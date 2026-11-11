@@ -119,6 +119,8 @@ export const DEFAULT_SOURCES: Record<string, DefaultSource> = {
   'heatPump.separateTariff': { kind: 'annahme', text: 'Annahme: eigener Zähler mit Wärmepumpentarif. Ohne separaten Tarif läuft die WP über den Haushaltsstrom.' },
   'heatPump.elecPriceCt': mkt('Verivox: günstigste Wärmepumpentarife für Neukunden um 20,7 ct/kWh (7.500 kWh/Jahr); Ratgeber nennen für übliche WP-Tarife 22–28 ct/kWh, Bestandsverträge oft mehr. Default = typischer Neuvertrag. Tarife vergleichen.', 'https://www.verivox.de/heizstrom/waermepumpenstrom-preisentwicklung/'),
   'heatPump.meterFee': { kind: 'schaetzung', text: 'Schätzung für Grundpreis und Messstellenbetrieb des zweiten Zählers pro Jahr.' },
+  'heatPump.meterSetupCost': { kind: 'beispiel', text: 'Standard 0 €. Hier die Mehrkosten für den zweiten Zählerplatz eintragen (z. B. Erweiterung oder Neuaufbau des Zählerschranks). Die Kosten hängen stark vom Zustand des Zählerschranks ab – Angebot vom Elektriker einholen. Ein Teil des Umbaus kann ohnehin nötig sein: Für die Förderung muss ein intelligentes Messsystem mit Steuerungseinrichtung bestellt werden; dessen Einbauentgelt ist förderfähig und gehört nicht hierher.' },
+  'heatPump.meterSetupEligible': { kind: 'annahme', text: 'Annahme: nicht förderfähig. Das Infoblatt nennt als förderfähig die „notwendigen Netzanschlüsse“ der Wärmepumpe sowie das intelligente Messsystem mit Steuerungseinrichtung, aber nicht ausdrücklich einen zweiten Zählerplatz für einen günstigeren Tarif. Ob der Umbau anerkannt wird, klärt der Fachbetrieb bzw. Energieeffizienz-Experte bei der Bestätigung zum Antrag.' },
   'heatPump.householdPriceCt': mkt('BDEW-Strompreisanalyse: durchschnittlicher Haushaltsstrompreis 2026 bisher 37,0 ct/kWh (brutto). Eigene Stromrechnung verwenden.', 'https://www.bdew.de/service/daten-und-grafiken/bdew-strompreisanalyse/'),
   'heatPump.elecIncrease': { kind: 'annahme', text: 'Modellannahme für die jährliche Strompreissteigerung.' },
   'heatPump.para14aReduction': {
@@ -126,6 +128,7 @@ export const DEFAULT_SOURCES: Record<string, DefaultSource> = {
     text: '§ 14a EnWG, Festlegung der Bundesnetzagentur: steuerbare Wärmepumpen erhalten reduzierte Netzentgelte (Modul 1 = Pauschale aus 80 € brutto + netzgebietsabhängigem Anteil). Beispiele 2026: Stadtwerke Mengen 152,56 € brutto, Stadtwerke Northeim 106,31 €. Default = mittlerer Wert; Preisblatt des eigenen Netzbetreibers prüfen.',
     url: 'https://www.vattenfall.de/steuerbare-verbrauchseinrichtungen-14a-enwg',
   },
+  'heatPump.existing14aOnHousehold': { kind: 'quelle', text: 'Bundesnetzagentur: Die pauschale Netzentgeltreduzierung (Modul 1) wird je Marktlokation gewährt, über die der Verbrauch der steuerbaren Verbrauchseinrichtung abgerechnet wird. Sie bleibt gleich hoch, auch wenn dort mehrere steuerbare Verbrauchseinrichtungen (Wärmepumpe, Wallbox, Klimaanlage, Batteriespeicher) betrieben werden. Mit eigenem WP-Zähler (eigene Marktlokation) gibt es die Pauschale dort zusätzlich. Standard: nein.', url: 'https://www.bundesnetzagentur.de/DE/Vportal/Energie/SteuerbareVBE/Netzentgelt_table.html', asOf: ASOF },
   'heatPump.pvShare': { kind: 'beispiel', text: 'Standard 0 % (keine PV-Anlage). Mit PV im Winter typischerweise nur ein kleiner Anteil des WP-Stroms.' },
   'heatPump.feedInCt': {
     kind: 'gesetz',
@@ -254,7 +257,10 @@ export const OFFICIAL_REFS: Record<string, OfficialRef[]> = {
   'heatPump.installMonth': [m458('S. 6 „Antragstellung“, „Vorhabenbeginn“')],
   'heatPump.leadMonths': [m458('S. 3 „In 6 Schritten zum Zuschuss“, S. 6 „Vorhabenbeginn“')],
   'heatPump.euOrigin': [rl('8.4.1 c, 8.4.6'), info('1.8 „Förderung von Wärmepumpen mit lokaler Wertschöpfung“')],
-  'heatPump.para14aReduction': [law('§ 14a EnWG', 'https://www.gesetze-im-internet.de/enwg_2005/__14a.html')],
+  'heatPump.meterSetupCost': [info('4.1.3 (notwendige Netzanschlüsse, intelligentes Messsystem)'), info('4.1.3.2 „iMSys-Bestellpflicht“')],
+  'heatPump.meterSetupEligible': [info('4.1.3 „Elektrisch angetriebene Wärmepumpen“'), info('4.1.3.2 „iMSys-Bestellpflicht“')],
+  'heatPump.para14aReduction': [law('§ 14a EnWG', 'https://www.gesetze-im-internet.de/enwg_2005/__14a.html'), law('Bundesnetzagentur: Reduzierung des Netzentgelts (Module 1–3)', 'https://www.bundesnetzagentur.de/DE/Vportal/Energie/SteuerbareVBE/Netzentgelt_table.html')],
+  'heatPump.existing14aOnHousehold': [law('Bundesnetzagentur: Reduzierung des Netzentgelts – Pauschale je Marktlokation', 'https://www.bundesnetzagentur.de/DE/Vportal/Energie/SteuerbareVBE/Netzentgelt_table.html'), law('§ 14a EnWG', 'https://www.gesetze-im-internet.de/enwg_2005/__14a.html')],
   'heatPump.feedInCt': [law('§§ 48, 49 EEG', 'https://www.gesetze-im-internet.de/eeg_2014/__48.html')],
   'prices.co2Path': [law('§ 10 BEHG (Preiskorridor)', 'https://www.gesetze-im-internet.de/behg/__10.html')],
   'general.vat': [law('§ 12 Abs. 1 UStG', 'https://www.gesetze-im-internet.de/ustg_1980/__12.html')],

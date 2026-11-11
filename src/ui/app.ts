@@ -4,11 +4,12 @@ import { formatMonth, tryParseMonth } from '../core/dates';
 import { createDefaults, FUNDING_SOURCE_DATE } from '../core/defaults';
 import { DEFAULT_SOURCES, OFFICIAL_REFS, SOURCE_KIND_LABEL } from '../core/sources';
 import { priceRows, runAll, type RunResult } from '../core/simulation';
+import { tariffComparison } from '../core/tariff';
 import { decodeHash, encodeHash, exportJson, importJson, mergeInputs } from '../core/serialize';
 import type { Inputs, ScenarioKind, ScenarioResult } from '../core/types';
 import { Charts, type ChartId } from './charts';
 import { SECTIONS, getPath, setPath, type Field } from './fields';
-import { escapeHtml, fmtDuration, fmtEur, fmtMonth, fmtPct } from './format';
+import { escapeHtml, fmtDuration, fmtEur, fmtMonth, fmtNum, fmtPct } from './format';
 
 export const STORAGE_KEY = 'wp-investitionsrechner:v1';
 
@@ -238,6 +239,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     renderWarnings(run);
     renderEvents(events);
     renderDetails(run);
+    renderTariff();
     renderInstallTable(cmp);
     renderYearTable(run, events);
     charts.update(run, priceRows(inputs), cmp, events);
@@ -342,6 +344,66 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       <div class="card"><h3>KfW-Zuschuss (458)</h3>${kfwHtml}</div>
       <div class="card"><h3>Steuerbonus (§ 35c EStG)</h3>${taxHtml}</div>
       <div class="card"><h3>Finanzierung</h3>${loanHtml}</div>`;
+  }
+
+  function renderTariff(): void {
+    const el = $<HTMLElement>('#tariff');
+    const t = tariffComparison(inputs);
+    if (!t || !t.firstFullYear) {
+      el.innerHTML = '<h2>Stromkosten: mit oder ohne Wärmepumpentarif</h2><p class="muted">Keine Inbetriebnahme im Betrachtungszeitraum.</p>';
+      return;
+    }
+    const y = t.firstFullYear;
+    const hp = inputs.heatPump;
+    const cheaperLabel = t.cheaper === 'with' ? 'Wärmepumpentarif' : 'Haushaltsstrom';
+    const selectedNote =
+      t.selected === t.cheaper
+        ? `Die gewählte Variante (${t.selected === 'with' ? 'Wärmepumpentarif' : 'Haushaltsstrom'}) ist die günstigere.`
+        : `Gewählt ist „${t.selected === 'with' ? 'Wärmepumpentarif' : 'Haushaltsstrom'}“ – „${cheaperLabel}“ wäre ${fmtEur(Math.abs(t.saving))} günstiger.`;
+    el.innerHTML = `
+      <h2>Stromkosten: mit oder ohne Wärmepumpentarif</h2>
+      <div class="tariff-grid">
+        <div class="tariff-col${t.cheaper === 'with' ? ' is-cheaper' : ''}">
+          <div class="tariff-head">Mit Wärmepumpentarif${t.cheaper === 'with' ? ' <span class="badge">günstiger</span>' : ''}</div>
+          <div class="tariff-val">${fmtEur(y.withTariff)}<small>/Jahr (${y.year})</small></div>
+          <div class="tariff-sub">${fmtNum(hp.elecPriceCt, 1)} ct/kWh + ${fmtEur(hp.meterFee)} Zähler − ${fmtEur(hp.para14aReduction)} § 14a</div>
+          ${t.setupCost > 0 ? `<div class="tariff-sub">einmalig ${fmtEur(t.setupCost)} Zählerschrank-Umbau${t.setupSubsidy > 0 ? ` − ${fmtEur(t.setupSubsidy)} Zuschuss` : ''}</div>` : ''}
+          <div class="tariff-total">${fmtEur(t.totalWith)} im Zeitraum${t.setupCost > 0 ? ' inkl. Umbau' : ''}</div>
+        </div>
+        <div class="tariff-col${t.cheaper === 'without' ? ' is-cheaper' : ''}">
+          <div class="tariff-head">Ohne (Haushaltsstrom)${t.cheaper === 'without' ? ' <span class="badge">günstiger</span>' : ''}</div>
+          <div class="tariff-val">${fmtEur(y.withoutTariff)}<small>/Jahr (${y.year})</small></div>
+          <div class="tariff-sub">${fmtNum(hp.householdPriceCt, 1)} ct/kWh, kein Zusatzzähler${hp.existing14aOnHousehold ? ', § 14a schon für andere Einrichtung genutzt' : ` − ${fmtEur(hp.para14aReduction)} § 14a`}</div>
+          <div class="tariff-total">${fmtEur(t.totalWithout)} im Zeitraum</div>
+        </div>
+      </div>
+      <p class="tariff-note"><strong>${t.saving >= 0 ? 'Ersparnis' : 'Mehrkosten'} mit Wärmepumpentarif: ${fmtEur(Math.abs(t.saving))}</strong> über ${t.years.length} Jahre
+        (${fmtEur(Math.abs(y.withoutTariff - y.withTariff))} im Jahr ${y.year}). ${escapeHtml(selectedNote)}</p>
+      <p class="muted small">WP-Strom aus dem Netz ${y.year}: ca. ${fmtNum(y.gridKWh)} kWh. ${
+        t.breakEvenKWh === null
+          ? 'Der WP-Tarif ist nicht günstiger als Haushaltsstrom – ein eigener Zähler lohnt sich nicht.'
+          : `Der eigene Zähler lohnt sich ab ca. ${fmtNum(t.breakEvenKWh)} kWh WP-Strom pro Jahr (Zählergrundpreis ÷ Preisvorteil, heutige Preise).`
+      }${
+        t.setupCost > 0
+          ? t.setupPaybackYears === null
+            ? ' Der Zählerschrank-Umbau amortisiert sich nicht.'
+            : ` Der Zählerschrank-Umbau (netto ${fmtEur(t.setupCost - t.setupSubsidy)}) hat sich nach ca. ${fmtNum(t.setupPaybackYears, 1)} Jahren durch die günstigeren Stromkosten bezahlt gemacht.`
+          : ' Einmalige Kosten für einen zweiten Zähler sind nicht angesetzt (Feld „Zählerschrank-Umbau“).'
+      } ${
+        hp.existing14aOnHousehold
+          ? 'Die § 14a-Pauschale gibt es nur einmal je Zähler: Am Haushaltszähler wird sie schon für eine andere steuerbare Verbrauchseinrichtung (z. B. Wallbox) gewährt – nur mit eigenem WP-Zähler kommt eine zweite hinzu.'
+          : 'Die § 14a-Pauschale (Modul 1) ist in beiden Varianten angesetzt. Hängt am Haushaltszähler schon z. B. eine Wallbox mit § 14a, bitte das entsprechende Feld ankreuzen.'
+      }</p>
+      <details class="tariff-years"><summary>Jahreswerte</summary>
+        <div class="table-wrap"><table class="compact">
+          <thead><tr><th>Jahr</th><th class="num">Netzbezug WP</th><th class="num">mit WP-Tarif</th><th class="num">Haushaltsstrom</th><th class="num">Differenz</th></tr></thead>
+          <tbody>${t.years
+            .map(
+              (r) => `<tr><td>${r.year}</td><td class="num">${fmtNum(r.gridKWh)} kWh</td><td class="num">${fmtEur(r.withTariff)}</td><td class="num">${fmtEur(r.withoutTariff)}</td><td class="num ${r.withoutTariff - r.withTariff >= 0 ? 'pos' : 'neg'}">${fmtEur(r.withoutTariff - r.withTariff)}</td></tr>`,
+            )
+            .join('')}</tbody>
+        </table></div>
+      </details>`;
   }
 
   function renderInstallTable(cmp: InstallComparison): void {
@@ -568,6 +630,7 @@ function layout(): string {
         ${CHART_TABS.map(([id], i) => `<div class="chart-wrap" data-panel="${id}" ${i === 0 ? '' : 'hidden'}><canvas data-chart="${id}"></canvas></div>`).join('')}
       </div>
       <div id="details" class="details"></div>
+      <div id="tariff" class="card tariff"></div>
       <div class="card">
         <h2>Wann umrüsten?</h2>
         <div id="install-table" class="table-wrap"></div>

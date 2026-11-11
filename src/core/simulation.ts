@@ -18,6 +18,15 @@ import type {
 const SUBSIDY = 'Zuschuss';
 const WINDFALL = 'Einmalzahlung';
 
+/**
+ * § 14a EnWG Modul 1 wird je Marktlokation (Zähler) gewährt, nicht je Gerät (F13.6).
+ * Hängt die WP am Haushaltszähler, an dem schon eine steuerbare Verbrauchseinrichtung (z. B. Wallbox)
+ * die Pauschale erhält, bringt sie keine zusätzliche Reduzierung.
+ */
+export function para14aFor(hp: Inputs['heatPump']): number {
+  return hp.separateTariff || !hp.existing14aOnHousehold ? hp.para14aReduction : 0;
+}
+
 /** Sondertilgungsregeln KfW 358/359 (Merkblatt S. 5). */
 function kfwRules(inp: Inputs): PrepaymentRules {
   const f = inp.financing;
@@ -171,7 +180,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
       const gridCt = pm.elecCt(year);
       r.energy = (elec * (1 - hp.pvShare) * gridCt + elec * hp.pvShare * hp.feedInCt) / 100;
       const elecGrowth = Math.pow(1 + hp.elecIncrease, Math.max(0, year - pm.startYear));
-      r.fixed = ((hp.separateTariff ? hp.meterFee * elecGrowth : 0) - hp.para14aReduction) / 12;
+      r.fixed = ((hp.separateTariff ? hp.meterFee * elecGrowth : 0) - para14aFor(hp)) / 12;
       r.maintenance = (hp.maintenance * maintGrowth) / 12;
     } else {
       const isNew = abs >= oldEnd;
@@ -193,9 +202,11 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
   if (install !== null) {
     const iIdx = install - start;
     const wpGross = hp.investment * growth(inp.general.investIncrease, iIdx);
-    const extra = hp.extraCost * growth(inp.general.investIncrease, iIdx);
-    const eligibleGross = wpGross * hp.eligibleShare;
-    const total = wpGross + extra;
+    // Zweiter Zähler (Zählerschrank-Umbau) nur bei separatem WP-Tarif (F13.5)
+    const meterSetup = hp.separateTariff ? Math.max(0, hp.meterSetupCost) * growth(inp.general.investIncrease, iIdx) : 0;
+    const extra = hp.extraCost * growth(inp.general.investIncrease, iIdx) + (hp.meterSetupEligible ? 0 : meterSetup);
+    const eligibleGross = wpGross * hp.eligibleShare + (hp.meterSetupEligible ? meterSetup : 0);
+    const total = wpGross + extra + (hp.meterSetupEligible ? meterSetup : 0);
     rows[iIdx].investment += total;
     assets.push({ cost: wpGross, install, lifeMonths: Math.max(1, Math.round(hp.lifeYears * 12)) });
 

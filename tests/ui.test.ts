@@ -156,4 +156,24 @@ describe('UI (Smoke-Test)', () => {
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
     expect((kgb as HTMLElement).hidden).toBe(true);
   });
+
+  it('F13 Tarifvergleich wird angezeigt und reagiert auf Eingaben', () => {
+    const { root } = mount();
+    const card = () => root.querySelector('#tariff')!.textContent!;
+    expect(card()).toContain('Mit Wärmepumpentarif');
+    expect(card()).toContain('Ohne (Haushaltsstrom)');
+    expect(root.querySelectorAll('#tariff tbody tr').length).toBeGreaterThan(10);
+    expect(root.querySelector('[data-field="heatPump.householdPriceCt"]')!.hasAttribute('hidden')).toBe(false);
+    setValue(root, 'heatPump.householdPriceCt', '20');
+    expect(card()).toMatch(/ein eigener Zähler lohnt sich nicht/);
+  });
+
+  it('F13.6 Wallbox-Hinweis im Tarifvergleich', () => {
+    const { root } = mount();
+    const el = root.querySelector<HTMLInputElement>('[data-path="heatPump.existing14aOnHousehold"]')!;
+    el.checked = true;
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(root.querySelector('#tariff')!.textContent).toMatch(/nur einmal je Zähler/);
+    expect(root.querySelector('#tariff')!.textContent).toMatch(/§ 14a schon für andere Einrichtung genutzt/);
+  });
 });

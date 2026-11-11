@@ -404,3 +404,16 @@ td.ev-cell { white-space: normal; min-width: 220px; }
 .src-refs ul { margin: 2px 0 0; padding-left: 16px; }
 .src-refs li { margin: 1px 0; }
 .src-refs a { color: var(--accent); }
+
+/* ---------- Tarifvergleich ---------- */
+.tariff-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.tariff-col { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; background: var(--surface-2); }
+.tariff-col.is-cheaper { border-color: var(--accent); background: var(--accent-soft); }
+.tariff-head { font-size: 0.85rem; font-weight: 600; color: var(--c-text-2); }
+.tariff-val { font-size: 1.35rem; font-weight: 650; margin: 4px 0 2px; font-variant-numeric: tabular-nums; }
+.tariff-val small { font-size: 0.75rem; font-weight: 400; color: var(--c-muted); margin-left: 4px; }
+.tariff-sub { font-size: 0.78rem; color: var(--c-muted); }
+.tariff-total { font-size: 0.85rem; margin-top: 6px; font-variant-numeric: tabular-nums; }
+.tariff-note { font-size: 0.88rem; margin: 12px 0 4px; }
+.tariff-years { margin-top: 8px; }
+.tariff-years summary { cursor: pointer; font-size: 0.85rem; color: var(--c-text-2); }

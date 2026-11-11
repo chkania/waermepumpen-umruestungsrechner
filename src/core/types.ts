@@ -79,7 +79,13 @@ export interface HeatPumpInputs {
   householdPriceCt: number;
   elecIncrease: number;
   meterFee: number;
+  /** Einmalige Kosten für den zweiten Zähler (Zählerschrank-Umbau), nur mit separatem WP-Tarif. */
+  meterSetupCost: number;
+  /** Zählerschrank-Umbau als förderfähig anerkannt (vom Fachbetrieb zu bestätigen). */
+  meterSetupEligible: boolean;
   para14aReduction: number;
+  /** Am Haushaltszähler hängt bereits eine steuerbare Verbrauchseinrichtung mit § 14a (z. B. Wallbox). */
+  existing14aOnHousehold: boolean;
   pvShare: number;
   feedInCt: number;
 }
