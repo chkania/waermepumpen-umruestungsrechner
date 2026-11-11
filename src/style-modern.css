@@ -388,3 +388,12 @@
 :root[data-design='modern'] a { color: var(--accent); }
 :root[data-design='modern'] .toast { border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.8rem; box-shadow: var(--shadow-lg); }
 :root[data-design='modern'] .disclaimer { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.02em; }
+:root[data-design='modern'] .toolbar > .tool-link {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--c-text);
+  padding: 7px 14px;
+  font-size: 0.86rem;
+}
+:root[data-design='modern'] .toolbar > .tool-link:hover { border-color: var(--accent); color: var(--accent); }

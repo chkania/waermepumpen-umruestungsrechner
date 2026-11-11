@@ -210,4 +210,11 @@ describe('UI (Smoke-Test)', () => {
     store.setItem(THEME_KEY, 'quatsch');
     expect(mount().app.getTheme()).toBe('auto');
   });
+
+  it('F15 Hilfe-Link öffnet das Benutzerhandbuch in neuem Tab', () => {
+    const { root } = mount();
+    const a = root.querySelector<HTMLAnchorElement>('#btn-help')!;
+    expect(a.getAttribute('href')).toBe('./hilfe.html');
+    expect(a.target).toBe('_blank');
+  });
 });

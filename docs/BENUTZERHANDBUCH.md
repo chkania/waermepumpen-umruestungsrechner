@@ -1,0 +1,248 @@
+# Benutzerhandbuch
+
+Der **Wärmepumpen-Investitionsrechner** zeigt, was der Umstieg von einer Gas- oder Ölheizung auf eine Wärmepumpe über die nächsten Jahre kostet – im Vergleich dazu, die alte Heizung weiterzubetreiben. Er berücksichtigt steigende Energie- und CO₂-Preise, die KfW-Heizungsförderung, Kredite, den Steuerbonus und den richtigen Zeitpunkt für den Umstieg.
+
+> **Hinweis:** Der Rechner ist keine Finanz-, Steuer- oder Förderberatung. Förderbedingungen, Preise und Zinsen ändern sich. Prüfen Sie vor einer Entscheidung die aktuellen Bedingungen bei der KfW, einem Energieeffizienz-Experten und ggf. einer Steuerberatung.
+
+## Schnellstart
+
+1. **Bestandsheizung** eintragen: Energieträger, Jahresverbrauch (aus der Abrechnung), Alter und geschätzte Restlebensdauer.
+2. **Energiepreise** prüfen: aktuellen Gas- bzw. Heizölpreis aus der letzten Rechnung eintragen.
+3. **Wärmepumpe** eintragen: Angebotspreis, geplante Inbetriebnahme, Jahresarbeitszahl.
+4. **Haushalt & Gebäude** ausfüllen – davon hängen Boni, Kreditart und Steuerbonus ab.
+5. **Finanzierung** anpassen: Eigenkapital und Kreditkonditionen.
+6. Rechts die **Ergebnisse** lesen. Alles wird bei jeder Eingabe sofort neu berechnet.
+
+Jedes Eingabefeld hat einen kleinen **„i“-Knopf**. Er zeigt den Standardwert, woher er stammt (z. B. Förderrichtlinie, Gesetz, recherchierte Marktdaten oder Schätzung) und – wo vorhanden – die offizielle Fundstelle mit Link. Standardwerte sind Beispiele; ersetzen Sie sie möglichst durch eigene Werte.
+
+## Aufbau der Oberfläche
+
+- **Kopfbereich:** Titel und Werkzeugleiste (Design, Hell/Dunkel, Hilfe, Teilen, Export, Import, Zurücksetzen).
+- **Links – Eingaben:** in aufklappbare Abschnitte gegliedert. Ein Klick auf die Überschrift klappt einen Abschnitt auf oder zu. Abschnitte mit „Experten“ enthalten die Förder- und Steuerregeln; sie müssen normalerweise nicht geändert werden.
+- **Rechts – Ergebnisse:** Kennzahlen, wichtige Ereignisse und Hinweise, Diagramme, Förderdetails, Stromtarifvergleich, Vergleich der Umrüstzeitpunkte und Jahresübersicht.
+
+Auf dem Smartphone stehen die Eingaben oben und die Ergebnisse darunter.
+
+## Werkzeugleiste
+
+### Design: Modern | Klassisch
+
+Schaltet zwischen dem modernen und dem klassischen Erscheinungsbild um. Inhalt und Berechnung sind identisch. Die Wahl wird im Browser gespeichert.
+
+### Hell | Dunkel | Auto
+
+- **Auto** folgt der Einstellung von Browser bzw. Betriebssystem.
+- **Hell** und **Dunkel** legen das Farbschema fest – unabhängig vom Browser. Das ist hilfreich, wenn ein Browser (z. B. Brave mit dunklem Browser-Design) immer „dunkel“ meldet.
+
+Die Wahl wird im Browser gespeichert.
+
+### Hilfe
+
+Öffnet dieses Handbuch in einem neuen Tab. Es ist auch direkt unter der Adresse **hilfe.html** neben dem Rechner erreichbar.
+
+### Link teilen
+
+Erzeugt einen Link, der alle **vom Standard abweichenden Eingaben** enthält, und kopiert ihn in die Zwischenablage (sonst steht er in der Adresszeile). Wer den Link öffnet, sieht den Rechner mit genau Ihren Eingaben.
+
+- Der Link enthält die Eingaben selbst (im Teil nach `#s=`). Es wird **nichts auf einem Server gespeichert**.
+- **Achtung:** Auch persönliche Angaben wie das Haushaltseinkommen stehen im Link. Teilen Sie ihn nur mit Personen, die diese Angaben sehen dürfen.
+- Solange ein geteilter Link in der Adresszeile steht, wird er bei jeder Änderung mit aktualisiert.
+- Ein geöffneter Link hat Vorrang vor den im Browser gespeicherten Eingaben.
+
+### Export
+
+Speichert alle Eingaben als **JSON-Datei** (z. B. `waermepumpe-rechner-2026-11.json`). Geeignet zur Sicherung, zur Übertragung auf ein anderes Gerät oder um mehrere Varianten (z. B. „Angebot A“, „Angebot B“) aufzubewahren.
+
+### Import
+
+Lädt eine zuvor exportierte JSON-Datei. Felder, die in der Datei fehlen oder ungültig sind, erhalten den Standardwert; unbekannte Felder werden ignoriert. Dateien, die nicht von diesem Rechner stammen, werden mit einer Meldung abgelehnt.
+
+### Zurücksetzen
+
+Setzt nach Rückfrage **alle Eingaben auf die Standardwerte** zurück. Design und Hell/Dunkel bleiben erhalten. Tipp: Vorher exportieren, wenn Sie den Stand behalten möchten.
+
+### Automatisches Speichern
+
+Alle Eingaben werden bei jeder Änderung automatisch im Browser gespeichert (`localStorage`) und beim nächsten Besuch wiederhergestellt – nur auf diesem Gerät und in diesem Browser. Im privaten Modus oder nach dem Löschen der Website-Daten gehen sie verloren; nutzen Sie dann Export oder Link.
+
+## Eingaben
+
+Prozentwerte werden als Prozent eingegeben (z. B. `90` für 90 %). Monate werden als Jahr und Monat eingegeben. Ungültige Eingaben werden rot markiert und nicht übernommen.
+
+### Bestandsheizung
+
+| Feld | Bedeutung |
+|---|---|
+| **Energieträger** | Erdgas oder Heizöl. Beim Wechsel wird der Verbrauch umgerechnet (10 kWh je Liter). |
+| **Verbrauch pro Jahr** | Gas in kWh bzw. Öl in Litern, für Heizung und Warmwasser – am besten der Durchschnitt mehrerer Jahresabrechnungen. |
+| **Nutzungsgrad Altanlage** | Anteil des Brennstoffs, der als Wärme im Haus ankommt. Daraus ergibt sich der Wärmebedarf, den später die Wärmepumpe decken muss. |
+| **Alter der Heizung** | Für den Klimageschwindigkeitsbonus: Gasheizungen müssen bei Antragstellung mindestens 20 Jahre alt sein. |
+| **Restlebensdauer** | Wie lange die Anlage voraussichtlich noch hält. Danach rechnet das Szenario „ohne Wärmepumpe“ mit einem neuen Kessel. |
+| **Wartung + Schornsteinfeger** | Jährliche Kosten der Altanlage; entfallen nach dem Umstieg. |
+| **Kosten Ersatzkessel** | Preis eines neuen Gas-/Ölkessels inkl. Montage (zu heutigen Preisen). |
+| **Nutzungsgrad Ersatzkessel** | Effizienz des neuen Kessels. |
+| **Lebensdauer Ersatzkessel** | Für den Restwert am Ende des Betrachtungszeitraums. |
+
+### Energiepreise
+
+| Feld | Bedeutung |
+|---|---|
+| **Gaspreis heute (inkl. CO₂)** | Arbeitspreis brutto aus der Gasrechnung. Der Rechner trennt daraus den CO₂-Anteil heraus. |
+| **Gas-Grundpreis** | Jährlicher Grundpreis; entfällt nach dem Umstieg (Gasanschluss wird stillgelegt). |
+| **Steigerung Gaspreis (ohne CO₂)** | Jährliche Steigerung von Beschaffung, Netzentgelten usw. |
+| **Heizölpreis heute (inkl. CO₂)** | Preis je Liter aus der letzten Lieferung. |
+| **Steigerung Ölpreis (ohne CO₂)** | Jährliche Steigerung ohne CO₂-Anteil. |
+| **CO₂-Preispfad** | Stützstellen im Format `Jahr:€/t`, z. B. `2026:55, 2030:110`. Dazwischen wird linear interpoliert. Der CO₂-Aufschlag wird aus Preis und Emissionsfaktor berechnet. |
+| **Bio-Treppe für neuen fossilen Kessel** | Neu eingebaute Gas-/Ölheizungen müssen ab 2029 einen steigenden Bio-Anteil nutzen. Gilt nur für einen neuen Kessel, nicht für die Altanlage. |
+| **Bio-Anteil** | Stufen im Format `Jahr:%`. |
+| **Mehrpreis Biogas/-öl** | Aufpreis je kWh für den Bio-Anteil. |
+
+### Wärmepumpe
+
+| Feld | Bedeutung |
+|---|---|
+| **Geplante Inbetriebnahme** | Bis dahin läuft die Altanlage zu steigenden Preisen weiter. |
+| **Investition gesamt (brutto)** | Angebotspreis inkl. Installation und Umfeldmaßnahmen (Heizkörper, Elektrik, Rückbau Altanlage). |
+| **davon förderfähig** | Anteil, den die KfW anerkennt. Rückbau und Entsorgung der Altanlage inkl. Öl-/Gastank sind förderfähig. |
+| **Nicht förderfähige Nebenkosten** | Z. B. die Stilllegung des Gasanschlusses durch den Netzbetreiber. |
+| **Jahresarbeitszahl (JAZ)** | Wie viel Wärme die Wärmepumpe aus 1 kWh Strom erzeugt. Luft/Wasser im Bestand typisch 3,0–3,5. |
+| **Wartung** | Jährliche Wartungskosten der Wärmepumpe. |
+| **Lebensdauer** | Für den Restwert am Ende des Betrachtungszeitraums. |
+| **Wärmepumpe mit Ursprung in der EU** | Ab dem 1. Quartal 2027 gibt es den vollen Fördersatz (15 % Grundförderung + 15 % Wertschöpfungs-Bonus) nur für Wärmepumpen aus der EU. |
+| **Vorlauf Förderantrag** | Monate zwischen Förderantrag und Inbetriebnahme. Boni und Höchstbeträge richten sich nach dem **Antragsdatum**. |
+
+### Strom
+
+| Feld | Bedeutung |
+|---|---|
+| **Separater Wärmepumpentarif** | Ob die Hauptrechnung mit eigenem WP-Zähler und WP-Tarif rechnet. Der Stromtarifvergleich zeigt immer beide Varianten. |
+| **WP-Strompreis (eigener Zähler)** | Arbeitspreis des Wärmepumpentarifs. |
+| **Grundpreis WP-Zähler** | Jährliche Kosten des zweiten Zählers. |
+| **Einmalig: zweiter Zähler / Zählerschrank-Umbau** | Mehrkosten für den zweiten Zählerplatz; nur mit WP-Tarif. |
+| **Umbau als förderfähig angesetzt** | Nur ankreuzen, wenn der Fachbetrieb die Förderfähigkeit bestätigt. |
+| **Haushaltsstrompreis (ohne WP-Tarif)** | Arbeitspreis des normalen Haushaltsstroms. |
+| **Steigerung Strompreis** | Jährliche Steigerung der Strompreise. |
+| **Netzentgeltreduzierung § 14a EnWG** | Pauschale für steuerbare Verbrauchseinrichtungen (Modul 1) laut Preisblatt des Netzbetreibers. Gibt es einmal je Zähler. |
+| **Haushaltszähler hat schon § 14a (z. B. Wallbox)** | Ankreuzen, wenn am Haushaltszähler bereits eine Wallbox o. Ä. die Pauschale erhält. Dann bringt die Wärmepumpe ohne eigenen Zähler keine zusätzliche Reduzierung. |
+| **Anteil PV-Eigenverbrauch** | Anteil des Wärmepumpenstroms aus der eigenen PV-Anlage. |
+| **Einspeisevergütung (entgangen)** | Wert des selbst genutzten PV-Stroms (er wird nicht mehr eingespeist). |
+
+### Haushalt & Gebäude
+
+| Feld | Bedeutung |
+|---|---|
+| **Selbstgenutzt (Hauptwohnsitz)** | Voraussetzung für Klimageschwindigkeits- und Einkommensbonus, den zinsgünstigen KfW-Kredit 358 und den Steuerbonus. |
+| **Wohneinheiten** | Bestimmt die förderfähigen Höchstbeträge. Boni gelten nur für den Anteil der selbstgenutzten Wohneinheit. |
+| **Gebäudealter** | Der Steuerbonus setzt ein Gebäudealter von über 10 Jahren voraus. |
+| **Zu versteuerndes Haushaltseinkommen** | Durchschnitt des 2. und 3. Jahres vor Antragstellung laut Steuerbescheid. Maßgeblich für Einkommensbonus und KfW 358. |
+| **Kindergeldberechtigtes Kind unter 18** | Familienzuschlag: Die Einkommensgrenzen steigen um 10.000 €. |
+| **Einkommensteuerschuld** | Begrenzt den Steuerbonus pro Jahr. 0 = keine Begrenzung. |
+
+### Finanzierung
+
+| Feld | Bedeutung |
+|---|---|
+| **Eigenkapital (KfW-Weg)** | Eigenes Geld im Weg „KfW-Zuschuss + Kredit“. Der Rest wird finanziert. |
+| **Zins KfW 358 (zinsverbilligt)** | Für Selbstnutzer mit Einkommen bis 90.000 €. Zinsen sind Annahmen – aktuelle Konditionen bei der Hausbank erfragen. |
+| **Zins KfW 359** | Ergänzungskredit ohne Zinsverbilligung. |
+| **Laufzeit KfW-Kredit** | 4 bis 35 Jahre. |
+| **Tilgungsfreie Anlaufjahre** | In dieser Zeit werden nur Zinsen gezahlt. |
+| **Zinsbindung** | Danach gilt der Anschlusszins. |
+| **Anschlusszins** | Angenommener Zins nach Ende der Zinsbindung. |
+| **Zuschuss als Sondertilgung verwenden** | Der KfW-Zuschuss tilgt bei Auszahlung den Kredit (ab 5.000 €). |
+| **Auszahlung Zuschuss nach Inbetriebnahme** | Monate bis zur Auszahlung. |
+| **Eigenkapital (Steuer-Weg)** | Eigenes Geld im Weg „Steuerbonus + Bankkredit“. |
+| **Zins Bankkredit** | Für den Steuer-Weg und Beträge über den KfW-Kredit hinaus. |
+| **Laufzeit Bankkredit** | Laufzeit des Bankkredits. |
+| **Tilgungsfreie Jahre (Bank)** | Tilgungsfreie Zeit des Bankkredits. |
+| **Steuererstattung im Folgejahr, Monat** | Wann die Steuererstattung typischerweise eingeht. |
+
+### Sondertilgung aus Einmalzahlung
+
+Für Geld, das Ihnen zu einem späteren Zeitpunkt zur Verfügung steht, z. B. eine fällige Lebensversicherung.
+
+| Feld | Bedeutung |
+|---|---|
+| **Verfügbarer Betrag** | 0 = keine Einmalzahlung. |
+| **Verfügbar ab** | Monat, in dem das Geld zur Verfügung steht. |
+| **Zuerst tilgen** | „Automatisch“ tilgt zuerst den Kredit mit dem höchsten Zins. Ist die Sondertilgung dort nicht möglich, wird der andere Kredit versucht. |
+
+Es gelten die Kreditbedingungen: Beim KfW-Kredit sind Teil-Sondertilgungen nur innerhalb der ersten Zinsbindung und ab 5.000 € möglich (kostenfrei), danach nur die vollständige Rückzahlung. Beim Bankkredit ist jede Sondertilgung möglich, ggf. gegen eine Vorfälligkeitsentschädigung (höchstens 1 %). Was nicht eingesetzt werden kann, zeigt der Rechner unter „Wichtige Ereignisse“.
+
+### Betrachtung
+
+| Feld | Bedeutung |
+|---|---|
+| **Start der Betrachtung** | Ab diesem Monat wird gerechnet (Standard: aktueller Monat). |
+| **Betrachtungszeitraum** | Anzahl der Jahre (Standard: 20, etwa die Lebensdauer einer Wärmepumpe). |
+| **Opportunitätszins** | Was eingesetztes Geld anderswo bringen würde (z. B. Tagesgeld). Alle Zahlungen werden damit bis zum Ende aufgezinst. Bei 0 % ist die Summe einfach addiert. |
+| **Steigerung Wartungskosten** | Jährliche Steigerung der Wartungskosten. |
+| **Steigerung Anschaffungspreise** | Wirkt, wenn später gekauft wird (z. B. Ersatzkessel, späterer Umstieg). |
+| **Restwert am Ende berücksichtigen** | Noch nutzbare Anlagen werden am Ende anteilig gutgeschrieben, damit spät gekaufte Anlagen fair bewertet werden. |
+| **Zeitpunktvergleich: Abstand** | Abstand der verglichenen Umrüstzeitpunkte in Monaten. |
+| **Zeitpunktvergleich: Anzahl** | Wie viele Zeitpunkte verglichen werden. |
+
+### Experten-Abschnitte
+
+Diese Abschnitte enthalten die geltenden Förder-, Kredit- und Steuerregeln mit Quellenangaben. Ändern Sie sie nur, wenn sich die Regeln ändern oder Sie eine Annahme bewusst variieren möchten.
+
+**Experten: KfW-Heizungsförderung 458** – Grundförderung, Neue WP-Förderung gilt ab (Antrag), Grundförderung Wärmepumpe ab Stichtag, Wertschöpfungs-Bonus (EU-Ursprung), Klimageschwindigkeitsbonus, KGB-Absenkung je Halbjahr, KGB erste Absenkung, KGB entfällt ab, KGB: Mindestalter Gasheizung, Einkommensbonus Stufe 1 bis, Einkommensbonus Stufe 1, Einkommensbonus Stufe 2 bis, Einkommensbonus Stufe 2, Einkommensbonus Stufe 3 bis, Einkommensbonus Stufe 3, Grenzerhöhung mit Kind, Höchstfördersatz, Höchstfördersatz (Einkommensstufe 1), Förderfähige Kosten 1. WE, Absenkung je Halbjahr, Erste Absenkung, Untergrenze nach Absenkung, Förderfähige Kosten 2.–6. WE, Förderfähige Kosten ab 7. WE, KfW-Kredit max. je WE, KfW 358: Einkommensgrenze.
+
+**Experten: Sondertilgungsregeln** – KfW: Mindestbetrag Sondertilgung, KfW: Vorfälligkeitsentschädigung nach Zinsbindung, Bank: Vorfälligkeitsentschädigung, Bank: Entschädigung bei Restlaufzeit ≤ 1 Jahr.
+
+**Experten: Steuerbonus § 35c & Konstanten** – Steuerbonus Jahr 1, Steuerbonus Jahr 2, Steuerbonus Jahr 3, Max. Steuerermäßigung, Max. begünstigte Kosten, Abschluss spätestens, Mindestalter Gebäude, CO₂-Faktor Erdgas, CO₂-Faktor Heizöl, Heizwert Heizöl, Mehrwertsteuer.
+
+## Ergebnisse
+
+### Kennzahlen
+
+| Kennzahl | Bedeutung |
+|---|---|
+| **Ohne Wärmepumpe** | Gesamtkosten, wenn die alte Heizung weiterläuft und bei Bedarf durch einen neuen Kessel ersetzt wird. |
+| **WP + KfW-Zuschuss** | Gesamtkosten mit Wärmepumpe, KfW-Zuschuss und ggf. KfW-Ergänzungskredit. |
+| **WP + Steuerbonus** | Gesamtkosten mit Wärmepumpe, Steuerbonus nach § 35c EStG und ggf. Bankkredit. Zuschuss und Steuerbonus sind für dieselbe Maßnahme nicht kombinierbar. |
+| **Ersparnis mit WP** | Differenz zwischen „Ohne Wärmepumpe“ und dem besten Weg. |
+| **Amortisation** | Ab wann die aufsummierten Kosten mit Wärmepumpe dauerhaft unter denen ohne Wärmepumpe liegen. |
+
+Alle Beträge sind brutto, inklusive Opportunitätszins. Positive Werte in Tabellen sind Ausgaben, negative Einnahmen (Zuschuss, Steuerbonus, Kreditauszahlung, Restwert).
+
+Hinweis zur Amortisation: Der Rechner betrachtet Zahlungsströme. Eine Sondertilgung oder ein hoher Eigenkapitaleinsatz verschiebt die Amortisation nach hinten, obwohl die Gesamtkosten sinken. Für die Entscheidung sind die Gesamtkosten aussagekräftiger.
+
+### Wichtige Ereignisse & Hinweise
+
+- **Hinweise** (Kästen oben) erklären Förder- und Steuerbedingungen für Ihren Fall – z. B. ob der Klimageschwindigkeitsbonus erreichbar ist, ob ein Einkommensbonus greift oder bis wann der Steuerbonus möglich ist. Orange markierte Hinweise sind Nachteile, die leicht übersehen werden.
+- Die **Zeitleiste** zeigt datierte Ereignisse je Szenario: Förderantrag, Inbetriebnahme, Auszahlung des Zuschusses, Steuererstattungen (die letzte ist hervorgehoben), Kauf eines Ersatzkessels, Bio-Treppe, Ende der Zinsbindung, Sondertilgungen und Tilgungsende.
+
+### Diagramme
+
+- **Kumulierte Kosten:** aufsummierte Kosten der drei Szenarien über die Jahre. Rauten markieren Jahre mit wichtigen Ereignissen; der Tooltip nennt sie.
+- **Jährliche Kosten:** Kosten pro Jahr; Spitzen zeigen Investitionen.
+- **Preisentwicklung:** Kosten je kWh Wärme aus Altanlage und Wärmepumpe sowie der CO₂-Preis.
+- **Zeitpunkt der Umrüstung:** Gesamtkosten je Umrüstzeitpunkt im Vergleich zu „ohne Wärmepumpe“.
+
+### KfW-Zuschuss, Steuerbonus, Finanzierung
+
+Zeigt, wie sich der Zuschuss zusammensetzt (Fördersätze, förderfähige Kosten, Höchstbetrag), wie sich der Steuerbonus auf drei Jahre verteilt und welche Kredite mit welchem Zins und welchen Zinskosten anfallen.
+
+### Stromkosten: mit oder ohne Wärmepumpentarif
+
+Vergleicht die Stromkosten der Wärmepumpe mit eigenem Zähler und WP-Tarif gegenüber Haushaltsstrom – für das erste volle Jahr und den ganzen Zeitraum, inklusive einmaliger Kosten für den Zählerschrank. Zeigt, ab welchem Verbrauch sich der eigene Zähler lohnt und nach wie vielen Jahren sich ein Umbau bezahlt macht. Unter „Jahreswerte“ stehen die Zahlen je Jahr.
+
+### Wann umrüsten?
+
+Vergleicht mehrere Umrüstzeitpunkte (Abstand und Anzahl unter „Betrachtung“). Die Spalte **Kosten des Wartens** zeigt, was ein späterer Umstieg gegenüber dem frühesten Zeitpunkt mehr kostet – z. B. wegen sinkender Boni, steigender Energie- und CO₂-Preise oder des Ablaufs des Steuerbonus. Der günstigste Zeitpunkt ist markiert.
+
+### Jahresübersicht
+
+Tabelle je Jahr mit allen Kostenarten (Energie, Grundkosten, Wartung, Investition, Kredit, Zinsen, Tilgung, Vorfälligkeitsentschädigung, Zuschuss, Steuerbonus, Restwert), Summe und kumulierter Summe. Über die Auswahl oben rechts wechseln Sie das Szenario. Die Spalte **Ereignisse** nennt wichtige Ereignisse des Jahres.
+
+## Tipps
+
+- **Angebote vergleichen:** Für jedes Angebot exportieren und später per Import vergleichen.
+- **Varianten durchspielen:** z. B. eine höhere Jahresarbeitszahl, ein anderer Umrüstzeitpunkt oder eine Sondertilgung – die Ergebnisse ändern sich sofort.
+- **Restlebensdauer realistisch schätzen:** Sie bestimmt, wann im Szenario „ohne Wärmepumpe“ ein neuer Kessel nötig wird – oft der größte Einzelposten.
+- **Förderantrag rechtzeitig planen:** Boni und Höchstbeträge sinken halbjährlich; maßgeblich ist das Antragsdatum, nicht die Inbetriebnahme.
+
+## Datenschutz
+
+Der Rechner läuft vollständig in Ihrem Browser. Eingaben werden nicht an einen Server übertragen. Gespeichert wird nur lokal im Browser; geteilt wird nur, was Sie per Link oder Export selbst weitergeben.

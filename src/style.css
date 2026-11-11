@@ -437,3 +437,15 @@ td.ev-cell { white-space: normal; min-width: 220px; }
 /* Kartenkopf darf auf schmalen Bildschirmen umbrechen (beide Designs) */
 .card-head { flex-wrap: wrap; }
 .card-head select { max-width: 100%; }
+
+/* Link-Schaltfläche in der Werkzeugleiste (Hilfe, Zurück zum Rechner) */
+.toolbar > .tool-link {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  padding: 7px 14px;
+  border-radius: 8px;
+  color: inherit;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+.toolbar > .tool-link:hover { border-color: var(--accent); }

@@ -11,6 +11,8 @@ npm test         # Regressionstests
 npm run build    # statische Dateien in dist/ (z. B. für GitHub Pages)
 ```
 
+Bedienung: [docs/BENUTZERHANDBUCH.md](docs/BENUTZERHANDBUCH.md) – im Browser unter `hilfe.html` bzw. über „Hilfe“ im Rechner.
+
 Anforderungen, Annahmen und Quellen: [docs/ANFORDERUNGEN.md](docs/ANFORDERUNGEN.md).
 
 Keine Finanz-, Steuer- oder Förderberatung; alle Angaben ohne Gewähr.

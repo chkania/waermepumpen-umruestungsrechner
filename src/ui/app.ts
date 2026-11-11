@@ -704,6 +704,7 @@ function layout(): string {
         <button type="button" data-theme-choice="dark" aria-pressed="false" title="Dunkles Design">Dunkel</button>
         <button type="button" data-theme-choice="auto" aria-pressed="false" title="Wie Browser bzw. System">Auto</button>
       </div>
+      <a id="btn-help" class="tool-link" href="./hilfe.html" target="_blank" rel="noopener" title="Benutzerhandbuch in neuem Tab öffnen">Hilfe</a>
       <button id="btn-share" type="button">Link teilen</button>
       <button id="btn-export" type="button">Export</button>
       <button id="btn-import" type="button">Import</button>

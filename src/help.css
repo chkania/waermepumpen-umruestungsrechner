@@ -1,0 +1,64 @@
+/* Benutzerhandbuch (F15) – nutzt die Farbtokens beider Designs */
+.help-layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 40px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 28px 24px 64px;
+  align-items: start;
+}
+.help-toc {
+  position: sticky;
+  top: 16px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  font-size: 0.86rem;
+}
+.help-toc-title { font-weight: 600; color: var(--c-text-2); margin-bottom: 8px; }
+.help-toc ul { list-style: none; margin: 0; padding: 0; border-left: 1px solid var(--border); }
+.help-toc li a { display: block; padding: 3px 0 3px 12px; color: var(--c-text-2); text-decoration: none; }
+.help-toc li a:hover { color: var(--accent); }
+.help-toc li.lvl-3 a { padding-left: 24px; font-size: 0.82rem; color: var(--c-muted); }
+
+.help-content { max-width: 78ch; line-height: 1.65; }
+.help-content h2 { font-size: 1.35rem; margin: 2.2em 0 0.6em; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+.help-content h2:first-of-type { margin-top: 0.4em; }
+.help-content h3 { font-size: 1.08rem; margin: 1.8em 0 0.5em; }
+.help-content h2, .help-content h3 { position: relative; scroll-margin-top: 16px; }
+.help-content .anchor { position: absolute; left: -1.1em; color: var(--c-muted); text-decoration: none; opacity: 0; font-weight: 400; }
+.help-content h2:hover .anchor, .help-content h3:hover .anchor { opacity: 1; }
+.help-content p, .help-content ul, .help-content ol { margin: 0 0 1em; }
+.help-content li { margin: 0.25em 0; }
+.help-content a { color: var(--accent); }
+.help-content code { font-size: 0.88em; padding: 1px 5px; border-radius: 4px; background: var(--surface-2); border: 1px solid var(--border); }
+.help-content blockquote {
+  margin: 0 0 1.2em;
+  padding: 10px 14px;
+  border-left: 3px solid var(--warn-border);
+  background: var(--warn-bg);
+  border-radius: 6px;
+}
+.help-content blockquote p { margin: 0; }
+.help-content .table-wrap { margin: 0 0 1.2em; }
+.help-content table { font-size: 0.88rem; }
+.help-content td, .help-content th { white-space: normal; vertical-align: top; }
+.help-content td:first-child { min-width: 170px; }
+
+@media (max-width: 860px) {
+  .help-layout { grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 16px 16px 48px; }
+  .help-toc { position: static; max-height: none; border: 1px solid var(--border); border-radius: 8px; padding: 12px; background: var(--surface); }
+  .help-content .anchor { display: none; }
+}
+
+/* Modernes Design: Mono-Labels wie im Rechner */
+:root[data-design='modern'] .help-toc-title {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.7rem;
+}
+:root[data-design='modern'] .help-content h2 { border-bottom-color: var(--c-text); }
+:root[data-design='modern'] .help-content code,
+:root[data-design='modern'] .help-content blockquote { border-radius: var(--radius-sm); }
+:root[data-design='modern'] .help-content code { font-family: var(--font-mono); }
