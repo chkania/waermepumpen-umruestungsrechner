@@ -1,4 +1,5 @@
 import { compareInstallTimes, type InstallComparison } from '../core/compare';
+import { keyEvents, type KeyEvent, type KeyEvents } from '../core/events';
 import { formatMonth, tryParseMonth } from '../core/dates';
 import { createDefaults, FUNDING_SOURCE_DATE } from '../core/defaults';
 import { priceRows, runAll, type RunResult } from '../core/simulation';
@@ -21,7 +22,7 @@ export interface AppController {
   getInputs(): Inputs;
   setInputs(i: Inputs): void;
   recalc(): void;
-  lastResult(): { run: RunResult; cmp: InstallComparison } | null;
+  lastResult(): { run: RunResult; cmp: InstallComparison; events: KeyEvents } | null;
 }
 
 const CHART_TABS: [ChartId, string][] = [
@@ -35,7 +36,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   const storage = env.storage === undefined ? safeStorage() : env.storage;
   const defaults = createDefaults(env.today ?? new Date());
   let inputs = loadInitial(defaults, storage);
-  let last: { run: RunResult; cmp: InstallComparison } | null = null;
+  let last: { run: RunResult; cmp: InstallComparison; events: KeyEvents } | null = null;
   let tableKind: ScenarioKind = 'kfw';
   let activeChart: ChartId = 'cumulative';
 
@@ -167,13 +168,13 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   );
   $<HTMLSelectElement>('#table-kind').addEventListener('change', (e) => {
     tableKind = (e.target as HTMLSelectElement).value as ScenarioKind;
-    if (last) renderYearTable(last.run);
+    if (last) renderYearTable(last.run, last.events);
   });
 
   const media = typeof matchMedia === 'function' ? matchMedia('(prefers-color-scheme: dark)') : null;
   media?.addEventListener?.('change', () => {
     charts.reset();
-    if (last) charts.update(last.run, priceRows(inputs), last.cmp);
+    if (last) charts.update(last.run, priceRows(inputs), last.cmp, last.events);
   });
 
   // ---------- Berechnung ----------
@@ -197,20 +198,23 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   function recalc(): void {
     let run: RunResult;
     let cmp: InstallComparison;
+    let events: KeyEvents;
     try {
       run = runAll(inputs);
       cmp = compareInstallTimes(inputs);
+      events = keyEvents(inputs, run);
     } catch (err) {
       $<HTMLElement>('#warnings').innerHTML = `<div class="alert error">${escapeHtml((err as Error).message)}</div>`;
       return;
     }
-    last = { run, cmp };
+    last = { run, cmp, events };
     renderKpis(run);
     renderWarnings(run);
+    renderEvents(events);
     renderDetails(run);
     renderInstallTable(cmp);
-    renderYearTable(run);
-    charts.update(run, priceRows(inputs), cmp);
+    renderYearTable(run, events);
+    charts.update(run, priceRows(inputs), cmp, events);
   }
 
   function renderKpis(run: RunResult): void {
@@ -238,10 +242,43 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   }
 
   function renderWarnings(run: RunResult): void {
-    const ws = [...new Set([...run.kfw.warnings, ...run.tax.warnings, ...run.ref.warnings])];
+    // Förder-/Steuerhinweise, Ersatzkessel und Restschulden erscheinen ausführlicher unter „Wichtige Ereignisse“
+    const covered = new Set([...(run.kfw.kfw?.notes ?? []), ...(run.tax.tax?.notes ?? [])]);
+    const ws = [...new Set([...run.kfw.warnings, ...run.tax.warnings, ...run.ref.warnings])].filter(
+      (w) => !covered.has(w) && !/Ersatzkessel|Restschuld/.test(w),
+    );
     $<HTMLElement>('#warnings').innerHTML = ws.length
       ? `<ul class="alert">${ws.map((w) => `<li>${escapeHtml(w)}</li>`).join('')}</ul>`
       : '';
+  }
+
+  function renderEvents(ev: KeyEvents): void {
+    const hints = ev.hints
+      .map(
+        (h) => `<div class="hint level-${h.level}">
+          <div class="hint-title">${escapeHtml(h.title)}</div>
+          ${h.detail ? `<div class="hint-detail">${escapeHtml(h.detail)}</div>` : ''}
+        </div>`,
+      )
+      .join('');
+    const items = ev.timeline
+      .map(
+        (e) => `<li class="ev level-${e.level}">
+          <span class="ev-date">${fmtMonth(e.month)}</span>
+          <span class="ev-body">
+            <span class="ev-head">${scenarioChip(e)}<span class="ev-title">${escapeHtml(e.title)}</span></span>
+            ${e.detail ? `<span class="ev-detail">${escapeHtml(e.detail)}</span>` : ''}
+          </span>
+          <span class="ev-amount ${e.amount !== undefined && e.amount < 0 ? 'pos' : ''}">${
+            e.amount !== undefined ? (e.amount < 0 ? '+' : '−') + fmtEur(Math.abs(e.amount)) + (e.perYear ? '<small>/Jahr</small>' : '') : ''
+          }</span>
+        </li>`,
+      )
+      .join('');
+    $<HTMLElement>('#events').innerHTML = `
+      <h2>Wichtige Ereignisse &amp; Hinweise</h2>
+      ${hints ? `<div class="hints">${hints}</div>` : ''}
+      ${items ? `<ol class="timeline">${items}</ol>` : ''}`;
   }
 
   function renderDetails(run: RunResult): void {
@@ -301,8 +338,15 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       <p class="muted small">Referenz ohne Wärmepumpe: ${fmtEur(cmp.refTotal)}. Förderantrag jeweils ${inputs.heatPump.leadMonths} Monate vor Inbetriebnahme.</p>`;
   }
 
-  function renderYearTable(run: RunResult): void {
+  function renderYearTable(run: RunResult, ev: KeyEvents): void {
     const s: ScenarioResult = run[tableKind];
+    const evByYear = new Map<number, KeyEvent[]>();
+    for (const e of ev.timeline) {
+      if (e.month === null || (e.scenario !== 'all' && e.scenario !== tableKind)) continue;
+      if (tableKind === 'ref' && e.scenario === 'all') continue;
+      const y = Math.floor(e.month / 12);
+      evByYear.set(y, [...(evByYear.get(y) ?? []), e]);
+    }
     const cols: [keyof ScenarioResult['years'][number], string][] = [
       ['energy', 'Energie'],
       ['fixed', 'Grund-/Fixkosten'],
@@ -320,13 +364,15 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     const used = cols.filter(([k]) => k === 'total' || k === 'cumulative' || s.years.some((y) => Math.abs(y[k] as number) > 0.5));
     $<HTMLElement>('#year-table').innerHTML = `
       <table>
-        <thead><tr><th>Jahr</th>${used.map(([, l]) => `<th class="num">${l}</th>`).join('')}</tr></thead>
+        <thead><tr><th>Jahr</th>${used.map(([, l]) => `<th class="num">${l}</th>`).join('')}<th>Ereignisse</th></tr></thead>
         <tbody>${s.years
           .map(
             (y) =>
               `<tr><td>${y.year}</td>${used
                 .map(([k]) => `<td class="num${k === 'total' || k === 'cumulative' ? ' strong' : ''}">${fmtEur(y[k] as number)}</td>`)
-                .join('')}</tr>`,
+                .join('')}<td class="ev-cell">${(evByYear.get(y.year) ?? [])
+                .map((e) => `<span class="ev-tag level-${e.level}" title="${escapeHtml(e.detail ?? '')}">${MONTH_SHORT[e.month! % 12]}: ${escapeHtml(e.title)}</span>`)
+                .join('')}</td></tr>`,
           )
           .join('')}</tbody>
       </table>`;
@@ -370,6 +416,14 @@ function safeStorage(): Storage | null {
 }
 
 const round = (x: number, d: number) => Math.round(x * 10 ** d) / 10 ** d;
+
+const MONTH_SHORT = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+
+const SCENARIO_LABEL = { all: 'beide WP-Wege', ref: 'ohne WP', kfw: 'KfW-Weg', tax: 'Steuer-Weg' } as const;
+
+function scenarioChip(e: KeyEvent): string {
+  return `<span class="chip chip-${e.scenario}">${SCENARIO_LABEL[e.scenario]}</span>`;
+}
 
 function kpi(label: string, value: string, tone: string, sub: string, best = false): string {
   return `<div class="kpi tone-${tone}${best ? ' is-best' : ''}">
@@ -436,6 +490,7 @@ function layout(): string {
       <div id="kpis" class="kpis"></div>
       <p id="horizon-note" class="muted small"></p>
       <div id="warnings"></div>
+      <div id="events" class="card events"></div>
       <div class="card">
         <div class="tabs" role="tablist">
           ${CHART_TABS.map(([id, l], i) => `<button type="button" role="tab" data-tab="${id}" aria-selected="${i === 0}">${l}</button>`).join('')}

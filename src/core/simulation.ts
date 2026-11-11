@@ -106,9 +106,11 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
   }
   const assets: Asset[] = [];
 
+  const boilerPurchases: { month: number; cost: number }[] = [];
   for (const b of replacements) {
     const cost = o.replacementCost * growth(inp.general.investIncrease, b - start);
     rows[b - start].investment += cost;
+    boilerPurchases.push({ month: b, cost });
     assets.push({ cost, install: b, lifeMonths: replLife });
   }
 
@@ -159,6 +161,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
       const sched = loanSchedule(spec);
       let interest = 0;
       let balanceAtEnd = spec.principal;
+      let payoffMonth: number | null = null;
       for (const p of sched) {
         if (p.month >= end) break;
         const row = rows[p.month - start];
@@ -166,6 +169,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
         row.principal += p.principal;
         interest += p.interest;
         balanceAtEnd = p.balance;
+        if (p.balance <= 0.005) payoffMonth = p.month;
       }
       if (balanceAtEnd > 0.005) {
         rows[H - 1].principal += balanceAtEnd;
@@ -173,7 +177,20 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
           `${name}: Restschuld von ${Math.round(balanceAtEnd).toLocaleString('de-DE')} € am Ende des Betrachtungszeitraums als Ablösung eingerechnet.`,
         );
       }
-      loans.push({ name, principal: spec.principal, rate: spec.rate, totalInterest: interest });
+      const lastPayment = sched.length ? sched[sched.length - 1].month : spec.startMonth;
+      const fixEnd = spec.fixMonths > 0 ? spec.startMonth + spec.fixMonths : null;
+      loans.push({
+        name,
+        principal: spec.principal,
+        rate: spec.rate,
+        totalInterest: interest,
+        startMonth: spec.startMonth,
+        repaymentStartMonth: spec.graceMonths > 0 ? spec.startMonth + spec.graceMonths + 1 : null,
+        fixEndMonth: fixEnd !== null && fixEnd < lastPayment ? fixEnd : null,
+        followUpRate: spec.followUpRate,
+        payoffMonth,
+        balanceAtEnd: balanceAtEnd > 0.005 ? balanceAtEnd : 0,
+      });
     };
 
     if (kind === 'kfw') {
@@ -298,6 +315,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
     kfw: kfwRes,
     tax: taxRes,
     loans,
+    boilerPurchases,
   };
 }
 

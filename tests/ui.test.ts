@@ -106,4 +106,28 @@ describe('UI (Smoke-Test)', () => {
     root.querySelector<HTMLButtonElement>('#btn-reset')!.click();
     expect(app.getInputs()).toEqual(defaults());
   });
+
+  it('F10 zeigt wichtige Ereignisse, Hinweise und Ereignis-Spalte', () => {
+    const i = defaults();
+    i.oldHeating.ageYears = 16;
+    store.setItem(STORAGE_KEY, JSON.stringify(i));
+    const { root } = mount();
+    const events = root.querySelector('#events')!.textContent!;
+    expect(events).toContain('Klimageschwindigkeitsbonus nicht erreichbar');
+    expect(events).toContain('Kauf eines neuen Kessels');
+    expect(events).toContain('Letzte Steuererstattung');
+    expect(root.querySelector('#events .hint.level-warning')).not.toBeNull();
+    const sel = root.querySelector<HTMLSelectElement>('#table-kind')!;
+    sel.value = 'ref';
+    sel.dispatchEvent(new Event('change'));
+    expect(root.querySelector('#year-table')!.textContent).toContain('Nov: Kauf eines neuen Kessels');
+  });
+
+  it('Förderhinweise werden nicht doppelt als Warnung angezeigt', () => {
+    const i = defaults();
+    i.oldHeating.ageYears = 16;
+    store.setItem(STORAGE_KEY, JSON.stringify(i));
+    const { root } = mount();
+    expect(root.querySelector('#warnings')!.textContent).not.toMatch(/Klimageschwindigkeitsbonus|Ersatzkessel/);
+  });
 });

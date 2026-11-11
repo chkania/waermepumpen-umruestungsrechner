@@ -14,6 +14,7 @@ import {
   type TooltipItem,
 } from 'chart.js';
 import type { InstallComparison } from '../core/compare';
+import type { KeyEvent, KeyEvents } from '../core/events';
 import type { PriceRow, RunResult } from '../core/simulation';
 import { fmtEur, fmtMonth, fmtNum } from './format';
 
@@ -47,7 +48,7 @@ export class Charts {
 
   constructor(private canvases: Record<ChartId, HTMLCanvasElement>) {}
 
-  update(run: RunResult, prices: PriceRow[], cmp: InstallComparison): void {
+  update(run: RunResult, prices: PriceRow[], cmp: InstallComparison, events?: KeyEvents): void {
     const c = palette();
     Chart.defaults.color = c.text;
     Chart.defaults.borderColor = c.grid;
@@ -69,17 +70,52 @@ export class Charts {
       callbacks: { label: (ctx: TooltipItem<ChartType>) => `${ctx.dataset.label}: ${fmtEur(ctx.parsed.y ?? 0)}` },
     };
 
+    // Ereignis-Markierungen (wichtige Ereignisse/Warnungen) je Szenario und Jahr
+    const timeline = events?.timeline ?? [];
+    const evFor = (kind: 'ref' | 'kfw' | 'tax', year: number) =>
+      timeline.filter(
+        (e) =>
+          e.month !== null &&
+          Math.floor(e.month / 12) === year &&
+          e.level !== 'info' &&
+          (e.scenario === kind || (e.scenario === 'all' && kind !== 'ref')),
+      );
+    const marked = (kind: 'ref' | 'kfw' | 'tax', label: string, color: string, dashed = false) => ({
+      ...line(label, run[kind].years.map((y) => y.cumulative), color, dashed),
+      pointRadius: run[kind].years.map((y) => (evFor(kind, y.year).length ? 5 : 0)),
+      pointStyle: 'rectRot' as const,
+      pointBorderColor: css('--surface', '#fff'),
+      pointBorderWidth: 1.5,
+    });
+    const kinds = ['ref', 'kfw', 'tax'] as const;
     this.render('cumulative', {
       type: 'line',
       data: {
         labels: years,
         datasets: [
-          line('Ohne WP', run.ref.years.map((y) => y.cumulative), c.ref),
-          line('WP + KfW', run.kfw.years.map((y) => y.cumulative), c.kfw),
-          line(run.tax.feasible ? 'WP + Steuerbonus' : 'WP + Steuerbonus (nicht möglich)', run.tax.years.map((y) => y.cumulative), c.tax, !run.tax.feasible),
+          marked('ref', 'Ohne WP', c.ref),
+          marked('kfw', 'WP + KfW', c.kfw),
+          marked('tax', run.tax.feasible ? 'WP + Steuerbonus' : 'WP + Steuerbonus (nicht möglich)', c.tax, !run.tax.feasible),
         ],
       },
-      options: { interaction: { mode: 'index', intersect: false }, scales: { y: eurAxis() }, plugins: { tooltip: tooltipEur } },
+      options: {
+        interaction: { mode: 'index', intersect: false },
+        scales: { y: eurAxis() },
+        plugins: {
+          tooltip: {
+            ...tooltipEur,
+            callbacks: {
+              ...tooltipEur.callbacks,
+              footer: (items) => {
+                const year = Number(items[0]?.label);
+                const seen = new Set<KeyEvent>();
+                for (const k of kinds) for (const e of evFor(k, year)) seen.add(e);
+                return [...seen].map((e) => `◆ ${e.title}`);
+              },
+            },
+          },
+        },
+      },
     });
 
     const bar = (label: string, data: number[], color: string) => ({ label, data, backgroundColor: color, borderRadius: 3, maxBarThickness: 18 });

@@ -212,6 +212,16 @@ export interface LoanInfo {
   principal: number;
   rate: number;
   totalInterest: number;
+  startMonth: number;
+  /** Erste Tilgungsrate (nach tilgungsfreier Zeit); null ohne Anlaufzeit. */
+  repaymentStartMonth: number | null;
+  /** Ende der Zinsbindung, falls vor Tilgungsende; danach gilt followUpRate. */
+  fixEndMonth: number | null;
+  followUpRate: number;
+  /** Monat der letzten Rate, falls im Betrachtungszeitraum. */
+  payoffMonth: number | null;
+  /** Restschuld am Ende des Zeitraums (als Ablösung eingerechnet). */
+  balanceAtEnd: number;
 }
 
 export interface ScenarioResult {
@@ -230,4 +240,6 @@ export interface ScenarioResult {
   kfw?: KfwResult;
   tax?: TaxResult;
   loans: LoanInfo[];
+  /** Käufe von Ersatzkesseln (Monat, Bruttokosten). */
+  boilerPurchases: { month: number; cost: number }[];
 }

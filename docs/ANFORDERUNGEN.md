@@ -89,6 +89,14 @@ inklusive steigender Energiepreise, Bundesförderung (KfW 458), Kreditfinanzieru
 - F8.3 Jahrestabelle je Szenario: Energie, Grund-/Fixkosten, Wartung, Investition, Kreditauszahlung, Zinsen, Tilgung, Förderung, Steuerbonus, Restwert, Summe, kumuliert. *(Test: ui)*
 - F8.4 Warnhinweise (z. B. Altanlage fällt vor Installation aus, Steuerbonus nicht möglich, Kredit über Höchstbetrag). *(Test: simulation)*
 
+### F10 – Wichtige Ereignisse & Hinweise
+Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, damit sie wahrgenommen werden (Block „Wichtige Ereignisse & Hinweise" unter den Kennzahlen, Rauten-Markierungen im Diagramm „Kumulierte Kosten" mit Tooltip, Spalte „Ereignisse" in der Jahrestabelle). Stufen: *info*, *important* (großer Zahlungsfluss/Wendepunkt), *warning* (leicht übersehener Nachteil).
+- F10.1 Zeitleiste Referenz: Kauf eines Ersatzkessels (Monat, Betrag inkl. Preissteigerung); Bio-Treppen-Stufen ab Kesselkauf mit Mehrkosten/Jahr. Im WP-Szenario: Ausfall der Altanlage vor Installation als Warnung. *(Test: events)*
+- F10.2 Zeitleiste Steuer-Weg: jede Steuererstattung; die **letzte** ist hervorgehoben mit Hinweis, dass danach die Entlastung entfällt (und Kreditraten weiterlaufen). *(Test: events)*
+- F10.3 Zeitleiste WP: Förderantrag, Inbetriebnahme (Investition), Auszahlung Zuschuss, Tilgungsbeginn, Ende der Zinsbindung (Anschlusszins), vollständige Tilgung bzw. Restschuld am Ende. *(Test: events)*
+- F10.4 Hinweise: Klimageschwindigkeitsbonus – gesichert (mit Betrag und nächster Absenkung), ausgelaufen, später erreichbar (ab wann, welcher Satz) oder **nicht erreichbar** (Heizung erreicht das Mindestalter erst nach Auslaufen des Bonus bzw. nach Ende der Restlebensdauer); Einkommensbonus ja/nein; Begrenzung der förderfähigen Kosten mit nächster Absenkung; KfW 359 statt 358; Frist bzw. Nichtverfügbarkeit des Steuerbonus. *(Test: events)*
+- F10.5 Diese Fakten werden im Warnhinweis-Block nicht doppelt angezeigt. *(Test: ui)*
+
 ### F9 – Persistenz
 - F9.1 Eingaben werden automatisch im localStorage gespeichert und beim Laden wiederhergestellt. *(Test: serialize)*
 - F9.2 „Link teilen": Eingaben (nur Abweichungen von den Defaults) als Base64url-JSON im URL-Hash `#s=…`; ein Link hat Vorrang vor localStorage. *(Test: serialize)*
@@ -121,3 +129,4 @@ inklusive steigender Energiepreise, Bundesförderung (KfW 458), Kreditfinanzieru
 | Datum | Änderung |
 |---|---|
 | 2026-11-11 | Erstfassung nach Anforderungsaufnahme (E1–E12) und Recherche |
+| 2026-11-11 | F10 „Wichtige Ereignisse & Hinweise" ergänzt (Anlass: Kostenspitze durch Ersatzkessel 2031 war nicht erkennbar). Rechenergebnisse unverändert. |
