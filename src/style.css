@@ -21,27 +21,26 @@
   color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #141412;
-    --surface: #1d1c1a;
-    --surface-2: #262522;
-    --border: #34322e;
-    --c-text: #ece9e2;
-    --c-text-2: #bab5aa;
-    --c-muted: #8f897d;
-    --c-grid: #2e2c28;
-    --accent: #2dd4bf;
-    --accent-soft: #123a36;
-    --c-ref: #fb923c;
-    --c-kfw: #2dd4bf;
-    --c-tax: #a78bfa;
-    --good: #4ade80;
-    --bad: #f87171;
-    --warn-bg: #2b2414;
-    --warn-border: #5c4a1f;
-    color-scheme: dark;
-  }
+/* Dunkel: per data-theme (Auto folgt dem System, Hell/Dunkel übersteuern) */
+:root[data-theme='dark'] {
+  --bg: #141412;
+  --surface: #1d1c1a;
+  --surface-2: #262522;
+  --border: #34322e;
+  --c-text: #ece9e2;
+  --c-text-2: #bab5aa;
+  --c-muted: #8f897d;
+  --c-grid: #2e2c28;
+  --accent: #2dd4bf;
+  --accent-soft: #123a36;
+  --c-ref: #fb923c;
+  --c-kfw: #2dd4bf;
+  --c-tax: #a78bfa;
+  --good: #4ade80;
+  --bad: #f87171;
+  --warn-bg: #2b2414;
+  --warn-border: #5c4a1f;
+  color-scheme: dark;
 }
 
 * {
@@ -286,13 +285,12 @@ table.compact th, table.compact td { padding: 4px 6px; }
   --imp-bg: #e6f3f1;
   --imp-border: #a9d6cf;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --info-bg: #1c232b;
-    --info-border: #2f3b48;
-    --imp-bg: #13302c;
-    --imp-border: #1f5049;
-  }
+/* Dunkel: per data-theme (Auto folgt dem System, Hell/Dunkel übersteuern) */
+:root[data-theme='dark'] {
+  --info-bg: #1c232b;
+  --info-border: #2f3b48;
+  --imp-bg: #13302c;
+  --imp-border: #1f5049;
 }
 .events h2 { margin-bottom: 12px; }
 .hints { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-bottom: 14px; }
@@ -393,9 +391,8 @@ td.ev-cell { white-space: normal; min-width: 220px; }
 .kind-quelle, .kind-gesetz, .kind-markt { background: var(--imp-bg); color: var(--accent); }
 .kind-schaetzung, .kind-annahme { background: var(--warn-bg); color: #b45309; }
 .kind-beispiel, .kind-technik { background: var(--info-bg); color: var(--c-text-2); }
-@media (prefers-color-scheme: dark) {
-  .kind-schaetzung, .kind-annahme { color: #fbbf24; }
-}
+/* Dunkel: per data-theme (Auto folgt dem System, Hell/Dunkel übersteuern) */
+:root[data-theme='dark'] .kind-schaetzung, :root[data-theme='dark'] .kind-annahme { color: #fbbf24; }
 .src-default { color: var(--c-text); }
 .src-meta { color: var(--c-muted); }
 .src-meta a { color: var(--accent); }
@@ -417,3 +414,26 @@ td.ev-cell { white-space: normal; min-width: 220px; }
 .tariff-note { font-size: 0.88rem; margin: 12px 0 4px; }
 .tariff-years { margin-top: 8px; }
 .tariff-years summary { cursor: pointer; font-size: 0.85rem; color: var(--c-text-2); }
+
+/* ---------- Design-Umschalter (klassisch) ---------- */
+.design-switch {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-right: 4px;
+}
+.toolbar .design-switch button {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 7px 12px;
+}
+.toolbar .design-switch button[aria-pressed='true'] { background: var(--accent); color: #fff; }
+
+/* Marke wird nur im modernen Design gezeigt */
+.brand .mark { display: none; }
+
+/* Kartenkopf darf auf schmalen Bildschirmen umbrechen (beide Designs) */
+.card-head { flex-wrap: wrap; }
+.card-head select { max-width: 100%; }

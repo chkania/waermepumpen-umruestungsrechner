@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { beforeEach, describe, expect, it } from 'vitest';
 import { SECTIONS, getPath } from '../src/ui/fields';
-import { mountApp, STORAGE_KEY } from '../src/ui/app';
+import { DESIGN_KEY, mountApp, STORAGE_KEY, THEME_KEY } from '../src/ui/app';
 import { defaults, TODAY } from './helpers';
 
 class MemoryStorage implements Storage {
@@ -175,5 +175,39 @@ describe('UI (Smoke-Test)', () => {
     el.dispatchEvent(new Event('change', { bubbles: true }));
     expect(root.querySelector('#tariff')!.textContent).toMatch(/nur einmal je Zähler/);
     expect(root.querySelector('#tariff')!.textContent).toMatch(/§ 14a schon für andere Einrichtung genutzt/);
+  });
+
+  it('F14 Design-Umschalter: Default modern, Wechsel setzt Attribut und wird gespeichert', () => {
+    const { root, app } = mount();
+    expect(app.getDesign()).toBe('modern');
+    expect(document.documentElement.dataset.design).toBe('modern');
+    const classic = root.querySelector<HTMLButtonElement>('[data-design-choice="classic"]')!;
+    classic.click();
+    expect(document.documentElement.dataset.design).toBe('classic');
+    expect(classic.getAttribute('aria-pressed')).toBe('true');
+    expect(store.getItem(DESIGN_KEY)).toBe('classic');
+    // Design ist Ansichtseinstellung, nicht Teil der Eingaben
+    expect(JSON.stringify(app.getInputs())).not.toContain('classic');
+    // beim nächsten Laden wiederhergestellt
+    const again = mount();
+    expect(again.app.getDesign()).toBe('classic');
+    store.setItem(DESIGN_KEY, 'unsinn');
+    expect(mount().app.getDesign()).toBe('modern');
+  });
+
+  it('F14.5 Hell/Dunkel/Auto übersteuert die Browser-Einstellung und wird gespeichert', () => {
+    const { root, app } = mount();
+    expect(app.getTheme()).toBe('auto');
+    expect(['light', 'dark']).toContain(document.documentElement.dataset.theme);
+    root.querySelector<HTMLButtonElement>('[data-theme-choice="dark"]')!.click();
+    expect(document.documentElement.dataset.theme).toBe('dark');
+    expect(store.getItem(THEME_KEY)).toBe('dark');
+    root.querySelector<HTMLButtonElement>('[data-theme-choice="light"]')!.click();
+    expect(document.documentElement.dataset.theme).toBe('light');
+    expect(root.querySelector('[data-theme-choice="light"]')!.getAttribute('aria-pressed')).toBe('true');
+    expect(mount().app.getTheme()).toBe('light');
+    expect(JSON.stringify(app.getInputs())).not.toMatch(/"light"|"dark"/);
+    store.setItem(THEME_KEY, 'quatsch');
+    expect(mount().app.getTheme()).toBe('auto');
   });
 });

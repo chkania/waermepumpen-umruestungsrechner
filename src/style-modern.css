@@ -1,0 +1,390 @@
+/*
+ * Modernes Design (F14), angelehnt an chkania.net (F14.4):
+ * warmes Off-White, Sand-Flächen, feine Linien, Anthrazit, gedämpftes Grau, ruhiges Blau;
+ * Inter für Text, JetBrains Mono (Großbuchstaben) für Labels/Metadaten; fast eckige Kanten, keine Verläufe.
+ * Alle Regeln gelten nur bei <html data-design="modern">. Das klassische Design (style.css) bleibt unverändert.
+ */
+
+/* ---------- Tokens (Farben von chkania.net) ---------- */
+:root[data-design='modern'] {
+  --bg: #fdfcfa;
+  --surface: #ffffff;
+  --surface-2: #f0eeea;
+  --border: #e4e2dd;
+  --c-text: #23252a;
+  --c-text-2: #5b5a53;
+  --c-muted: #7a786f;
+  --c-grid: #eceae5;
+  --accent: #2864a6;
+  --accent-strong: #1f4e82;
+  --accent-soft: #e9f0f8;
+  /* Szenariofarben: Blau = Akzent, dazu gedeckte, warme Ergänzungen */
+  --c-ref: #b4532a;
+  --c-kfw: #2864a6;
+  --c-tax: #4b7f52;
+  --good: #2f7d4f;
+  --bad: #b3261e;
+  --warn: #a86b0c;
+  --warn-bg: #fbf5e8;
+  --warn-border: #ead9b0;
+  --info-bg: #f6f5f2;
+  --info-border: #e4e2dd;
+  --imp-bg: #eef3f9;
+  --imp-border: #c9d9ec;
+  --radius: 4px;
+  --radius-sm: 2px;
+  --shadow: none;
+  --shadow-lg: 0 8px 28px -12px rgb(35 37 42 / 0.25);
+  --font-body: 'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+
+/* chkania.net hat keinen Dunkelmodus – abgeleitete, gleich warme Variante */
+/* Dunkel: per data-theme (Auto folgt dem System, Hell/Dunkel übersteuern) */
+:root[data-design='modern'][data-theme='dark'] {
+  --bg: #17181b;
+  --surface: #1d1f23;
+  --surface-2: #24262b;
+  --border: #34363c;
+  --c-text: #ecebe7;
+  --c-text-2: #b8b5ab;
+  --c-muted: #8e8b81;
+  --c-grid: #2a2c31;
+  --accent: #6fa3dc;
+  --accent-strong: #8db8e6;
+  --accent-soft: #1d2a3a;
+  --c-ref: #e08a5f;
+  --c-kfw: #6fa3dc;
+  --c-tax: #84b88b;
+  --good: #6cc48f;
+  --bad: #ef7d74;
+  --warn: #e0a84a;
+  --warn-bg: #2a2416;
+  --warn-border: #4e4122;
+  --info-bg: #202226;
+  --info-border: #34363c;
+  --imp-bg: #1b2533;
+  --imp-border: #2d4560;
+  --shadow-lg: 0 10px 30px -12px rgb(0 0 0 / 0.7);
+  color-scheme: dark;
+}
+
+/* ---------- Typografie ---------- */
+:root[data-design='modern'] body {
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  background: var(--bg);
+  color: var(--c-text);
+  font-feature-settings: 'cv11', 'ss01';
+}
+:root[data-design='modern'] h1,
+:root[data-design='modern'] h2,
+:root[data-design='modern'] h3 { font-weight: 600; letter-spacing: -0.01em; }
+:root[data-design='modern'] h2 { font-size: 1.15rem; }
+:root[data-design='modern'] h3 { font-size: 1rem; }
+
+/* Mono-Labels wie die Metadaten auf chkania.net */
+:root[data-design='modern'] .kpi-label,
+:root[data-design='modern'] .ev-date,
+:root[data-design='modern'] th,
+:root[data-design='modern'] .chip,
+:root[data-design='modern'] .src-kind,
+:root[data-design='modern'] .src-refs > span,
+:root[data-design='modern'] .tariff-head,
+:root[data-design='modern'] .tabs button,
+:root[data-design='modern'] .badge,
+:root[data-design='modern'] .field .unit,
+:root[data-design='modern'] .design-switch button {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 500;
+}
+
+/* ---------- Kopfbereich ---------- */
+:root[data-design='modern'] .top {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 18px max(24px, calc((100vw - 1500px) / 2 + 24px));
+}
+:root[data-design='modern'] .brand {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 14px;
+  align-items: center;
+}
+:root[data-design='modern'] .brand .mark {
+  display: inline-flex;
+  grid-row: span 2;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1.5px solid var(--c-text);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--c-text);
+}
+:root[data-design='modern'] .brand h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.015em; }
+:root[data-design='modern'] .brand p { color: var(--c-text-2); font-size: 0.9rem; margin-top: 2px; }
+
+:root[data-design='modern'] .toolbar { gap: 8px; align-items: center; }
+:root[data-design='modern'] .toolbar > button {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--c-text);
+  padding: 7px 14px;
+  font-size: 0.86rem;
+  transition: border-color 0.15s, color 0.15s;
+}
+:root[data-design='modern'] .toolbar > button:hover { border-color: var(--accent); color: var(--accent); }
+:root[data-design='modern'] .toolbar > button.ghost { background: transparent; color: var(--c-text-2); }
+
+:root[data-design='modern'] .design-switch {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  padding: 2px;
+}
+:root[data-design='modern'] .toolbar .design-switch button {
+  color: var(--c-text-2);
+  border-radius: var(--radius-sm);
+  padding: 5px 10px;
+  font-size: 0.72rem;
+}
+:root[data-design='modern'] .toolbar .design-switch button[aria-pressed='true'] {
+  background: var(--surface);
+  color: var(--c-text);
+  box-shadow: 0 0 0 1px var(--border);
+}
+
+:root[data-design='modern'] .layout { gap: 28px; padding-top: 28px; }
+@media (max-width: 960px) {
+  :root[data-design='modern'] .top { padding: 14px 16px; }
+  :root[data-design='modern'] .brand h1 { font-size: 1.1rem; }
+  :root[data-design='modern'] .brand .mark { width: 34px; height: 34px; }
+  :root[data-design='modern'] .layout { padding-top: 16px; }
+}
+
+/* ---------- Eingaben ---------- */
+:root[data-design='modern'] .inputs { gap: 10px; }
+:root[data-design='modern'] .section {
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: none;
+  background: var(--surface);
+}
+:root[data-design='modern'] .section > summary { padding: 13px 16px; font-size: 0.95rem; font-weight: 600; }
+:root[data-design='modern'] .section > summary::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid var(--c-muted);
+  border-bottom: 1.5px solid var(--c-muted);
+  transform: rotate(-45deg);
+  transition: transform 0.2s;
+}
+:root[data-design='modern'] .section[open] > summary { border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+:root[data-design='modern'] .section[open] > summary::after { transform: rotate(45deg); }
+:root[data-design='modern'] .section.expert > summary { color: var(--c-text-2); font-weight: 500; }
+:root[data-design='modern'] .section .note { margin: 0 16px 12px; border-radius: var(--radius-sm); }
+:root[data-design='modern'] .fields { padding: 0 16px 16px; gap: 13px; }
+:root[data-design='modern'] .field label { color: var(--c-text-2); font-size: 0.84rem; font-weight: 500; }
+:root[data-design='modern'] .field .unit { font-size: 0.68rem; }
+:root[data-design='modern'] .field .control input,
+:root[data-design='modern'] .field .control select,
+:root[data-design='modern'] .card-head select {
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+  font-family: var(--font-body);
+  transition: border-color 0.15s, background 0.15s;
+}
+:root[data-design='modern'] .field .control input[type='number'] { font-family: var(--font-mono); font-size: 0.9rem; }
+:root[data-design='modern'] .field .control input:focus,
+:root[data-design='modern'] .field .control select:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--surface);
+}
+:root[data-design='modern'] .field.check input { accent-color: var(--accent); }
+
+:root[data-design='modern'] .info-btn {
+  border-radius: 50%;
+  border-color: var(--border);
+  background: transparent;
+  color: var(--c-muted);
+  font: 600 10px/16px var(--font-mono);
+}
+:root[data-design='modern'] .info-btn:hover,
+:root[data-design='modern'] .info-btn[aria-expanded='true'] { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+:root[data-design='modern'] .src-pop {
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--accent);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+:root[data-design='modern'] .src-kind { border-radius: var(--radius-sm); font-size: 0.64rem; }
+:root[data-design='modern'] .kind-quelle,
+:root[data-design='modern'] .kind-gesetz,
+:root[data-design='modern'] .kind-markt { background: var(--accent-soft); color: var(--accent-strong); }
+:root[data-design='modern'] .kind-schaetzung,
+:root[data-design='modern'] .kind-annahme { background: var(--warn-bg); color: var(--warn); }
+:root[data-design='modern'] .src-refs a,
+:root[data-design='modern'] .src-meta a { color: var(--accent); text-underline-offset: 2px; }
+
+/* ---------- Kennzahlen ---------- */
+:root[data-design='modern'] .kpis { gap: 12px; grid-template-columns: repeat(auto-fit, minmax(158px, 1fr)); }
+:root[data-design='modern'] .kpi {
+  border: 1px solid var(--border);
+  border-top: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px 15px;
+  box-shadow: none;
+  background: var(--surface);
+  position: relative;
+}
+:root[data-design='modern'] .kpi::before {
+  content: '';
+  position: absolute;
+  left: -1px;
+  right: -1px;
+  top: -1px;
+  height: 3px;
+  background: var(--c-muted);
+}
+:root[data-design='modern'] .kpi.tone-ref::before { background: var(--c-ref); }
+:root[data-design='modern'] .kpi.tone-kfw::before { background: var(--c-kfw); }
+:root[data-design='modern'] .kpi.tone-tax::before { background: var(--c-tax); }
+:root[data-design='modern'] .kpi.tone-good::before { background: var(--good); }
+:root[data-design='modern'] .kpi.tone-bad::before { background: var(--bad); }
+:root[data-design='modern'] .kpi-label { font-size: 0.66rem; color: var(--c-text-2); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+:root[data-design='modern'] .kpi-value { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.025em; margin: 8px 0 2px; }
+:root[data-design='modern'] .kpi-value small { font-family: var(--font-body); }
+:root[data-design='modern'] .kpi.is-best { background: var(--surface); box-shadow: inset 0 0 0 1px var(--accent); border-color: var(--accent); }
+:root[data-design='modern'] .kpi.tone-good .kpi-value { color: var(--good); }
+:root[data-design='modern'] .badge {
+  background: var(--accent);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  padding: 1px 6px;
+  font-size: 0.6rem;
+}
+:root[data-design='modern'] #horizon-note { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.02em; }
+
+/* ---------- Karten, Tabs, Tabellen ---------- */
+:root[data-design='modern'] .card {
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  box-shadow: none;
+  background: var(--surface);
+}
+:root[data-design='modern'] .card h2,
+:root[data-design='modern'] .card-head h2 { padding-bottom: 10px; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
+:root[data-design='modern'] .card-head h2 { border: 0; padding: 0; margin: 0; }
+:root[data-design='modern'] .details { gap: 12px; }
+:root[data-design='modern'] .details .card { padding: 16px 18px; }
+:root[data-design='modern'] .details h3 { font-size: 0.95rem; }
+
+:root[data-design='modern'] .tabs {
+  border-bottom: 1px solid var(--border);
+  gap: 18px;
+  margin-bottom: 16px;
+}
+:root[data-design='modern'] .tabs button {
+  padding: 8px 0 10px;
+  font-size: 0.7rem;
+  color: var(--c-muted);
+  border-bottom: 2px solid transparent;
+}
+:root[data-design='modern'] .tabs button:hover { color: var(--c-text); }
+:root[data-design='modern'] .tabs button[aria-selected='true'] { color: var(--c-text); border-bottom-color: var(--accent); font-weight: 600; }
+:root[data-design='modern'] .chart-wrap { height: 360px; }
+
+:root[data-design='modern'] table { font-size: 0.84rem; }
+:root[data-design='modern'] th {
+  background: var(--surface);
+  font-size: 0.64rem;
+  color: var(--c-muted);
+  border-bottom: 1px solid var(--c-text);
+  padding: 8px 10px;
+}
+:root[data-design='modern'] td { padding: 8px 10px; border-bottom: 1px solid var(--c-grid); }
+:root[data-design='modern'] td.num { font-family: var(--font-mono); font-size: 0.8rem; }
+:root[data-design='modern'] tbody tr:hover td { background: var(--bg); }
+:root[data-design='modern'] tr.best td { background: var(--accent-soft); }
+
+:root[data-design='modern'] .alert { border-radius: var(--radius); }
+
+/* ---------- Ereignisse & Hinweise ---------- */
+:root[data-design='modern'] .hints { gap: 10px; }
+:root[data-design='modern'] .hint {
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--c-muted);
+  background: var(--surface);
+  padding: 11px 14px;
+}
+:root[data-design='modern'] .hint.level-important { border-left-color: var(--accent); background: var(--imp-bg); border-color: var(--imp-border); border-left-color: var(--accent); }
+:root[data-design='modern'] .hint.level-warning { border-left-color: var(--warn); background: var(--warn-bg); border-color: var(--warn-border); border-left-color: var(--warn); }
+:root[data-design='modern'] .hint-title { font-weight: 600; }
+
+:root[data-design='modern'] .timeline { position: relative; margin-top: 4px; }
+:root[data-design='modern'] .timeline::before {
+  content: '';
+  position: absolute;
+  left: 92px;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: var(--border);
+}
+:root[data-design='modern'] .ev {
+  grid-template-columns: 76px minmax(0, 1fr) auto;
+  column-gap: 34px;
+  border-top: 0;
+  border-left: 0;
+  padding: 10px 10px 10px 2px;
+  border-radius: var(--radius-sm);
+  position: relative;
+}
+:root[data-design='modern'] .ev::before {
+  content: '';
+  position: absolute;
+  left: 88px;
+  top: 16px;
+  width: 9px;
+  height: 9px;
+  background: var(--bg);
+  border: 1.5px solid var(--c-muted);
+}
+:root[data-design='modern'] .ev.level-important::before { border-color: var(--accent); background: var(--accent); }
+:root[data-design='modern'] .ev.level-warning::before { border-color: var(--warn); background: var(--warn); }
+:root[data-design='modern'] .ev.level-warning { background: var(--warn-bg); }
+:root[data-design='modern'] .ev-date { font-size: 0.72rem; color: var(--c-text-2); }
+:root[data-design='modern'] .ev-amount { font-family: var(--font-mono); font-size: 0.84rem; font-weight: 600; }
+@media (max-width: 600px) {
+  :root[data-design='modern'] .timeline::before { left: 5px; }
+  :root[data-design='modern'] .ev { grid-template-columns: 1fr auto; padding-left: 22px; column-gap: 12px; }
+  :root[data-design='modern'] .ev::before { left: 1px; }
+}
+:root[data-design='modern'] .chip { border: 1px solid currentColor; border-radius: var(--radius-sm); padding: 0 6px; font-size: 0.62rem; }
+:root[data-design='modern'] .ev-tag { border-radius: var(--radius-sm); }
+
+/* ---------- Tarifvergleich ---------- */
+:root[data-design='modern'] .tariff-col { border-radius: var(--radius); padding: 14px 16px; background: var(--surface-2); }
+:root[data-design='modern'] .tariff-col.is-cheaper { background: var(--surface); border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+:root[data-design='modern'] .tariff-head { font-size: 0.66rem; }
+:root[data-design='modern'] .tariff-val { font-size: 1.55rem; font-weight: 700; letter-spacing: -0.025em; }
+
+/* ---------- Sonstiges ---------- */
+:root[data-design='modern'] a { color: var(--accent); }
+:root[data-design='modern'] .toast { border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.8rem; box-shadow: var(--shadow-lg); }
+:root[data-design='modern'] .disclaimer { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.02em; }

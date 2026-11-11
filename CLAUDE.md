@@ -22,5 +22,6 @@ SPA (Vite + TypeScript, ohne UI-Framework, Chart.js) zur Wirtschaftlichkeitsrech
 - `npm test` – alle Tests · `npm run build` – Typecheck + statischer Build nach `dist/`
 
 ## Konventionen
+- Zwei Designs: `src/style.css` = Basis/„Klassisch“, `src/style-modern.css` = „Modern“ (nur Regeln unter `:root[data-design='modern']`). Neue UI-Elemente in beiden Designs und in Hell/Dunkel prüfen. Dunkle Farben nur über `:root[data-theme='dark']` (keine `prefers-color-scheme`-Media-Queries).
 - UI-Texte Deutsch; Beträge brutto in €; Prozentwerte intern als Anteil (0.3), im Formular als % (`type: 'percent'`).
 - Kostenvorzeichen: positiv = Ausgabe, negativ = Einnahme (Zuschuss, Steuerbonus, Kreditauszahlung, Restwert).

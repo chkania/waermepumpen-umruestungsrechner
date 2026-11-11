@@ -12,6 +12,13 @@ import { SECTIONS, getPath, setPath, type Field } from './fields';
 import { escapeHtml, fmtDuration, fmtEur, fmtMonth, fmtNum, fmtPct } from './format';
 
 export const STORAGE_KEY = 'wp-investitionsrechner:v1';
+/** Gewähltes Design (Ansichtseinstellung, nicht Teil der Eingaben/Links). */
+export const DESIGN_KEY = 'wp-investitionsrechner:design';
+export type Design = 'modern' | 'classic';
+export const DEFAULT_DESIGN: Design = 'modern';
+/** Hell/Dunkel: 'auto' folgt der Browser-/Systemeinstellung, 'light'/'dark' übersteuern sie (F14.5). */
+export const THEME_KEY = 'wp-investitionsrechner:theme';
+export type ThemeChoice = 'auto' | 'light' | 'dark';
 
 export interface AppEnv {
   storage?: Storage | null;
@@ -25,6 +32,10 @@ export interface AppController {
   setInputs(i: Inputs): void;
   recalc(): void;
   lastResult(): { run: RunResult; cmp: InstallComparison; events: KeyEvents } | null;
+  getDesign(): Design;
+  setDesign(d: Design): void;
+  getTheme(): ThemeChoice;
+  setTheme(t: ThemeChoice): void;
 }
 
 const CHART_TABS: [ChartId, string][] = [
@@ -198,11 +209,43 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     if (last) renderYearTable(last.run, last.events);
   });
 
-  const media = typeof matchMedia === 'function' ? matchMedia('(prefers-color-scheme: dark)') : null;
-  media?.addEventListener?.('change', () => {
+  const redrawCharts = () => {
     charts.reset();
     if (last) charts.update(last.run, priceRows(inputs), last.cmp, last.events);
+  };
+  // ---------- Hell/Dunkel ----------
+  const media = typeof matchMedia === 'function' ? matchMedia('(prefers-color-scheme: dark)') : null;
+  let theme: ThemeChoice = readTheme(storage);
+  const applyTheme = (t: ThemeChoice) => {
+    theme = t;
+    document.documentElement.dataset.theme = t === 'auto' ? (media?.matches ? 'dark' : 'light') : t;
+    root.querySelectorAll<HTMLButtonElement>('[data-theme-choice]').forEach((b) =>
+      b.setAttribute('aria-pressed', String(b.dataset.themeChoice === t)),
+    );
+  };
+  applyTheme(theme);
+  media?.addEventListener?.('change', () => {
+    if (theme !== 'auto') return;
+    applyTheme('auto');
+    redrawCharts();
   });
+  root.querySelectorAll<HTMLButtonElement>('[data-theme-choice]').forEach((b) =>
+    b.addEventListener('click', () => controller.setTheme(b.dataset.themeChoice as ThemeChoice)),
+  );
+
+  // ---------- Design-Umschalter ----------
+  let design: Design = readDesign(storage);
+  const applyDesign = (d: Design) => {
+    design = d;
+    document.documentElement.dataset.design = d;
+    root.querySelectorAll<HTMLButtonElement>('[data-design-choice]').forEach((b) =>
+      b.setAttribute('aria-pressed', String(b.dataset.designChoice === d)),
+    );
+  };
+  applyDesign(design);
+  root.querySelectorAll<HTMLButtonElement>('[data-design-choice]').forEach((b) =>
+    b.addEventListener('click', () => controller.setDesign(b.dataset.designChoice as Design)),
+  );
 
   // ---------- Berechnung ----------
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -478,6 +521,28 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     },
     recalc,
     lastResult: () => last,
+    getDesign: () => design,
+    getTheme: () => theme,
+    setTheme(t) {
+      if (t === theme) return;
+      applyTheme(t);
+      try {
+        storage?.setItem(THEME_KEY, t);
+      } catch {
+        /* Speicher nicht verfügbar */
+      }
+      redrawCharts();
+    },
+    setDesign(d) {
+      if (d === design) return;
+      applyDesign(d);
+      try {
+        storage?.setItem(DESIGN_KEY, d);
+      } catch {
+        /* Speicher nicht verfügbar */
+      }
+      redrawCharts();
+    },
   };
 
   writeForm();
@@ -495,6 +560,26 @@ function loadInitial(defaults: Inputs, storage: Storage | null): Inputs {
     /* ignorieren */
   }
   return mergeInputs(defaults, {});
+}
+
+function readTheme(storage: Storage | null): ThemeChoice {
+  try {
+    const v = storage?.getItem(THEME_KEY);
+    if (v === 'light' || v === 'dark' || v === 'auto') return v;
+  } catch {
+    /* ignorieren */
+  }
+  return 'auto';
+}
+
+function readDesign(storage: Storage | null): Design {
+  try {
+    const v = storage?.getItem(DESIGN_KEY);
+    if (v === 'modern' || v === 'classic') return v;
+  } catch {
+    /* ignorieren */
+  }
+  return DEFAULT_DESIGN;
 }
 
 function safeStorage(): Storage | null {
@@ -605,10 +690,20 @@ function layout(): string {
   return `
   <header class="top">
     <div class="brand">
+      <span class="mark" aria-hidden="true">~wp</span>
       <h1>Wärmepumpen-Investitionsrechner</h1>
       <p>Umstieg von Gas oder Öl: Energiepreise, KfW-Förderung, Kredit und Steuerbonus im Vergleich</p>
     </div>
     <div class="toolbar">
+      <div class="design-switch" role="group" aria-label="Design">
+        <button type="button" data-design-choice="modern" aria-pressed="false">Modern</button>
+        <button type="button" data-design-choice="classic" aria-pressed="false">Klassisch</button>
+      </div>
+      <div class="design-switch theme-switch" role="group" aria-label="Hell oder dunkel">
+        <button type="button" data-theme-choice="light" aria-pressed="false" title="Helles Design">Hell</button>
+        <button type="button" data-theme-choice="dark" aria-pressed="false" title="Dunkles Design">Dunkel</button>
+        <button type="button" data-theme-choice="auto" aria-pressed="false" title="Wie Browser bzw. System">Auto</button>
+      </div>
       <button id="btn-share" type="button">Link teilen</button>
       <button id="btn-export" type="button">Export</button>
       <button id="btn-import" type="button">Import</button>
