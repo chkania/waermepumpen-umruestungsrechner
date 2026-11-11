@@ -1,0 +1,466 @@
+import { compareInstallTimes, type InstallComparison } from '../core/compare';
+import { formatMonth, tryParseMonth } from '../core/dates';
+import { createDefaults, FUNDING_SOURCE_DATE } from '../core/defaults';
+import { priceRows, runAll, type RunResult } from '../core/simulation';
+import { decodeHash, encodeHash, exportJson, importJson, mergeInputs } from '../core/serialize';
+import type { Inputs, ScenarioKind, ScenarioResult } from '../core/types';
+import { Charts, type ChartId } from './charts';
+import { SECTIONS, getPath, setPath, type Field } from './fields';
+import { escapeHtml, fmtDuration, fmtEur, fmtMonth, fmtPct } from './format';
+
+export const STORAGE_KEY = 'wp-investitionsrechner:v1';
+
+export interface AppEnv {
+  storage?: Storage | null;
+  today?: Date;
+  /** Für Tests abschaltbar. */
+  debounceMs?: number;
+}
+
+export interface AppController {
+  getInputs(): Inputs;
+  setInputs(i: Inputs): void;
+  recalc(): void;
+  lastResult(): { run: RunResult; cmp: InstallComparison } | null;
+}
+
+const CHART_TABS: [ChartId, string][] = [
+  ['cumulative', 'Kumulierte Kosten'],
+  ['annual', 'Jährliche Kosten'],
+  ['prices', 'Preisentwicklung'],
+  ['install', 'Zeitpunkt der Umrüstung'],
+];
+
+export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
+  const storage = env.storage === undefined ? safeStorage() : env.storage;
+  const defaults = createDefaults(env.today ?? new Date());
+  let inputs = loadInitial(defaults, storage);
+  let last: { run: RunResult; cmp: InstallComparison } | null = null;
+  let tableKind: ScenarioKind = 'kfw';
+  let activeChart: ChartId = 'cumulative';
+
+  root.innerHTML = layout();
+  const $ = <T extends HTMLElement>(sel: string) => root.querySelector(sel) as T;
+  const form = $<HTMLElement>('#inputs');
+  form.innerHTML = SECTIONS.map(sectionHtml).join('');
+
+  const canvases = Object.fromEntries(
+    CHART_TABS.map(([id]) => [id, $<HTMLCanvasElement>(`canvas[data-chart="${id}"]`)]),
+  ) as Record<ChartId, HTMLCanvasElement>;
+  const charts = new Charts(canvases);
+
+  // ---------- Formular ----------
+  const fieldByPath = new Map<string, Field>();
+  for (const s of SECTIONS) for (const f of s.fields) fieldByPath.set(f.path, f);
+
+  function writeForm(): void {
+    for (const el of form.querySelectorAll<HTMLInputElement | HTMLSelectElement>('[data-path]')) {
+      const f = fieldByPath.get(el.dataset.path!)!;
+      const v = getPath(inputs, f.path);
+      if (el instanceof HTMLInputElement && f.type === 'checkbox') el.checked = Boolean(v);
+      else if (f.type === 'percent') el.value = String(round(Number(v) * 100, 6));
+      else el.value = String(v ?? '');
+      el.classList.remove('invalid');
+    }
+    refreshVisibility();
+  }
+
+  function refreshVisibility(): void {
+    for (const wrap of form.querySelectorAll<HTMLElement>('[data-field]')) {
+      const f = fieldByPath.get(wrap.dataset.field!)!;
+      wrap.hidden = f.show ? !f.show(inputs) : false;
+      if (typeof f.unit === 'function') {
+        const u = wrap.querySelector('.unit');
+        if (u) u.textContent = f.unit(inputs);
+      }
+    }
+  }
+
+  function readField(el: HTMLInputElement | HTMLSelectElement): void {
+    const f = fieldByPath.get(el.dataset.path!)!;
+    const prev = getPath(inputs, f.path);
+    let value: unknown;
+    let valid = true;
+    if (f.type === 'checkbox') value = (el as HTMLInputElement).checked;
+    else if (f.type === 'number' || f.type === 'percent') {
+      const n = Number(String(el.value).replace(',', '.'));
+      valid = el.value.trim() !== '' && Number.isFinite(n);
+      value = f.type === 'percent' ? n / 100 : n;
+    } else if (f.type === 'month') {
+      const empty = el.value.trim() === '';
+      const allowEmpty = f.path === 'funding.grundRateNewFrom';
+      valid = (empty && allowEmpty) || tryParseMonth(el.value) !== null;
+      value = empty ? '' : el.value.trim();
+    } else value = el.value;
+    el.classList.toggle('invalid', !valid);
+    if (!valid) return;
+    setPath(inputs, f.path, value);
+    f.onChange?.(inputs, prev);
+    if (f.onChange) writeForm();
+    refreshVisibility();
+    persist();
+    schedule();
+  }
+
+  form.addEventListener('input', (e) => {
+    const el = e.target as HTMLInputElement;
+    if (el.dataset.path) readField(el);
+  });
+  form.addEventListener('change', (e) => {
+    const el = e.target as HTMLInputElement;
+    if (el.dataset.path) readField(el);
+  });
+
+  // ---------- Toolbar ----------
+  const toast = (msg: string) => {
+    const t = $<HTMLElement>('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  };
+
+  $<HTMLButtonElement>('#btn-share').addEventListener('click', async () => {
+    const hash = encodeHash(defaults, inputs);
+    history.replaceState(null, '', hash);
+    const url = location.href;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast('Link in die Zwischenablage kopiert.');
+    } catch {
+      toast('Link steht in der Adresszeile.');
+    }
+  });
+  $<HTMLButtonElement>('#btn-export').addEventListener('click', () => {
+    const blob = new Blob([exportJson(inputs)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `waermepumpe-rechner-${formatMonth(new Date().getFullYear() * 12 + new Date().getMonth())}.json`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  });
+  const fileInput = $<HTMLInputElement>('#file-import');
+  $<HTMLButtonElement>('#btn-import').addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', async () => {
+    const file = fileInput.files?.[0];
+    if (!file) return;
+    try {
+      controller.setInputs(importJson(defaults, await file.text()));
+      toast('Eingaben importiert.');
+    } catch (err) {
+      toast((err as Error).message);
+    }
+    fileInput.value = '';
+  });
+  $<HTMLButtonElement>('#btn-reset').addEventListener('click', () => {
+    if (!confirm('Alle Eingaben auf die Standardwerte zurücksetzen?')) return;
+    controller.setInputs(createDefaults(env.today ?? new Date()));
+    toast('Auf Standardwerte zurückgesetzt.');
+  });
+
+  // ---------- Tabs ----------
+  root.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((b) =>
+    b.addEventListener('click', () => {
+      activeChart = b.dataset.tab as ChartId;
+      root.querySelectorAll('[data-tab]').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
+      root.querySelectorAll<HTMLElement>('[data-panel]').forEach((p) => (p.hidden = p.dataset.panel !== activeChart));
+    }),
+  );
+  $<HTMLSelectElement>('#table-kind').addEventListener('change', (e) => {
+    tableKind = (e.target as HTMLSelectElement).value as ScenarioKind;
+    if (last) renderYearTable(last.run);
+  });
+
+  const media = typeof matchMedia === 'function' ? matchMedia('(prefers-color-scheme: dark)') : null;
+  media?.addEventListener?.('change', () => {
+    charts.reset();
+    if (last) charts.update(last.run, priceRows(inputs), last.cmp);
+  });
+
+  // ---------- Berechnung ----------
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  function schedule(): void {
+    const ms = env.debounceMs ?? 120;
+    if (ms <= 0) return recalc();
+    clearTimeout(timer);
+    timer = setTimeout(recalc, ms);
+  }
+
+  function persist(): void {
+    try {
+      storage?.setItem(STORAGE_KEY, JSON.stringify(inputs));
+    } catch {
+      /* Speicher nicht verfügbar */
+    }
+    if (location.hash.startsWith('#s=')) history.replaceState(null, '', encodeHash(defaults, inputs));
+  }
+
+  function recalc(): void {
+    let run: RunResult;
+    let cmp: InstallComparison;
+    try {
+      run = runAll(inputs);
+      cmp = compareInstallTimes(inputs);
+    } catch (err) {
+      $<HTMLElement>('#warnings').innerHTML = `<div class="alert error">${escapeHtml((err as Error).message)}</div>`;
+      return;
+    }
+    last = { run, cmp };
+    renderKpis(run);
+    renderWarnings(run);
+    renderDetails(run);
+    renderInstallTable(cmp);
+    renderYearTable(run);
+    charts.update(run, priceRows(inputs), cmp);
+  }
+
+  function renderKpis(run: RunResult): void {
+    const best = run.best === 'tax' ? run.tax : run.kfw;
+    const saving = run.ref.totalCost - best.totalCost;
+    const be = run.best === 'tax' ? run.breakEvenTax : run.breakEvenKfw;
+    const install = best.installMonth;
+    const beText =
+      be === null
+        ? 'nicht im Zeitraum'
+        : install !== null && be > install
+          ? `${fmtMonth(be)} <small>(${fmtDuration(be - install)} nach Inbetriebnahme)</small>`
+          : fmtMonth(be);
+    $<HTMLElement>('#kpis').innerHTML = `
+      ${kpi('Ohne Wärmepumpe', fmtEur(run.ref.totalCost), 'ref', 'Gesamtkosten im Zeitraum')}
+      ${kpi('WP + KfW-Zuschuss', fmtEur(run.kfw.totalCost), 'kfw', `Zuschuss ${fmtEur(run.kfw.kfw?.subsidy ?? 0)}`, run.best === 'kfw')}
+      ${kpi('WP + Steuerbonus', run.tax.feasible ? fmtEur(run.tax.totalCost) : 'nicht möglich', 'tax', run.tax.feasible ? `Steuerbonus ${fmtEur(run.tax.tax?.total ?? 0)}` : (run.tax.tax?.notes[0] ?? ''), run.best === 'tax')}
+      ${kpi(saving >= 0 ? 'Ersparnis mit WP' : 'Mehrkosten mit WP', fmtEur(Math.abs(saving)), saving >= 0 ? 'good' : 'bad', `bester Weg: ${run.best === 'tax' ? 'Steuerbonus' : 'KfW'}`)}
+      ${kpi('Amortisation', beText, 'neutral', 'kumulierte Kosten dauerhaft unter Referenz')}
+    `;
+    $<HTMLElement>('#horizon-note').textContent =
+      `Betrachtung ${fmtMonth(run.ref.months[0].month)} – ${fmtMonth(run.ref.months[run.ref.months.length - 1].month)}, ` +
+      `Inbetriebnahme WP ${fmtMonth(run.kfw.installMonth)}` +
+      (inputs.general.opportunityRate ? `, aufgezinst mit ${fmtPct(inputs.general.opportunityRate, 2)} p. a.` : '');
+  }
+
+  function renderWarnings(run: RunResult): void {
+    const ws = [...new Set([...run.kfw.warnings, ...run.tax.warnings, ...run.ref.warnings])];
+    $<HTMLElement>('#warnings').innerHTML = ws.length
+      ? `<ul class="alert">${ws.map((w) => `<li>${escapeHtml(w)}</li>`).join('')}</ul>`
+      : '';
+  }
+
+  function renderDetails(run: RunResult): void {
+    const k = run.kfw.kfw;
+    const t = run.tax.tax;
+    const kfwHtml = k
+      ? `<dl>
+          <dt>Antrag (angenommen)</dt><dd>${fmtMonth(k.appMonth)}</dd>
+          <dt>Grundförderung</dt><dd>${fmtPct(k.grundRate)}</dd>
+          <dt>Klimageschwindigkeitsbonus</dt><dd>${fmtPct(k.kgbRate)}</dd>
+          <dt>Einkommensbonus</dt><dd>${fmtPct(k.incomeRate)}</dd>
+          <dt>Fördersatz (selbstgenutzte WE)</dt><dd>${fmtPct(k.ownerUnitRate)} <small>max. ${fmtPct(k.maxRate)}</small></dd>
+          <dt>Förderfähige Kosten</dt><dd>${fmtEur(k.eligibleCosts)} <small>Höchstbetrag ${fmtEur(k.capTotal)}</small></dd>
+          <dt>Zuschuss</dt><dd><strong>${fmtEur(k.subsidy)}</strong></dd>
+        </dl>`
+      : '<p class="muted">Keine Installation im Zeitraum.</p>';
+    const taxHtml = t
+      ? t.eligible
+        ? `<dl>${t.yearly.map((y) => `<dt>Steuerjahr ${y.year}</dt><dd>${fmtEur(y.amount)}</dd>`).join('')}
+            <dt>Summe</dt><dd><strong>${fmtEur(t.total)}</strong></dd></dl>
+            <p class="muted small">Erstattung jeweils im Folgejahr. Nicht mit KfW-Zuschuss kombinierbar.</p>`
+        : `<p class="muted">${t.notes.map(escapeHtml).join('<br>')}</p>`
+      : '<p class="muted">Keine Installation im Zeitraum.</p>';
+    const loans = [
+      ...run.kfw.loans.map((l) => ({ ...l, path: 'KfW-Weg' })),
+      ...run.tax.loans.map((l) => ({ ...l, path: 'Steuer-Weg' })),
+    ];
+    const loanHtml = loans.length
+      ? `<div class="table-wrap"><table class="compact"><thead><tr><th>Weg</th><th>Kredit</th><th class="num">Betrag</th><th class="num">Zins</th><th class="num">Zinskosten*</th></tr></thead><tbody>
+          ${loans.map((l) => `<tr><td>${l.path}</td><td>${escapeHtml(l.name.replace('KfW-Kredit ', 'KfW '))}</td><td class="num">${fmtEur(l.principal)}</td><td class="num">${fmtPct(l.rate, 2)}</td><td class="num">${fmtEur(l.totalInterest)}</td></tr>`).join('')}
+          </tbody></table></div><p class="muted small">* im Betrachtungszeitraum. Zinssätze sind Annahmen.</p>`
+      : '<p class="muted">Keine Kredite – vollständig aus Eigenkapital finanziert.</p>';
+    $<HTMLElement>('#details').innerHTML = `
+      <div class="card"><h3>KfW-Zuschuss (458)</h3>${kfwHtml}</div>
+      <div class="card"><h3>Steuerbonus (§ 35c EStG)</h3>${taxHtml}</div>
+      <div class="card"><h3>Finanzierung</h3>${loanHtml}</div>`;
+  }
+
+  function renderInstallTable(cmp: InstallComparison): void {
+    $<HTMLElement>('#install-table').innerHTML = `
+      <table>
+        <thead><tr><th>Inbetriebnahme</th><th class="num">Zuschuss</th><th class="num">WP + KfW</th><th class="num">WP + Steuer</th><th>Bester Weg</th><th class="num">Ersparnis ggü. ohne WP</th><th class="num">Kosten des Wartens</th></tr></thead>
+        <tbody>${cmp.rows
+          .map(
+            (r, i) => `<tr class="${i === cmp.bestIndex ? 'best' : ''}">
+              <td>${fmtMonth(r.installMonth)}${i === cmp.bestIndex ? ' <span class="badge">günstigster</span>' : ''}</td>
+              <td class="num">${fmtEur(r.kfwSubsidy)}</td>
+              <td class="num">${fmtEur(r.kfwTotal)}</td>
+              <td class="num">${r.taxFeasible ? fmtEur(r.taxTotal) : '<span class="muted">–</span>'}</td>
+              <td>${r.best === 'tax' ? 'Steuerbonus' : 'KfW'}</td>
+              <td class="num ${r.savingVsRef >= 0 ? 'pos' : 'neg'}">${fmtEur(r.savingVsRef)}</td>
+              <td class="num ${r.extraVsFirst > 0 ? 'neg' : ''}">${i === 0 ? '–' : (r.extraVsFirst > 0 ? '+' : '') + fmtEur(r.extraVsFirst)}</td>
+            </tr>`,
+          )
+          .join('')}</tbody>
+      </table>
+      <p class="muted small">Referenz ohne Wärmepumpe: ${fmtEur(cmp.refTotal)}. Förderantrag jeweils ${inputs.heatPump.leadMonths} Monate vor Inbetriebnahme.</p>`;
+  }
+
+  function renderYearTable(run: RunResult): void {
+    const s: ScenarioResult = run[tableKind];
+    const cols: [keyof ScenarioResult['years'][number], string][] = [
+      ['energy', 'Energie'],
+      ['fixed', 'Grund-/Fixkosten'],
+      ['maintenance', 'Wartung'],
+      ['investment', 'Investition'],
+      ['loanPayout', 'Kredit­auszahlung'],
+      ['interest', 'Zinsen'],
+      ['principal', 'Tilgung'],
+      ['subsidy', 'Zuschuss'],
+      ['taxBonus', 'Steuer­bonus'],
+      ['residual', 'Restwert'],
+      ['total', 'Summe'],
+      ['cumulative', 'Kumuliert'],
+    ];
+    const used = cols.filter(([k]) => k === 'total' || k === 'cumulative' || s.years.some((y) => Math.abs(y[k] as number) > 0.5));
+    $<HTMLElement>('#year-table').innerHTML = `
+      <table>
+        <thead><tr><th>Jahr</th>${used.map(([, l]) => `<th class="num">${l}</th>`).join('')}</tr></thead>
+        <tbody>${s.years
+          .map(
+            (y) =>
+              `<tr><td>${y.year}</td>${used
+                .map(([k]) => `<td class="num${k === 'total' || k === 'cumulative' ? ' strong' : ''}">${fmtEur(y[k] as number)}</td>`)
+                .join('')}</tr>`,
+          )
+          .join('')}</tbody>
+      </table>`;
+  }
+
+  const controller: AppController = {
+    getInputs: () => inputs,
+    setInputs(i) {
+      inputs = mergeInputs(defaults, i);
+      writeForm();
+      persist();
+      recalc();
+    },
+    recalc,
+    lastResult: () => last,
+  };
+
+  writeForm();
+  recalc();
+  return controller;
+}
+
+function loadInitial(defaults: Inputs, storage: Storage | null): Inputs {
+  const fromHash = typeof location !== 'undefined' ? decodeHash(defaults, location.hash) : null;
+  if (fromHash) return fromHash;
+  try {
+    const raw = storage?.getItem(STORAGE_KEY);
+    if (raw) return mergeInputs(defaults, JSON.parse(raw));
+  } catch {
+    /* ignorieren */
+  }
+  return mergeInputs(defaults, {});
+}
+
+function safeStorage(): Storage | null {
+  try {
+    return window.localStorage;
+  } catch {
+    return null;
+  }
+}
+
+const round = (x: number, d: number) => Math.round(x * 10 ** d) / 10 ** d;
+
+function kpi(label: string, value: string, tone: string, sub: string, best = false): string {
+  return `<div class="kpi tone-${tone}${best ? ' is-best' : ''}">
+    <div class="kpi-label">${escapeHtml(label)}${best ? ' <span class="badge">bester Weg</span>' : ''}</div>
+    <div class="kpi-value">${value}</div>
+    <div class="kpi-sub">${escapeHtml(sub)}</div>
+  </div>`;
+}
+
+function fieldHtml(f: Field): string {
+  const id = `f-${f.path.replace(/\./g, '-')}`;
+  const unit = typeof f.unit === 'string' ? f.unit : '';
+  const help = f.help ? `<small class="help">${escapeHtml(f.help)}</small>` : '';
+  if (f.type === 'checkbox') {
+    return `<div class="field check" data-field="${f.path}">
+      <label for="${id}"><input type="checkbox" id="${id}" data-path="${f.path}"> ${escapeHtml(f.label)}</label>${help}</div>`;
+  }
+  let control: string;
+  if (f.type === 'select') {
+    control = `<select id="${id}" data-path="${f.path}">${(f.options ?? []).map(([v, l]) => `<option value="${v}">${escapeHtml(l)}</option>`).join('')}</select>`;
+  } else if (f.type === 'month') {
+    control = `<input type="month" id="${id}" data-path="${f.path}" placeholder="JJJJ-MM">`;
+  } else if (f.type === 'text') {
+    control = `<input type="text" id="${id}" data-path="${f.path}" spellcheck="false">`;
+  } else {
+    const attrs = [
+      f.step !== undefined ? `step="${f.step}"` : 'step="any"',
+      f.min !== undefined ? `min="${f.min}"` : '',
+      f.max !== undefined ? `max="${f.max}"` : '',
+    ].join(' ');
+    control = `<input type="number" inputmode="decimal" id="${id}" data-path="${f.path}" ${attrs}>`;
+  }
+  return `<div class="field" data-field="${f.path}">
+    <label for="${id}">${escapeHtml(f.label)}</label>
+    <div class="control">${control}<span class="unit">${escapeHtml(unit)}</span></div>${help}</div>`;
+}
+
+function sectionHtml(s: (typeof SECTIONS)[number]): string {
+  return `<details class="section${s.expert ? ' expert' : ''}" ${s.open ? 'open' : ''}>
+    <summary>${escapeHtml(s.title)}</summary>
+    ${s.note ? `<p class="note">${escapeHtml(s.note)}</p>` : ''}
+    <div class="fields">${s.fields.map(fieldHtml).join('')}</div>
+  </details>`;
+}
+
+function layout(): string {
+  return `
+  <header class="top">
+    <div class="brand">
+      <h1>Wärmepumpen-Investitionsrechner</h1>
+      <p>Umstieg von Gas oder Öl: Energiepreise, KfW-Förderung, Kredit und Steuerbonus im Vergleich</p>
+    </div>
+    <div class="toolbar">
+      <button id="btn-share" type="button">Link teilen</button>
+      <button id="btn-export" type="button">Export</button>
+      <button id="btn-import" type="button">Import</button>
+      <button id="btn-reset" type="button" class="ghost">Zurücksetzen</button>
+      <input id="file-import" type="file" accept="application/json,.json" hidden>
+    </div>
+  </header>
+  <main class="layout">
+    <aside id="inputs" class="inputs" aria-label="Eingaben"></aside>
+    <section class="results" aria-label="Ergebnisse">
+      <div id="kpis" class="kpis"></div>
+      <p id="horizon-note" class="muted small"></p>
+      <div id="warnings"></div>
+      <div class="card">
+        <div class="tabs" role="tablist">
+          ${CHART_TABS.map(([id, l], i) => `<button type="button" role="tab" data-tab="${id}" aria-selected="${i === 0}">${l}</button>`).join('')}
+        </div>
+        ${CHART_TABS.map(([id], i) => `<div class="chart-wrap" data-panel="${id}" ${i === 0 ? '' : 'hidden'}><canvas data-chart="${id}"></canvas></div>`).join('')}
+      </div>
+      <div id="details" class="details"></div>
+      <div class="card">
+        <h2>Wann umrüsten?</h2>
+        <div id="install-table" class="table-wrap"></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <h2>Jahresübersicht</h2>
+          <select id="table-kind" aria-label="Szenario">
+            <option value="kfw">WP + KfW-Zuschuss</option>
+            <option value="tax">WP + Steuerbonus</option>
+            <option value="ref">Ohne Wärmepumpe</option>
+          </select>
+        </div>
+        <div id="year-table" class="table-wrap"></div>
+        <p class="muted small">Positive Werte = Ausgaben, negative = Einnahmen. „Kumuliert" enthält den Opportunitätszins.</p>
+      </div>
+      <p class="disclaimer">Keine Finanz-, Steuer- oder Förderberatung. Alle Angaben ohne Gewähr; Förderbedingungen Stand ${FUNDING_SOURCE_DATE.split('-').reverse().join('.')} – bitte vor Antragstellung bei KfW, Energieberatung und Steuerberatung prüfen.</p>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>`;
+}
