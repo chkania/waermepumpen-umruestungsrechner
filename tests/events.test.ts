@@ -39,7 +39,7 @@ describe('F10 Wichtige Ereignisse', () => {
       ['2040-01', '60 %'],
     ]);
     expect(bio[0].perYear).toBe(true);
-    expect(bio[0].amount).toBeCloseTo(((11000 * 0.9) / 0.95) * 0.15 * 0.04, 6);
+    expect(bio[0].amount).toBeCloseTo(((11000 * 0.9) / 0.95) * 0.15 * (userCase().prices.bioPremiumCt / 100), 6);
   });
 
   it('F10.2 letzte Steuererstattung ist hervorgehoben', () => {
@@ -115,5 +115,17 @@ describe('F10 Wichtige Ereignisse', () => {
     const w = timeline.filter((e) => /fällt vor der Wärmepumpe aus/.test(e.title));
     expect(w.map((e) => e.scenario)).toEqual(['kfw', 'tax']);
     expect(w[0].level).toBe('warning');
+  });
+
+  it('F10.4 Hinweis Wertschöpfungs-Bonus bzw. reduzierte Grundförderung ab 2027', () => {
+    const eu = ev(userCase((i) => (i.heatPump.installMonth = '2027-11'))).hints;
+    expect(find(eu, /Wertschöpfungs-Bonus 15 %/)!.level).toBe('info');
+    const nonEu = ev(userCase((i) => {
+      i.heatPump.installMonth = '2027-11';
+      i.heatPump.euOrigin = false;
+    })).hints;
+    expect(find(nonEu, /Nur 15 % Grundförderung/)!.level).toBe('warning');
+    // Antrag 12/2026 (vor dem Stichtag): kein Hinweis
+    expect(find(ev(userCase((i) => (i.heatPump.installMonth = '2027-04'))).hints, /Grundförderung/)).toBeUndefined();
   });
 });

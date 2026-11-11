@@ -69,6 +69,12 @@ describe('F5.1 Förderfähige Kosten', () => {
     expect(cap1At(M(m), P())).toBe(cap);
   });
 
+  it('Untergrenze 22.000 € ab 08/2030 (Richtlinie Nr. 8.3.1 a)', () => {
+    expect(cap1At(M('2030-07'), P())).toBe(22750);
+    expect(cap1At(M('2030-08'), P())).toBe(22000);
+    expect(cap1At(M('2035-02'), P())).toBe(22000);
+  });
+
   it('Mehrfamilienhaus: 1. WE + 5×15.000 + Rest×8.000', () => {
     expect(capTotalAt(M('2026-12'), 7, P())).toBe(28000 + 5 * 15000 + 8000); // 111.000 (KfW-Beispiel)
     expect(capTotalAt(M('2026-12'), 2, P())).toBe(43000);
@@ -120,12 +126,20 @@ describe('F5.1 Zuschuss gesamt', () => {
     expect(r.subsidy).toBeCloseTo(0.3 * 21500 + 0.46 * 21500, 2);
   });
 
-  it('abweichende Grundförderung ab Datum (z. B. Wertschöpfungsbonus)', () => {
+  it('ab Q1/2027: 15 % Grundförderung + 15 % Wertschöpfungs-Bonus nur bei EU-Ursprung (Nr. 8.4.1 c, 8.4.6)', () => {
     const p = P();
-    p.grundRateNew = 0.15;
-    p.grundRateNewFrom = '2027-04';
-    expect(grundRateAt(M('2027-03'), p)).toBe(0.3);
-    expect(grundRateAt(M('2027-04'), p)).toBe(0.15);
+    expect(grundRateAt(M('2026-12'), p)).toBe(0.3);
+    expect(grundRateAt(M('2027-01'), p)).toBe(0.15);
+    // Vermieter, keine Boni: EU-WP weiterhin 30 %, Nicht-EU nur 15 %
+    const eu = kfwSubsidy(req({ appMonth: M('2027-03'), ownerOccupied: false, eligibleCost: 20000 }), p);
+    expect(eu.wsbRate).toBe(0.15);
+    expect(eu.subsidy).toBe(6000);
+    const nonEu = kfwSubsidy(req({ appMonth: M('2027-03'), ownerOccupied: false, eligibleCost: 20000, euOrigin: false }), p);
+    expect(nonEu.wsbRate).toBe(0);
+    expect(nonEu.subsidy).toBe(3000);
+    expect(nonEu.notes.join()).toMatch(/EU-Ursprung/);
+    // vor dem Stichtag spielt der Ursprung keine Rolle
+    expect(kfwSubsidy(req({ euOrigin: false }), p).subsidy).toBe(12880);
   });
 });
 

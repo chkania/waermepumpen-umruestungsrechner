@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { annualHeatDemand, createPriceModel, fuelKWh, interpolate, parsePath, stepValue } from '../src/core/prices';
-import { defaults } from './helpers';
+import { pinned as defaults } from './helpers';
 
 describe('F2.3 CO2-Preispfad', () => {
   it('parst Stützstellen, sortiert und ignoriert Müll', () => {
@@ -69,6 +69,7 @@ describe('F2.4 Heizöl', () => {
   it('€/Liter → ct/kWh mit 10 kWh/l', () => {
     const i = defaults();
     i.oldHeating.fuel = 'oil';
+    i.prices.oilPriceEur = 1.0;
     expect(createPriceModel(i).fuelCt('oil', 2026)).toBeCloseTo(10, 10);
     i.oldHeating.consumption = 2000;
     expect(fuelKWh(i)).toBe(20000);

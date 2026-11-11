@@ -13,13 +13,22 @@ export interface KfwRequest {
   units: number;
   householdIncome: number;
   hasChild: boolean;
+  /** Wärmepumpe mit Ursprung in der EU (Wertschöpfungs-Bonus, Richtlinie Nr. 8.4.6). Default: true. */
+  euOrigin?: boolean;
 }
 
 const round2 = (x: number) => Math.round(x * 100) / 100;
 
+/** Grundförderung zum Antragsmonat (ab Q1/2027 für Wärmepumpen reduziert, Richtlinie Nr. 8.4.1 c). */
 export function grundRateAt(appMonth: number, p: FundingParams): number {
   const from = tryParseMonth(p.grundRateNewFrom);
   return from !== null && appMonth >= from ? p.grundRateNew : p.grundRate;
+}
+
+/** Wertschöpfungs-Bonus für Wärmepumpen mit EU-Ursprung (Richtlinie Nr. 8.4.6), gilt ab demselben Stichtag. */
+export function wsbRateAt(appMonth: number, euOrigin: boolean, p: FundingParams): number {
+  const from = tryParseMonth(p.grundRateNewFrom);
+  return euOrigin && from !== null && appMonth >= from ? p.wsbRate : 0;
 }
 
 /** Klimageschwindigkeitsbonus-Satz zum Antragsmonat (ohne Berechtigungsprüfung). */
@@ -37,7 +46,8 @@ const round4 = (x: number) => Math.round(x * 10000) / 10000;
 export function cap1At(appMonth: number, p: FundingParams): number {
   const start = tryParseMonth(p.capDegressionStart);
   const steps = start === null ? 0 : halfYearSteps(appMonth, start);
-  return Math.max(0, p.cap1 - steps * p.capStep);
+  // Richtlinie Nr. 8.3.1 a: Absenkung endet bei der Untergrenze (ab 1. August 2030: 22.000 €)
+  return Math.max(Math.min(p.capFloor, p.cap1), p.cap1 - steps * p.capStep);
 }
 
 export function capTotalAt(appMonth: number, units: number, p: FundingParams): number {
@@ -58,6 +68,11 @@ export function kfwSubsidy(req: KfwRequest, p: FundingParams): KfwResult {
   const notes: string[] = [];
   const units = Math.max(1, Math.floor(req.units));
   const grund = grundRateAt(req.appMonth, p);
+  const wsb = wsbRateAt(req.appMonth, req.euOrigin ?? true, p);
+  const base = grund + wsb;
+  if (grund < p.grundRate && wsb === 0) {
+    notes.push(`Grundförderung nur ${Math.round(grund * 100)} %: kein Wertschöpfungs-Bonus (Wärmepumpe ohne EU-Ursprung).`);
+  }
 
   let kgb = 0;
   if (req.ownerOccupied) {
@@ -76,8 +91,8 @@ export function kfwSubsidy(req: KfwRequest, p: FundingParams): KfwResult {
 
   const income = req.ownerOccupied ? incomeBonusRate(req.householdIncome, req.hasChild, p) : 0;
   const maxRate = income > 0 && income >= p.incomeRate1 ? p.maxRateLowIncome : p.maxRate;
-  const ownerUnitRate = req.ownerOccupied ? round4(Math.min(grund + kgb + income, maxRate)) : grund;
-  if (req.ownerOccupied && grund + kgb + income > maxRate) {
+  const ownerUnitRate = req.ownerOccupied ? round4(Math.min(base + kgb + income, maxRate)) : base;
+  if (req.ownerOccupied && base + kgb + income > maxRate) {
     notes.push(`Fördersatz auf Höchstsatz ${Math.round(maxRate * 100)} % begrenzt.`);
   }
 
@@ -88,13 +103,14 @@ export function kfwSubsidy(req: KfwRequest, p: FundingParams): KfwResult {
   }
   const ownerShare = eligibleCosts / units;
   const subsidy = req.ownerOccupied
-    ? grund * (eligibleCosts - ownerShare) + ownerUnitRate * ownerShare
-    : grund * eligibleCosts;
+    ? base * (eligibleCosts - ownerShare) + ownerUnitRate * ownerShare
+    : base * eligibleCosts;
 
   return {
-    eligible: grund > 0 && eligibleCosts > 0,
+    eligible: base > 0 && eligibleCosts > 0,
     appMonth: req.appMonth,
     grundRate: grund,
+    wsbRate: wsb,
     kgbRate: kgb,
     incomeRate: income,
     ownerUnitRate,

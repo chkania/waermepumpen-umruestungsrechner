@@ -130,4 +130,30 @@ describe('UI (Smoke-Test)', () => {
     const { root } = mount();
     expect(root.querySelector('#warnings')!.textContent).not.toMatch(/Klimageschwindigkeitsbonus|Ersatzkessel/);
   });
+
+  it('F11 Info-Button öffnet Herkunfts-Popover mit Standardwert, Escape schließt', () => {
+    const { root } = mount();
+    const btn = root.querySelector<HTMLButtonElement>('[data-field="oldHeating.replacementCost"] .info-btn')!;
+    const pop = document.getElementById(btn.getAttribute('aria-controls')!)!;
+    expect(pop.hidden).toBe(true);
+    btn.click();
+    expect(pop.hidden).toBe(false);
+    expect(btn.getAttribute('aria-expanded')).toBe('true');
+    expect(pop.textContent).toContain('Marktdaten');
+    expect(pop.textContent).toContain('12.000 €');
+    // nur ein Popover gleichzeitig
+    root.querySelector<HTMLButtonElement>('[data-field="funding.kgbRate"] .info-btn')!.click();
+    expect(pop.hidden).toBe(true);
+    const kgb = root.querySelector('[data-field="funding.kgbRate"] .src-pop')!;
+    expect(kgb.textContent).toContain('16 %');
+    const links = [...kgb.querySelectorAll('a')].map((a) => a.getAttribute('href'));
+    expect(links.some((h) => h!.includes('bundesanzeiger.de'))).toBe(true);
+    expect(links.some((h) => h!.includes('6000005131_M_458.pdf'))).toBe(true);
+    expect(kgb.textContent).toContain('Nr. 8.4.4');
+    const child = root.querySelector('[data-field="building.hasChild"] .src-pop')!;
+    expect(child.textContent).toContain('Nr. 8.4.5');
+    expect(child.textContent).toContain('Kindergeldberechtigung');
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    expect((kgb as HTMLElement).hidden).toBe(true);
+  });
 });

@@ -61,11 +61,11 @@ inklusive steigender Energiepreise, Bundesförderung (KfW 458), Kreditfinanzieru
 
 ### F5 – Förderung und Steuer
 - F5.1 **KfW 458** (Zuschuss, Antragsmonat maßgeblich):
-  - Grundförderung 30 % (optional: abweichender Satz ab einem Datum, z. B. für den angekündigten Wertschöpfungsbonus 2027).
+  - Grundförderung 30 %; ab Anträgen im 1. Quartal 2027 (angenommen ab 01/2027) für Wärmepumpen 15 % plus Wertschöpfungs-Bonus 15 % bei EU-Ursprung (Richtlinie Nr. 8.4.1 c, 8.4.6). Eingabe „Wärmepumpe mit Ursprung in der EU“ (Default: ja).
   - Klimageschwindigkeitsbonus (nur selbstgenutzt, Ersatz einer funktionstüchtigen Öl-Heizung oder einer Gasheizung ≥ 20 Jahre): 16 %, ab 02/2027 halbjährlich (Feb/Aug) −4 Prozentpunkte, ab Anträgen 08/2028 entfallen.
   - Einkommensbonus (nur selbstgenutzt, zu versteuerndes Haushaltseinkommen): ≤ 30.000 € → 40 %, ≤ 40.000 € → 30 %, ≤ 50.000 € → 10 %; mit kindergeldberechtigtem Kind < 18 Grenzen +10.000 €.
-  - Höchstfördersatz 70 %; 80 %, wenn der höchste Einkommensbonus-Satz (40 %) greift (Annahme aus KfW-Beispielen).
-  - Förderfähige Kosten: 1. Wohneinheit 28.000 € (ab 02/2027 halbjährlich −750 €), 2.–6. WE je 15.000 €, ab 7. WE je 8.000 €. Boni gelten nur für den Kostenanteil der selbstgenutzten WE (Kosten gleichmäßig auf WE verteilt).
+  - Höchstfördersatz 70 %; 80 % bei zvE bis 30.000 € bzw. 40.000 € mit Familienzuschlag (Richtlinie Nr. 8.4.1).
+  - Förderfähige Kosten: 1. Wohneinheit 28.000 € (ab 02/2027 halbjährlich −750 €, Untergrenze 22.000 € ab 08/2030, Richtlinie Nr. 8.3.1 a), 2.–6. WE je 15.000 €, ab 7. WE je 8.000 €. Boni gelten nur für den Kostenanteil der selbstgenutzten WE (Kosten gleichmäßig auf WE verteilt).
   - Auszahlung `n` Monate nach Installation (Default 3).
   - Effizienzbonus existiert nicht mehr (nicht modelliert).
   *(Test: funding)*
@@ -97,6 +97,19 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 - F10.4 Hinweise: Klimageschwindigkeitsbonus – gesichert (mit Betrag und nächster Absenkung), ausgelaufen, später erreichbar (ab wann, welcher Satz) oder **nicht erreichbar** (Heizung erreicht das Mindestalter erst nach Auslaufen des Bonus bzw. nach Ende der Restlebensdauer); Einkommensbonus ja/nein; Begrenzung der förderfähigen Kosten mit nächster Absenkung; KfW 359 statt 358; Frist bzw. Nichtverfügbarkeit des Steuerbonus. *(Test: events)*
 - F10.5 Diese Fakten werden im Warnhinweis-Block nicht doppelt angezeigt. *(Test: ui)*
 
+### F11 – Herkunft der Standardwerte
+- F11.1 Jedes Eingabefeld hat einen Info-Button („i") neben der Beschriftung; er öffnet ein Popover mit dem Standardwert, der Art der Herkunft und einer Erläuterung (ggf. Link und Stand). Nur ein Popover ist gleichzeitig offen; Klick daneben oder Escape schließt. *(Test: ui)*
+- F11.2 Herkunftsarten: *Offizielle Quelle* (mit Link + Stand), *Gesetz / Regelung*, *Marktdaten (recherchiert)* (mit Link + Stand), *Schätzung* (keine konkrete Erhebung, mit typischer Spanne), *Beispielwert* (eigene Angabe nötig), *Technischer Richtwert*, *Modellannahme*. Schätzungen und Annahmen müssen ehrlich als solche gekennzeichnet sein. *(Test: sources)*
+- F11.3 Die Herkunft wird zentral in `src/core/sources.ts` gepflegt; jedes Feld braucht einen Eintrag, verwaiste Einträge sind unzulässig. *(Test: sources)*
+- F11.4 Soweit relevant nennt das Popover zusätzlich die **offiziellen Fundstellen** mit Link (BEG-EM-Richtlinie mit Nummer, KfW-Merkblätter 458 und 358/359 mit Seite, KfW-Infoblatt mit Nummer, Gesetze mit Paragraf). Jede KfW-Förderregel (`funding.*`) muss auf Richtlinie oder Merkblatt verweisen. *(Test: sources, ui)*
+
+### F12 – Sondertilgung aus Einmalzahlung
+- F12.1 Eingaben: verfügbarer Betrag (z. B. fällige Lebensversicherung, Default 0 €), Monat der Verfügbarkeit, Ziel „automatisch (höchster Zins zuerst)“ / „KfW-Kredit“ / „Bankkredit“. Ist die Sondertilgung beim ersten Kredit nicht (vollständig) möglich, wird der andere Kredit versucht; nicht einsetzbares Geld bleibt außen vor. *(Test: prepayment)*
+- F12.2 Regeln KfW 358/359 (Merkblatt S. 5): Teil-Sondertilgung nur innerhalb der ersten Zinsbindung, Mindestbetrag 5.000 €, kostenfrei; nach Ende der Zinsbindung nur vollständige Rückzahlung gegen Vorfälligkeitsentschädigung (Höhe = Annahme, Default 1 %). Gilt auch für den Zuschuss als Sondertilgung. *(Test: prepayment)*
+- F12.3 Regeln Bankkredit (§ 500 Abs. 2, § 502 BGB): jederzeit ganz oder teilweise; Vorfälligkeitsentschädigung max. 1 % (Restlaufzeit ≤ 1 Jahr: 0,5 %), höchstens die entgangenen Sollzinsen (vereinfacht: Betrag × Zins × Restlaufzeit). *(Test: prepayment)*
+- F12.4 Wirkung: Sondertilgung = Ausgabe (Tilgung) im Monat der Verfügbarkeit; Rate bleibt, Laufzeit verkürzt sich; beim Zinswechsel nach der Zinsbindung wird die Rate auf die tatsächlich verbleibende Laufzeit gerechnet. Vorfälligkeitsentschädigungen erscheinen als eigene Kostenkategorie (Jahrestabelle). *(Test: prepayment, loan)*
+- F12.5 Ereignisse: eingesetzte Sondertilgung (Betrag, Kredit, Entschädigung, ggf. vollständig getilgt), abgelehnte Sondertilgung mit Begründung, nicht eingesetzter Rest, abgelehnte Zuschuss-Sondertilgung. *(Test: prepayment)*
+
 ### F9 – Persistenz
 - F9.1 Eingaben werden automatisch im localStorage gespeichert und beim Laden wiederhergestellt. *(Test: serialize)*
 - F9.2 „Link teilen": Eingaben (nur Abweichungen von den Defaults) als Base64url-JSON im URL-Hash `#s=…`; ein Link hat Vorrang vor localStorage. *(Test: serialize)*
@@ -105,23 +118,30 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 
 ## 4. Nicht-funktionale Anforderungen
 - N1 Rechenkern (`src/core`) ist frei von DOM-Zugriffen und vollständig unit-getestet.
-- N2 Alle Förder-/Steuer-/Preisannahmen stehen zentral in `src/core/defaults.ts` mit Quelle und Stand.
+- N2 Alle Förder-/Steuer-/Preisannahmen stehen zentral in `src/core/defaults.ts`; die Herkunft jedes Standardwerts in `src/core/sources.ts` (F11).
 - N3 Regressionstests: `npm test` muss vor jeder Änderung und danach grün sein; ein Snapshot-Test sichert die Ergebnisse des Default-Szenarios. Bewusste Ergebnisänderungen → Snapshot mit `npm test -- -u` aktualisieren und im Änderungsprotokoll begründen.
 - N4 Responsive (nutzbar ab 360 px Breite), funktioniert offline nach dem Laden, keine Server-Komponente.
 - N5 Hinweis in der UI: keine Finanz-/Steuerberatung, Angaben ohne Gewähr.
 
 ## 5. Quellen (abgerufen 2026-11-11)
+- BEG-EM-Richtlinie vom 17.08.2026 (BAnz AT 27.08.2026 B1): https://www.bundesanzeiger.de/pub/publication/jLXvW09kHTQoDINAdoC/content/jLXvW09kHTQoDINAdoC/BAnz%20AT%2027.08.2026%20B1.pdf?inline
+- KfW-Merkblatt 458 (Stand 09/2026, gültig ab 24.09.2026): https://www.kfw.de/PDF/Download-Center/F%C3%B6rderprogramme-(Inlandsf%C3%B6rderung)/PDF-Dokumente/6000005131_M_458.pdf
+- KfW-Merkblatt 358/359 (Stand 09/2026): https://www.kfw.de/PDF/Download-Center/F%C3%B6rderprogramme-(Inlandsf%C3%B6rderung)/PDF-Dokumente/6000005135_M_358_359.pdf
+- KfW-Infoblatt förderfähige Maßnahmen (Version 11.1, 11/2026): https://www.kfw.de/PDF/Download-Center/F%C3%B6rderprogramme-(Inlandsf%C3%B6rderung)/PDF-Dokumente/6000004863_Infoblatt_BEG_F%C3%B6rderf%C3%A4hige_Ma%C3%9Fnahmen.pdf
+- KfW Technische FAQ BEG EM (10/2026): https://www.kfw.de/PDF/Download-Center/F%C3%B6rderprogramme-(Inlandsf%C3%B6rderung)/PDF-Dokumente/6000004864_BEG_TFAQ_EM.pdf
 - KfW 458: https://www.kfw.de/inlandsfoerderung/Privatpersonen/Bestehende-Immobilie/F%C3%B6rderprodukte/Heizungsf%C3%B6rderung-f%C3%BCr-Privatpersonen-Wohngeb%C3%A4ude-(458)/
 - KfW Heizung: https://www.kfw.de/inlandsfoerderung/Privatpersonen/Bestehende-Immobilie/Energieeffizient-sanieren/Heizung/
 - KfW 358/359: https://www.kfw.de/inlandsfoerderung/Privatpersonen/Bestehende-Immobilie/F%C3%B6rderprodukte/Einzelma%C3%9Fnahmen-Erg%C3%A4nzungskredit-Wohngeb%C3%A4ude-(358-359)/ (Zinsen auf der Seite nicht verfügbar → Annahmen)
 - co2online BAFA/Steuer/GModG: https://www.co2online.de/foerdermittel/bafa-foerderung/
 - Methodische Inspiration: https://akkudoktor.net/pub/waermepumpen-rechner (Inhalt nicht maschinenlesbar)
+- Marktdaten (recherchiert 2026-11-11): BDEW Gas-/Strompreisanalyse, Destatis, esyoil, Verivox, co2online (Wartung), Schwäbisch Hall (Kesselkosten), Fraunhofer ISE (JAZ-Feldtest), DGS (EEG-Vergütung), hausvoraus.de (KfW-Zinsen), 42watt (Modernisierungskredit), Finanztip (Biogas) – Links im Info-Popover des jeweiligen Felds.
 
 ## 6. Offene Punkte / Annahmen zum Nachprüfen
-- A1 Aktuelle Zinssätze KfW 358/359 (Defaults: 358 = 1,5 %, 359 = 3,3 %, Bank 5,0 %, Anschlusszins 4,0 %).
+- A1 Zinssätze KfW 358/359 nur aus Sekundärquelle (hausvoraus.de, 10.11.2026): 358 = 2,2 % (interpoliert für 20 J.), 359 = 4,6 %; Bank 7,5 %; Anschlusszins 4,0 % (Annahme).
+- A7 Markt-Defaults (Preise, Kosten, Wartung) stammen überwiegend aus Ratgeber- und Vergleichsportalen bzw. Verbänden (BDEW, co2online, Verivox, esyoil); für Investitionskosten gibt es keine amtliche Erhebung. Quellen je Feld in `src/core/sources.ts`. Regelmäßig (z. B. halbjährlich) aktualisieren.
 - A2 Ob die Degression der förderfähigen Kosten (−750 €) auch nach 2028 weiterläuft (aktuell: ja, ohne Ende).
-- A3 Angekündigter Wertschöpfungsbonus ab Q1/2027 (evtl. 15 % Grund + 15 % Bonus) – über „abweichende Grundförderung ab Datum" abbildbar, Default unverändert 30 %.
-- A4 Höchstfördersatz 80 % nur bei Einkommensbonus 40 % (aus KfW-Beispielen abgeleitet).
+- A3 Wertschöpfungs-Bonus: Die Richtlinie (Nr. 8.4.1 c, 8.4.6) regelt 15 % Grundförderung + 15 % Bonus bei EU-Ursprung „ab dem ersten Quartal 2027“; Stichtag und Nachweis sind noch offen (Infoblatt Nr. 1.8). Angenommen: Anträge ab 01/2027.
+- A4 ~~Höchstfördersatz 80 % aus Beispielen abgeleitet~~ – bestätigt durch Richtlinie Nr. 8.4.1 und Merkblatt 458 S. 4.
 - A5 Bio-Treppe: Gilt hier nur für neu eingebaute fossile Kessel; Aufpreis Biomethan/Bioöl als Pauschale.
 - A6 CO₂-Preispfad ab 2028 (EU-ETS2) ist eine Annahme.
 
@@ -130,3 +150,7 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 |---|---|
 | 2026-11-11 | Erstfassung nach Anforderungsaufnahme (E1–E12) und Recherche |
 | 2026-11-11 | F10 „Wichtige Ereignisse & Hinweise" ergänzt (Anlass: Kostenspitze durch Ersatzkessel 2031 war nicht erkennbar). Rechenergebnisse unverändert. |
+| 2026-11-11 | F11 Herkunfts-Popover für alle Standardwerte. Klarstellung: Preise und Kosten (z. B. Ersatzkessel) sind Schätzungen ohne konkrete Erhebung. Rechenergebnisse unverändert. |
+| 2026-11-11 | Markt-Defaults recherchiert und aktualisiert: Gas 12,2 ct (vorher 11,5), Gas-Grundpreis 150 € (180), Heizöl 1,64 €/l (1,00), Wartung Gas 200 € (300) / WP 150 € (200), WP-Tarif 24 ct (26), Haushaltsstrom 37 ct (34), Einspeisung 7,7 ct (7,8), KfW 358 2,2 % (1,5), 359 4,6 % (3,3), Bank 7,5 % (5,0), Bio-Aufpreis 3 ct (4). Regressions-Snapshots bewusst aktualisiert (Default-Ersparnis KfW-Weg 39,2 → 42,1 T€). Tests nutzen feste Testpreise (`pinPrices`), damit künftige Preis-Updates nur die Snapshots betreffen. |
+| 2026-11-11 | Offizielle Fundstellen (Richtlinie, Merkblätter, Infoblatt, Gesetze) in den Popovers (F11.4). Abgleich mit der Richtlinie: Untergrenze förderfähige Kosten 22.000 € ab 08/2030 ergänzt; Grundförderung WP 15 % + Wertschöpfungs-Bonus 15 % (EU-Ursprung) ab 01/2027 modelliert, neue Eingabe „Wärmepumpe mit Ursprung in der EU“; 80-%-Obergrenze bestätigt. Hilfetext korrigiert: Öl-/Gastank-Entsorgung ist förderfähig (Infoblatt Nr. 4.2.8). Default-Ergebnisse unverändert (EU-Wärmepumpe). |
+| 2026-11-11 | F12 Sondertilgung aus Einmalzahlung (z. B. Lebensversicherung) mit KfW- und BGB-Regeln; Kostenkategorie Vorfälligkeitsentschädigung; Zuschuss-Sondertilgung unterliegt jetzt dem KfW-Mindestbetrag 5.000 €. Korrektur: Beim Ende der Zinsbindung wird die Annuität auf die tatsächliche Restlaufzeit gerechnet (vorher wurde eine durch Sondertilgung verkürzte Laufzeit wieder gestreckt). Default-Ergebnisse unverändert. |

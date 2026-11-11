@@ -1,7 +1,7 @@
 import { HEAT_PROFILE } from './defaults';
-import { formatMonthDe, monthOf, parseMonth, yearOf } from './dates';
+import { formatMonthDe, monthOf, parseMonth, tryParseMonth, yearOf } from './dates';
 import { kfwLoanVariant, kfwSubsidy } from './funding';
-import { loanSchedule, type LoanSpec } from './loan';
+import { loanScheduleDetailed, type LoanResult, type LoanSpec, type PrepaymentRules } from './loan';
 import { annualHeatDemand, createPriceModel } from './prices';
 import { taxBonus } from './tax';
 import type {
@@ -11,8 +11,49 @@ import type {
   MonthRow,
   ScenarioKind,
   ScenarioResult,
+  WindfallInfo,
   YearRow,
 } from './types';
+
+const SUBSIDY = 'Zuschuss';
+const WINDFALL = 'Einmalzahlung';
+
+/** Sondertilgungsregeln KfW 358/359 (Merkblatt S. 5). */
+function kfwRules(inp: Inputs): PrepaymentRules {
+  const f = inp.financing;
+  return {
+    minAmount: f.kfwMinPrepay,
+    freeWithinFix: true,
+    fullOnlyAfterFix: true,
+    feeRate: f.kfwFeeAfterFix,
+    feeRateShortRemaining: f.kfwFeeAfterFix,
+    capFeeAtInterest: false,
+  };
+}
+
+/** Sondertilgungsregeln Verbraucherkredit (§ 500 Abs. 2, § 502 BGB). */
+function bankRules(inp: Inputs): PrepaymentRules {
+  const f = inp.financing;
+  return {
+    minAmount: 0,
+    freeWithinFix: false,
+    fullOnlyAfterFix: false,
+    feeRate: f.bankPrepayFee,
+    feeRateShortRemaining: f.bankPrepayFeeShort,
+    capFeeAtInterest: true,
+  };
+}
+
+/** Reihenfolge der Kredite für die Einmalzahlung: gewählter Kredit zuerst, sonst höchster Zins zuerst. */
+function windfallOrder<T extends { name: string; spec: LoanSpec }>(loans: T[], target: string, month: number): T[] {
+  const rateAt = (l: T) => (l.spec.fixMonths > 0 && month - l.spec.startMonth > l.spec.fixMonths ? l.spec.followUpRate : l.spec.rate);
+  const isKfw = (l: T) => l.name.startsWith('KfW');
+  return [...loans].sort((a, b) => {
+    if (target === 'kfw' && isKfw(a) !== isKfw(b)) return isKfw(a) ? -1 : 1;
+    if (target === 'bank' && isKfw(a) !== isKfw(b)) return isKfw(a) ? 1 : -1;
+    return rateAt(b) - rateAt(a);
+  });
+}
 
 const LABELS: Record<ScenarioKind, string> = {
   ref: 'Ohne Wärmepumpe (Referenz)',
@@ -28,6 +69,7 @@ const COST_KEYS: (keyof CostBreakdown)[] = [
   'loanPayout',
   'interest',
   'principal',
+  'fees',
   'subsidy',
   'taxBonus',
   'residual',
@@ -43,6 +85,7 @@ function emptyBreakdown(): CostBreakdown {
     loanPayout: 0,
     interest: 0,
     principal: 0,
+    fees: 0,
     subsidy: 0,
     taxBonus: 0,
     residual: 0,
@@ -143,6 +186,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
   }
 
   const loans: LoanInfo[] = [];
+  let windfall: WindfallInfo | undefined;
   let kfwRes: ScenarioResult['kfw'];
   let taxRes: ScenarioResult['tax'];
 
@@ -155,19 +199,20 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
     rows[iIdx].investment += total;
     assets.push({ cost: wpGross, install, lifeMonths: Math.max(1, Math.round(hp.lifeYears * 12)) });
 
-    const addLoan = (name: string, spec: LoanSpec) => {
-      if (spec.principal <= 0) return;
+    const addLoan = (name: string, spec: LoanSpec, res: LoanResult) => {
       rows[spec.startMonth - start].loanPayout -= spec.principal;
-      const sched = loanSchedule(spec);
       let interest = 0;
+      let fees = 0;
       let balanceAtEnd = spec.principal;
       let payoffMonth: number | null = null;
-      for (const p of sched) {
+      for (const p of res.payments) {
         if (p.month >= end) break;
         const row = rows[p.month - start];
         row.interest += p.interest;
         row.principal += p.principal;
+        row.fees += p.fee;
         interest += p.interest;
+        fees += p.fee;
         balanceAtEnd = p.balance;
         if (p.balance <= 0.005) payoffMonth = p.month;
       }
@@ -177,7 +222,12 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
           `${name}: Restschuld von ${Math.round(balanceAtEnd).toLocaleString('de-DE')} € am Ende des Betrachtungszeitraums als Ablösung eingerechnet.`,
         );
       }
-      const lastPayment = sched.length ? sched[sched.length - 1].month : spec.startMonth;
+      for (const x of res.extras) {
+        if (x.label === SUBSIDY && x.status === 'rejected') {
+          warnings.push(`${name}: Zuschuss nicht als Sondertilgung möglich – ${x.reason}`);
+        }
+      }
+      const lastPayment = res.payments.length ? res.payments[res.payments.length - 1].month : spec.startMonth;
       const fixEnd = spec.fixMonths > 0 ? spec.startMonth + spec.fixMonths : null;
       loans.push({
         name,
@@ -190,7 +240,44 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
         followUpRate: spec.followUpRate,
         payoffMonth,
         balanceAtEnd: balanceAtEnd > 0.005 ? balanceAtEnd : 0,
+        extras: res.extras,
+        totalFees: fees,
       });
+    };
+
+    /** Kredite berechnen und die Einmalzahlung (z. B. Lebensversicherung) als Sondertilgung verteilen. */
+    const runLoans = (planned: { name: string; spec: LoanSpec }[]) => {
+      const active = planned.filter((l) => l.spec.principal > 0);
+      const results = new Map(active.map((l) => [l, loanScheduleDetailed(l.spec)] as const));
+      const wfMonth = tryParseMonth(fin.windfallMonth);
+      if (fin.windfallAmount > 0 && wfMonth !== null) {
+        windfall = { month: wfMonth, amount: fin.windfallAmount, used: 0, unused: fin.windfallAmount, attempts: [] };
+        if (wfMonth < start || wfMonth >= end) {
+          windfall.note = 'Die Einmalzahlung liegt außerhalb des Betrachtungszeitraums.';
+        } else if (active.length === 0) {
+          windfall.note = 'Es gibt keinen Kredit, der getilgt werden könnte.';
+        } else {
+          let remaining = fin.windfallAmount;
+          for (const l of windfallOrder(active, fin.windfallTarget, wfMonth)) {
+            if (remaining <= 0.005) break;
+            const spec: LoanSpec = {
+              ...l.spec,
+              extraRepayments: [...(l.spec.extraRepayments ?? []), { month: wfMonth, amount: remaining, label: WINDFALL }],
+            };
+            const res = loanScheduleDetailed(spec);
+            const r = res.extras.find((x) => x.label === WINDFALL)!;
+            windfall.attempts.push({ loan: l.name, applied: r.applied, fee: r.fee, status: r.status, reason: r.reason, paidOff: r.paidOff });
+            if (r.applied > 0) {
+              l.spec = spec;
+              results.set(l, res);
+              remaining -= r.applied;
+            }
+          }
+          windfall.used = fin.windfallAmount - remaining;
+          windfall.unused = remaining;
+        }
+      }
+      for (const l of active) addLoan(l.name, l.spec, results.get(l)!);
     };
 
     if (kind === 'kfw') {
@@ -208,6 +295,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
           units: inp.building.units,
           householdIncome: inp.building.householdIncome,
           hasChild: inp.building.hasChild,
+          euOrigin: inp.heatPump.euOrigin,
         },
         inp.funding,
       );
@@ -231,20 +319,26 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
           `Finanzierungsbedarf über KfW-Kredit hinaus (${Math.round(bankLoan).toLocaleString('de-DE')} €) wird über den Bankkredit gerechnet.`,
         );
       }
-      addLoan(`KfW-Kredit ${variant}`, {
-        principal: kfwLoan,
-        startMonth: install,
-        rate: variant === '358' ? fin.kfwRate358 : fin.kfwRate359,
-        termMonths: Math.round(fin.kfwTermYears * 12),
-        graceMonths: Math.round(fin.kfwGraceYears * 12),
-        fixMonths: Math.round(fin.kfwFixYears * 12),
-        followUpRate: fin.followUpRate,
-        extraRepayments:
-          fin.subsidyAsSpecialRepayment && subsidyMonth < end
-            ? [{ month: subsidyMonth, amount: kfwRes.subsidy }]
-            : [],
-      });
-      addLoan('Bankkredit', bankSpec(bankLoan, install, inp));
+      runLoans([
+        {
+          name: `KfW-Kredit ${variant}`,
+          spec: {
+            principal: kfwLoan,
+            startMonth: install,
+            rate: variant === '358' ? fin.kfwRate358 : fin.kfwRate359,
+            termMonths: Math.round(fin.kfwTermYears * 12),
+            graceMonths: Math.round(fin.kfwGraceYears * 12),
+            fixMonths: Math.round(fin.kfwFixYears * 12),
+            followUpRate: fin.followUpRate,
+            rules: kfwRules(inp),
+            extraRepayments:
+              fin.subsidyAsSpecialRepayment && subsidyMonth < end
+                ? [{ month: subsidyMonth, amount: kfwRes.subsidy, label: SUBSIDY }]
+                : [],
+          },
+        },
+        { name: 'Bankkredit', spec: bankSpec(bankLoan, install, inp) },
+      ]);
     } else {
       const ageAtCompletion = inp.building.buildingAgeYears + (install - start) / 12;
       taxRes = taxBonus(
@@ -265,7 +359,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
         if (month >= start && month < end) rows[month - start].taxBonus -= y.amount;
       }
       const equity = Math.min(Math.max(0, fin.taxEquity), total);
-      addLoan('Bankkredit', bankSpec(total - equity, install, inp));
+      runLoans([{ name: 'Bankkredit', spec: bankSpec(total - equity, install, inp) }]);
     }
   }
 
@@ -291,6 +385,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
       r.loanPayout +
       r.interest +
       r.principal +
+      r.fees +
       r.subsidy +
       r.taxBonus +
       r.residual;
@@ -316,6 +411,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
     tax: taxRes,
     loans,
     boilerPurchases,
+    windfall,
   };
 }
 
@@ -329,6 +425,7 @@ function bankSpec(principal: number, install: number, inp: Inputs): LoanSpec {
     graceMonths: Math.round(f.bankGraceYears * 12),
     fixMonths: 0,
     followUpRate: f.bankRate,
+    rules: bankRules(inp),
   };
 }
 

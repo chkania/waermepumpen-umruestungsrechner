@@ -2,6 +2,7 @@ import { compareInstallTimes, type InstallComparison } from '../core/compare';
 import { keyEvents, type KeyEvent, type KeyEvents } from '../core/events';
 import { formatMonth, tryParseMonth } from '../core/dates';
 import { createDefaults, FUNDING_SOURCE_DATE } from '../core/defaults';
+import { DEFAULT_SOURCES, OFFICIAL_REFS, SOURCE_KIND_LABEL } from '../core/sources';
 import { priceRows, runAll, type RunResult } from '../core/simulation';
 import { decodeHash, encodeHash, exportJson, importJson, mergeInputs } from '../core/serialize';
 import type { Inputs, ScenarioKind, ScenarioResult } from '../core/types';
@@ -43,7 +44,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   root.innerHTML = layout();
   const $ = <T extends HTMLElement>(sel: string) => root.querySelector(sel) as T;
   const form = $<HTMLElement>('#inputs');
-  form.innerHTML = SECTIONS.map(sectionHtml).join('');
+  form.innerHTML = SECTIONS.map((s) => sectionHtml(s, defaults)).join('');
 
   const canvases = Object.fromEntries(
     CHART_TABS.map(([id]) => [id, $<HTMLCanvasElement>(`canvas[data-chart="${id}"]`)]),
@@ -102,6 +103,31 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     persist();
     schedule();
   }
+
+  // ---------- Herkunft der Standardwerte (Popover) ----------
+  const closePopovers = (except?: Element) => {
+    for (const b of form.querySelectorAll<HTMLButtonElement>('.info-btn[aria-expanded="true"]')) {
+      if (b === except) continue;
+      b.setAttribute('aria-expanded', 'false');
+      (document.getElementById(b.getAttribute('aria-controls')!) as HTMLElement).hidden = true;
+    }
+  };
+  form.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.info-btn');
+    if (!btn) return;
+    e.preventDefault();
+    closePopovers(btn);
+    const pop = document.getElementById(btn.getAttribute('aria-controls')!) as HTMLElement;
+    const open = btn.getAttribute('aria-expanded') !== 'true';
+    btn.setAttribute('aria-expanded', String(open));
+    pop.hidden = !open;
+  });
+  document.addEventListener('click', (e) => {
+    if (!(e.target as HTMLElement).closest?.('.info-btn, .src-pop')) closePopovers();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closePopovers();
+  });
 
   form.addEventListener('input', (e) => {
     const el = e.target as HTMLInputElement;
@@ -288,6 +314,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       ? `<dl>
           <dt>Antrag (angenommen)</dt><dd>${fmtMonth(k.appMonth)}</dd>
           <dt>Grundförderung</dt><dd>${fmtPct(k.grundRate)}</dd>
+          ${k.wsbRate > 0 ? `<dt>Wertschöpfungs-Bonus (EU)</dt><dd>${fmtPct(k.wsbRate)}</dd>` : ''}
           <dt>Klimageschwindigkeitsbonus</dt><dd>${fmtPct(k.kgbRate)}</dd>
           <dt>Einkommensbonus</dt><dd>${fmtPct(k.incomeRate)}</dd>
           <dt>Fördersatz (selbstgenutzte WE)</dt><dd>${fmtPct(k.ownerUnitRate)} <small>max. ${fmtPct(k.maxRate)}</small></dd>
@@ -355,6 +382,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       ['loanPayout', 'Kredit­auszahlung'],
       ['interest', 'Zinsen'],
       ['principal', 'Tilgung'],
+      ['fees', 'Vorfällig­keits­entschädigung'],
       ['subsidy', 'Zuschuss'],
       ['taxBonus', 'Steuer­bonus'],
       ['residual', 'Restwert'],
@@ -433,13 +461,55 @@ function kpi(label: string, value: string, tone: string, sub: string, best = fal
   </div>`;
 }
 
-function fieldHtml(f: Field): string {
+/** Standardwert lesbar formatieren (für das Herkunfts-Popover). */
+export function formatDefault(f: Field, defaults: Inputs): string {
+  const v = getPath(defaults, f.path);
+  const unit = typeof f.unit === 'function' ? f.unit(defaults) : (f.unit ?? '');
+  if (f.type === 'checkbox') return v ? 'Ja' : 'Nein';
+  if (f.type === 'select') return f.options?.find(([k]) => k === v)?.[1] ?? String(v);
+  if (f.type === 'month') return v ? fmtMonth(Number(tryParseMonth(String(v)))) : '(leer)';
+  if (f.type === 'text') return String(v);
+  const n = f.type === 'percent' ? Number(v) * 100 : Number(v);
+  return `${n.toLocaleString('de-DE', { maximumFractionDigits: 3 })}${unit ? ' ' + unit : ''}`;
+}
+
+function sourceHtml(f: Field, id: string, defaults: Inputs): { button: string; pop: string } {
+  const src = DEFAULT_SOURCES[f.path];
+  if (!src) return { button: '', pop: '' };
+  const popId = `${id}-src`;
+  let host = '';
+  try {
+    host = src.url ? new URL(src.url).hostname.replace(/^www\./, '') : '';
+  } catch {
+    host = '';
+  }
+  return {
+    button: `<button type="button" class="info-btn" aria-label="Woher kommt der Standardwert?" aria-expanded="false" aria-controls="${popId}">i</button>`,
+    pop: `<div class="src-pop" id="${popId}" role="note" hidden>
+      <div class="src-head"><span class="src-kind kind-${src.kind}">${SOURCE_KIND_LABEL[src.kind]}</span>
+        <span class="src-default">Standard: <strong>${escapeHtml(formatDefault(f, defaults))}</strong></span></div>
+      <p>${escapeHtml(src.text)}</p>
+      ${refsHtml(OFFICIAL_REFS[f.path])}
+      ${src.url || src.asOf ? `<p class="src-meta">${src.url ? `<a href="${src.url}" target="_blank" rel="noopener">${escapeHtml(host)}</a>` : ''}${src.url && src.asOf ? ' · ' : ''}${src.asOf ? `Stand ${src.asOf}` : ''}</p>` : ''}
+    </div>`,
+  };
+}
+
+function refsHtml(refs: { label: string; url: string }[] | undefined): string {
+  if (!refs?.length) return '';
+  return `<div class="src-refs"><span>Offizielle Quellen</span><ul>${refs
+    .map((r) => `<li><a href="${r.url}" target="_blank" rel="noopener">${escapeHtml(r.label)}</a></li>`)
+    .join('')}</ul></div>`;
+}
+
+function fieldHtml(f: Field, defaults: Inputs): string {
   const id = `f-${f.path.replace(/\./g, '-')}`;
   const unit = typeof f.unit === 'string' ? f.unit : '';
   const help = f.help ? `<small class="help">${escapeHtml(f.help)}</small>` : '';
+  const src = sourceHtml(f, id, defaults);
   if (f.type === 'checkbox') {
     return `<div class="field check" data-field="${f.path}">
-      <label for="${id}"><input type="checkbox" id="${id}" data-path="${f.path}"> ${escapeHtml(f.label)}</label>${help}</div>`;
+      <div class="label-row"><label for="${id}"><input type="checkbox" id="${id}" data-path="${f.path}"> ${escapeHtml(f.label)}</label>${src.button}</div>${src.pop}${help}</div>`;
   }
   let control: string;
   if (f.type === 'select') {
@@ -457,15 +527,15 @@ function fieldHtml(f: Field): string {
     control = `<input type="number" inputmode="decimal" id="${id}" data-path="${f.path}" ${attrs}>`;
   }
   return `<div class="field" data-field="${f.path}">
-    <label for="${id}">${escapeHtml(f.label)}</label>
+    <div class="label-row"><label for="${id}">${escapeHtml(f.label)}</label>${src.button}</div>${src.pop}
     <div class="control">${control}<span class="unit">${escapeHtml(unit)}</span></div>${help}</div>`;
 }
 
-function sectionHtml(s: (typeof SECTIONS)[number]): string {
+function sectionHtml(s: (typeof SECTIONS)[number], defaults: Inputs): string {
   return `<details class="section${s.expert ? ' expert' : ''}" ${s.open ? 'open' : ''}>
     <summary>${escapeHtml(s.title)}</summary>
     ${s.note ? `<p class="note">${escapeHtml(s.note)}</p>` : ''}
-    <div class="fields">${s.fields.map(fieldHtml).join('')}</div>
+    <div class="fields">${s.fields.map((f) => fieldHtml(f, defaults)).join('')}</div>
   </details>`;
 }
 

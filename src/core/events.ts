@@ -130,6 +130,8 @@ export function keyEvents(inp: Inputs, run: RunResult): KeyEvents {
   }
   addLoanEvents(timeline, kfw, 'kfw');
   addLoanEvents(timeline, tax, 'tax');
+  addWindfallEvents(timeline, kfw, 'kfw');
+  addWindfallEvents(timeline, tax, 'tax');
 
   if (tax.tax?.eligible) {
     const refundMonth = Math.min(12, Math.max(1, Math.round(inp.financing.taxRefundMonth)));
@@ -160,6 +162,44 @@ export function keyEvents(inp: Inputs, run: RunResult): KeyEvents {
 
 function order(e: KeyEvent): number {
   return { all: 0, ref: 1, kfw: 2, tax: 3 }[e.scenario];
+}
+
+function addWindfallEvents(timeline: KeyEvent[], s: ScenarioResult, scenario: 'kfw' | 'tax'): void {
+  // Zuschuss als Sondertilgung abgelehnt (z. B. unter 5.000 €)
+  for (const l of s.loans) {
+    for (const x of l.extras) {
+      if (x.label === 'Zuschuss' && x.status === 'rejected') {
+        timeline.push({ month: x.month, scenario, level: 'warning', title: `Zuschuss nicht als Sondertilgung für ${l.name}`, detail: x.reason });
+      }
+    }
+  }
+  const w = s.windfall;
+  if (!w) return;
+  if (w.note) {
+    timeline.push({ month: w.month, scenario, level: 'warning', title: 'Einmalzahlung nicht eingesetzt', detail: w.note });
+    return;
+  }
+  for (const a of w.attempts) {
+    if (a.applied > 0) {
+      const parts = ['Aus der Einmalzahlung (z. B. Lebensversicherung).'];
+      if (a.paidOff) parts.push('Der Kredit ist damit vollständig getilgt.');
+      if (a.fee > 0) parts.push(`Vorfälligkeitsentschädigung ${eur(a.fee)}.`);
+      else parts.push('Ohne Vorfälligkeitsentschädigung.');
+      if (a.reason) parts.push(a.reason);
+      timeline.push({ month: w.month, scenario, level: 'important', title: `Sondertilgung ${eur(a.applied)} auf ${a.loan}`, detail: parts.join(' '), amount: a.applied + a.fee });
+    } else {
+      timeline.push({ month: w.month, scenario, level: 'warning', title: `Sondertilgung auf ${a.loan} nicht möglich`, detail: a.reason });
+    }
+  }
+  if (w.unused > 0.5) {
+    timeline.push({
+      month: w.month,
+      scenario,
+      level: w.used > 0 ? 'info' : 'warning',
+      title: `${eur(w.unused)} der Einmalzahlung nicht eingesetzt`,
+      detail: w.used > 0 ? 'Alle Kredite sind getilgt bzw. eine weitere Sondertilgung ist nach den Bedingungen nicht möglich.' : 'Nach den Kreditbedingungen ist keine Sondertilgung möglich.',
+    });
+  }
 }
 
 function sumBoiler(s: ScenarioResult, month: number): number {
@@ -232,6 +272,15 @@ function fundingHints(inp: Inputs, run: RunResult, start: number): KeyEvent[] {
   } else {
     const reason = kgbReason(inp, run, start, app, kgbEnd);
     if (reason) out.push(reason);
+  }
+
+  // Grundförderung / Wertschöpfungs-Bonus (Richtlinie Nr. 8.4.1 c, 8.4.6)
+  if (k.grundRate < p.grundRate) {
+    out.push(
+      k.wsbRate > 0
+        ? hint('info', `Grundförderung ${pct(k.grundRate)} + Wertschöpfungs-Bonus ${pct(k.wsbRate)}`, `Gilt für Anträge ab ${M(tryParseMonth(p.grundRateNewFrom)!)} und Wärmepumpen mit Ursprung in der EU. Nachweis des Ursprungs nach noch ausstehender Detailregelung.`)
+        : hint('warning', `Nur ${pct(k.grundRate)} Grundförderung`, `Für Anträge ab ${M(tryParseMonth(p.grundRateNewFrom)!)} gibt es den Wertschöpfungs-Bonus von ${pct(p.wsbRate)} nur für Wärmepumpen mit Ursprung in der EU.`),
+    );
   }
 
   // Einkommensbonus

@@ -1,3 +1,5 @@
+import type { ExtraResult } from './loan';
+
 /** Brennstoff der Bestandsheizung. */
 export type Fuel = 'gas' | 'oil';
 
@@ -70,6 +72,8 @@ export interface HeatPumpInputs {
   lifeYears: number;
   installMonth: MonthString;
   leadMonths: number;
+  /** Wärmepumpe mit Ursprung in der EU (Wertschöpfungs-Bonus). */
+  euOrigin: boolean;
   separateTariff: boolean;
   elecPriceCt: number;
   householdPriceCt: number;
@@ -95,13 +99,29 @@ export interface FinancingInputs {
   bankGraceYears: number;
   subsidyDelayMonths: number;
   taxRefundMonth: number;
+  /** Einmalzahlung in der Zukunft (z. B. Lebensversicherung) für Sondertilgungen; 0 = keine. */
+  windfallAmount: number;
+  windfallMonth: MonthString;
+  /** Welcher Kredit zuerst: 'auto' = höchster Zins zuerst. */
+  windfallTarget: 'auto' | 'kfw' | 'bank';
+  /** KfW: Mindestbetrag Sondertilgung innerhalb der ersten Zinsbindung. */
+  kfwMinPrepay: number;
+  /** KfW: Vorfälligkeitsentschädigung nach Ende der Zinsbindung (Anteil, Annahme). */
+  kfwFeeAfterFix: number;
+  /** Bank: Vorfälligkeitsentschädigung (§ 502 BGB max. 1 %). */
+  bankPrepayFee: number;
+  /** Bank: Vorfälligkeitsentschädigung bei Restlaufzeit ≤ 1 Jahr (§ 502 BGB max. 0,5 %). */
+  bankPrepayFeeShort: number;
 }
 
 export interface FundingParams {
   grundRate: number;
+  /** Grundförderung für Wärmepumpen ab grundRateNewFrom (Richtlinie Nr. 8.4.1 c: 15 %). */
   grundRateNew: number;
-  /** Ab diesem Antragsmonat gilt grundRateNew; leer = nie. */
+  /** Ab diesem Antragsmonat gelten grundRateNew und der Wertschöpfungs-Bonus; leer = nie. */
   grundRateNewFrom: MonthString;
+  /** Wertschöpfungs-Bonus für Wärmepumpen mit EU-Ursprung (Richtlinie Nr. 8.4.6). */
+  wsbRate: number;
   kgbRate: number;
   kgbStep: number;
   kgbDegressionStart: MonthString;
@@ -118,6 +138,8 @@ export interface FundingParams {
   maxRateLowIncome: number;
   cap1: number;
   capStep: number;
+  /** Untergrenze nach Ende der Degression (ab 08/2030: 22.000 €). */
+  capFloor: number;
   capDegressionStart: MonthString;
   cap2to6: number;
   cap7plus: number;
@@ -165,6 +187,8 @@ export interface CostBreakdown {
   loanPayout: number;
   interest: number;
   principal: number;
+  /** Vorfälligkeitsentschädigungen. */
+  fees: number;
   subsidy: number;
   taxBonus: number;
   residual: number;
@@ -188,6 +212,7 @@ export interface KfwResult {
   eligible: boolean;
   appMonth: number;
   grundRate: number;
+  wsbRate: number;
   kgbRate: number;
   incomeRate: number;
   /** Effektiver Fördersatz der selbstgenutzten WE (nach Höchstsatz). */
@@ -222,6 +247,28 @@ export interface LoanInfo {
   payoffMonth: number | null;
   /** Restschuld am Ende des Zeitraums (als Ablösung eingerechnet). */
   balanceAtEnd: number;
+  /** Ergebnisse der Sondertilgungen (Zuschuss, Einmalzahlung). */
+  extras: ExtraResult[];
+  totalFees: number;
+}
+
+export interface WindfallAttempt {
+  loan: string;
+  applied: number;
+  fee: number;
+  status: 'applied' | 'partial' | 'rejected';
+  reason?: string;
+  paidOff: boolean;
+}
+
+export interface WindfallInfo {
+  month: number;
+  amount: number;
+  used: number;
+  unused: number;
+  attempts: WindfallAttempt[];
+  /** Hinweis, warum nichts eingesetzt wurde (z. B. außerhalb des Zeitraums, kein Kredit). */
+  note?: string;
 }
 
 export interface ScenarioResult {
@@ -242,4 +289,5 @@ export interface ScenarioResult {
   loans: LoanInfo[];
   /** Käufe von Ersatzkesseln (Monat, Bruttokosten). */
   boilerPurchases: { month: number; cost: number }[];
+  windfall?: WindfallInfo;
 }

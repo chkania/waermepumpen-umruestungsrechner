@@ -1,0 +1,188 @@
+import { describe, expect, it } from 'vitest';
+import { parseMonth } from '../src/core/dates';
+import { keyEvents } from '../src/core/events';
+import { loanScheduleDetailed, type LoanSpec, type PrepaymentRules } from '../src/core/loan';
+import { runAll, simulate } from '../src/core/simulation';
+import type { Inputs } from '../src/core/types';
+import { neutral } from './helpers';
+
+const KFW: PrepaymentRules = { minAmount: 5000, freeWithinFix: true, fullOnlyAfterFix: true, feeRate: 0.01, feeRateShortRemaining: 0.01, capFeeAtInterest: false };
+const BANK: PrepaymentRules = { minAmount: 0, freeWithinFix: false, fullOnlyAfterFix: false, feeRate: 0.01, feeRateShortRemaining: 0.005, capFeeAtInterest: true };
+
+const spec = (over: Partial<LoanSpec> = {}): LoanSpec => ({
+  principal: 30000,
+  startMonth: 0,
+  rate: 0.03,
+  termMonths: 240,
+  graceMonths: 0,
+  fixMonths: 120,
+  followUpRate: 0.04,
+  rules: KFW,
+  ...over,
+});
+const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
+
+describe('F12 Sondertilgungsregeln KfW (Merkblatt 358/359 S. 5)', () => {
+  it('innerhalb der Zinsbindung ab 5.000 € kostenfrei', () => {
+    const r = loanScheduleDetailed(spec({ extraRepayments: [{ month: 24, amount: 8000 }] }));
+    expect(r.extras[0]).toMatchObject({ status: 'applied', applied: 8000, fee: 0, paidOff: false });
+    expect(sum(r.payments.map((p) => p.principal))).toBeCloseTo(30000, 6);
+    expect(r.payments.length).toBeLessThan(240);
+  });
+
+  it('unter 5.000 € abgelehnt', () => {
+    const r = loanScheduleDetailed(spec({ extraRepayments: [{ month: 24, amount: 4999 }] }));
+    expect(r.extras[0].status).toBe('rejected');
+    expect(r.extras[0].reason).toMatch(/Mindestbetrag/);
+    expect(r.payments).toHaveLength(240);
+  });
+
+  it('nach der Zinsbindung nur vollständige Rückzahlung, dann mit Entschädigung', () => {
+    const partial = loanScheduleDetailed(spec({ extraRepayments: [{ month: 130, amount: 8000 }] }));
+    expect(partial.extras[0].status).toBe('rejected');
+    expect(partial.extras[0].reason).toMatch(/vollständige Rückzahlung/);
+    const full = loanScheduleDetailed(spec({ extraRepayments: [{ month: 130, amount: 50000 }] }));
+    const x = full.extras[0];
+    expect(x.status).toBe('partial'); // mehr Geld als Restschuld
+    expect(x.paidOff).toBe(true);
+    expect(x.fee).toBeCloseTo(x.applied * 0.01, 6);
+    expect(full.payments).toHaveLength(130);
+    expect(full.payments[129].balance).toBe(0);
+  });
+
+  it('Restbetrag unter 5.000 € darf vollständig getilgt werden', () => {
+    const r = loanScheduleDetailed(spec({ principal: 4000, extraRepayments: [{ month: 2, amount: 6000 }] }));
+    expect(r.extras[0].paidOff).toBe(true);
+  });
+
+  it('Sondertilgung vor Auszahlung oder nach Tilgungsende abgelehnt', () => {
+    const r = loanScheduleDetailed(spec({ startMonth: 10, extraRepayments: [{ month: 10, amount: 6000 }, { month: 400, amount: 6000 }] }));
+    expect(r.extras.map((x) => x.status)).toEqual(['rejected', 'rejected']);
+  });
+});
+
+describe('F12 Sondertilgungsregeln Bankkredit (§ 500 Abs. 2, § 502 BGB)', () => {
+  const bank = (over: Partial<LoanSpec> = {}) => spec({ rules: BANK, fixMonths: 0, followUpRate: 0.03, termMonths: 120, ...over });
+
+  it('Teilrückzahlung jederzeit, Entschädigung 1 %', () => {
+    const r = loanScheduleDetailed(bank({ extraRepayments: [{ month: 12, amount: 1000 }] }));
+    expect(r.extras[0]).toMatchObject({ status: 'applied', applied: 1000 });
+    expect(r.extras[0].fee).toBeCloseTo(10, 6);
+    expect(r.payments[11].fee).toBeCloseTo(10, 6);
+  });
+
+  it('Restlaufzeit ≤ 1 Jahr: 0,5 %, höchstens entgangene Zinsen', () => {
+    const r = loanScheduleDetailed(bank({ extraRepayments: [{ month: 110, amount: 2000 }] }));
+    const x = r.extras[0];
+    // Restlaufzeit 10 Monate: 0,5 % = 10 €, Zinsdeckel 2000 × 3 % × 10/12 = 50 € → 10 €
+    expect(x.fee).toBeCloseTo(Math.min(x.applied * 0.005, (x.applied * 0.03 * 10) / 12), 6);
+    const tiny = loanScheduleDetailed(bank({ rate: 0.001, followUpRate: 0.001, extraRepayments: [{ month: 118, amount: 2000 }] }));
+    const t = tiny.extras[0];
+    expect(t.fee).toBeCloseTo((t.applied * 0.001 * 2) / 12, 6); // Zinsdeckel greift
+  });
+});
+
+/** WP-Szenario mit KfW-Kredit (1,5 %) und Bankkredit (5 %), Inbetriebnahme sofort. */
+function wfCase(mut?: (i: Inputs) => void): Inputs {
+  return neutral((i) => {
+    i.oldHeating.remainingLifeYears = 100;
+    i.heatPump.installMonth = '2026-11';
+    i.heatPump.extraCost = 6000; // nicht förderfähig → Bankkredit
+    i.financing.kfwEquity = 0;
+    i.financing.taxEquity = 0;
+    i.financing.windfallAmount = 10000;
+    i.financing.windfallMonth = '2029-11';
+    mut?.(i);
+  });
+}
+
+describe('F12 Einmalzahlung als Sondertilgung in der Simulation', () => {
+  it('automatisch: zuerst höchster Zins (Bank), Rest auf KfW', () => {
+    const r = simulate(wfCase((i) => (i.financing.windfallAmount = 12000)), 'kfw');
+    expect(r.windfall!.attempts.map((a) => [a.loan, a.status])).toEqual([
+      ['Bankkredit', 'partial'],
+      ['KfW-Kredit 358', 'applied'],
+    ]);
+    const bankPaid = r.windfall!.attempts[0].applied;
+    expect(r.windfall!.used).toBeCloseTo(12000, 6);
+    expect(r.windfall!.attempts[1].applied).toBeCloseTo(12000 - bankPaid, 6);
+    expect(r.loans.find((l) => l.name === 'Bankkredit')!.payoffMonth).toBe(parseMonth('2029-11'));
+  });
+
+  it('Rest unter 5.000 € kann nicht auf den KfW-Kredit', () => {
+    const r = simulate(wfCase(), 'kfw'); // 10.000 €: Bank ≈ 5.130 €, Rest ≈ 4.870 €
+    expect(r.windfall!.attempts[1]).toMatchObject({ loan: 'KfW-Kredit 358', status: 'rejected' });
+    expect(r.windfall!.attempts[1].reason).toMatch(/Mindestbetrag/);
+    expect(r.windfall!.unused).toBeCloseTo(10000 - r.windfall!.attempts[0].applied, 6);
+  });
+
+  it('Ziel KfW: zuerst KfW-Kredit', () => {
+    const r = simulate(wfCase((i) => (i.financing.windfallTarget = 'kfw')), 'kfw');
+    expect(r.windfall!.attempts[0]).toMatchObject({ loan: 'KfW-Kredit 358', applied: 10000, fee: 0 });
+  });
+
+  it('senkt Zinsen; Tilgung + Ablösung = Kreditsumme; Entschädigung als Kosten', () => {
+    const without = simulate(wfCase((i) => (i.financing.windfallAmount = 0)), 'kfw');
+    const withWf = simulate(wfCase(), 'kfw');
+    const interest = (s: typeof without) => sum(s.loans.map((l) => l.totalInterest));
+    expect(interest(withWf)).toBeLessThan(interest(without));
+    const principal = (s: typeof without) => sum(s.months.map((m) => m.principal));
+    expect(principal(withWf)).toBeCloseTo(principal(without), 4);
+    const fees = sum(withWf.months.map((m) => m.fees));
+    expect(fees).toBeCloseTo(withWf.windfall!.attempts[0].fee, 6);
+    expect(fees).toBeGreaterThan(0);
+    // ohne Opportunitätszins: Gesamtkosten sinken um die gesparten Zinsen abzüglich Entschädigung
+    expect(withWf.nominalCost).toBeCloseTo(without.nominalCost - (interest(without) - interest(withWf)) + fees, 4);
+  });
+
+  it('nach Ende der KfW-Zinsbindung: Teiltilgung abgelehnt, Geld geht an die Bank', () => {
+    const r = simulate(
+      wfCase((i) => {
+        i.financing.windfallMonth = '2037-06';
+        i.financing.windfallTarget = 'kfw';
+        i.heatPump.extraCost = 20000;
+      }),
+      'kfw',
+    );
+    expect(r.windfall!.attempts[0]).toMatchObject({ loan: 'KfW-Kredit 358', status: 'rejected' });
+    expect(r.windfall!.attempts[1].loan).toBe('Bankkredit');
+    expect(r.windfall!.attempts[1].applied).toBeGreaterThan(0);
+  });
+
+  it('Steuer-Weg: nur Bankkredit; Überschuss bleibt ungenutzt', () => {
+    const r = simulate(wfCase((i) => (i.financing.windfallAmount = 100000)), 'tax');
+    expect(r.windfall!.attempts).toHaveLength(1);
+    expect(r.windfall!.attempts[0].paidOff).toBe(true);
+    expect(r.windfall!.unused).toBeGreaterThan(0);
+  });
+
+  it('außerhalb des Zeitraums bzw. ohne Kredit: Hinweis, keine Wirkung', () => {
+    const out = simulate(wfCase((i) => (i.financing.windfallMonth = '2050-01')), 'kfw');
+    expect(out.windfall!.note).toMatch(/außerhalb/);
+    const noLoan = simulate(wfCase((i) => (i.financing.kfwEquity = 1e6)), 'kfw');
+    expect(noLoan.windfall!.note).toMatch(/keinen Kredit/);
+  });
+
+  it('Zuschuss unter 5.000 € nicht als Sondertilgung möglich', () => {
+    const r = simulate(wfCase((i) => (i.heatPump.investment = 10000)), 'kfw'); // Zuschuss 4.600 €
+    expect(r.kfw!.subsidy).toBe(4600);
+    expect(r.warnings.join()).toMatch(/Zuschuss nicht als Sondertilgung möglich – Mindestbetrag/);
+  });
+
+  it('Ereignisse: Sondertilgung, Tilgungsende, Ablehnung', () => {
+    const i = wfCase();
+    const { timeline } = keyEvents(i, runAll(i));
+    const titles = timeline.map((e) => e.title);
+    expect(titles.some((t) => /^Sondertilgung .* auf Bankkredit$/.test(t))).toBe(true);
+    expect(titles).toContain('Bankkredit vollständig getilgt');
+    const i2 = wfCase((x) => {
+      x.financing.windfallMonth = '2037-06';
+      x.financing.windfallTarget = 'kfw';
+      x.heatPump.extraCost = 0;
+    });
+    const t2 = keyEvents(i2, runAll(i2)).timeline;
+    const rej = t2.find((e) => e.title === 'Sondertilgung auf KfW-Kredit 358 nicht möglich')!;
+    expect(rej.level).toBe('warning');
+    expect(t2.find((e) => /der Einmalzahlung nicht eingesetzt/.test(e.title))).toBeDefined();
+  });
+});
