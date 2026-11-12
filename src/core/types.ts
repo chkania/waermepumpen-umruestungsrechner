@@ -99,6 +99,8 @@ export interface FinancingInputs {
   kfwGraceYears: number;
   kfwFixYears: number;
   followUpRate: number;
+  /** KfW-Ergänzungskredit 358/359 beantragen; false = Fremdfinanzierung nur über den Bankkredit. */
+  useKfwLoan: boolean;
   subsidyAsSpecialRepayment: boolean;
   bankRate: number;
   bankTermYears: number;

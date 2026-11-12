@@ -142,6 +142,7 @@ Prozentwerte werden als Prozent eingegeben (z. B. `90` für 90 %). Monate werden
 
 | Feld | Bedeutung |
 |---|---|
+| **KfW-Kredit nutzen (358/359)** | Ob Sie den KfW-Ergänzungskredit beantragen. Ohne Haken wird der Teil, den das Eigenkapital nicht deckt, über den Bankkredit finanziert; mit ausreichend Eigenkapital entfällt jeder Kredit. Den Zuschuss gibt es trotzdem, er fließt dann als Einnahme ein (keine Sondertilgung). |
 | **Eigenkapital (KfW-Weg)** | Eigenes Geld im Weg „KfW-Zuschuss + Kredit“. Der Rest wird finanziert. |
 | **Zins KfW 358 (zinsverbilligt)** | Für Selbstnutzer mit Einkommen bis 90.000 €. Zinsen sind Annahmen – aktuelle Konditionen bei der Hausbank erfragen. |
 | **Zins KfW 359** | Ergänzungskredit ohne Zinsverbilligung. |

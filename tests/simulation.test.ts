@@ -234,6 +234,23 @@ describe('F6 Finanzierung im Szenario', () => {
     expect(a.loans[0].totalInterest).toBeLessThan(b.loans[0].totalInterest);
   });
 
+  it('F6.2 ohne KfW-Kredit: Bedarf über den Bankkredit, Zuschuss bleibt', () => {
+    const a = simulate(fin(), 'kfw');
+    const b = simulate(fin((i) => (i.financing.useKfwLoan = false)), 'kfw');
+    expect(b.loans.map((l) => l.name)).toEqual(['Bankkredit']);
+    expect(b.loans[0].principal).toBeCloseTo(sum(a.loans.map((l) => l.principal)), 6);
+    expect(b.kfw!.subsidy).toBe(a.kfw!.subsidy);
+    expect(sum(b.months.map((m) => m.subsidy))).toBeCloseTo(-b.kfw!.subsidy, 6);
+    expect(b.warnings.join()).toMatch(/Ohne KfW-Kredit/);
+    // mit ausreichend Eigenkapital gar kein Kredit
+    const c = simulate(fin((i) => {
+      i.financing.useKfwLoan = false;
+      i.financing.kfwEquity = 1e6;
+    }), 'kfw');
+    expect(c.loans).toHaveLength(0);
+    expect(c.warnings.join()).not.toMatch(/Ohne KfW-Kredit/);
+  });
+
   it('KfW 359 bei Einkommen > 90.000 €', () => {
     const r = simulate(fin((i) => (i.building.householdIncome = 100000)), 'kfw');
     expect(r.loans[0].name).toBe('KfW-Kredit 359');

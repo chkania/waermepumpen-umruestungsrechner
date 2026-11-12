@@ -345,9 +345,15 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
         inp.funding,
       );
       const kfwMax = inp.funding.loanMaxPerUnit * Math.max(1, inp.building.units);
-      const kfwLoan = Math.max(0, Math.min(need, kfwMax, eligibleGross));
+      const kfwLoan = fin.useKfwLoan ? Math.max(0, Math.min(need, kfwMax, eligibleGross)) : 0;
       const bankLoan = need - kfwLoan;
-      if (need > kfwLoan + 0.005) {
+      if (!fin.useKfwLoan) {
+        if (need > 0.005) {
+          warnings.push(
+            `Ohne KfW-Kredit: Finanzierungsbedarf von ${Math.round(bankLoan).toLocaleString('de-DE')} € wird über den Bankkredit gerechnet.`,
+          );
+        }
+      } else if (need > kfwLoan + 0.005) {
         warnings.push(
           `Finanzierungsbedarf über KfW-Kredit hinaus (${Math.round(bankLoan).toLocaleString('de-DE')} €) wird über den Bankkredit gerechnet.`,
         );

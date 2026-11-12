@@ -133,6 +133,7 @@ export const SECTIONS: Section[] = [
     title: 'Finanzierung',
     note: 'Zinssätze sind Annahmen – die aktuellen KfW-Konditionen bitte auf kfw.de bzw. bei der Hausbank prüfen.',
     fields: [
+      { path: 'financing.useKfwLoan', label: 'KfW-Kredit nutzen (358/359)', type: 'checkbox' },
       { path: 'financing.kfwEquity', label: 'Eigenkapital (KfW-Weg)', type: 'number', unit: '€', step: 1000, min: 0 },
       { path: 'financing.kfwRate358', label: 'Zins KfW 358 (zinsverbilligt)', type: 'percent', unit: '%', step: 0.05 },
       { path: 'financing.kfwRate359', label: 'Zins KfW 359', type: 'percent', unit: '%', step: 0.05 },

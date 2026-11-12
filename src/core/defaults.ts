@@ -98,6 +98,7 @@ export function createDefaults(today: Date = new Date()): Inputs {
       kfwGraceYears: 1,
       kfwFixYears: 10,
       followUpRate: 0.04,
+      useKfwLoan: true,
       subsidyAsSpecialRepayment: true,
       bankRate: 0.075,
       bankTermYears: 15,

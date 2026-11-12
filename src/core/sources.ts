@@ -164,6 +164,7 @@ export const DEFAULT_SOURCES: Record<string, DefaultSource> = {
   'financing.kfwGraceYears': kfwLoan('Je nach Laufzeit 1–5 tilgungsfreie Anlaufjahre möglich; 1 Jahr als Annahme.'),
   'financing.kfwFixYears': kfwLoan('Zinsbindung bei Laufzeiten ab 6 Jahren: 10 Jahre.'),
   'financing.followUpRate': { kind: 'annahme', text: 'Annahme für den Zins nach Ende der Zinsbindung (Prolongationsangebot der KfW ist heute nicht bekannt).' },
+  'financing.useKfwLoan': { kind: 'annahme', text: 'Annahme: Der KfW-Ergänzungskredit wird beantragt. Er ist optional – der Zuschuss (458) wird auch ohne Kredit gewährt. Ohne Haken läuft der Finanzierungsbedarf über den Bankkredit.' },
   'financing.subsidyAsSpecialRepayment': kfwLoan('Während der Zinsbindung sind Sondertilgungen ab 5.000 € ohne Vorfälligkeitsentschädigung möglich; die Laufzeit verkürzt sich.'),
   'financing.subsidyDelayMonths': { kind: 'annahme', text: 'Annahme: Auszahlung ca. 3 Monate nach Inbetriebnahme (Nachweis im KfW-Portal, Prüfung).' },
   'financing.bankRate': mkt('42watt: Modernisierungskredite der Banken für die Mehrheit der Kunden 6,9–9,2 % effektiver Jahreszins (Juli 2026); Konsumentenkredite laut Bundesbank-Daten im August 2026 im Schnitt 8,99 %. Default = günstiger Bereich bei guter Bonität.', 'https://42watt.de/magazin/modernisierungskredit-deutschland', 'Juli 2026'),
