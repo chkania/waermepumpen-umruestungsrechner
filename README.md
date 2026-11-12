@@ -15,6 +15,8 @@ Bedienung: [docs/BENUTZERHANDBUCH.md](docs/BENUTZERHANDBUCH.md) – im Browser u
 
 Anforderungen, Annahmen und Quellen: [docs/ANFORDERUNGEN.md](docs/ANFORDERUNGEN.md).
 
+Version 1.0.0 – Änderungen siehe [CHANGELOG.md](CHANGELOG.md) (im Browser: `changelog.html`). Versionierung nach [Semantic Versioning](https://semver.org/lang/de/).
+
 Keine Finanz-, Steuer- oder Förderberatung; alle Angaben ohne Gewähr.
 
 ## Lizenz

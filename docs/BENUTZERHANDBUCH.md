@@ -287,6 +287,10 @@ Der Rechner orientiert sich an WCAG 2.1 Stufe AA (Grundlage der EN 301 549):
 
 Ein Test mit Screenreadern steht noch aus.
 
+## Version und Änderungen
+
+Die aktuelle Version steht im Kopf des Rechners neben der Beschreibung (z. B. „Version 1.0.0“) und in der Fußzeile. Ein Klick öffnet die Seite **Änderungen** (changelog.html) mit allen Versionen. Die Nummer folgt dem Schema Major.Minor.Patch: Eine neue **Minor**-Version bringt neue Funktionen oder geänderte Annahmen – die Ergebnisse können sich dann ändern. Eine neue **Major**-Version wird es nur geben, wenn ältere Export-Dateien oder Links nicht mehr übernommen werden können. Exportierte Dateien enthalten die Version, mit der sie erstellt wurden (`appVersion`).
+
 ## Lizenz
 
 Der Rechner steht unter der **PolyForm Noncommercial License 1.0.0** (Copyright © 2026 Christoph Kania). Sie dürfen ihn für nicht-kommerzielle Zwecke kostenfrei nutzen, verändern und weitergeben – z. B. privat, in Forschung und Lehre, in gemeinnützigen Organisationen oder Behörden. Kommerzielle Nutzung, etwa als Teil eines Beratungs- oder Verkaufsangebots, erfordert eine gesonderte Vereinbarung. Bei der Weitergabe müssen der Lizenztext (oder seine Adresse) und der Copyright-Hinweis mitgegeben werden.

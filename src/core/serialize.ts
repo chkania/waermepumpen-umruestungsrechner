@@ -1,4 +1,5 @@
 import type { Inputs } from './types';
+import { APP_VERSION } from '../version';
 import { checkValue, type InputIssue } from './validate';
 
 type Obj = Record<string, unknown>;
@@ -125,7 +126,9 @@ export function exportFileName(inputs: Inputs, now: Date): string {
 }
 
 export function exportJson(inputs: Inputs): string {
-  return JSON.stringify(inputs, null, 2);
+  // Programmversion zur Nachvollziehbarkeit (N9); beim Import ignoriert
+  const { version, ...rest } = inputs;
+  return JSON.stringify({ version, appVersion: APP_VERSION, ...rest }, null, 2);
 }
 
 /** Import einer JSON-Datei; wirft bei ungültigem Inhalt (F9.3). */

@@ -1,5 +1,6 @@
 import { escapeHtml } from './ui/format';
 import { renderHelp } from './help';
+import { APP_VERSION } from './version';
 
 export interface DocPage {
   /** Markdown-Quelle (per `?raw` eingebunden, bleibt als .md-Datei im Repo). */
@@ -22,6 +23,7 @@ export const DOC_LINKS: [string, string][] = [
   ['./hilfe.html', 'Hilfe'],
   ['./lizenz.html', 'Lizenz'],
   ['./lizenzen-drittanbieter.html', 'Lizenzen von Drittanbietern'],
+  ['./changelog.html', `Änderungen (Version ${APP_VERSION})`],
 ];
 
 /** Rendert eine Markdown-Dokumentseite im Stil des Rechners (Handbuch F15, Lizenzseiten N8). */
@@ -60,7 +62,7 @@ export function renderDocPage(page: DocPage): { html: string; title: string } {
       ([href, label]) =>
         `<li><a href="${href}"${href.endsWith(here) ? ' aria-current="page"' : ''}>${escapeHtml(label)}</a></li>`,
     ).join('')}</ul></nav>
-    <p>© 2026 Christoph Kania · PolyForm Noncommercial License 1.0.0</p>
+    <p>Version ${APP_VERSION} · © 2026 Christoph Kania · PolyForm Noncommercial License 1.0.0</p>
   </footer>`;
   return { html: body, title };
 }

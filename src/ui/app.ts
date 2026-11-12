@@ -1,6 +1,7 @@
 import { compareInstallTimes, type InstallComparison } from '../core/compare';
 import { keyEvents, type KeyEvent, type KeyEvents } from '../core/events';
 import { tryParseMonth } from '../core/dates';
+import { APP_VERSION } from '../version';
 import { createDefaults, FUNDING_SOURCE_DATE } from '../core/defaults';
 import { DEFAULT_SOURCES, OFFICIAL_REFS, SOURCE_KIND_LABEL } from '../core/sources';
 import { priceRows, runAll, type RunResult } from '../core/simulation';
@@ -926,7 +927,8 @@ function layout(): string {
     <div class="brand">
       <span class="mark" aria-hidden="true">~wp</span>
       <h1>Wärmepumpen-Investitionsrechner</h1>
-      <p>Umstieg von Gas oder Öl: Energiepreise, KfW-Förderung, Kredit und Steuerbonus im Vergleich</p>
+      <p>Umstieg von Gas oder Öl: Energiepreise, KfW-Förderung, Kredit und Steuerbonus im Vergleich
+        <a id="app-version" class="version-link" href="./changelog.html" target="_blank" rel="noopener" title="Änderungen dieser und früherer Versionen (Changelog)">Version ${APP_VERSION}</a></p>
     </div>
     <div class="toolbar">
       <div class="design-switch" role="group" aria-label="Design">
@@ -987,7 +989,7 @@ function layout(): string {
         <p class="muted small">Positive Werte = Ausgaben, negative = Einnahmen. „Kumuliert" enthält den Opportunitätszins.</p>
       </div>
       <p class="disclaimer">Keine Finanz-, Steuer- oder Förderberatung. Alle Angaben ohne Gewähr; Förderbedingungen Stand ${FUNDING_SOURCE_DATE.split('-').reverse().join('.')} – bitte vor Antragstellung bei KfW, Energieberatung und Steuerberatung prüfen.</p>
-      <p class="disclaimer license">© 2026 Christoph Kania · Lizenz: <a href="./lizenz.html" target="_blank" rel="noopener">PolyForm Noncommercial 1.0.0</a> – kostenfreie Nutzung für nicht-kommerzielle Zwecke; kommerzielle Nutzung nur nach Absprache · <a href="./lizenzen-drittanbieter.html" target="_blank" rel="noopener">Lizenzen von Drittanbietern</a></p>
+      <p class="disclaimer license"><a href="./changelog.html" target="_blank" rel="noopener">Version ${APP_VERSION}</a> · © 2026 Christoph Kania · Lizenz: <a href="./lizenz.html" target="_blank" rel="noopener">PolyForm Noncommercial 1.0.0</a> – kostenfreie Nutzung für nicht-kommerzielle Zwecke; kommerzielle Nutzung nur nach Absprache · <a href="./lizenzen-drittanbieter.html" target="_blank" rel="noopener">Lizenzen von Drittanbietern</a></p>
     </section>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>`;

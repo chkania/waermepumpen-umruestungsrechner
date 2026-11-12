@@ -17,6 +17,8 @@ export default defineConfig({
         // Lizenzseiten (N8): rendern LICENSE.md und THIRD-PARTY-NOTICES.md
         lizenz: resolve(__dirname, 'lizenz.html'),
         drittanbieter: resolve(__dirname, 'lizenzen-drittanbieter.html'),
+        // Changelog (N9)
+        changelog: resolve(__dirname, 'changelog.html'),
       },
     },
   },

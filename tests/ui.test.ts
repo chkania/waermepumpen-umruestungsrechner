@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { SECTIONS, getPath } from '../src/ui/fields';
 import { DESIGN_KEY, mountApp, STORAGE_KEY, THEME_KEY } from '../src/ui/app';
 import { encodeHash } from '../src/core/serialize';
+import { APP_VERSION } from '../src/version';
 import { defaults, TODAY } from './helpers';
 
 class MemoryStorage implements Storage {
@@ -361,6 +362,13 @@ describe('UI (Smoke-Test)', () => {
     expect(cooking.hidden).toBe(false);
     setValue(root, 'oldHeating.fuel', 'oil');
     expect(cooking.hidden).toBe(true);
+  });
+
+  it('N9 Version im Kopf, verlinkt auf den Changelog', () => {
+    const { root } = mount();
+    const v = root.querySelector<HTMLAnchorElement>('#app-version')!;
+    expect(v.textContent).toBe(`Version ${APP_VERSION}`);
+    expect(v.getAttribute('href')).toBe('./changelog.html');
   });
 
   it('F15 Hilfe-Link öffnet das Benutzerhandbuch in neuem Tab', () => {

@@ -22,6 +22,9 @@ SPA (Vite + TypeScript, ohne UI-Framework, Chart.js) zur Wirtschaftlichkeitsrech
 - `src/ui/` – `fields.ts` (deklarative Formularfelder; neues Eingabefeld = Eintrag hier + in `types.ts`/`defaults.ts`), `app.ts`, `charts.ts`
 - `tests/` – Vitest; `ui.test.ts` läuft mit happy-dom; `helpers.ts` fixiert den Stichtag 2026-11-11 und feste Testpreise (`pinPrices`/`neutral`). Markt-Defaults aktualisieren → nur Regressions-Snapshots ändern sich (`npm test -- -u`, im Änderungsprotokoll begründen).
 
+## Version & Changelog
+Semantic Versioning (N9), Quelle `package.json`. Jede für Nutzer sichtbare Änderung in `CHANGELOG.md` unter „Unveröffentlicht“ eintragen. Release: Version in `package.json` erhöhen (Major = Export/Link inkompatibel, Minor = Funktion/Rechenmodell/Defaults, Patch = Fehlerkorrektur/Text), Abschnitt „Unveröffentlicht“ in „## x.y.z – JJJJ-MM-TT“ umbenennen, neuen leeren Abschnitt anlegen; `tests/version.test.ts` prüft die Übereinstimmung.
+
 ## Lizenz
 PolyForm Noncommercial 1.0.0 (`LICENSE.md`). Neue/aktualisierte Laufzeit-Abhängigkeit → `npm run notices` (erzeugt `THIRD-PARTY-NOTICES.md`; `tests/license.test.ts` prüft die Aktualität). Nur Abhängigkeiten mit kompatibler, freizügiger Lizenz (MIT, BSD, Apache-2.0, ISC, OFL) aufnehmen.
 
