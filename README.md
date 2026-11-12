@@ -19,10 +19,10 @@ Keine Finanz-, Steuer- oder Förderberatung; alle Angaben ohne Gewähr.
 
 ## Lizenz
 
-Copyright © 2026 Christoph Kania. Veröffentlicht unter der [PolyForm Noncommercial License 1.0.0](LICENSE.md):
+Copyright © 2026 Christoph Kania. Veröffentlicht unter der [PolyForm Noncommercial License 1.0.0](LICENSE.md) (im Browser: `lizenz.html`):
 Nutzung, Änderung und Weitergabe sind für **nicht-kommerzielle Zwecke** kostenfrei erlaubt (private Nutzung,
 Forschung, Bildung, gemeinnützige Organisationen, Behörden). Für kommerzielle Nutzung ist eine gesonderte
 Vereinbarung nötig. Hinweis: Das ist eine „Source available“-Lizenz, keine Open-Source-Lizenz im Sinne der OSI.
 
 Enthaltene Bibliotheken und Schriften stehen unter eigenen Lizenzen (MIT, SIL OFL 1.1), siehe
-[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) – nach Änderungen an den Abhängigkeiten mit `npm run notices` neu erzeugen.
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) (im Browser: `lizenzen-drittanbieter.html`) – nach Änderungen an den Abhängigkeiten mit `npm run notices` neu erzeugen.

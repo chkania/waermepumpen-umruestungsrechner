@@ -273,7 +273,7 @@ Ein Test mit Screenreadern steht noch aus.
 
 Der Rechner steht unter der **PolyForm Noncommercial License 1.0.0** (Copyright © 2026 Christoph Kania). Sie dürfen ihn für nicht-kommerzielle Zwecke kostenfrei nutzen, verändern und weitergeben – z. B. privat, in Forschung und Lehre, in gemeinnützigen Organisationen oder Behörden. Kommerzielle Nutzung, etwa als Teil eines Beratungs- oder Verkaufsangebots, erfordert eine gesonderte Vereinbarung. Bei der Weitergabe müssen der Lizenztext (oder seine Adresse) und der Copyright-Hinweis mitgegeben werden.
 
-Der Lizenztext und die Lizenzen der enthaltenen Bibliotheken und Schriften (Chart.js und marked unter MIT, Inter und JetBrains Mono unter SIL Open Font License 1.1) sind über den Seitenfuß des Rechners verlinkt.
+Der Lizenztext und die Lizenzen der enthaltenen Bibliotheken und Schriften (Chart.js und marked unter MIT, Inter und JetBrains Mono unter SIL Open Font License 1.1) stehen als eigene Seiten **lizenz.html** (mit deutscher Kurzfassung) und **lizenzen-drittanbieter.html** neben dem Rechner und sind über den Seitenfuß verlinkt.
 
 ## Datenschutz
 
