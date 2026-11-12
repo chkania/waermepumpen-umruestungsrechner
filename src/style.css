@@ -292,6 +292,8 @@ tr.best td { background: var(--accent-soft); }
 table.compact th, table.compact td { padding: 4px 6px; }
 
 .disclaimer { font-size: 0.78rem; color: var(--c-muted); margin: 0 0 24px; }
+.disclaimer.license { margin-top: -16px; }
+.disclaimer a { color: inherit; }
 
 .toast {
   position: fixed;

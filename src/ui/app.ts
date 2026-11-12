@@ -942,6 +942,7 @@ function layout(): string {
         <p class="muted small">Positive Werte = Ausgaben, negative = Einnahmen. „Kumuliert" enthält den Opportunitätszins.</p>
       </div>
       <p class="disclaimer">Keine Finanz-, Steuer- oder Förderberatung. Alle Angaben ohne Gewähr; Förderbedingungen Stand ${FUNDING_SOURCE_DATE.split('-').reverse().join('.')} – bitte vor Antragstellung bei KfW, Energieberatung und Steuerberatung prüfen.</p>
+      <p class="disclaimer license">© 2026 Christoph Kania · Lizenz: <a href="./LICENSE.md" target="_blank" rel="noopener">PolyForm Noncommercial 1.0.0</a> – kostenfreie Nutzung für nicht-kommerzielle Zwecke; kommerzielle Nutzung nur nach Absprache · <a href="./THIRD-PARTY-NOTICES.md" target="_blank" rel="noopener">Lizenzen von Drittanbietern</a></p>
     </section>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>`;

@@ -269,6 +269,12 @@ Der Rechner orientiert sich an WCAG 2.1 Stufe AA (Grundlage der EN 301 549):
 
 Ein Test mit Screenreadern steht noch aus.
 
+## Lizenz
+
+Der Rechner steht unter der **PolyForm Noncommercial License 1.0.0** (Copyright © 2026 Christoph Kania). Sie dürfen ihn für nicht-kommerzielle Zwecke kostenfrei nutzen, verändern und weitergeben – z. B. privat, in Forschung und Lehre, in gemeinnützigen Organisationen oder Behörden. Kommerzielle Nutzung, etwa als Teil eines Beratungs- oder Verkaufsangebots, erfordert eine gesonderte Vereinbarung. Bei der Weitergabe müssen der Lizenztext (oder seine Adresse) und der Copyright-Hinweis mitgegeben werden.
+
+Der Lizenztext und die Lizenzen der enthaltenen Bibliotheken und Schriften (Chart.js und marked unter MIT, Inter und JetBrains Mono unter SIL Open Font License 1.1) sind über den Seitenfuß des Rechners verlinkt.
+
 ## Datenschutz
 
 Der Rechner läuft vollständig in Ihrem Browser. Eingaben werden nicht an einen Server übertragen. Die veröffentlichte Fassung erlaubt per Content-Security-Policy nur die eigenen Skripte des Rechners; eingeschleuster Code aus Links oder Dateien würde nicht ausgeführt. Gespeichert wird nur lokal im Browser; geteilt wird nur, was Sie per Link oder Export selbst weitergeben.
