@@ -41,23 +41,32 @@ export function stepValue(points: PathPoint[], year: number): number {
   return v;
 }
 
-/** Vorbereitete Preisfunktionen je Kalenderjahr (alle Werte brutto, ct/kWh). */
+/**
+ * Vorbereitete Preisfunktionen (alle Werte brutto, ct/kWh).
+ * Preissteigerungen wirken stetig ab dem Startmonat ((1 + Rate)^(Monate/12)), wie Wartung und Investition.
+ * Der CO₂-Preis folgt dem Pfad je Kalenderjahr (gesetzliche Festlegung je Jahr).
+ */
 export interface PriceModel {
   startYear: number;
+  startMonth: number;
   co2Price(year: number): number;
   co2SurchargeCt(fuel: Fuel, year: number): number;
-  /** Brennstoffpreis ct/kWh (Endenergie) inkl. CO2. */
-  fuelCt(fuel: Fuel, year: number): number;
+  /** Brennstoffpreis ct/kWh (Endenergie) inkl. CO2 im Monat `month` (absolut). */
+  fuelCt(fuel: Fuel, month: number): number;
   /** Bio-Mehrkosten ct/kWh für neu eingebaute fossile Kessel. */
   bioSurchargeCt(year: number): number;
   bioShare(year: number): number;
-  /** Strompreis ct/kWh für die WP (WP-Tarif oder Haushaltsstrom). */
-  elecCt(year: number): number;
-  gasBaseFee(year: number): number;
+  /** Strompreis ct/kWh für die WP (WP-Tarif oder Haushaltsstrom) im Monat `month`. */
+  elecCt(month: number): number;
+  /** Faktor der Strompreissteigerung im Monat `month` (1 im Startmonat). */
+  elecGrowth(month: number): number;
+  /** Gas-Grundpreis €/Jahr im Monat `month`. */
+  gasBaseFee(month: number): number;
 }
 
 export function createPriceModel(inp: Inputs): PriceModel {
-  const startYear = yearOf(parseMonth(inp.general.startMonth));
+  const startMonth = parseMonth(inp.general.startMonth);
+  const startYear = yearOf(startMonth);
   const co2 = parsePath(inp.prices.co2Path);
   const bio = parsePath(inp.prices.bioSteps);
   const vat = inp.general.vat;
@@ -74,18 +83,16 @@ export function createPriceModel(inp: Inputs): PriceModel {
   const gasBase0 = gasTotal0 - co2SurchargeCt('gas', startYear);
   const oilBase0 = oilTotal0 - co2SurchargeCt('oil', startYear);
 
-  const idx = (year: number) => Math.max(0, year - startYear);
+  const g = (rate: number, month: number) => Math.pow(1 + rate, Math.max(0, month - startMonth) / 12);
 
   return {
     startYear,
+    startMonth,
     co2Price,
     co2SurchargeCt,
-    fuelCt(fuel, year) {
-      const base =
-        fuel === 'gas'
-          ? gasBase0 * Math.pow(1 + p.gasIncrease, idx(year))
-          : oilBase0 * Math.pow(1 + p.oilIncrease, idx(year));
-      return base + co2SurchargeCt(fuel, year);
+    fuelCt(fuel, month) {
+      const base = fuel === 'gas' ? gasBase0 * g(p.gasIncrease, month) : oilBase0 * g(p.oilIncrease, month);
+      return base + co2SurchargeCt(fuel, yearOf(month));
     },
     bioShare(year) {
       return p.bioEnabled ? stepValue(bio, year) / 100 : 0;
@@ -93,12 +100,15 @@ export function createPriceModel(inp: Inputs): PriceModel {
     bioSurchargeCt(year) {
       return p.bioEnabled ? (stepValue(bio, year) / 100) * p.bioPremiumCt : 0;
     },
-    elecCt(year) {
+    elecCt(month) {
       const base = hp.separateTariff ? hp.elecPriceCt : hp.householdPriceCt;
-      return base * Math.pow(1 + hp.elecIncrease, idx(year));
+      return base * g(hp.elecIncrease, month);
     },
-    gasBaseFee(year) {
-      return p.gasBaseFee * Math.pow(1 + p.gasIncrease, idx(year));
+    elecGrowth(month) {
+      return g(hp.elecIncrease, month);
+    },
+    gasBaseFee(month) {
+      return p.gasBaseFee * g(p.gasIncrease, month);
     },
   };
 }

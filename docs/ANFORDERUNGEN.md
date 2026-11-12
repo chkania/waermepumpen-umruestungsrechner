@@ -40,7 +40,7 @@ inklusive steigender Energiepreise, Bundesförderung (KfW 458), Kreditfinanzieru
 - F1.4 Der Förderantrag wird `Vorlauf` Monate (Default 4) vor der Installation gestellt; die Förderkonditionen richten sich nach dem Antragsmonat. *(Test: funding, compare)*
 
 ### F2 – Energiepreise
-- F2.1 Gas: Eingabe des **aktuellen Gesamtpreises** (ct/kWh brutto, inkl. CO₂). Der Preis ohne CO₂ wird daraus für das Startjahr abgeleitet und steigt mit eigener Rate p. a. *(Test: prices)*
+- F2.1 Gas: Eingabe des **aktuellen Gesamtpreises** (ct/kWh brutto, inkl. CO₂). Der Preis ohne CO₂ wird daraus für das Startjahr abgeleitet und steigt mit eigener Rate p. a., stetig ab dem Startmonat ((1 + Rate)^(Monate/12), wie Wartung und Investitionen); der CO₂-Aufschlag folgt dem Pfad je Kalenderjahr. Gilt ebenso für Heizöl, Gas-Grundpreis, Strompreise und Zählergrundpreis. *(Test: prices)*
 - F2.2 CO₂-Aufschlag = CO₂-Preis(Jahr) × Emissionsfaktor × (1 + MwSt.). Emissionsfaktoren: Erdgas 0,201 kg/kWh, Heizöl 0,266 kg/kWh (editierbar). *(Test: prices)*
 - F2.3 CO₂-Preispfad als Stützstellen „Jahr:€/t", linear interpoliert; vor der ersten/nach der letzten Stützstelle konstant. Default: 2026: 55, 2027: 65, 2028: 80, 2030: 110, 2035: 160, 2040: 200, 2045: 220 (Annahme: BEHG-Korridor 55–65 €/t bis 2027, danach EU-ETS2). *(Test: prices)*
 - F2.4 Heizöl: aktueller Gesamtpreis in €/Liter (inkl. CO₂), Heizwert 10 kWh/l. *(Test: prices)*
@@ -51,12 +51,12 @@ inklusive steigender Energiepreise, Bundesförderung (KfW 458), Kreditfinanzieru
 ### F3 – Referenzszenario (ohne WP)
 - F3.1 Jährlicher Brennstoffverbrauch (Gas kWh bzw. Öl Liter), Kesselnutzungsgrad, Grundpreis Gas (€/Jahr, steigt mit Gaspreisrate), Wartung + Schornsteinfeger (€/Jahr, steigt mit allgemeiner Kostensteigerung). *(Test: simulation)*
 - F3.2 Restlebensdauer der Altanlage (Jahre); danach Ersatzkessel zum heutigen Preis × Investitionskosten-Steigerung; Lebensdauer neuer Kessel (Default 20 Jahre). Neuer Kessel hat eigenen Nutzungsgrad. *(Test: simulation)*
-- F3.3 Restwert: Am Ende des Betrachtungszeitraums wird der lineare Restwert neu gekaufter Anlagen (Ersatzkessel bzw. WP) gutgeschrieben (Bruttoinvestition × Restlebensdauer/Lebensdauer). Abschaltbar. *(Test: simulation)*
+- F3.3 Restwert: Am Ende des Betrachtungszeitraums wird der lineare Restwert neu gekaufter Anlagen (Ersatzkessel bzw. WP) gutgeschrieben (Bruttoinvestition × Restlebensdauer/Lebensdauer). Ein Ersatzkessel, der im WP-Szenario vor der Installation gekauft und dann durch die WP ersetzt wurde, hat keinen Restwert. Abschaltbar. *(Test: simulation)*
 
 ### F4 – Wärmepumpen-Szenario
 - F4.1 Investition WP gesamt (brutto) und davon förderfähig (Default: gesamt), zuzüglich nicht förderfähiger Nebenkosten (z. B. Stilllegung Gasanschluss). Investitionskosten steigen mit Rate p. a. bis zur Installation. *(Test: simulation)*
 - F4.2 Ab Installation: WP-Strom = Wärmebedarf / JAZ; Gas-Grundpreis, Gas-/Ölwartung und Schornsteinfeger entfallen; WP-Wartung €/Jahr fällt an. *(Test: simulation)*
-- F4.3 Lebensdauer WP (Default 20 Jahre) für Restwert. *(Test: simulation)*
+- F4.3 Lebensdauer WP (Default 20 Jahre) für Restwert. Ist der Betrachtungszeitraum länger, wird nach Ablauf eine Ersatz-WP zum heutigen Preis × Investitionskosten-Steigerung ohne Förderung eingerechnet (Warnung und Ereignis). *(Test: simulation, events)*
 - F4.4 Fällt die Altanlage vor dem gewählten Installationszeitpunkt aus, muss auch im WP-Szenario ein Ersatzkessel gekauft werden (inkl. Warnhinweis). *(Test: simulation)*
 
 ### F5 – Förderung und Steuer
@@ -66,7 +66,7 @@ inklusive steigender Energiepreise, Bundesförderung (KfW 458), Kreditfinanzieru
   - Einkommensbonus (nur selbstgenutzt, zu versteuerndes Haushaltseinkommen): ≤ 30.000 € → 40 %, ≤ 40.000 € → 30 %, ≤ 50.000 € → 10 %; mit kindergeldberechtigtem Kind < 18 Grenzen +10.000 €.
   - Höchstfördersatz 70 %; 80 % bei zvE bis 30.000 € bzw. 40.000 € mit Familienzuschlag (Richtlinie Nr. 8.4.1).
   - Förderfähige Kosten: 1. Wohneinheit 28.000 € (ab 02/2027 halbjährlich −750 €, Untergrenze 22.000 € ab 08/2030, Richtlinie Nr. 8.3.1 a), 2.–6. WE je 15.000 €, ab 7. WE je 8.000 €. Boni gelten nur für den Kostenanteil der selbstgenutzten WE (Kosten gleichmäßig auf WE verteilt).
-  - Auszahlung `n` Monate nach Installation (Default 3).
+  - Auszahlung `n` Monate nach Installation (Default 3). Liegt die Auszahlung nach dem Betrachtungszeitraum, wird der Zuschuss als Forderung im letzten Monat eingerechnet (wie die Ablösung einer Restschuld), mit Warnung.
   - Effizienzbonus existiert nicht mehr (nicht modelliert).
   *(Test: funding)*
 - F5.2 **§ 35c EStG**: 20 % der Kosten (max. 200.000 € Kosten, max. 40.000 € Steuerermäßigung), verteilt 7 % / 7 % / 6 % auf Abschlussjahr und zwei Folgejahre; Erstattung jeweils im Folgejahr (Monat wählbar, Default Juni). Nur selbstgenutzt, Gebäude ≥ 10 Jahre, Abschluss bis 31.12.2029 (editierbar). Optional begrenzt durch die jährliche Einkommensteuerschuld (keine Erstattung darüber hinaus, kein Vor-/Rücktrag). *(Test: tax)*
@@ -91,7 +91,7 @@ inklusive steigender Energiepreise, Bundesförderung (KfW 458), Kreditfinanzieru
 
 ### F10 – Wichtige Ereignisse & Hinweise
 Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, damit sie wahrgenommen werden (Block „Wichtige Ereignisse & Hinweise" unter den Kennzahlen, Rauten-Markierungen im Diagramm „Kumulierte Kosten" mit Tooltip, Spalte „Ereignisse" in der Jahrestabelle). Stufen: *info*, *important* (großer Zahlungsfluss/Wendepunkt), *warning* (leicht übersehener Nachteil).
-- F10.1 Zeitleiste Referenz: Kauf eines Ersatzkessels (Monat, Betrag inkl. Preissteigerung); Bio-Treppen-Stufen ab Kesselkauf mit Mehrkosten/Jahr. Im WP-Szenario: Ausfall der Altanlage vor Installation als Warnung. *(Test: events)*
+- F10.1 Zeitleiste Referenz: Kauf eines Ersatzkessels (Monat, Betrag inkl. Preissteigerung); Bio-Treppen-Stufen ab Kesselkauf mit Mehrkosten/Jahr. Im WP-Szenario: Ausfall der Altanlage vor Installation als Warnung; Ersatz der WP nach Ablauf der Lebensdauer (F4.3). *(Test: events)*
 - F10.2 Zeitleiste Steuer-Weg: jede Steuererstattung; die **letzte** ist hervorgehoben mit Hinweis, dass danach die Entlastung entfällt (und Kreditraten weiterlaufen). *(Test: events)*
 - F10.3 Zeitleiste WP: Förderantrag, Inbetriebnahme (Investition), Auszahlung Zuschuss, Tilgungsbeginn, Ende der Zinsbindung (Anschlusszins), vollständige Tilgung bzw. Restschuld am Ende. *(Test: events)*
 - F10.4 Hinweise: Klimageschwindigkeitsbonus – gesichert (mit Betrag und nächster Absenkung), ausgelaufen, später erreichbar (ab wann, welcher Satz) oder **nicht erreichbar** (Heizung erreicht das Mindestalter erst nach Auslaufen des Bonus bzw. nach Ende der Restlebensdauer); Einkommensbonus ja/nein; Begrenzung der förderfähigen Kosten mit nächster Absenkung; KfW 359 statt 358; Frist bzw. Nichtverfügbarkeit des Steuerbonus. *(Test: events)*
@@ -113,7 +113,7 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 ### F13 – Stromkosten mit oder ohne Wärmepumpentarif
 - F13.1 Block „Stromkosten: mit oder ohne Wärmepumpentarif“: Kosten des WP-Stroms im ersten vollen Betriebsjahr und über den Zeitraum ab Inbetriebnahme (nominal) für beide Varianten, günstigere Variante markiert, Ersparnis/Mehrkosten, Hinweis, ob die gewählte Variante die günstigere ist. *(Test: tariff, ui)*
 - F13.2 Mit WP-Tarif: WP-Arbeitspreis + Grundpreis Zähler − § 14a-Reduzierung; ohne: Haushaltsstrompreis − § 14a-Reduzierung (Modul 1 gilt auch ohne separaten Zähler). PV-Anteil und Preissteigerung wie in der Simulation. *(Test: tariff)*
-- F13.3 Schwelle: Netzbezug pro Jahr, ab dem sich der eigene Zähler lohnt = Zählergrundpreis ÷ (Haushaltspreis − WP-Preis), heutige Preise; ohne Preisvorteil: Hinweis „lohnt sich nicht“. *(Test: tariff)*
+- F13.3 Schwelle: Netzbezug pro Jahr, ab dem sich der eigene Zähler lohnt = (Zählergrundpreis − zusätzliche § 14a-Pauschale) ÷ (Haushaltspreis − WP-Preis), heutige Preise. Die zusätzliche Pauschale gibt es nur, wenn sie am Haushaltszähler schon genutzt wird (F13.6); deckt sie den Grundpreis, lohnt sich der Zähler bei jedem Verbrauch. Ohne Preisvorteil: Hinweis „lohnt sich nicht“. *(Test: tariff)*
 - F13.4 Jahreswerte aufklappbar; die Preisfelder beider Varianten sind immer sichtbar. *(Test: ui)*
 - F13.5 Einmalige Kosten für den zweiten Zähler / Zählerschrank-Umbau (Default 0 €): fallen nur mit separatem WP-Tarif an, gehen zum Inbetriebnahmezeitpunkt in die Investition ein (nicht förderfähig → Nebenkosten/Bankkredit; optional „förderfähig“, wenn vom Fachbetrieb bestätigt). Im Tarifvergleich: Netto-Umbaukosten in der Summe „mit WP-Tarif“ und Amortisationszeit = Netto-Umbaukosten ÷ jährliche Ersparnis der laufenden Kosten. Herkunft: Infoblatt Nr. 4.1.3 (notwendige Netzanschlüsse, iMSys förderfähig), 4.1.3.2 (iMSys-Bestellpflicht); ein zweiter Zählerplatz ist nicht ausdrücklich genannt. *(Test: tariff)*
 - F13.6 § 14a EnWG Modul 1 gilt je Marktlokation (Zähler), nicht je Gerät (Bundesnetzagentur). Eingabe „Haushaltszähler hat schon § 14a (z. B. Wallbox)“ (Default: nein): dann erhält die WP ohne eigenen Zähler keine zusätzliche Pauschale; mit eigenem WP-Zähler weiterhin. Wirkt in Hauptrechnung und Tarifvergleich, mit Hinweistext. *(Test: tariff, ui)*
@@ -181,3 +181,4 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 | 2026-11-11 | F14.4 Modernes Design an Farben und Schriften von chkania.net ausgerichtet (Inter, JetBrains Mono lokal eingebunden). Fix: Szenario-Auswahl der Jahrestabelle verursachte mobil horizontalen Überlauf. |
 | 2026-11-11 | F14.5 Hell/Dunkel/Auto-Schalter. Anlass: In Brave erschien nur das dunkle Design, weil Brave „dunkel bevorzugt“ meldet und es keine manuelle Wahl gab. |
 | 2026-11-11 | F15 Benutzerhandbuch als Markdown und eigene Hilfeseite im Browser (`hilfe.html`), Link „Hilfe“ im Rechner. |
+| 2026-11-11 | Konsistenzprüfung, fünf Korrekturen: (1) kein Restwert mehr für einen Ersatzkessel, den die WP bereits ersetzt hat (F3.3; spät installierte WP wurde zu günstig gerechnet); (2) Zuschuss bzw. Steuererstattung nach Zeitraumende als Forderung im letzten Monat (F5.1/F5.2; vorher entfallen, Kredit-Restschuld aber abgelöst); (3) Tarif-Schwelle berücksichtigt die zusätzliche § 14a-Pauschale bei Wallbox (F13.3); (4) Ersatz-WP bei Betrachtungszeitraum > Lebensdauer (F4.3); (5) Energie-, Grund- und Strompreise steigen stetig ab Startmonat statt in vollen Schritten je Kalenderjahr (F2.1; vorher wirkte die Jahressteigerung bei Start im November schon ab Januar). Regressions-Snapshots bewusst aktualisiert, nur durch (5): Default-Gesamtkosten Referenz 115.827 → 114.913 €, KfW-Weg 73.698 → 73.328 €, Steuer-Weg 97.007 → 96.637 € (Ersparnis KfW-Weg 42,1 → 41,6 T€). |

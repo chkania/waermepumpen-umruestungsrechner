@@ -295,5 +295,7 @@ export interface ScenarioResult {
   loans: LoanInfo[];
   /** Käufe von Ersatzkesseln (Monat, Bruttokosten). */
   boilerPurchases: { month: number; cost: number }[];
+  /** Ersatz-Wärmepumpen nach Ablauf der Lebensdauer (Monat, Kosten brutto). */
+  hpReplacements: { month: number; cost: number }[];
   windfall?: WindfallInfo;
 }

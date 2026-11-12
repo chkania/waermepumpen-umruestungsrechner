@@ -118,6 +118,16 @@ describe('F13.6 § 14a je Zähler (Wallbox am Haushaltszähler)', () => {
     expect(t.saving).toBeCloseTo(20 * (kwh * 0.08 - 100 + 130), 4);
   });
 
+  it('F13.3 Schwelle: zusätzliche § 14a-Pauschale mindert die Zählerkosten', () => {
+    // 100 € Grundpreis − 130 € Pauschale < 0 → lohnt sich bei jedem Verbrauch
+    expect(tariffComparison(base((i) => (i.heatPump.existing14aOnHousehold = true)))!.breakEvenKWh).toBe(0);
+    const t = tariffComparison(base((i) => {
+      i.heatPump.existing14aOnHousehold = true;
+      i.heatPump.meterFee = 170;
+    }))!;
+    expect(t.breakEvenKWh).toBeCloseTo((40 * 100) / 8, 6);
+  });
+
   it('wirkt in der Hauptrechnung nur ohne separaten WP-Tarif', () => {
     const mk = (sep: boolean, wallbox: boolean) =>
       simulate(base((i) => {

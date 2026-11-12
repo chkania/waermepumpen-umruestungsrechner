@@ -89,7 +89,7 @@ Prozentwerte werden als Prozent eingegeben (z. B. `90` für 90 %). Monate werden
 |---|---|
 | **Gaspreis heute (inkl. CO₂)** | Arbeitspreis brutto aus der Gasrechnung. Der Rechner trennt daraus den CO₂-Anteil heraus. |
 | **Gas-Grundpreis** | Jährlicher Grundpreis; entfällt nach dem Umstieg (Gasanschluss wird stillgelegt). |
-| **Steigerung Gaspreis (ohne CO₂)** | Jährliche Steigerung von Beschaffung, Netzentgelten usw. |
+| **Steigerung Gaspreis (ohne CO₂)** | Jährliche Steigerung von Beschaffung, Netzentgelten usw. Sie wirkt gleichmäßig ab dem Startmonat; der CO₂-Aufschlag ändert sich dagegen jeweils zum Jahreswechsel nach dem CO₂-Preispfad. |
 | **Heizölpreis heute (inkl. CO₂)** | Preis je Liter aus der letzten Lieferung. |
 | **Steigerung Ölpreis (ohne CO₂)** | Jährliche Steigerung ohne CO₂-Anteil. |
 | **CO₂-Preispfad** | Stützstellen im Format `Jahr:€/t`, z. B. `2026:55, 2030:110`. Dazwischen wird linear interpoliert. Der CO₂-Aufschlag wird aus Preis und Emissionsfaktor berechnet. |
@@ -107,7 +107,7 @@ Prozentwerte werden als Prozent eingegeben (z. B. `90` für 90 %). Monate werden
 | **Nicht förderfähige Nebenkosten** | Z. B. die Stilllegung des Gasanschlusses durch den Netzbetreiber. |
 | **Jahresarbeitszahl (JAZ)** | Wie viel Wärme die Wärmepumpe aus 1 kWh Strom erzeugt. Luft/Wasser im Bestand typisch 3,0–3,5. |
 | **Wartung** | Jährliche Wartungskosten der Wärmepumpe. |
-| **Lebensdauer** | Für den Restwert am Ende des Betrachtungszeitraums. |
+| **Lebensdauer** | Für den Restwert am Ende des Betrachtungszeitraums. Ist der Betrachtungszeitraum länger, rechnet der Rechner danach eine Ersatz-Wärmepumpe ohne Förderung ein. |
 | **Wärmepumpe mit Ursprung in der EU** | Ab dem 1. Quartal 2027 gibt es den vollen Fördersatz (15 % Grundförderung + 15 % Wertschöpfungs-Bonus) nur für Wärmepumpen aus der EU. |
 | **Vorlauf Förderantrag** | Monate zwischen Förderantrag und Inbetriebnahme. Boni und Höchstbeträge richten sich nach dem **Antragsdatum**. |
 
@@ -178,7 +178,7 @@ Es gelten die Kreditbedingungen: Beim KfW-Kredit sind Teil-Sondertilgungen nur i
 | **Opportunitätszins** | Was eingesetztes Geld anderswo bringen würde (z. B. Tagesgeld). Alle Zahlungen werden damit bis zum Ende aufgezinst. Bei 0 % ist die Summe einfach addiert. |
 | **Steigerung Wartungskosten** | Jährliche Steigerung der Wartungskosten. |
 | **Steigerung Anschaffungspreise** | Wirkt, wenn später gekauft wird (z. B. Ersatzkessel, späterer Umstieg). |
-| **Restwert am Ende berücksichtigen** | Noch nutzbare Anlagen werden am Ende anteilig gutgeschrieben, damit spät gekaufte Anlagen fair bewertet werden. |
+| **Restwert am Ende berücksichtigen** | Noch nutzbare Anlagen werden am Ende anteilig gutgeschrieben, damit spät gekaufte Anlagen fair bewertet werden. Ein Ersatzkessel, den die Wärmepumpe schon ersetzt hat, zählt nicht. Zuschüsse oder Steuererstattungen, die erst nach dem Zeitraum fließen, werden im letzten Monat gutgeschrieben. |
 | **Zeitpunktvergleich: Abstand** | Abstand der verglichenen Umrüstzeitpunkte in Monaten. |
 | **Zeitpunktvergleich: Anzahl** | Wie viele Zeitpunkte verglichen werden. |
 
@@ -226,7 +226,7 @@ Zeigt, wie sich der Zuschuss zusammensetzt (Fördersätze, förderfähige Kosten
 
 ### Stromkosten: mit oder ohne Wärmepumpentarif
 
-Vergleicht die Stromkosten der Wärmepumpe mit eigenem Zähler und WP-Tarif gegenüber Haushaltsstrom – für das erste volle Jahr und den ganzen Zeitraum, inklusive einmaliger Kosten für den Zählerschrank. Zeigt, ab welchem Verbrauch sich der eigene Zähler lohnt und nach wie vielen Jahren sich ein Umbau bezahlt macht. Unter „Jahreswerte“ stehen die Zahlen je Jahr.
+Vergleicht die Stromkosten der Wärmepumpe mit eigenem Zähler und WP-Tarif gegenüber Haushaltsstrom – für das erste volle Jahr und den ganzen Zeitraum, inklusive einmaliger Kosten für den Zählerschrank. Zeigt, ab welchem Verbrauch sich der eigene Zähler lohnt (mit Wallbox am Haushaltszähler unter Berücksichtigung der zusätzlichen § 14a-Pauschale) und nach wie vielen Jahren sich ein Umbau bezahlt macht. Unter „Jahreswerte“ stehen die Zahlen je Jahr.
 
 ### Wann umrüsten?
 

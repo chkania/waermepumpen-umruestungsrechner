@@ -91,6 +91,16 @@ export function keyEvents(inp: Inputs, run: RunResult): KeyEvents {
       });
     }
   }
+  for (const r of kfw.hpReplacements) {
+    timeline.push({
+      month: r.month,
+      scenario: 'all',
+      level: 'important',
+      title: 'Ersatz der Wärmepumpe',
+      detail: `Lebensdauer der Wärmepumpe (${fmtYears(inp.heatPump.lifeYears)}) erreicht. Ersatz zu heutigen Preisen mit Preissteigerung, ohne Förderung.`,
+      amount: r.cost,
+    });
+  }
   if (install !== null) {
     const invest = kfw.months[install - start].investment - sumBoiler(kfw, install);
     timeline.push({

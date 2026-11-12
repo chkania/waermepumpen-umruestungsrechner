@@ -161,6 +161,53 @@ describe('F4 Wärmepumpe (KfW-Weg)', () => {
     );
     expect(r.months[239].residual).toBeCloseTo(-32000 * (60 / 240), 6);
   });
+
+  it('F3.3 kein Restwert für einen Ersatzkessel, den die WP schon ersetzt hat', () => {
+    const r = simulate(
+      wp((i) => {
+        i.general.residualValue = true;
+        i.oldHeating.remainingLifeYears = 1;
+        i.heatPump.installMonth = '2031-11';
+      }),
+      'kfw',
+    );
+    expect(r.boilerPurchases).toHaveLength(1);
+    // nur die WP: 60 Monate Restlebensdauer
+    expect(r.months[239].residual).toBeCloseTo(-32000 * (60 / 240), 6);
+  });
+
+  it('F4.3 Ersatz-WP, wenn der Zeitraum länger ist als die Lebensdauer', () => {
+    const r = simulate(
+      wp((i) => {
+        i.general.horizonYears = 30;
+        i.general.residualValue = true;
+      }),
+      'kfw',
+    );
+    expect(r.hpReplacements).toEqual([{ month: parseMonth('2046-11'), cost: 32000 }]);
+    expect(r.months[240].investment).toBe(32000);
+    expect(r.warnings.join()).toMatch(/Ersatz-Wärmepumpe/);
+    // Restwert nur der Ersatz-WP: 120 von 240 Monaten
+    expect(r.months[359].residual).toBeCloseTo(-32000 * 0.5, 6);
+    expect(simulate(wp(), 'kfw').hpReplacements).toHaveLength(0);
+  });
+
+  it('F5.1/F5.2 Zuschuss bzw. Steuererstattung nach Zeitraumende als Forderung am Ende', () => {
+    const late = (mut?: Parameters<typeof neutral>[0]) =>
+      wp((i) => {
+        i.heatPump.installMonth = '2046-09';
+        mut?.(i);
+      });
+    const k = simulate(late(), 'kfw');
+    expect(k.kfw!.subsidy).toBeGreaterThan(0);
+    expect(k.months[239].subsidy).toBeCloseTo(-k.kfw!.subsidy, 6);
+    expect(k.warnings.join()).toMatch(/Forderung/);
+    // Steuerbonus: Fristende angehoben, damit er möglich ist
+    const t = simulate(late((i) => (i.tax.deadline = '2050-12')), 'tax');
+    expect(t.tax!.total).toBeGreaterThan(0);
+    expect(sum(t.months.map((m) => m.taxBonus))).toBeCloseTo(-t.tax!.total, 6);
+    expect(t.months[239].taxBonus).toBeCloseTo(-t.tax!.total, 6);
+  });
 });
 
 describe('F6 Finanzierung im Szenario', () => {

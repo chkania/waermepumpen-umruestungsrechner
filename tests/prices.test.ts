@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { annualHeatDemand, createPriceModel, fuelKWh, interpolate, parsePath, stepValue } from '../src/core/prices';
+import { parseMonth as M } from '../src/core/dates';
 import { pinned as defaults } from './helpers';
 
 describe('F2.3 CO2-Preispfad', () => {
@@ -41,7 +42,8 @@ describe('F2.7 Bio-Treppe (Treppenfunktion)', () => {
 describe('F2.1/F2.2 Gaspreis', () => {
   it('Startjahr entspricht dem eingegebenen Gesamtpreis', () => {
     const i = defaults();
-    expect(createPriceModel(i).fuelCt('gas', 2026)).toBeCloseTo(11.5, 10);
+    expect(createPriceModel(i).fuelCt('gas', M('2026-11'))).toBeCloseTo(11.5, 10);
+    expect(createPriceModel(i).fuelCt('gas', M('2026-12'))).toBeCloseTo(11.5 + (11.5 - createPriceModel(i).co2SurchargeCt('gas', 2026)) * (1.03 ** (1 / 12) - 1), 10);
   });
 
   it('CO2-Aufschlag = Preis × Faktor /10 × (1+MwSt)', () => {
@@ -51,17 +53,21 @@ describe('F2.1/F2.2 Gaspreis', () => {
     expect(pm.co2SurchargeCt('oil', 2027)).toBeCloseTo((65 * 0.266) / 10 * 1.19, 10);
   });
 
-  it('Folgejahr: Basis wächst mit Rate, CO2 nach Pfad', () => {
-    const i = defaults();
+  it('Basis wächst stetig ab Startmonat, CO2 nach Pfad je Kalenderjahr', () => {
+    const i = defaults(); // Start 2026-11
     const pm = createPriceModel(i);
     const co2_26 = pm.co2SurchargeCt('gas', 2026);
     const base = 11.5 - co2_26;
-    expect(pm.fuelCt('gas', 2027)).toBeCloseTo(base * 1.03 + pm.co2SurchargeCt('gas', 2027), 10);
+    // Januar 2027: erst 2 Monate Steigerung, aber schon CO2-Preis 2027
+    expect(pm.fuelCt('gas', M('2027-01'))).toBeCloseTo(base * 1.03 ** (2 / 12) + pm.co2SurchargeCt('gas', 2027), 10);
+    // 12 Monate nach Start: volle Jahressteigerung
+    expect(pm.fuelCt('gas', M('2027-11'))).toBeCloseTo(base * 1.03 + pm.co2SurchargeCt('gas', 2027), 10);
   });
 
   it('Grundpreis steigt mit Gaspreisrate', () => {
     const i = defaults();
-    expect(createPriceModel(i).gasBaseFee(2028)).toBeCloseTo(180 * 1.03 ** 2, 10);
+    expect(createPriceModel(i).gasBaseFee(M('2028-11'))).toBeCloseTo(180 * 1.03 ** 2, 10);
+    expect(createPriceModel(i).gasBaseFee(M('2026-11'))).toBe(180);
   });
 });
 
@@ -70,7 +76,7 @@ describe('F2.4 Heizöl', () => {
     const i = defaults();
     i.oldHeating.fuel = 'oil';
     i.prices.oilPriceEur = 1.0;
-    expect(createPriceModel(i).fuelCt('oil', 2026)).toBeCloseTo(10, 10);
+    expect(createPriceModel(i).fuelCt('oil', M('2026-11'))).toBeCloseTo(10, 10);
     i.oldHeating.consumption = 2000;
     expect(fuelKWh(i)).toBe(20000);
     expect(annualHeatDemand(i)).toBe(18000);
@@ -80,8 +86,9 @@ describe('F2.4 Heizöl', () => {
 describe('F2.5 Strompreis', () => {
   it('WP-Tarif oder Haushaltsstrom, mit Steigerung', () => {
     const i = defaults();
-    expect(createPriceModel(i).elecCt(2027)).toBeCloseTo(26 * 1.02, 10);
+    expect(createPriceModel(i).elecCt(M('2027-11'))).toBeCloseTo(26 * 1.02, 10);
+    expect(createPriceModel(i).elecCt(M('2027-05'))).toBeCloseTo(26 * 1.02 ** 0.5, 10);
     i.heatPump.separateTariff = false;
-    expect(createPriceModel(i).elecCt(2026)).toBe(34);
+    expect(createPriceModel(i).elecCt(M('2026-11'))).toBe(34);
   });
 });

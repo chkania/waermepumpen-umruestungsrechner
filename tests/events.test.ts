@@ -117,6 +117,14 @@ describe('F10 Wichtige Ereignisse', () => {
     expect(w[0].level).toBe('warning');
   });
 
+  it('F10.1 Ersatz der Wärmepumpe bei langem Betrachtungszeitraum', () => {
+    const e = ev(userCase((i) => (i.general.horizonYears = 30)));
+    const r = find(e.timeline, /Ersatz der Wärmepumpe/);
+    expect(r).toBeDefined();
+    expect(r!.amount).toBeGreaterThan(30000);
+    expect(find(ev(userCase()).timeline, /Ersatz der Wärmepumpe/)).toBeUndefined();
+  });
+
   it('F10.4 Hinweis Wertschöpfungs-Bonus bzw. reduzierte Grundförderung ab 2027', () => {
     const eu = ev(userCase((i) => (i.heatPump.installMonth = '2027-11'))).hints;
     expect(find(eu, /Wertschöpfungs-Bonus 15 %/)!.level).toBe('info');

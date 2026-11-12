@@ -425,7 +425,9 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       <p class="muted small">WP-Strom aus dem Netz ${y.year}: ca. ${fmtNum(y.gridKWh)} kWh. ${
         t.breakEvenKWh === null
           ? 'Der WP-Tarif ist nicht günstiger als Haushaltsstrom – ein eigener Zähler lohnt sich nicht.'
-          : `Der eigene Zähler lohnt sich ab ca. ${fmtNum(t.breakEvenKWh)} kWh WP-Strom pro Jahr (Zählergrundpreis ÷ Preisvorteil, heutige Preise).`
+          : t.breakEvenKWh === 0
+            ? 'Der eigene Zähler lohnt sich bei jedem Verbrauch: Die zusätzliche § 14a-Pauschale deckt den Zählergrundpreis.'
+            : `Der eigene Zähler lohnt sich ab ca. ${fmtNum(t.breakEvenKWh)} kWh WP-Strom pro Jahr (${hp.existing14aOnHousehold ? '(Zählergrundpreis − zusätzliche § 14a-Pauschale)' : 'Zählergrundpreis'} ÷ Preisvorteil, heutige Preise).`
       }${
         t.setupCost > 0
           ? t.setupPaybackYears === null

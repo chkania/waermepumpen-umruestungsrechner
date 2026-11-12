@@ -1,5 +1,5 @@
 import { yearOf } from './dates';
-import { simulate } from './simulation';
+import { para14aFor, simulate } from './simulation';
 import type { Inputs, ScenarioResult } from './types';
 
 export interface TariffYear {
@@ -19,7 +19,10 @@ export interface TariffComparison {
   saving: number;
   /** Erstes volles Betriebsjahr (oder erstes Jahr, falls keins voll ist). */
   firstFullYear: TariffYear | null;
-  /** Netzbezug pro Jahr, ab dem sich der WP-Tarif bei den laufenden Kosten lohnt (Startpreise); null = nie. */
+  /**
+   * Netzbezug pro Jahr, ab dem sich der WP-Tarif bei den laufenden Kosten lohnt (Startpreise):
+   * (Zählergrundpreis − zusätzliche § 14a-Pauschale) ÷ Preisvorteil. 0 = bei jedem Verbrauch; null = nie.
+   */
   breakEvenKWh: number | null;
   /** Einmalige Kosten zweiter Zähler (brutto, zum Kaufzeitpunkt). */
   setupCost: number;
@@ -75,7 +78,11 @@ export function tariffComparison(inp: Inputs): TariffComparison | null {
   const firstFullYear = years.find((y) => y.year === fullYear) ?? years[0] ?? null;
 
   const priceGap = hp.householdPriceCt - hp.elecPriceCt; // ct/kWh
-  const breakEvenKWh = priceGap > 0 ? (hp.meterFee * 100) / priceGap : null;
+  // Feste Mehrkosten des eigenen Zählers: Grundpreis abzüglich einer zusätzlichen § 14a-Pauschale
+  // (nur, wenn die Pauschale am Haushaltszähler schon für z. B. eine Wallbox genutzt wird, F13.6)
+  const extra14a = para14aFor({ ...hp, separateTariff: true }) - para14aFor({ ...hp, separateTariff: false });
+  const fixedGap = hp.meterFee - extra14a;
+  const breakEvenKWh = priceGap > 0 ? (Math.max(0, fixedGap) * 100) / priceGap : fixedGap <= 0 && priceGap === 0 ? 0 : null;
   const annualSaving = firstFullYear ? firstFullYear.withoutTariff - firstFullYear.withTariff : 0;
   const setupPaybackYears = setupNet <= 0 ? 0 : annualSaving > 0 ? setupNet / annualSaving : null;
 

@@ -159,11 +159,13 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
   const assets: Asset[] = [];
 
   const boilerPurchases: { month: number; cost: number }[] = [];
+  const hpReplacements: { month: number; cost: number }[] = [];
   for (const b of replacements) {
     const cost = o.replacementCost * growth(inp.general.investIncrease, b - start);
     rows[b - start].investment += cost;
     boilerPurchases.push({ month: b, cost });
-    assets.push({ cost, install: b, lifeMonths: replLife });
+    // Restwert nur, wenn der Kessel bis zum Ende läuft; im WP-Szenario wird er bei der Installation ersetzt
+    if (install === null) assets.push({ cost, install: b, lifeMonths: replLife });
   }
 
   // Laufende Kosten
@@ -177,19 +179,18 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
     if (install !== null && abs >= install) {
       r.system = 'wp';
       const elec = heatM / hp.jaz;
-      const gridCt = pm.elecCt(year);
+      const gridCt = pm.elecCt(abs);
       r.energy = (elec * (1 - hp.pvShare) * gridCt + elec * hp.pvShare * hp.feedInCt) / 100;
-      const elecGrowth = Math.pow(1 + hp.elecIncrease, Math.max(0, year - pm.startYear));
-      r.fixed = ((hp.separateTariff ? hp.meterFee * elecGrowth : 0) - para14aFor(hp)) / 12;
+      r.fixed = ((hp.separateTariff ? hp.meterFee * pm.elecGrowth(abs) : 0) - para14aFor(hp)) / 12;
       r.maintenance = (hp.maintenance * maintGrowth) / 12;
     } else {
       const isNew = abs >= oldEnd;
       r.system = isNew ? 'new' : 'old';
       const eff = isNew ? o.replacementEfficiency : o.efficiency;
       const fuelKWh = heatM / eff;
-      const ct = pm.fuelCt(fuel, year) + (isNew ? pm.bioSurchargeCt(year) : 0);
+      const ct = pm.fuelCt(fuel, abs) + (isNew ? pm.bioSurchargeCt(year) : 0);
       r.energy = (fuelKWh * ct) / 100;
-      r.fixed = fuel === 'gas' ? pm.gasBaseFee(year) / 12 : 0;
+      r.fixed = fuel === 'gas' ? pm.gasBaseFee(abs) / 12 : 0;
       r.maintenance = (o.maintenance * maintGrowth) / 12;
     }
   }
@@ -208,7 +209,20 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
     const eligibleGross = wpGross * hp.eligibleShare + (hp.meterSetupEligible ? meterSetup : 0);
     const total = wpGross + extra + (hp.meterSetupEligible ? meterSetup : 0);
     rows[iIdx].investment += total;
-    assets.push({ cost: wpGross, install, lifeMonths: Math.max(1, Math.round(hp.lifeYears * 12)) });
+    const hpLife = Math.max(1, Math.round(hp.lifeYears * 12));
+    assets.push({ cost: wpGross, install, lifeMonths: hpLife });
+    // Ersatz-WP, wenn der Zeitraum länger ist als die Lebensdauer (ohne Förderung, analog zum Ersatzkessel)
+    for (let b = install + hpLife; b < end; b += hpLife) {
+      const cost = hp.investment * growth(inp.general.investIncrease, b - start);
+      rows[b - start].investment += cost;
+      hpReplacements.push({ month: b, cost });
+      assets.push({ cost, install: b, lifeMonths: hpLife });
+    }
+    if (hpReplacements.length > 0) {
+      warnings.push(
+        `Die Wärmepumpe erreicht ihr Lebensende (${formatMonthDe(hpReplacements[0].month)}) im Betrachtungszeitraum – eine Ersatz-Wärmepumpe ohne Förderung ist eingerechnet.`,
+      );
+    }
 
     const addLoan = (name: string, spec: LoanSpec, res: LoanResult) => {
       rows[spec.startMonth - start].loanPayout -= spec.principal;
@@ -312,7 +326,15 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
       );
       warnings.push(...kfwRes.notes);
       const subsidyMonth = install + Math.max(0, Math.round(fin.subsidyDelayMonths));
-      if (subsidyMonth < end) rows[subsidyMonth - start].subsidy -= kfwRes.subsidy;
+      if (subsidyMonth < end) {
+        rows[subsidyMonth - start].subsidy -= kfwRes.subsidy;
+      } else if (kfwRes.subsidy > 0) {
+        // Anspruch besteht – wie die Restschuld der Kredite am Ende des Zeitraums eingerechnet
+        rows[H - 1].subsidy -= kfwRes.subsidy;
+        warnings.push(
+          `KfW-Zuschuss wird erst ${formatMonthDe(subsidyMonth)} ausgezahlt – als Forderung am Ende des Betrachtungszeitraums eingerechnet.`,
+        );
+      }
 
       const equity = Math.min(Math.max(0, fin.kfwEquity), total);
       const need = total - equity;
@@ -368,6 +390,13 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
       for (const y of taxRes.yearly) {
         const month = (y.year + 1) * 12 + (refundMonth - 1);
         if (month >= start && month < end) rows[month - start].taxBonus -= y.amount;
+        else if (month >= end && y.amount > 0) rows[H - 1].taxBonus -= y.amount;
+      }
+      const late = taxRes.yearly.filter((y) => y.amount > 0 && (y.year + 1) * 12 + (refundMonth - 1) >= end);
+      if (late.length > 0) {
+        warnings.push(
+          `Steuererstattung für ${late.map((y) => y.year).join(', ')} erfolgt nach dem Betrachtungszeitraum – als Forderung am Ende eingerechnet.`,
+        );
       }
       const equity = Math.min(Math.max(0, fin.taxEquity), total);
       runLoans([{ name: 'Bankkredit', spec: bankSpec(total - equity, install, inp) }]);
@@ -422,6 +451,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
     tax: taxRes,
     loans,
     boilerPurchases,
+    hpReplacements,
     windfall,
   };
 }
@@ -483,8 +513,10 @@ export function priceRows(inp: Inputs): PriceRow[] {
   const n = Math.ceil(inp.general.horizonYears) + 1;
   for (let i = 0; i < n; i++) {
     const year = pm.startYear + i;
-    const fuelCt = pm.fuelCt(inp.oldHeating.fuel, year);
-    const elecCt = pm.elecCt(year);
+    // Preis zu Jahresbeginn (im Startjahr: Startmonat)
+    const month = Math.max(pm.startMonth, year * 12);
+    const fuelCt = pm.fuelCt(inp.oldHeating.fuel, month);
+    const elecCt = pm.elecCt(month);
     const hp = inp.heatPump;
     out.push({
       year,
