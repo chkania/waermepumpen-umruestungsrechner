@@ -47,7 +47,8 @@ Erzeugt einen Link, der alle **vom Standard abweichenden Eingaben** enthält, un
 - Der Link enthält die Eingaben selbst (im Teil nach `#s=`). Es wird **nichts auf einem Server gespeichert**.
 - **Achtung:** Auch persönliche Angaben wie das Haushaltseinkommen stehen im Link. Teilen Sie ihn nur mit Personen, die diese Angaben sehen dürfen.
 - Solange ein geteilter Link in der Adresszeile steht, wird er bei jeder Änderung mit aktualisiert.
-- Ein geöffneter Link hat Vorrang vor den im Browser gespeicherten Eingaben.
+- Ein geöffneter Link hat Vorrang vor den im Browser gespeicherten Eingaben – er **überschreibt sie aber nicht**. Haben Sie eigene Eingaben gespeichert, erscheint über den Ergebnissen der Hinweis „Geteiltes Szenario geöffnet“. Änderungen wirken dann nur auf den Link. Mit **Als meine Eingaben übernehmen** speichern Sie das Szenario als Ihre eigenen Eingaben, mit **Eigene Eingaben laden** kehren Sie zu Ihrem gespeicherten Stand zurück. Import und Zurücksetzen beenden die Link-Ansicht ebenfalls.
+- Werte im Link werden geprüft: Ungültige Monate oder Auswahlwerte werden durch den Standardwert ersetzt, extreme Zahlen (z. B. 1.000.000 Jahre Laufzeit) auf sinnvolle Grenzen begrenzt. Was ersetzt wurde, steht im Hinweis über den Ergebnissen.
 
 ### Export
 
@@ -55,7 +56,7 @@ Speichert alle Eingaben als **JSON-Datei**, einschließlich Bezeichnung und Beme
 
 ### Import
 
-Lädt eine zuvor exportierte JSON-Datei. Felder, die in der Datei fehlen oder ungültig sind, erhalten den Standardwert; unbekannte Felder werden ignoriert. Dateien, die nicht von diesem Rechner stammen, werden mit einer Meldung abgelehnt.
+Lädt eine zuvor exportierte JSON-Datei. Felder, die in der Datei fehlen oder ungültig sind, erhalten den Standardwert; Zahlen außerhalb sinnvoller Grenzen werden begrenzt, unbekannte Felder ignoriert. Ersetzte Werte werden über den Ergebnissen aufgelistet. Dateien, die nicht von diesem Rechner stammen, werden mit einer Meldung abgelehnt.
 
 ### Zurücksetzen
 
@@ -67,7 +68,7 @@ Alle Eingaben werden bei jeder Änderung automatisch im Browser gespeichert (`lo
 
 ## Eingaben
 
-Prozentwerte werden als Prozent eingegeben (z. B. `90` für 90 %). Monate werden als Jahr und Monat eingegeben. Ungültige Eingaben werden rot markiert und nicht übernommen.
+Prozentwerte werden als Prozent eingegeben (z. B. `90` für 90 %). Monate werden als Jahr und Monat eingegeben. Ungültige Eingaben werden rot markiert und nicht übernommen – ebenso Werte außerhalb sinnvoller Grenzen (z. B. Betrachtungszeitraum höchstens 50 Jahre, Kreditlaufzeit höchstens 50 Jahre, Zeitpunktvergleich höchstens 40 Zeitpunkte).
 
 ### Szenario
 
@@ -255,4 +256,4 @@ Tabelle je Jahr mit allen Kostenarten (Energie, Grundkosten, Wartung, Investitio
 
 ## Datenschutz
 
-Der Rechner läuft vollständig in Ihrem Browser. Eingaben werden nicht an einen Server übertragen. Gespeichert wird nur lokal im Browser; geteilt wird nur, was Sie per Link oder Export selbst weitergeben.
+Der Rechner läuft vollständig in Ihrem Browser. Eingaben werden nicht an einen Server übertragen. Die veröffentlichte Fassung erlaubt per Content-Security-Policy nur die eigenen Skripte des Rechners; eingeschleuster Code aus Links oder Dateien würde nicht ausgeführt. Gespeichert wird nur lokal im Browser; geteilt wird nur, was Sie per Link oder Export selbst weitergeben.

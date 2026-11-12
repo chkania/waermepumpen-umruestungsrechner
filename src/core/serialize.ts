@@ -1,4 +1,5 @@
 import type { Inputs } from './types';
+import { checkValue, type InputIssue } from './validate';
 
 type Obj = Record<string, unknown>;
 
@@ -6,21 +7,36 @@ const isObj = (v: unknown): v is Obj => typeof v === 'object' && v !== null && !
 
 /**
  * Mischt einen (teilweisen, evtl. fremden) Datenstand in die Defaults.
- * Nur bekannte Schlüssel mit passendem Typ werden übernommen (F9.3).
+ * Nur bekannte Schlüssel mit passendem Typ werden übernommen (F9.3); Werte werden geprüft und
+ * ggf. begrenzt bzw. durch den Standardwert ersetzt (F9.5). Befunde landen in `issues`.
  */
-export function mergeInputs(defaults: Inputs, data: unknown): Inputs {
-  return mergeObj(defaults as unknown as Obj, data) as unknown as Inputs;
+export function mergeInputs(defaults: Inputs, data: unknown, issues: InputIssue[] = []): Inputs {
+  return mergeObj(defaults as unknown as Obj, data, '', issues) as unknown as Inputs;
 }
 
-function mergeObj(base: Obj, data: unknown): Obj {
+function mergeObj(base: Obj, data: unknown, prefix: string, issues: InputIssue[]): Obj {
   const out: Obj = {};
   const src = isObj(data) ? data : {};
   for (const [k, def] of Object.entries(base)) {
-    const v = src[k];
-    if (isObj(def)) out[k] = mergeObj(def, v);
-    else if (typeof def === 'number') out[k] = typeof v === 'number' && Number.isFinite(v) ? v : def;
-    else if (v !== undefined && typeof v === typeof def) out[k] = v;
-    else out[k] = def;
+    const path = prefix ? `${prefix}.${k}` : k;
+    const v = Object.prototype.hasOwnProperty.call(src, k) ? src[k] : undefined;
+    if (isObj(def)) {
+      out[k] = mergeObj(def, v, path, issues);
+      continue;
+    }
+    const typeOk = typeof def === 'number' ? typeof v === 'number' && Number.isFinite(v) : v !== undefined && typeof v === typeof def;
+    if (!typeOk) {
+      if (v !== undefined) issues.push({ path, reason: 'ungültiger Wert, Standardwert verwendet' });
+      out[k] = def;
+      continue;
+    }
+    if (path === 'version') {
+      out[k] = def;
+      continue;
+    }
+    const r = checkValue(path, v, def);
+    if (r.issue) issues.push(r.issue);
+    out[k] = r.value;
   }
   return out;
 }
@@ -64,13 +80,13 @@ export function encodeHash(defaults: Inputs, inputs: Inputs): string {
 }
 
 /** Liest einen URL-Hash; null bei fehlendem/ungültigem Inhalt. */
-export function decodeHash(defaults: Inputs, hash: string): Inputs | null {
+export function decodeHash(defaults: Inputs, hash: string, issues: InputIssue[] = []): Inputs | null {
   const m = /[#&]s=([A-Za-z0-9_-]+)/.exec(hash);
   if (!m) return null;
   try {
     const data = JSON.parse(fromBase64Url(m[1]));
     if (!isObj(data)) return null;
-    return mergeInputs(defaults, data);
+    return mergeInputs(defaults, data, issues);
   } catch {
     return null;
   }
@@ -102,7 +118,7 @@ export function exportJson(inputs: Inputs): string {
 }
 
 /** Import einer JSON-Datei; wirft bei ungültigem Inhalt (F9.3). */
-export function importJson(defaults: Inputs, text: string): Inputs {
+export function importJson(defaults: Inputs, text: string, issues: InputIssue[] = []): Inputs {
   let data: unknown;
   try {
     data = JSON.parse(text);
@@ -112,5 +128,5 @@ export function importJson(defaults: Inputs, text: string): Inputs {
   if (!isObj(data) || data.version !== 1) {
     throw new Error('Die Datei ist kein Datensatz dieses Rechners (version 1).');
   }
-  return mergeInputs(defaults, data);
+  return mergeInputs(defaults, data, issues);
 }

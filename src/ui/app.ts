@@ -7,6 +7,7 @@ import { priceRows, runAll, type RunResult } from '../core/simulation';
 import { tariffComparison } from '../core/tariff';
 import { decodeHash, encodeHash, exportFileName, exportJson, importJson, mergeInputs } from '../core/serialize';
 import type { Inputs, ScenarioKind, ScenarioResult } from '../core/types';
+import { numberRange, TEXT_LIMITS, validMonth, type InputIssue } from '../core/validate';
 import { Charts, type ChartId } from './charts';
 import { SECTIONS, getPath, setPath, type Field } from './fields';
 import { escapeHtml, fmtDuration, fmtEur, fmtMonth, fmtNum, fmtPct } from './format';
@@ -48,7 +49,13 @@ const CHART_TABS: [ChartId, string][] = [
 export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   const storage = env.storage === undefined ? safeStorage() : env.storage;
   const defaults = createDefaults(env.today ?? new Date());
-  let inputs = loadInitial(defaults, storage);
+  const initial = loadInitial(defaults, storage);
+  let inputs = initial.inputs;
+  // Geteilter Link bei vorhandenen eigenen Eingaben: diese nicht still überschreiben (F9.6)
+  let sharedView = initial.source === 'hash' && initial.storedRaw !== null;
+  let loadIssues: { origin: string; issues: InputIssue[] } | null = initial.issues.length
+    ? { origin: initial.source === 'hash' ? 'dem Link' : 'den gespeicherten Eingaben', issues: initial.issues }
+    : null;
   let last: { run: RunResult; cmp: InstallComparison; events: KeyEvents } | null = null;
   let tableKind: ScenarioKind = 'kfw';
   let activeChart: ChartId = 'cumulative';
@@ -108,13 +115,13 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     if (f.type === 'checkbox') value = (el as HTMLInputElement).checked;
     else if (f.type === 'number' || f.type === 'percent') {
       const n = Number(String(el.value).replace(',', '.'));
-      valid = el.value.trim() !== '' && Number.isFinite(n);
       value = f.type === 'percent' ? n / 100 : n;
+      const [min, max] = numberRange(f.path);
+      // Grenzen aus der Eingabeprüfung (F9.5), damit auch Tippfehler den Browser nicht einfrieren
+      valid = el.value.trim() !== '' && Number.isFinite(n) && (value as number) >= min && (value as number) <= max;
     } else if (f.type === 'month') {
-      const empty = el.value.trim() === '';
-      const allowEmpty = f.path === 'funding.grundRateNewFrom';
-      valid = (empty && allowEmpty) || tryParseMonth(el.value) !== null;
-      value = empty ? '' : el.value.trim();
+      value = el.value.trim();
+      valid = validMonth(f.path, value as string);
     } else value = el.value;
     el.classList.toggle('invalid', !valid);
     if (!valid) return;
@@ -126,6 +133,59 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     if (f.noRecalc) renderScenarioName();
     else schedule();
   }
+
+  // ---------- Hinweise beim Laden: geteilter Link, ungültige Werte (F9.5, F9.6) ----------
+  const notice = $<HTMLElement>('#notice');
+  function renderNotice(): void {
+    const parts: string[] = [];
+    if (sharedView) {
+      parts.push(`<div class="notice-shared">
+        <p><strong>Geteiltes Szenario geöffnet.</strong> Ihre eigenen gespeicherten Eingaben bleiben unverändert, bis Sie dieses Szenario übernehmen. Änderungen wirken nur auf den Link.</p>
+        <div class="notice-actions">
+          <button type="button" data-notice="adopt">Als meine Eingaben übernehmen</button>
+          <button type="button" data-notice="own" class="ghost">Eigene Eingaben laden</button>
+        </div></div>`);
+    }
+    if (loadIssues) {
+      parts.push(`<div class="notice-issues">
+        <p><strong>${loadIssues.issues.length === 1 ? 'Ein Wert' : `${loadIssues.issues.length} Werte`} aus ${escapeHtml(loadIssues.origin)} ${loadIssues.issues.length === 1 ? 'war' : 'waren'} ungültig und wurde${loadIssues.issues.length === 1 ? '' : 'n'} ersetzt:</strong></p>
+        <ul>${loadIssues.issues
+          .slice(0, 12)
+          .map((x) => `<li>${escapeHtml(fieldByPath.get(x.path)?.label ?? x.path)}: ${escapeHtml(x.reason)}</li>`)
+          .join('')}${loadIssues.issues.length > 12 ? `<li>… und ${loadIssues.issues.length - 12} weitere</li>` : ''}</ul>
+        <button type="button" data-notice="dismiss" class="ghost">Ausblenden</button></div>`);
+    }
+    notice.innerHTML = parts.join('');
+    notice.hidden = parts.length === 0;
+  }
+  /** Link-Ansicht verlassen: Hash entfernen, Speichern wieder erlauben. */
+  function leaveShared(): void {
+    sharedView = false;
+    if (location.hash.startsWith('#s=')) history.replaceState(null, '', location.pathname + location.search);
+  }
+  notice.addEventListener('click', (e) => {
+    const action = (e.target as HTMLElement).closest<HTMLElement>('[data-notice]')?.dataset.notice;
+    if (action === 'adopt') {
+      sharedView = false;
+      persist();
+      toast('Szenario als eigene Eingaben übernommen.');
+    } else if (action === 'own') {
+      leaveShared();
+      const issues: InputIssue[] = [];
+      try {
+        inputs = mergeInputs(defaults, JSON.parse(initial.storedRaw ?? '{}'), issues);
+      } catch {
+        inputs = mergeInputs(defaults, {});
+      }
+      loadIssues = issues.length ? { origin: 'den gespeicherten Eingaben', issues } : null;
+      writeForm();
+      recalc();
+      toast('Eigene Eingaben geladen.');
+    } else if (action === 'dismiss') {
+      loadIssues = null;
+    } else return;
+    renderNotice();
+  });
 
   // ---------- Herkunft der Standardwerte (Popover) ----------
   const closePopovers = (except?: Element) => {
@@ -194,7 +254,12 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     const file = fileInput.files?.[0];
     if (!file) return;
     try {
-      controller.setInputs(importJson(defaults, await file.text()));
+      const issues: InputIssue[] = [];
+      const imported = importJson(defaults, await file.text(), issues);
+      leaveShared();
+      loadIssues = issues.length ? { origin: 'der Datei', issues } : null;
+      controller.setInputs(imported);
+      renderNotice();
       toast('Eingaben importiert.');
     } catch (err) {
       toast((err as Error).message);
@@ -203,7 +268,10 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   });
   $<HTMLButtonElement>('#btn-reset').addEventListener('click', () => {
     if (!confirm('Alle Eingaben auf die Standardwerte zurücksetzen?')) return;
+    leaveShared();
+    loadIssues = null;
     controller.setInputs(createDefaults(env.today ?? new Date()));
+    renderNotice();
     toast('Auf Standardwerte zurückgesetzt.');
   });
 
@@ -269,7 +337,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
 
   function persist(): void {
     try {
-      storage?.setItem(STORAGE_KEY, JSON.stringify(inputs));
+      if (!sharedView) storage?.setItem(STORAGE_KEY, JSON.stringify(inputs));
     } catch {
       /* Speicher nicht verfügbar */
     }
@@ -529,8 +597,8 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     setInputs(i) {
       inputs = mergeInputs(defaults, i);
       writeForm();
-      persist();
       recalc();
+      persist();
     },
     recalc,
     lastResult: () => last,
@@ -559,20 +627,38 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   };
 
   writeForm();
+  renderNotice();
   recalc();
   return controller;
 }
 
-function loadInitial(defaults: Inputs, storage: Storage | null): Inputs {
-  const fromHash = typeof location !== 'undefined' ? decodeHash(defaults, location.hash) : null;
-  if (fromHash) return fromHash;
+interface InitialLoad {
+  inputs: Inputs;
+  source: 'hash' | 'storage' | 'default';
+  issues: InputIssue[];
+  /** Eigene gespeicherte Eingaben (roh), falls vorhanden. */
+  storedRaw: string | null;
+}
+
+function loadInitial(defaults: Inputs, storage: Storage | null): InitialLoad {
+  let storedRaw: string | null = null;
   try {
-    const raw = storage?.getItem(STORAGE_KEY);
-    if (raw) return mergeInputs(defaults, JSON.parse(raw));
+    storedRaw = storage?.getItem(STORAGE_KEY) ?? null;
   } catch {
     /* ignorieren */
   }
-  return mergeInputs(defaults, {});
+  const issues: InputIssue[] = [];
+  const fromHash = typeof location !== 'undefined' ? decodeHash(defaults, location.hash, issues) : null;
+  if (fromHash) return { inputs: fromHash, source: 'hash', issues, storedRaw };
+  issues.length = 0;
+  if (storedRaw) {
+    try {
+      return { inputs: mergeInputs(defaults, JSON.parse(storedRaw), issues), source: 'storage', issues, storedRaw };
+    } catch {
+      /* ignorieren */
+    }
+  }
+  return { inputs: mergeInputs(defaults, {}), source: 'default', issues: [], storedRaw };
 }
 
 function readTheme(storage: Storage | null): ThemeChoice {
@@ -678,9 +764,9 @@ function fieldHtml(f: Field, defaults: Inputs): string {
   } else if (f.type === 'month') {
     control = `<input type="month" id="${id}" data-path="${f.path}" placeholder="JJJJ-MM">`;
   } else if (f.type === 'textarea') {
-    control = `<textarea id="${id}" data-path="${f.path}" rows="4"${ph}></textarea>`;
+    control = `<textarea id="${id}" data-path="${f.path}" rows="4" maxlength="${TEXT_LIMITS[f.path] ?? 2000}"${ph}></textarea>`;
   } else if (f.type === 'text') {
-    control = `<input type="text" id="${id}" data-path="${f.path}"${f.noSource ? '' : ' spellcheck="false"'}${ph}>`;
+    control = `<input type="text" id="${id}" data-path="${f.path}" maxlength="${TEXT_LIMITS[f.path] ?? 2000}"${f.noSource ? '' : ' spellcheck="false"'}${ph}>`;
   } else {
     const attrs = [
       f.step !== undefined ? `step="${f.step}"` : 'step="any"',
@@ -731,6 +817,7 @@ function layout(): string {
   <main class="layout">
     <aside id="inputs" class="inputs" aria-label="Eingaben"></aside>
     <section class="results" aria-label="Ergebnisse">
+      <div id="notice" class="notice" role="status" hidden></div>
       <h2 id="scenario-name" class="scenario-name" hidden></h2>
       <div id="kpis" class="kpis"></div>
       <p id="horizon-note" class="muted small"></p>
