@@ -187,6 +187,13 @@ export const SECTIONS: Section[] = [
       { path: 'financing.windfallAmount', label: 'Verfügbarer Betrag', type: 'number', unit: '€', step: 1000, min: 0, help: '0 = keine Einmalzahlung.' },
       { path: 'financing.windfallMonth', label: 'Verfügbar ab', type: 'month', show: (i) => i.financing.windfallAmount > 0 },
       {
+        path: 'financing.windfallRepayMonth',
+        label: 'Sondertilgung am',
+        type: 'month',
+        show: (i) => i.financing.windfallAmount > 0,
+        help: 'Leer = sofort, wenn das Geld verfügbar ist. KfW: Teil-Sondertilgungen nur bis zum Ende der ersten Zinsbindung kostenfrei.',
+      },
+      {
         path: 'financing.windfallTarget',
         label: 'Zuerst tilgen',
         type: 'select',

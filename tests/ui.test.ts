@@ -296,6 +296,54 @@ describe('UI (Smoke-Test)', () => {
     expect(JSON.parse(store.getItem(STORAGE_KEY)!).heatPump.investment).toBe(40000);
   });
 
+  it('N7 ungültige Eingabe: Fehlertext, aria-invalid, verknüpft mit dem Feld', () => {
+    const { root } = mount();
+    const el = setValue(root, 'general.horizonYears', '1000');
+    expect(el.getAttribute('aria-invalid')).toBe('true');
+    const err = root.querySelector<HTMLElement>(`#${el.id}-err`)!;
+    expect(err.hidden).toBe(false);
+    expect(err.textContent).toContain('1 bis 50');
+    expect(el.getAttribute('aria-describedby')).toContain(`${el.id}-err`);
+    setValue(root, 'general.horizonYears', '25');
+    expect(el.hasAttribute('aria-invalid')).toBe(false);
+    expect(err.hidden).toBe(true);
+    // Prozentfelder in Prozent
+    expect(setValue(root, 'heatPump.pvShare', '150').closest('.field')!.textContent).toContain('0 bis 100 %');
+  });
+
+  it('N7 Diagramme: Textalternative, Datentabellen, Reiter mit Pfeiltasten', () => {
+    const { root } = mount();
+    const canvas = root.querySelector('canvas[data-chart="prices"]')!;
+    expect(canvas.getAttribute('role')).toBe('img');
+    expect(canvas.getAttribute('aria-label')).toContain('Preisentwicklung');
+    const prices = root.querySelector('[data-chart-table="prices"] table')!;
+    expect(prices.querySelector('caption')!.textContent).toContain('Preisentwicklung');
+    expect(prices.querySelectorAll('tbody tr').length).toBe(21);
+    expect(root.querySelectorAll('[data-chart-table="install"] tbody tr')).toHaveLength(9);
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    expect(tabs[0].getAttribute('aria-controls')).toBe('panel-cumulative');
+    expect(root.querySelector('#panel-cumulative')!.getAttribute('role')).toBe('tabpanel');
+    expect(tabs.map((t) => t.tabIndex)).toEqual([0, -1, -1, -1]);
+    tabs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(tabs[1].getAttribute('aria-selected')).toBe('true');
+    expect(tabs.map((t) => t.tabIndex)).toEqual([-1, 0, -1, -1]);
+    expect(root.querySelector<HTMLElement>('#panel-annual')!.hidden).toBe(false);
+    tabs[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
+    expect(tabs[3].getAttribute('aria-selected')).toBe('true');
+    tabs[3].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(tabs[0].getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('F12.6 Finanzierungskarte zeigt Sondertilgung mit Termin und Zinsersparnis', () => {
+    const { root } = mount();
+    setValue(root, 'financing.windfallAmount', '10000');
+    setValue(root, 'financing.windfallRepayMonth', '2032-11');
+    const card = root.querySelector('#details')!.textContent!;
+    expect(card).toContain('Sondertilgung 11/2032');
+    expect(card).toContain('verfügbar ab 11/2031');
+    expect(card).toContain('Zinsersparnis');
+  });
+
   it('F15 Hilfe-Link öffnet das Benutzerhandbuch in neuem Tab', () => {
     const { root } = mount();
     const a = root.querySelector<HTMLAnchorElement>('#btn-help')!;

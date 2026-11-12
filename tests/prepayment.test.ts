@@ -186,3 +186,50 @@ describe('F12 Einmalzahlung als Sondertilgung in der Simulation', () => {
     expect(t2.find((e) => /der Einmalzahlung nicht eingesetzt/.test(e.title))).toBeDefined();
   });
 });
+
+describe('F12.6 Tilgungstermin der Sondertilgung', () => {
+  const at = (repay: string, mut?: (i: Inputs) => void) =>
+    wfCase((i) => {
+      i.financing.windfallTarget = 'kfw';
+      i.financing.windfallRepayMonth = repay;
+      mut?.(i);
+    });
+
+  it('leer = Verfügbarkeitsmonat; späterer Termin verschiebt Tilgung und Zinsen', () => {
+    const now = simulate(at(''), 'kfw');
+    expect(now.windfall!.month).toBe(parseMonth('2029-11'));
+    const later = simulate(at('2031-05'), 'kfw');
+    expect(later.windfall!.month).toBe(parseMonth('2031-05'));
+    expect(later.windfall!.availableMonth).toBe(parseMonth('2029-11'));
+    const row = (s: typeof now, m: string) => s.months.find((r) => r.month === parseMonth(m))!;
+    expect(row(later, '2031-05').principal).toBeGreaterThan(10000);
+    expect(row(later, '2029-11').principal).toBeLessThan(1000);
+    // später tilgen spart weniger Zinsen
+    expect(later.windfall!.interestSaved).toBeGreaterThan(0);
+    expect(later.windfall!.interestSaved).toBeLessThan(now.windfall!.interestSaved);
+    const interest = (s: typeof now) => sum(s.loans.map((l) => l.totalInterest));
+    const none = simulate(at('', (i) => (i.financing.windfallAmount = 0)), 'kfw');
+    expect(now.windfall!.interestSaved).toBeCloseTo(interest(none) - interest(now), 6);
+  });
+
+  it('Regeln gelten zum Tilgungsmonat: nach Zinsbindungsende KfW abgelehnt', () => {
+    const r = simulate(at('2037-06'), 'kfw');
+    expect(r.windfall!.attempts[0]).toMatchObject({ loan: 'KfW-Kredit 358', status: 'rejected' });
+  });
+
+  it('Termin vor Verfügbarkeit → Verfügbarkeitsmonat mit Warnung', () => {
+    const r = simulate(at('2028-01'), 'kfw');
+    expect(r.windfall!.month).toBe(parseMonth('2029-11'));
+    expect(r.warnings.join()).toMatch(/vor der Verfügbarkeit/);
+  });
+
+  it('Ereignisse: Verfügbarkeit und Sondertilgung mit Zinsersparnis', () => {
+    const i = at('2031-05');
+    const t = keyEvents(i, runAll(i)).timeline.filter((e) => e.scenario === 'kfw');
+    const avail = t.find((e) => /verfügbar$/.test(e.title))!;
+    expect(avail.month).toBe(parseMonth('2029-11'));
+    const sond = t.find((e) => /^Sondertilgung 10\.000 €/.test(e.title))!;
+    expect(sond.month).toBe(parseMonth('2031-05'));
+    expect(sond.detail).toMatch(/Zinsen im Betrachtungszeitraum/);
+  });
+});

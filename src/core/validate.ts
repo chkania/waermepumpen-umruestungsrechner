@@ -60,6 +60,7 @@ export const MONTH_FIELDS: Record<string, boolean> = {
   'general.startMonth': false,
   'heatPump.installMonth': false,
   'financing.windfallMonth': false,
+  'financing.windfallRepayMonth': true,
   'tax.deadline': false,
   'funding.grundRateNewFrom': true,
   'funding.kgbDegressionStart': true,

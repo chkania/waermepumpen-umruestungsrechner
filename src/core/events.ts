@@ -185,6 +185,15 @@ function addWindfallEvents(timeline: KeyEvent[], s: ScenarioResult, scenario: 'k
   }
   const w = s.windfall;
   if (!w) return;
+  if (w.availableMonth !== w.month && !w.note) {
+    timeline.push({
+      month: w.availableMonth,
+      scenario,
+      level: 'info',
+      title: `Einmalzahlung ${eur(w.amount)} verfügbar`,
+      detail: `Die Sondertilgung ist für ${M(w.month)} geplant.`,
+    });
+  }
   if (w.note) {
     timeline.push({ month: w.month, scenario, level: 'warning', title: 'Einmalzahlung nicht eingesetzt', detail: w.note });
     return;
@@ -195,11 +204,17 @@ function addWindfallEvents(timeline: KeyEvent[], s: ScenarioResult, scenario: 'k
       if (a.paidOff) parts.push('Der Kredit ist damit vollständig getilgt.');
       if (a.fee > 0) parts.push(`Vorfälligkeitsentschädigung ${eur(a.fee)}.`);
       else parts.push('Ohne Vorfälligkeitsentschädigung.');
+      if (w.interestSaved > 0.5 && w.attempts.filter((x) => x.applied > 0).length === 1) {
+        parts.push(`Spart ${eur(w.interestSaved)} Zinsen im Betrachtungszeitraum.`);
+      }
       if (a.reason) parts.push(a.reason);
       timeline.push({ month: w.month, scenario, level: 'important', title: `Sondertilgung ${eur(a.applied)} auf ${a.loan}`, detail: parts.join(' '), amount: a.applied + a.fee });
     } else {
       timeline.push({ month: w.month, scenario, level: 'warning', title: `Sondertilgung auf ${a.loan} nicht möglich`, detail: a.reason });
     }
+  }
+  if (w.interestSaved > 0.5 && w.attempts.filter((x) => x.applied > 0).length > 1) {
+    timeline.push({ month: w.month, scenario, level: 'info', title: `Sondertilgung spart ${eur(w.interestSaved)} Zinsen`, detail: 'Summe über alle getilgten Kredite im Betrachtungszeitraum.' });
   }
   if (w.unused > 0.5) {
     timeline.push({

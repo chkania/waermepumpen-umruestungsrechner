@@ -274,11 +274,31 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
     const runLoans = (planned: { name: string; spec: LoanSpec }[]) => {
       const active = planned.filter((l) => l.spec.principal > 0);
       const results = new Map(active.map((l) => [l, loanScheduleDetailed(l.spec)] as const));
-      const wfMonth = tryParseMonth(fin.windfallMonth);
-      if (fin.windfallAmount > 0 && wfMonth !== null) {
-        windfall = { month: wfMonth, amount: fin.windfallAmount, used: 0, unused: fin.windfallAmount, attempts: [] };
+      const avail = tryParseMonth(fin.windfallMonth);
+      if (fin.windfallAmount > 0 && avail !== null) {
+        // Tilgungstermin (F12.6): leer = sofort bei Verfügbarkeit; früher als verfügbar ist nicht möglich
+        let wfMonth = tryParseMonth(fin.windfallRepayMonth) ?? avail;
+        if (wfMonth < avail) {
+          warnings.push(
+            `Sondertilgung ${formatMonthDe(wfMonth)} liegt vor der Verfügbarkeit der Einmalzahlung – gerechnet wird mit ${formatMonthDe(avail)}.`,
+          );
+          wfMonth = avail;
+        }
+        windfall = {
+          month: wfMonth,
+          availableMonth: avail,
+          amount: fin.windfallAmount,
+          used: 0,
+          unused: fin.windfallAmount,
+          attempts: [],
+          interestSaved: 0,
+          fees: 0,
+        };
+        const interestInHorizon = () =>
+          active.reduce((sum, l) => sum + results.get(l)!.payments.filter((p) => p.month < end).reduce((a, p) => a + p.interest, 0), 0);
+        const interestBefore = interestInHorizon();
         if (wfMonth < start || wfMonth >= end) {
-          windfall.note = 'Die Einmalzahlung liegt außerhalb des Betrachtungszeitraums.';
+          windfall.note = 'Die Sondertilgung liegt außerhalb des Betrachtungszeitraums.';
         } else if (active.length === 0) {
           windfall.note = 'Es gibt keinen Kredit, der getilgt werden könnte.';
         } else {
@@ -296,10 +316,12 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
               l.spec = spec;
               results.set(l, res);
               remaining -= r.applied;
+              windfall.fees += r.fee;
             }
           }
           windfall.used = fin.windfallAmount - remaining;
           windfall.unused = remaining;
+          windfall.interestSaved = interestBefore - interestInHorizon();
         }
       }
       for (const l of active) addLoan(l.name, l.spec, results.get(l)!);

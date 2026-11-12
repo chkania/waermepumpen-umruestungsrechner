@@ -7,8 +7,8 @@ import { priceRows, runAll, type RunResult } from '../core/simulation';
 import { tariffComparison } from '../core/tariff';
 import { decodeHash, encodeHash, exportFileName, exportJson, importJson, mergeInputs } from '../core/serialize';
 import type { Inputs, ScenarioKind, ScenarioResult } from '../core/types';
-import { numberRange, TEXT_LIMITS, validMonth, type InputIssue } from '../core/validate';
-import { Charts, type ChartId } from './charts';
+import { NUMBER_LIMITS, numberRange, TEXT_LIMITS, validMonth, type InputIssue } from '../core/validate';
+import { Charts, chartTables, type ChartId } from './charts';
 import { SECTIONS, getPath, setPath, type Field } from './fields';
 import { escapeHtml, fmtDuration, fmtEur, fmtMonth, fmtNum, fmtPct } from './format';
 
@@ -81,7 +81,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       if (el instanceof HTMLInputElement && f.type === 'checkbox') el.checked = Boolean(v);
       else if (f.type === 'percent') el.value = String(round(Number(v) * 100, 6));
       else el.value = String(v ?? '');
-      el.classList.remove('invalid');
+      setFieldError(el, null);
     }
     refreshVisibility();
     renderScenarioName();
@@ -107,6 +107,18 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     }
   }
 
+  /** Fehler als Text und für Screenreader kennzeichnen (WCAG 3.3.1, 1.4.1). */
+  function setFieldError(el: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement, msg: string | null): void {
+    el.classList.toggle('invalid', msg !== null);
+    if (msg === null) el.removeAttribute('aria-invalid');
+    else el.setAttribute('aria-invalid', 'true');
+    const err = form.querySelector<HTMLElement>(`#${el.id}-err`);
+    if (err) {
+      err.textContent = msg ?? '';
+      err.hidden = msg === null;
+    }
+  }
+
   function readField(el: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement): void {
     const f = fieldByPath.get(el.dataset.path!)!;
     const prev = getPath(inputs, f.path);
@@ -123,7 +135,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       value = el.value.trim();
       valid = validMonth(f.path, value as string);
     } else value = el.value;
-    el.classList.toggle('invalid', !valid);
+    setFieldError(el, valid ? null : fieldErrorText(f));
     if (!valid) return;
     setPath(inputs, f.path, value);
     f.onChange?.(inputs, prev);
@@ -276,13 +288,32 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   });
 
   // ---------- Tabs ----------
-  root.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((b) =>
-    b.addEventListener('click', () => {
-      activeChart = b.dataset.tab as ChartId;
-      root.querySelectorAll('[data-tab]').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
-      root.querySelectorAll<HTMLElement>('[data-panel]').forEach((p) => (p.hidden = p.dataset.panel !== activeChart));
-    }),
-  );
+  // Reiter nach ARIA-Muster: ein Tab-Stopp, Pfeiltasten/Pos1/Ende wechseln (WCAG 2.1.1, 4.1.2)
+  const tabButtons = [...root.querySelectorAll<HTMLButtonElement>('[data-tab]')];
+  const selectTab = (b: HTMLButtonElement, focus = false) => {
+    activeChart = b.dataset.tab as ChartId;
+    for (const x of tabButtons) {
+      x.setAttribute('aria-selected', String(x === b));
+      x.tabIndex = x === b ? 0 : -1;
+    }
+    root.querySelectorAll<HTMLElement>('[data-panel]').forEach((p) => (p.hidden = p.dataset.panel !== activeChart));
+    if (focus) b.focus();
+  };
+  tabButtons.forEach((b, i) => {
+    b.addEventListener('click', () => selectTab(b));
+    b.addEventListener('keydown', (e) => {
+      const n = tabButtons.length;
+      const target =
+        e.key === 'ArrowRight' ? tabButtons[(i + 1) % n]
+        : e.key === 'ArrowLeft' ? tabButtons[(i - 1 + n) % n]
+        : e.key === 'Home' ? tabButtons[0]
+        : e.key === 'End' ? tabButtons[n - 1]
+        : null;
+      if (!target) return;
+      e.preventDefault();
+      selectTab(target, true);
+    });
+  });
   $<HTMLSelectElement>('#table-kind').addEventListener('change', (e) => {
     tableKind = (e.target as HTMLSelectElement).value as ScenarioKind;
     if (last) renderYearTable(last.run, last.events);
@@ -364,7 +395,20 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     renderTariff();
     renderInstallTable(cmp);
     renderYearTable(run, events);
-    charts.update(run, priceRows(inputs), cmp, events);
+    const prices = priceRows(inputs);
+    charts.update(run, prices, cmp, events);
+    renderChartTables(run, prices, cmp);
+  }
+
+  function renderChartTables(run: RunResult, prices: ReturnType<typeof priceRows>, cmp: InstallComparison): void {
+    const tables = chartTables(run, prices, cmp);
+    for (const [id, t] of Object.entries(tables)) {
+      const el = root.querySelector<HTMLElement>(`[data-chart-table="${id}"]`);
+      if (!el) continue;
+      el.innerHTML = `<table class="compact"><caption>${escapeHtml(t.caption)}</caption>
+        <thead><tr>${t.head.map((h, i) => `<th scope="col"${i ? ' class="num"' : ''}>${escapeHtml(h)}</th>`).join('')}</tr></thead>
+        <tbody>${t.rows.map((r) => `<tr>${r.map((c, i) => (i ? `<td class="num">${escapeHtml(c)}</td>` : `<th scope="row">${escapeHtml(c)}</th>`)).join('')}</tr>`).join('')}</tbody></table>`;
+    }
   }
 
   function renderKpis(run: RunResult): void {
@@ -460,7 +504,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     const loanHtml = loans.length
       ? `<div class="table-wrap"><table class="compact"><thead><tr><th>Weg</th><th>Kredit</th><th class="num">Betrag</th><th class="num">Zins</th><th class="num">Zinskosten*</th></tr></thead><tbody>
           ${loans.map((l) => `<tr><td>${l.path}</td><td>${escapeHtml(l.name.replace('KfW-Kredit ', 'KfW '))}</td><td class="num">${fmtEur(l.principal)}</td><td class="num">${fmtPct(l.rate, 2)}</td><td class="num">${fmtEur(l.totalInterest)}</td></tr>`).join('')}
-          </tbody></table></div><p class="muted small">* im Betrachtungszeitraum. Zinssätze sind Annahmen.</p>`
+          </tbody></table></div>${windfallHtml(run)}<p class="muted small">* im Betrachtungszeitraum. Zinssätze sind Annahmen.</p>`
       : '<p class="muted">Keine Kredite – vollständig aus Eigenkapital finanziert.</p>';
     $<HTMLElement>('#details').innerHTML = `
       <div class="card"><h3>KfW-Zuschuss (458)</h3>${kfwHtml}</div>
@@ -748,10 +792,50 @@ function refsHtml(refs: { label: string; url: string }[] | undefined): string {
     .join('')}</ul></div>`;
 }
 
+/** Sondertilgung aus Einmalzahlung je Weg (F12.6): Termin, Betrag, Entschädigung, Zinsersparnis. */
+function windfallHtml(run: RunResult): string {
+  const rows = (
+    [
+      ['KfW-Weg', run.kfw.windfall],
+      ['Steuer-Weg', run.tax.windfall],
+    ] as const
+  ).filter(([, w]) => w);
+  if (!rows.length) return '';
+  const w0 = rows[0][1]!;
+  const when =
+    w0.availableMonth === w0.month ? fmtMonth(w0.month) : `${fmtMonth(w0.month)} <small>(verfügbar ab ${fmtMonth(w0.availableMonth)})</small>`;
+  return `<h4 class="sub-head">Sondertilgung ${when}</h4>
+    ${rows
+      .map(([path, w]) =>
+        w!.note
+          ? `<p class="muted small"><strong>${path}:</strong> ${escapeHtml(w!.note)}</p>`
+          : `<dl class="wf-dl"><dt class="wf-path">${path}</dt><dd></dd>
+              <dt>Getilgt</dt><dd>${fmtEur(w!.used)}</dd>
+              ${w!.fees > 0 ? `<dt>Vorfälligkeitsentschädigung</dt><dd>${fmtEur(w!.fees)}</dd>` : ''}
+              <dt>Zinsersparnis*</dt><dd><strong>${fmtEur(w!.interestSaved)}</strong></dd>
+              ${w!.unused > 0.5 ? `<dt>Nicht eingesetzt</dt><dd>${fmtEur(w!.unused)}</dd>` : ''}</dl>`,
+      )
+      .join('')}`;
+}
+
+/** Fehlertext für ungültige Eingaben (F9.5, WCAG 3.3.1). */
+export function fieldErrorText(f: Field): string {
+  const keep = ' Der bisherige Wert wird weiter verwendet.';
+  if (f.type === 'month') return `Bitte einen Monat zwischen 2000 und 2150 angeben (Jahr und Monat).${keep}`;
+  if (f.type === 'number' || f.type === 'percent') {
+    if (!(f.path in NUMBER_LIMITS)) return `Bitte eine gültige Zahl eingeben.${keep}`;
+    const k = f.type === 'percent' ? 100 : 1;
+    const [min, max] = numberRange(f.path).map((x) => (x * k).toLocaleString('de-DE', { maximumFractionDigits: 2 }));
+    const unit = typeof f.unit === 'string' && f.unit ? ` ${f.unit}` : '';
+    return `Bitte einen Wert von ${min} bis ${max}${unit} eingeben.${keep}`;
+  }
+  return `Ungültige Eingabe.${keep}`;
+}
+
 function fieldHtml(f: Field, defaults: Inputs): string {
   const id = `f-${f.path.replace(/\./g, '-')}`;
   const unit = typeof f.unit === 'string' ? f.unit : '';
-  const help = f.help ? `<small class="help">${escapeHtml(f.help)}</small>` : '';
+  const help = f.help ? `<small class="help" id="${id}-help">${escapeHtml(f.help)}</small>` : '';
   const src = f.noSource ? { button: '', pop: '' } : sourceHtml(f, id, defaults);
   const ph = f.placeholder ? ` placeholder="${escapeHtml(f.placeholder)}"` : '';
   if (f.type === 'checkbox') {
@@ -775,9 +859,13 @@ function fieldHtml(f: Field, defaults: Inputs): string {
     ].join(' ');
     control = `<input type="number" inputmode="decimal" id="${id}" data-path="${f.path}" ${attrs}>`;
   }
+  // Hilfetext und Fehlermeldung mit dem Feld verknüpfen (Screenreader)
+  const describedBy = [f.help ? `${id}-help` : '', `${id}-err`].filter(Boolean).join(' ');
+  control = control.replace(`data-path="${f.path}"`, `data-path="${f.path}" aria-describedby="${describedBy}"`);
   return `<div class="field" data-field="${f.path}">
     <div class="label-row"><label for="${id}">${escapeHtml(f.label)}</label>${src.button}</div>${src.pop}
-    <div class="control">${control}<span class="unit">${escapeHtml(unit)}</span></div>${help}</div>`;
+    <div class="control">${control}<span class="unit">${escapeHtml(unit)}</span></div>
+    <small class="field-error" id="${id}-err" aria-live="polite" hidden></small>${help}</div>`;
 }
 
 function sectionHtml(s: (typeof SECTIONS)[number], defaults: Inputs): string {
@@ -824,10 +912,16 @@ function layout(): string {
       <div id="warnings"></div>
       <div id="events" class="card events"></div>
       <div class="card">
-        <div class="tabs" role="tablist">
-          ${CHART_TABS.map(([id, l], i) => `<button type="button" role="tab" data-tab="${id}" aria-selected="${i === 0}">${l}</button>`).join('')}
+        <h2 class="visually-hidden">Diagramme</h2>
+        <div class="tabs" role="tablist" aria-label="Diagramme">
+          ${CHART_TABS.map(([id, l], i) => `<button type="button" role="tab" id="tab-${id}" data-tab="${id}" aria-controls="panel-${id}" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}">${l}</button>`).join('')}
         </div>
-        ${CHART_TABS.map(([id], i) => `<div class="chart-wrap" data-panel="${id}" ${i === 0 ? '' : 'hidden'}><canvas data-chart="${id}"></canvas></div>`).join('')}
+        ${CHART_TABS.map(
+          ([id, l], i) => `<div role="tabpanel" id="panel-${id}" aria-labelledby="tab-${id}" data-panel="${id}" ${i === 0 ? '' : 'hidden'}>
+            <div class="chart-wrap"><canvas data-chart="${id}" role="img" aria-label="Diagramm ${l}. Die Werte stehen in der Tabelle darunter."></canvas></div>
+            <details class="chart-data"><summary>Werte als Tabelle</summary><div class="table-wrap" data-chart-table="${id}"></div></details>
+          </div>`,
+        ).join('')}
       </div>
       <div id="details" class="details"></div>
       <div id="tariff" class="card tariff"></div>

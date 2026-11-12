@@ -176,9 +176,10 @@ Für Geld, das Ihnen zu einem späteren Zeitpunkt zur Verfügung steht, z. B. ei
 |---|---|
 | **Verfügbarer Betrag** | 0 = keine Einmalzahlung. |
 | **Verfügbar ab** | Monat, in dem das Geld zur Verfügung steht. |
+| **Sondertilgung am** | Monat, in dem getilgt wird. Leer = sofort, wenn das Geld verfügbar ist. Ein späterer Termin kann sich lohnen – oder schaden: Beim KfW-Kredit sind Teil-Sondertilgungen nur bis zum Ende der ersten Zinsbindung möglich. Ein Termin vor der Verfügbarkeit wird auf den Verfügbarkeitsmonat gesetzt. |
 | **Zuerst tilgen** | „Automatisch“ tilgt zuerst den Kredit mit dem höchsten Zins. Ist die Sondertilgung dort nicht möglich, wird der andere Kredit versucht. |
 
-Es gelten die Kreditbedingungen: Beim KfW-Kredit sind Teil-Sondertilgungen nur innerhalb der ersten Zinsbindung und ab 5.000 € möglich (kostenfrei), danach nur die vollständige Rückzahlung. Beim Bankkredit ist jede Sondertilgung möglich, ggf. gegen eine Vorfälligkeitsentschädigung (höchstens 1 %). Was nicht eingesetzt werden kann, zeigt der Rechner unter „Wichtige Ereignisse“.
+Es gelten die Kreditbedingungen: Beim KfW-Kredit sind Teil-Sondertilgungen nur innerhalb der ersten Zinsbindung und ab 5.000 € möglich (kostenfrei), danach nur die vollständige Rückzahlung. Beim Bankkredit ist jede Sondertilgung möglich, ggf. gegen eine Vorfälligkeitsentschädigung (höchstens 1 %). Was nicht eingesetzt werden kann, zeigt der Rechner unter „Wichtige Ereignisse“. In der Karte **Finanzierung** stehen je Weg der getilgte Betrag, eine etwaige Vorfälligkeitsentschädigung, die **Zinsersparnis** im Betrachtungszeitraum und der nicht eingesetzte Rest. Zinsen und Tilgung in der Jahresübersicht und in den Diagrammen berücksichtigen die Sondertilgung ab dem gewählten Monat.
 
 ### Betrachtung
 
@@ -231,6 +232,8 @@ Hinweis zur Amortisation: Der Rechner betrachtet Zahlungsströme. Eine Sondertil
 - **Preisentwicklung:** Kosten je kWh Wärme aus Altanlage und Wärmepumpe sowie der CO₂-Preis.
 - **Zeitpunkt der Umrüstung:** Gesamtkosten je Umrüstzeitpunkt im Vergleich zu „ohne Wärmepumpe“.
 
+Unter jedem Diagramm zeigt **Werte als Tabelle** dieselben Zahlen zum Nachlesen (auch für Screenreader). Die Reiter wechseln Sie mit der Maus oder per Tastatur: Tab auf die Reiterleiste, dann Pfeiltasten links/rechts, Pos1 und Ende.
+
 ### KfW-Zuschuss, Steuerbonus, Finanzierung
 
 Zeigt, wie sich der Zuschuss zusammensetzt (Fördersätze, förderfähige Kosten, Höchstbetrag), wie sich der Steuerbonus auf drei Jahre verteilt und welche Kredite mit welchem Zins und welchen Zinskosten anfallen.
@@ -253,6 +256,18 @@ Tabelle je Jahr mit allen Kostenarten (Energie, Grundkosten, Wartung, Investitio
 - **Varianten durchspielen:** z. B. eine höhere Jahresarbeitszahl, ein anderer Umrüstzeitpunkt oder eine Sondertilgung – die Ergebnisse ändern sich sofort.
 - **Restlebensdauer realistisch schätzen:** Sie bestimmt, wann im Szenario „ohne Wärmepumpe“ ein neuer Kessel nötig wird – oft der größte Einzelposten.
 - **Förderantrag rechtzeitig planen:** Boni und Höchstbeträge sinken halbjährlich; maßgeblich ist das Antragsdatum, nicht die Inbetriebnahme.
+
+## Barrierefreiheit
+
+Der Rechner orientiert sich an WCAG 2.1 Stufe AA (Grundlage der EN 301 549):
+
+- vollständig per Tastatur bedienbar, sichtbarer Fokusrahmen in beiden Designs;
+- Textkontrast mindestens 4,5 : 1 in allen vier Kombinationen aus Design und Hell/Dunkel;
+- ungültige Eingaben werden mit einem Text unter dem Feld erklärt und für Screenreader gekennzeichnet;
+- jedes Diagramm hat eine Textbeschreibung und eine Tabelle mit denselben Werten;
+- Hinweise (z. B. „Link kopiert“) werden von Screenreadern angesagt.
+
+Ein Test mit Screenreadern steht noch aus.
 
 ## Datenschutz
 

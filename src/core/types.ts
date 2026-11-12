@@ -110,6 +110,8 @@ export interface FinancingInputs {
   /** Einmalzahlung in der Zukunft (z. B. Lebensversicherung) für Sondertilgungen; 0 = keine. */
   windfallAmount: number;
   windfallMonth: MonthString;
+  /** Monat der Sondertilgung (JJJJ-MM); leer = sofort bei Verfügbarkeit. */
+  windfallRepayMonth: string;
   /** Welcher Kredit zuerst: 'auto' = höchster Zins zuerst. */
   windfallTarget: 'auto' | 'kfw' | 'bank';
   /** KfW: Mindestbetrag Sondertilgung innerhalb der ersten Zinsbindung. */
@@ -279,7 +281,14 @@ export interface WindfallAttempt {
 }
 
 export interface WindfallInfo {
+  /** Monat der Sondertilgung. */
   month: number;
+  /** Monat, ab dem das Geld verfügbar ist. */
+  availableMonth: number;
+  /** Ersparte Kreditzinsen im Betrachtungszeitraum durch die Sondertilgung. */
+  interestSaved: number;
+  /** Vorfälligkeitsentschädigungen der Sondertilgung. */
+  fees: number;
   amount: number;
   used: number;
   unused: number;

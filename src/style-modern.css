@@ -13,16 +13,17 @@
   --border: #e4e2dd;
   --c-text: #23252a;
   --c-text-2: #5b5a53;
-  --c-muted: #7a786f;
+  --c-muted: #68665e; /* ≥ 4,5:1 auf allen Flächen (WCAG 1.4.3) */
   --c-grid: #eceae5;
   --accent: #2864a6;
   --accent-strong: #1f4e82;
   --accent-soft: #e9f0f8;
+  --on-accent: #ffffff;
   /* Szenariofarben: Blau = Akzent, dazu gedeckte, warme Ergänzungen */
   --c-ref: #b4532a;
   --c-kfw: #2864a6;
   --c-tax: #4b7f52;
-  --good: #2f7d4f;
+  --good: #2a7047;
   --bad: #b3261e;
   --warn: #a86b0c;
   --warn-bg: #fbf5e8;
@@ -49,11 +50,12 @@
   --border: #34363c;
   --c-text: #ecebe7;
   --c-text-2: #b8b5ab;
-  --c-muted: #8e8b81;
+  --c-muted: #9a978d;
   --c-grid: #2a2c31;
   --accent: #6fa3dc;
   --accent-strong: #8db8e6;
   --accent-soft: #1d2a3a;
+  --on-accent: #17181b;
   --c-ref: #e08a5f;
   --c-kfw: #6fa3dc;
   --c-tax: #84b88b;
@@ -211,7 +213,9 @@
 :root[data-design='modern'] .field .control input:focus,
 :root[data-design='modern'] .field .control select:focus,
 :root[data-design='modern'] .field .control textarea:focus {
-  outline: none;
+  /* deutlich sichtbarer Fokus (WCAG 2.4.7) */
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
   border-color: var(--accent);
   background: var(--surface);
 }
@@ -274,7 +278,7 @@
 :root[data-design='modern'] .kpi.tone-good .kpi-value { color: var(--good); }
 :root[data-design='modern'] .badge {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   border-radius: var(--radius-sm);
   padding: 1px 6px;
   font-size: 0.6rem;

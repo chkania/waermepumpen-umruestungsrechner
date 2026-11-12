@@ -27,5 +27,6 @@ SPA (Vite + TypeScript, ohne UI-Framework, Chart.js) zur Wirtschaftlichkeitsrech
 ## Konventionen
 - Zwei Designs: `src/style.css` = Basis/„Klassisch“, `src/style-modern.css` = „Modern“ (nur Regeln unter `:root[data-design='modern']`). Neue UI-Elemente in beiden Designs und in Hell/Dunkel prüfen. Dunkle Farben nur über `:root[data-theme='dark']` (keine `prefers-color-scheme`-Media-Queries).
 - Sicherheit: dynamische Texte in HTML immer mit `escapeHtml`; keine Inline-Skripte/-Event-Handler/`style="…"` im Markup (CSP aus `csp.ts` im Build). Gebauten Stand prüfen: `npm run build`, dann Vorschau „preview“ (Port 4173).
+- Barrierefreiheit (N7, WCAG 2.1 AA): Farben nur über Tokens; neue Text-/Flächenfarben müssen ≥ 4,5 : 1 erreichen (`tests/a11y.test.ts` prüft die Tokens), Text auf Akzentflächen mit `--on-accent`; kein `outline: none`; neue Diagramme brauchen `role="img"`-Beschreibung und eine Tabelle in `chartTables()`; Fehler als Text, nicht nur per Farbe.
 - UI-Texte Deutsch; Beträge brutto in €; Prozentwerte intern als Anteil (0.3), im Formular als % (`type: 'percent'`).
 - Kostenvorzeichen: positiv = Ausgabe, negativ = Einnahme (Zuschuss, Steuerbonus, Kreditauszahlung, Restwert).

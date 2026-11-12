@@ -108,6 +108,7 @@ export function createDefaults(today: Date = new Date()): Inputs {
       taxRefundMonth: 6,
       windfallAmount: 0,
       windfallMonth: formatMonth(parseMonth(start) + 60),
+      windfallRepayMonth: '',
       windfallTarget: 'auto',
       kfwMinPrepay: 5000,
       kfwFeeAfterFix: 0.01,

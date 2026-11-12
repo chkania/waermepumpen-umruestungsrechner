@@ -202,3 +202,35 @@ export class Charts {
     this.charts.clear();
   }
 }
+
+/** Tabellarische Fassung eines Diagramms (Textalternative, WCAG 1.1.1). */
+export interface ChartTable {
+  caption: string;
+  head: string[];
+  rows: string[][];
+}
+
+/** Liefert für jedes Diagramm dieselben Werte als Tabelle – auch ohne Canvas (z. B. Screenreader, Tests). */
+export function chartTables(run: RunResult, prices: PriceRow[], cmp: InstallComparison): Record<ChartId, ChartTable> {
+  const scen = [
+    ['Ohne WP', run.ref],
+    ['WP + KfW', run.kfw],
+    [run.tax.feasible ? 'WP + Steuerbonus' : 'WP + Steuerbonus (nicht möglich)', run.tax],
+  ] as const;
+  const byYear = (key: 'cumulative' | 'total') =>
+    run.ref.years.map((y, i) => [String(y.year), ...scen.map(([, s]) => fmtEur(s.years[i]?.[key] ?? 0))]);
+  return {
+    cumulative: { caption: 'Kumulierte Kosten je Jahr (Endwert inkl. Opportunitätszins)', head: ['Jahr', ...scen.map(([l]) => l)], rows: byYear('cumulative') },
+    annual: { caption: 'Jährliche Kosten je Szenario', head: ['Jahr', ...scen.map(([l]) => l)], rows: byYear('total') },
+    prices: {
+      caption: 'Preisentwicklung: Kosten je kWh Nutzwärme und CO₂-Preis',
+      head: ['Jahr', 'Wärme aus Altanlage (ct/kWh)', 'Wärme aus Wärmepumpe (ct/kWh)', 'CO₂-Preis (€/t)'],
+      rows: prices.map((p) => [String(p.year), fmtNum(p.heatCtFossil, 1), fmtNum(p.heatCtWp, 1), fmtNum(p.co2Price, 0)]),
+    },
+    install: {
+      caption: 'Gesamtkosten im Betrachtungszeitraum je Zeitpunkt der Umrüstung',
+      head: ['Inbetriebnahme', 'WP + KfW', 'WP + Steuerbonus', 'Ohne WP'],
+      rows: cmp.rows.map((r) => [fmtMonth(r.installMonth), fmtEur(r.kfwTotal), r.taxFeasible ? fmtEur(r.taxTotal) : 'nicht möglich', fmtEur(cmp.refTotal)]),
+    },
+  };
+}
