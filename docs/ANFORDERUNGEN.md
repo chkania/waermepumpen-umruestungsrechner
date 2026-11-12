@@ -130,6 +130,11 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 - F15.2 Im Browser aufrufbar als eigene Seite `hilfe.html` (Vite-Mehrseiten-Build): gerendert aus dem Markdown, Inhaltsverzeichnis mit Sprungmarken (`hilfe.html#link-teilen`), gleiches Design und Hell/Dunkel wie der Rechner (folgt Änderungen im anderen Tab), mobil ohne Überlauf. Im Rechner öffnet „Hilfe“ in der Werkzeugleiste die Seite in einem neuen Tab. *(Test: help, ui)*
 - F15.3 Das Handbuch muss jeden Eingabe-Abschnitt, jedes Feld (Beschriftung wie in `fields.ts`), jede Werkzeugleisten-Funktion und jeden Ergebnisbereich nennen – neue Felder/Funktionen erfordern eine Ergänzung (Test schlägt sonst fehl). *(Test: help)*
 
+### F16 – Szenario-Beschreibung
+- F16.1 Abschnitt „Szenario“ (oben, geöffnet) mit „Bezeichnung des Szenarios“ (einzeilig) und „Bemerkungen“ (mehrzeilig). Beide ohne Einfluss auf die Rechnung (keine Neuberechnung), ohne Herkunfts-Popover; gespeichert wie alle Eingaben (localStorage, Link, JSON). Die Bezeichnung erscheint über den Ergebnissen und im Fenstertitel. *(Test: serialize, ui)*
+- F16.2 Export-Dateiname `waermepumpe-rechner-<Bezeichnung>-JJJJ-MM.json`; Bezeichnung dateinamentauglich (Umlaute umschreiben, andere Zeichen → `-`, max. 60 Zeichen); ohne Bezeichnung `waermepumpe-rechner-JJJJ-MM.json`. *(Test: serialize)*
+- F16.3 Ältere Exporte ohne diese Felder lassen sich weiter importieren (leere Werte). *(Test: serialize)*
+
 ### F9 – Persistenz
 - F9.1 Eingaben werden automatisch im localStorage gespeichert und beim Laden wiederhergestellt. *(Test: serialize)*
 - F9.2 „Link teilen": Eingaben (nur Abweichungen von den Defaults) als Base64url-JSON im URL-Hash `#s=…`; ein Link hat Vorrang vor localStorage. *(Test: serialize)*
@@ -183,3 +188,4 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 | 2026-11-11 | F15 Benutzerhandbuch als Markdown und eigene Hilfeseite im Browser (`hilfe.html`), Link „Hilfe“ im Rechner. |
 | 2026-11-11 | Konsistenzprüfung, fünf Korrekturen: (1) kein Restwert mehr für einen Ersatzkessel, den die WP bereits ersetzt hat (F3.3; spät installierte WP wurde zu günstig gerechnet); (2) Zuschuss bzw. Steuererstattung nach Zeitraumende als Forderung im letzten Monat (F5.1/F5.2; vorher entfallen, Kredit-Restschuld aber abgelöst); (3) Tarif-Schwelle berücksichtigt die zusätzliche § 14a-Pauschale bei Wallbox (F13.3); (4) Ersatz-WP bei Betrachtungszeitraum > Lebensdauer (F4.3); (5) Energie-, Grund- und Strompreise steigen stetig ab Startmonat statt in vollen Schritten je Kalenderjahr (F2.1; vorher wirkte die Jahressteigerung bei Start im November schon ab Januar). Regressions-Snapshots bewusst aktualisiert, nur durch (5): Default-Gesamtkosten Referenz 115.827 → 114.913 €, KfW-Weg 73.698 → 73.328 €, Steuer-Weg 97.007 → 96.637 € (Ersparnis KfW-Weg 42,1 → 41,6 T€). |
 | 2026-11-12 | F6.2 Schalter „KfW-Kredit nutzen“: KfW-Weg auch ohne Ergänzungskredit rechenbar (Bankkredit bzw. nur Eigenkapital). Default ja – Ergebnisse unverändert. |
+| 2026-11-12 | F16 Bezeichnung und Bemerkungen des Szenarios; Bezeichnung im Export-Dateinamen. Rechenergebnisse unverändert. |

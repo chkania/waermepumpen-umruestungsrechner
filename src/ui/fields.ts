@@ -1,6 +1,6 @@
 import type { Inputs } from '../core/types';
 
-export type FieldType = 'number' | 'percent' | 'checkbox' | 'select' | 'month' | 'text';
+export type FieldType = 'number' | 'percent' | 'checkbox' | 'select' | 'month' | 'text' | 'textarea';
 
 export interface Field {
   /** Pfad im Inputs-Objekt, z. B. "heatPump.jaz". */
@@ -13,6 +13,11 @@ export interface Field {
   max?: number;
   options?: [string, string][];
   help?: string;
+  placeholder?: string;
+  /** Kein Standardwert mit Herkunft (z. B. Freitext) – kein „i“-Popover. */
+  noSource?: boolean;
+  /** Ändert die Rechnung nicht (nur speichern, kein Neuberechnen). */
+  noRecalc?: boolean;
   show?: (i: Inputs) => boolean;
   /** Reaktion auf Änderung (z. B. Einheitenumrechnung). */
   onChange?: (i: Inputs, prev: unknown) => void;
@@ -31,6 +36,30 @@ const isGas = (i: Inputs) => i.oldHeating.fuel === 'gas';
 const isOil = (i: Inputs) => i.oldHeating.fuel === 'oil';
 
 export const SECTIONS: Section[] = [
+  {
+    id: 'scenario',
+    title: 'Szenario',
+    open: true,
+    fields: [
+      {
+        path: 'scenario.name',
+        label: 'Bezeichnung des Szenarios',
+        type: 'text',
+        placeholder: 'z. B. Angebot Firma A, Herbst 2027',
+        help: 'Zur Unterscheidung mehrerer Szenarien; wird in den Dateinamen beim Export übernommen.',
+        noSource: true,
+        noRecalc: true,
+      },
+      {
+        path: 'scenario.notes',
+        label: 'Bemerkungen',
+        type: 'textarea',
+        placeholder: 'Beschreibung, Annahmen, Angebote, offene Fragen …',
+        noSource: true,
+        noRecalc: true,
+      },
+    ],
+  },
   {
     id: 'old',
     title: 'Bestandsheizung',

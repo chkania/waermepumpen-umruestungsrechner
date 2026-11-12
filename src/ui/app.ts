@@ -1,11 +1,11 @@
 import { compareInstallTimes, type InstallComparison } from '../core/compare';
 import { keyEvents, type KeyEvent, type KeyEvents } from '../core/events';
-import { formatMonth, tryParseMonth } from '../core/dates';
+import { tryParseMonth } from '../core/dates';
 import { createDefaults, FUNDING_SOURCE_DATE } from '../core/defaults';
 import { DEFAULT_SOURCES, OFFICIAL_REFS, SOURCE_KIND_LABEL } from '../core/sources';
 import { priceRows, runAll, type RunResult } from '../core/simulation';
 import { tariffComparison } from '../core/tariff';
-import { decodeHash, encodeHash, exportJson, importJson, mergeInputs } from '../core/serialize';
+import { decodeHash, encodeHash, exportFileName, exportJson, importJson, mergeInputs } from '../core/serialize';
 import type { Inputs, ScenarioKind, ScenarioResult } from '../core/types';
 import { Charts, type ChartId } from './charts';
 import { SECTIONS, getPath, setPath, type Field } from './fields';
@@ -68,7 +68,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   for (const s of SECTIONS) for (const f of s.fields) fieldByPath.set(f.path, f);
 
   function writeForm(): void {
-    for (const el of form.querySelectorAll<HTMLInputElement | HTMLSelectElement>('[data-path]')) {
+    for (const el of form.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>('[data-path]')) {
       const f = fieldByPath.get(el.dataset.path!)!;
       const v = getPath(inputs, f.path);
       if (el instanceof HTMLInputElement && f.type === 'checkbox') el.checked = Boolean(v);
@@ -77,6 +77,16 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       el.classList.remove('invalid');
     }
     refreshVisibility();
+    renderScenarioName();
+  }
+
+  /** Bezeichnung über den Ergebnissen und im Fenstertitel (F16.1). */
+  function renderScenarioName(): void {
+    const name = inputs.scenario.name.trim();
+    const el = $<HTMLElement>('#scenario-name');
+    el.textContent = name;
+    el.hidden = name === '';
+    document.title = name ? `${name} – Wärmepumpen-Rechner` : 'Wärmepumpen-Rechner';
   }
 
   function refreshVisibility(): void {
@@ -90,7 +100,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     }
   }
 
-  function readField(el: HTMLInputElement | HTMLSelectElement): void {
+  function readField(el: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement): void {
     const f = fieldByPath.get(el.dataset.path!)!;
     const prev = getPath(inputs, f.path);
     let value: unknown;
@@ -113,7 +123,8 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     if (f.onChange) writeForm();
     refreshVisibility();
     persist();
-    schedule();
+    if (f.noRecalc) renderScenarioName();
+    else schedule();
   }
 
   // ---------- Herkunft der Standardwerte (Popover) ----------
@@ -173,7 +184,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     const blob = new Blob([exportJson(inputs)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `waermepumpe-rechner-${formatMonth(new Date().getFullYear() * 12 + new Date().getMonth())}.json`;
+    a.download = exportFileName(inputs, env.today ?? new Date());
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   });
@@ -655,7 +666,8 @@ function fieldHtml(f: Field, defaults: Inputs): string {
   const id = `f-${f.path.replace(/\./g, '-')}`;
   const unit = typeof f.unit === 'string' ? f.unit : '';
   const help = f.help ? `<small class="help">${escapeHtml(f.help)}</small>` : '';
-  const src = sourceHtml(f, id, defaults);
+  const src = f.noSource ? { button: '', pop: '' } : sourceHtml(f, id, defaults);
+  const ph = f.placeholder ? ` placeholder="${escapeHtml(f.placeholder)}"` : '';
   if (f.type === 'checkbox') {
     return `<div class="field check" data-field="${f.path}">
       <div class="label-row"><label for="${id}"><input type="checkbox" id="${id}" data-path="${f.path}"> ${escapeHtml(f.label)}</label>${src.button}</div>${src.pop}${help}</div>`;
@@ -665,8 +677,10 @@ function fieldHtml(f: Field, defaults: Inputs): string {
     control = `<select id="${id}" data-path="${f.path}">${(f.options ?? []).map(([v, l]) => `<option value="${v}">${escapeHtml(l)}</option>`).join('')}</select>`;
   } else if (f.type === 'month') {
     control = `<input type="month" id="${id}" data-path="${f.path}" placeholder="JJJJ-MM">`;
+  } else if (f.type === 'textarea') {
+    control = `<textarea id="${id}" data-path="${f.path}" rows="4"${ph}></textarea>`;
   } else if (f.type === 'text') {
-    control = `<input type="text" id="${id}" data-path="${f.path}" spellcheck="false">`;
+    control = `<input type="text" id="${id}" data-path="${f.path}"${f.noSource ? '' : ' spellcheck="false"'}${ph}>`;
   } else {
     const attrs = [
       f.step !== undefined ? `step="${f.step}"` : 'step="any"',
@@ -717,6 +731,7 @@ function layout(): string {
   <main class="layout">
     <aside id="inputs" class="inputs" aria-label="Eingaben"></aside>
     <section class="results" aria-label="Ergebnisse">
+      <h2 id="scenario-name" class="scenario-name" hidden></h2>
       <div id="kpis" class="kpis"></div>
       <p id="horizon-note" class="muted small"></p>
       <div id="warnings"></div>

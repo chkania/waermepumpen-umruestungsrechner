@@ -211,6 +211,29 @@ describe('UI (Smoke-Test)', () => {
     expect(mount().app.getTheme()).toBe('auto');
   });
 
+  it('F16 Bezeichnung und Bemerkungen: gespeichert, angezeigt, ohne Neuberechnung', () => {
+    const { root, app } = mount();
+    const heading = root.querySelector<HTMLElement>('#scenario-name')!;
+    expect(heading.hidden).toBe(true);
+    const before = app.lastResult();
+    const name = root.querySelector<HTMLInputElement>('[data-path="scenario.name"]')!;
+    name.value = 'Angebot A';
+    name.dispatchEvent(new Event('input', { bubbles: true }));
+    const notes = root.querySelector<HTMLTextAreaElement>('textarea[data-path="scenario.notes"]')!;
+    notes.value = 'Zeile 1\nZeile 2';
+    notes.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(heading.hidden).toBe(false);
+    expect(heading.textContent).toBe('Angebot A');
+    expect(document.title).toContain('Angebot A');
+    expect(app.lastResult()).toBe(before); // keine Neuberechnung
+    expect(JSON.parse(store.getItem(STORAGE_KEY)!).scenario).toEqual({ name: 'Angebot A', notes: 'Zeile 1\nZeile 2' });
+    // kein Herkunfts-Popover für Freitextfelder
+    expect(name.closest('.field')!.querySelector('.info-btn')).toBeNull();
+    // wird beim Laden wiederhergestellt
+    const again = mount();
+    expect(again.root.querySelector<HTMLTextAreaElement>('textarea[data-path="scenario.notes"]')!.value).toBe('Zeile 1\nZeile 2');
+  });
+
   it('F15 Hilfe-Link öffnet das Benutzerhandbuch in neuem Tab', () => {
     const { root } = mount();
     const a = root.querySelector<HTMLAnchorElement>('#btn-help')!;

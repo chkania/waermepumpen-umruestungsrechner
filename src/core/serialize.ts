@@ -76,6 +76,27 @@ export function decodeHash(defaults: Inputs, hash: string): Inputs | null {
   }
 }
 
+/** Dateinamen-tauglicher Teil aus der Szenario-Bezeichnung (Umlaute umschreiben, max. 60 Zeichen). */
+export function fileSlug(text: string): string {
+  return text
+    .normalize('NFC')
+    .replace(/Ä/g, 'Ae').replace(/Ö/g, 'Oe').replace(/Ü/g, 'Ue')
+    .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^A-Za-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60)
+    .replace(/-+$/g, '');
+}
+
+/** Dateiname des Exports: waermepumpe-rechner[-bezeichnung]-JJJJ-MM.json (F16.2). */
+export function exportFileName(inputs: Inputs, now: Date): string {
+  const slug = fileSlug(inputs.scenario?.name ?? '');
+  const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  return `waermepumpe-rechner-${slug ? slug + '-' : ''}${month}.json`;
+}
+
 export function exportJson(inputs: Inputs): string {
   return JSON.stringify(inputs, null, 2);
 }

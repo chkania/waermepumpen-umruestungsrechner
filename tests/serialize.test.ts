@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { decodeHash, diffInputs, encodeHash, exportJson, importJson, mergeInputs } from '../src/core/serialize';
+import { decodeHash, diffInputs, encodeHash, exportFileName, exportJson, fileSlug, importJson, mergeInputs } from '../src/core/serialize';
 import { defaults } from './helpers';
 
 describe('F9 Persistenz', () => {
@@ -48,5 +48,32 @@ describe('F9 Persistenz', () => {
     expect(importJson(d, exportJson(i))).toEqual(i);
     expect(() => importJson(d, '{kaputt')).toThrow(/JSON/);
     expect(() => importJson(d, '{"version":2}')).toThrow(/version/);
+  });
+});
+
+describe('F16 Szenario-Beschreibung', () => {
+  const now = new Date(2026, 10, 12);
+
+  it('Export-Dateiname mit Bezeichnung, Umlaute umgeschrieben', () => {
+    const i = defaults();
+    expect(exportFileName(i, now)).toBe('waermepumpe-rechner-2026-11.json');
+    i.scenario.name = '  Angebot Müller / Herbst 2027 – 12 kW!  ';
+    expect(exportFileName(i, now)).toBe('waermepumpe-rechner-Angebot-Mueller-Herbst-2027-12-kW-2026-11.json');
+    expect(fileSlug('Größe Öl Straße')).toBe('Groesse-Oel-Strasse');
+    expect(fileSlug('Café')).toBe('Cafe');
+    expect(fileSlug('???')).toBe('');
+    expect(fileSlug('x'.repeat(100))).toHaveLength(60);
+  });
+
+  it('Bezeichnung und Bemerkungen im Export und Link, ältere Dateien ohne Felder importierbar', () => {
+    const d = defaults();
+    const i = defaults();
+    i.scenario.name = 'Variante B';
+    i.scenario.notes = 'Zeile 1\nZeile 2 – äöü';
+    expect(importJson(d, exportJson(i)).scenario).toEqual(i.scenario);
+    expect(decodeHash(d, encodeHash(d, i))!.scenario).toEqual(i.scenario);
+    const old = JSON.parse(exportJson(defaults()));
+    delete old.scenario;
+    expect(importJson(d, JSON.stringify(old)).scenario).toEqual({ name: '', notes: '' });
   });
 });

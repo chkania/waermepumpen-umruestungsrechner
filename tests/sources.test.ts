@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { DEFAULT_SOURCES, OFFICIAL_REFS, SOURCE_KIND_LABEL } from '../src/core/sources';
 import { SECTIONS } from '../src/ui/fields';
 
-const paths = SECTIONS.flatMap((s) => s.fields.map((f) => f.path));
+// Freitextfelder (Szenario-Bezeichnung, Bemerkungen) haben keinen Standardwert mit Herkunft
+const paths = SECTIONS.flatMap((s) => s.fields.filter((f) => !f.noSource).map((f) => f.path));
 
 describe('F11 Herkunft der Standardwerte', () => {
   it('jedes Eingabefeld hat eine Herkunftsangabe', () => {

@@ -51,7 +51,7 @@ Erzeugt einen Link, der alle **vom Standard abweichenden Eingaben** enthält, un
 
 ### Export
 
-Speichert alle Eingaben als **JSON-Datei** (z. B. `waermepumpe-rechner-2026-11.json`). Geeignet zur Sicherung, zur Übertragung auf ein anderes Gerät oder um mehrere Varianten (z. B. „Angebot A“, „Angebot B“) aufzubewahren.
+Speichert alle Eingaben als **JSON-Datei**, einschließlich Bezeichnung und Bemerkungen des Szenarios. Ist eine **Bezeichnung des Szenarios** eingetragen, steht sie im Dateinamen, z. B. `waermepumpe-rechner-Angebot-Firma-A-2026-11.json` (Umlaute werden umschrieben, Sonderzeichen durch `-` ersetzt); sonst heißt die Datei `waermepumpe-rechner-2026-11.json`. Geeignet zur Sicherung, zur Übertragung auf ein anderes Gerät oder um mehrere Varianten (z. B. „Angebot A“, „Angebot B“) aufzubewahren.
 
 ### Import
 
@@ -68,6 +68,15 @@ Alle Eingaben werden bei jeder Änderung automatisch im Browser gespeichert (`lo
 ## Eingaben
 
 Prozentwerte werden als Prozent eingegeben (z. B. `90` für 90 %). Monate werden als Jahr und Monat eingegeben. Ungültige Eingaben werden rot markiert und nicht übernommen.
+
+### Szenario
+
+Beschreibt das Szenario; beide Felder ändern die Rechnung nicht.
+
+| Feld | Bedeutung |
+|---|---|
+| **Bezeichnung des Szenarios** | Kurzer Name, um Varianten zu unterscheiden (z. B. „Angebot Firma A, Herbst 2027“). Er erscheint über den Ergebnissen, im Titel des Browser-Tabs und im Dateinamen beim Export. |
+| **Bemerkungen** | Freitext für Beschreibung, Annahmen, Angebotsdaten oder offene Fragen. Wird mit gespeichert, exportiert und importiert. Achtung: Auch Bezeichnung und Bemerkungen stehen im geteilten Link – keine vertraulichen Angaben eintragen, wenn Sie den Link weitergeben. |
 
 ### Bestandsheizung
 

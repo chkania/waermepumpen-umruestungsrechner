@@ -171,8 +171,17 @@ export interface CompareInputs {
   count: number;
 }
 
+/** Beschreibung des Szenarios (F16) – ohne Einfluss auf die Rechnung. */
+export interface ScenarioInfo {
+  /** Bezeichnung, z. B. „Variante Herbst 2027“; fließt in den Export-Dateinamen ein. */
+  name: string;
+  /** Freitext: Beschreibung, Annahmen, Angebote … */
+  notes: string;
+}
+
 export interface Inputs {
   version: 1;
+  scenario: ScenarioInfo;
   general: GeneralInputs;
   building: BuildingInputs;
   oldHeating: OldHeatingInputs;

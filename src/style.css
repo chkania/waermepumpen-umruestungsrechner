@@ -153,7 +153,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-v
 .fields { padding: 0 14px 14px; display: flex; flex-direction: column; gap: 10px; }
 .field label { display: block; font-size: 0.85rem; color: var(--c-text-2); margin-bottom: 3px; }
 .field .control { display: flex; align-items: center; gap: 8px; }
-.field .control input, .field .control select {
+.field .control input, .field .control select, .field .control textarea {
   flex: 1;
   min-width: 0;
   padding: 7px 9px;
@@ -163,6 +163,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-v
 }
 .field .control input[type='number'] { text-align: right; font-variant-numeric: tabular-nums; }
 .field .control input.invalid { border-color: var(--bad); }
+.field .control textarea { resize: vertical; min-height: 5.5em; font: inherit; line-height: 1.4; color: inherit; }
+.scenario-name { margin: 0 0 12px; font-size: 1.15rem; font-weight: 600; color: var(--c-text); overflow-wrap: anywhere; }
 .field .unit { min-width: 64px; font-size: 0.8rem; color: var(--c-muted); }
 .field .unit:empty { display: none; }
 .field .help { display: block; margin-top: 3px; font-size: 0.77rem; color: var(--c-muted); }

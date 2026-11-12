@@ -25,6 +25,7 @@ export function createDefaults(today: Date = new Date()): Inputs {
   const start = monthFromDate(today);
   return {
     version: 1,
+    scenario: { name: '', notes: '' },
     general: {
       startMonth: start,
       horizonYears: 20,
