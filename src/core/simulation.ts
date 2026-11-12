@@ -1,8 +1,8 @@
-import { HEAT_PROFILE } from './defaults';
+import { DHW_PROFILE, SPACE_PROFILE } from './defaults';
 import { formatMonthDe, monthOf, parseMonth, tryParseMonth, yearOf } from './dates';
 import { kfwLoanVariant, kfwSubsidy } from './funding';
 import { loanScheduleDetailed, type LoanResult, type LoanSpec, type PrepaymentRules } from './loan';
-import { annualHeatDemand, createPriceModel } from './prices';
+import { createPriceModel, energySplit } from './prices';
 import { taxBonus } from './tax';
 import type {
   CostBreakdown,
@@ -118,7 +118,9 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
   const H = Math.max(1, Math.round(inp.general.horizonYears * 12));
   const end = start + H;
   const pm = createPriceModel(inp);
-  const heat = annualHeatDemand(inp);
+  // Raumwärme, Warmwasser und Kochen getrennt (F17)
+  const split = energySplit(inp);
+  const cookStaysGas = split.cookingFuel > 0 && inp.oldHeating.cookingAfter === 'gas';
   const o = inp.oldHeating;
   const hp = inp.heatPump;
   const fin = inp.financing;
@@ -154,7 +156,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
 
   const rows: MonthRow[] = [];
   for (let m = 0; m < H; m++) {
-    rows.push({ month: start + m, heatKWh: 0, system: 'old', ...emptyBreakdown() });
+    rows.push({ month: start + m, heatKWh: 0, cookingCost: 0, system: 'old', ...emptyBreakdown() });
   }
   const assets: Asset[] = [];
 
@@ -173,7 +175,9 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
     const abs = r.month;
     const year = yearOf(abs);
     const m = abs - start;
-    const heatM = heat * HEAT_PROFILE[monthOf(abs) - 1];
+    const mo = monthOf(abs) - 1;
+    const heatM = split.spaceHeat * SPACE_PROFILE[mo] + split.dhwHeat * DHW_PROFILE[mo];
+    const cookM = split.cookingFuel / 12;
     r.heatKWh = heatM;
     const maintGrowth = growth(inp.general.costIncrease, m);
     if (install !== null && abs >= install) {
@@ -183,13 +187,30 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
       r.energy = (elec * (1 - hp.pvShare) * gridCt + elec * hp.pvShare * hp.feedInCt) / 100;
       r.fixed = ((hp.separateTariff ? hp.meterFee * pm.elecGrowth(abs) : 0) - para14aFor(hp)) / 12;
       r.maintenance = (hp.maintenance * maintGrowth) / 12;
+      if (cookM > 0) {
+        // Kochen: weiter mit Gas (Anschluss inkl. Grundpreis bleibt) oder Induktion am Haushaltszähler
+        if (cookStaysGas) {
+          const gas = (cookM * pm.fuelCt('gas', abs)) / 100;
+          const base = pm.gasBaseFee(abs) / 12;
+          r.energy += gas;
+          r.fixed += base;
+          r.cookingCost = gas + base;
+        } else {
+          const el = (cookM * inp.prices.cookingElecFactor * pm.householdCt(abs)) / 100;
+          r.energy += el;
+          r.cookingCost = el;
+        }
+      }
     } else {
       const isNew = abs >= oldEnd;
       r.system = isNew ? 'new' : 'old';
       const eff = isNew ? o.replacementEfficiency : o.efficiency;
       const fuelKWh = heatM / eff;
       const ct = pm.fuelCt(fuel, abs) + (isNew ? pm.bioSurchargeCt(year) : 0);
-      r.energy = (fuelKWh * ct) / 100;
+      // Kochen läuft nicht über den Kessel und ohne Bio-Pflicht
+      const cook = (cookM * pm.fuelCt(fuel, abs)) / 100;
+      r.energy = (fuelKWh * ct) / 100 + cook;
+      r.cookingCost = cook;
       r.fixed = fuel === 'gas' ? pm.gasBaseFee(abs) / 12 : 0;
       r.maintenance = (o.maintenance * maintGrowth) / 12;
     }
@@ -209,6 +230,10 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
     const eligibleGross = wpGross * hp.eligibleShare + (hp.meterSetupEligible ? meterSetup : 0);
     const total = wpGross + extra + (hp.meterSetupEligible ? meterSetup : 0);
     rows[iIdx].investment += total;
+    // Neues Kochfeld beim Umstieg auf Strom (F17.3): einmalig, nicht förderfähig, aus Eigenmitteln
+    if (split.cookingFuel > 0 && !cookStaysGas) {
+      rows[iIdx].investment += Math.max(0, inp.oldHeating.cookingSwitchCost) * growth(inp.general.investIncrease, iIdx);
+    }
     const hpLife = Math.max(1, Math.round(hp.lifeYears * 12));
     assets.push({ cost: wpGross, install, lifeMonths: hpLife });
     // Ersatz-WP, wenn der Zeitraum länger ist als die Lebensdauer (ohne Förderung, analog zum Ersatzkessel)
@@ -401,7 +426,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
         { name: 'Bankkredit', spec: bankSpec(bankLoan, install, inp) },
       ]);
     } else {
-      const ageAtCompletion = inp.building.buildingAgeYears + (install - start) / 12;
+      const ageAtCompletion = install / 12 - inp.building.constructionYear;
       taxRes = taxBonus(
         {
           cost: eligibleGross,

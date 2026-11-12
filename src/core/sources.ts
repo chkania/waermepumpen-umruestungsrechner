@@ -51,6 +51,12 @@ export const DEFAULT_SOURCES: Record<string, DefaultSource> = {
     kind: 'beispiel',
     text: `Beispielverbrauch eines unsanierten bis teilsanierten Einfamilienhauses (20.000 kWh Gas bzw. 2.000 l Öl). ${own} Am besten der Durchschnitt mehrerer Jahresabrechnungen.`,
   },
+  'oldHeating.dhwViaHeating': { kind: 'beispiel', text: `Standard: Warmwasser über die Heizung (häufigster Fall bei Gas- und Ölheizungen). ${own}` },
+  'oldHeating.dhwShare': { kind: 'schaetzung', text: 'Schätzung: Warmwasser macht in Einfamilienhäusern meist 10–20 % des Heizenergieverbrauchs aus, in gut gedämmten Häusern deutlich mehr. Grob: 500–800 kWh Wärme je Person und Jahr. Keine konkrete Erhebung.' },
+  'oldHeating.cookingWithGas': { kind: 'beispiel', text: `Standard: kein Gasherd. ${own}` },
+  'oldHeating.cookingShare': { kind: 'schaetzung', text: 'Schätzung: Ein Gasherd braucht im Haushalt etwa 300–600 kWh im Jahr, das sind bei 20.000 kWh Gesamtverbrauch rund 2–3 %. Keine konkrete Erhebung.' },
+  'oldHeating.cookingAfter': { kind: 'annahme', text: 'Standard: Umstieg auf ein Induktionskochfeld; dann entfällt der Gasanschluss samt Grundpreis. Bleibt der Gasherd, laufen Grundpreis und Gaskosten weiter.' },
+  'oldHeating.cookingSwitchCost': { kind: 'schaetzung', text: 'Schätzung: Induktionskochfelder kosten etwa 300–1.500 €, dazu Einbau durch den Elektriker (Herdanschluss meist vorhanden) und ggf. induktionsgeeignete Töpfe. Keine konkrete Erhebung – bitte Angebot einsetzen.' },
   'oldHeating.efficiency': {
     kind: 'technik',
     text: 'Typischer Jahresnutzungsgrad eines Brennwert- bzw. guten Niedertemperaturkessels (ältere Kessel eher 80–85 %). Bestimmt, wie viel Nutzwärme aus dem Brennstoff entsteht.',
@@ -99,6 +105,7 @@ export const DEFAULT_SOURCES: Record<string, DefaultSource> = {
   },
   'prices.oilCo2Factor': { kind: 'technik', text: 'Emissionsfaktor Heizöl 0,266 kg CO₂/kWh (bezogen auf den Heizwert), wie in den CO₂-Faktoren des BAFA verwendet.' },
   'prices.oilKwhPerLiter': { kind: 'technik', text: 'Heizwert von Heizöl EL: rund 10 kWh je Liter.' },
+  'prices.cookingElecFactor': { kind: 'technik', text: 'Ein Gasherd nutzt etwa 40–55 % der Energie für das Kochgut, ein Induktionskochfeld etwa 80–90 %. Je kWh Gas braucht Induktion daher grob 0,5–0,6 kWh Strom (Schätzung).' },
 
   // ---------- Wärmepumpe ----------
   'heatPump.installMonth': { kind: 'annahme', text: 'Annahme: Inbetriebnahme 6 Monate nach Start (Planung, Förderantrag, Lieferzeit). Eigenen Plan eintragen.' },
@@ -140,7 +147,10 @@ export const DEFAULT_SOURCES: Record<string, DefaultSource> = {
   // ---------- Haushalt & Gebäude ----------
   'building.ownerOccupied': { kind: 'beispiel', text: 'Beispiel: selbstgenutzt. Voraussetzung für Klimageschwindigkeits- und Einkommensbonus sowie den Steuerbonus.' },
   'building.units': { kind: 'beispiel', text: `Beispiel Einfamilienhaus. ${own}` },
-  'building.buildingAgeYears': { kind: 'beispiel', text: `Beispiel. Für den Steuerbonus muss das Gebäude mindestens 10 Jahre alt sein. ${own}` },
+  'building.constructionYear': { kind: 'beispiel', text: `Beispiel: 40 Jahre vor dem Startjahr. Für den Steuerbonus muss das Gebäude bei Abschluss mindestens 10 Jahre alt sein; außerdem dient das Baujahr der Einordnung des Hauses. ${own}` },
+  'building.heatedArea': { kind: 'beispiel', text: `Beispiel für ein Einfamilienhaus. Die beheizte Wohnfläche steht im Kaufvertrag, in der Wohnflächenberechnung oder im Energieausweis. ${own}` },
+  'building.renovationYear': { kind: 'beispiel', text: `Standard 0 = keine energetische Sanierung bekannt. ${own}` },
+  'building.renovationScope': { kind: 'annahme', text: 'Einzelmaßnahmen (z. B. Fenstertausch, Dachdämmung) senken den Verbrauch typischerweise um 10–25 %, eine umfassende Sanierung der Hülle um 40–60 % – grobe Erfahrungswerte für die Einordnung.' },
   'building.householdIncome': { kind: 'beispiel', text: 'Beispielwert (ohne Einkommensbonus). Maßgeblich ist der Durchschnitt der zu versteuernden Einkommen des 2. und 3. Jahres vor Antragseingang (Antrag 2026 → 2023 und 2024) aller im Haushalt gemeldeten Eigentümer und deren Partner; Minderjährige zählen nicht. Nachweis nur per Einkommensteuerbescheid. Bitte durch den eigenen Wert ersetzen.' },
   'building.hasChild': { kind: 'beispiel', text: 'Familienzuschlag: Ist mindestens ein Kind unter 18 (bei Antragstellung) mit Hauptwohnsitz in der Wohneinheit gemeldet und besteht für es Kindergeldberechtigung im Haushalt, erhöhen sich die Einkommensgrenzen einmalig um 10.000 € – unabhängig von der Zahl der Kinder. Nachweis per Meldebestätigung.' },
   'building.incomeTax': { kind: 'annahme', text: 'Standard 0 = keine Begrenzung. Liegt die Einkommensteuer unter dem jährlichen Steuerbonus, verfällt der Rest (kein Vor-/Rücktrag).' },
@@ -249,7 +259,7 @@ export const OFFICIAL_REFS: Record<string, OfficialRef[]> = {
   'oldHeating.ageYears': [rl('8.4.4'), m458('S. 3 „Klimageschwindigkeitsbonus“')],
   'building.ownerOccupied': [m458('S. 5 „Selbstnutzende Eigentümerinnen und Eigentümer“'), rl('8.4.4, 8.4.5'), ESTG('Abs. 1')],
   'building.units': [rl('8.3.1 a'), m458('S. 4 „Wohneinheiten“')],
-  'building.buildingAgeYears': [ESTG('Abs. 1'), m458('S. 2 (Bauantrag mind. 5 Jahre zurück)')],
+  'building.constructionYear': [ESTG('Abs. 1'), m458('S. 2 (Bauantrag mind. 5 Jahre zurück)')],
   'building.householdIncome': [m458('S. 5 „Haushalt“, „Haushaltsjahreseinkommen“'), rl('8.4.5'), m358('S. 2–3 (Einkommensgrenze 358)')],
   'building.hasChild': [rl('8.4.5'), m458('S. 4 „Einkommensbonus“ (Familienzuschlag), S. 8 „Meldebestätigung“')],
   'building.incomeTax': [ESTG('Abs. 1')],

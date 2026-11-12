@@ -1,7 +1,7 @@
 import { formatMonthDe, halfYearSteps, parseMonth, tryParseMonth, yearOf } from './dates';
 import { cap1At, incomeBonusRate, kfwLoanVariant, kgbRateAt } from './funding';
-import { annualHeatDemand, createPriceModel, parsePath } from './prices';
-import type { RunResult } from './simulation';
+import { annualHeatDemand, createPriceModel, energySplit, parsePath } from './prices';
+import { runAll, type RunResult } from './simulation';
 import type { Inputs, ScenarioResult } from './types';
 
 export type EventScenario = 'ref' | 'kfw' | 'tax' | 'all';
@@ -108,7 +108,12 @@ export function keyEvents(inp: Inputs, run: RunResult): KeyEvents {
       scenario: 'all',
       level: 'important',
       title: 'Inbetriebnahme der Wärmepumpe',
-      detail: 'Investition inkl. Preissteigerung bis zum Kaufzeitpunkt; Gasanschluss/Öltank und Wartung der Altanlage entfallen.',
+      detail:
+        energySplit(inp).cookingFuel > 0 && inp.oldHeating.cookingAfter === 'electric'
+          ? 'Investition inkl. Preissteigerung bis zum Kaufzeitpunkt und neuem Kochfeld (Induktion); Gasanschluss und Wartung der Altanlage entfallen.'
+          : inp.oldHeating.cookingAfter === 'gas' && energySplit(inp).cookingFuel > 0
+            ? 'Investition inkl. Preissteigerung bis zum Kaufzeitpunkt; Wartung der Altanlage entfällt, der Gasanschluss bleibt für den Herd.'
+            : 'Investition inkl. Preissteigerung bis zum Kaufzeitpunkt; Gasanschluss/Öltank und Wartung der Altanlage entfallen.',
       amount: invest,
     });
   }
@@ -164,7 +169,11 @@ export function keyEvents(inp: Inputs, run: RunResult): KeyEvents {
   }
 
   // ---------- Hinweise ----------
-  if (install !== null) hints.push(...fundingHints(inp, run, start));
+  if (install !== null) {
+    const cook = cookingSwitchHint(inp, run);
+    if (cook) hints.push(cook);
+    hints.push(...fundingHints(inp, run, start));
+  }
 
   timeline.sort((a, b) => a.month! - b.month! || order(a) - order(b));
   return { hints, timeline };
@@ -265,6 +274,34 @@ function addLoanEvents(timeline: KeyEvent[], s: ScenarioResult, scenario: 'kfw' 
       });
     }
   }
+}
+
+/**
+ * Bleibt der Gasherd, rechnet der Rechner die Alternative „Induktion“ durch (F17.4):
+ * Ersparnis im Betrachtungszeitraum (wie die Kennzahlen inkl. Opportunitätszins), beste Variante je Fall.
+ */
+export function cookingSwitchSaving(inp: Inputs, run: RunResult = runAll(inp)): number | null {
+  const s = energySplit(inp);
+  if (s.cookingFuel <= 0 || inp.oldHeating.cookingAfter !== 'gas' || run.kfw.installMonth === null) return null;
+  const alt = runAll({ ...inp, oldHeating: { ...inp.oldHeating, cookingAfter: 'electric' } });
+  const cost = (r: RunResult) => (r.best === 'tax' ? r.tax.totalCost : r.kfw.totalCost);
+  return cost(run) - cost(alt);
+}
+
+function cookingSwitchHint(inp: Inputs, run: RunResult): KeyEvent | null {
+  const saving = cookingSwitchSaving(inp, run);
+  if (saving === null) return null;
+  const s = energySplit(inp);
+  const gasCt = inp.prices.gasPriceCt;
+  const gasYear = (s.cookingFuel * gasCt) / 100;
+  const elYear = (s.cookingFuel * inp.prices.cookingElecFactor * inp.heatPump.householdPriceCt) / 100;
+  const detail =
+    `Mit Gasherd bleibt der Gasanschluss: Grundpreis ${eur(inp.prices.gasBaseFee)} und Gas fürs Kochen ca. ${eur(gasYear)} pro Jahr (heutige Preise). ` +
+    `Mit Induktion ca. ${eur(elYear)} Strom pro Jahr, einmalig ${eur(inp.oldHeating.cookingSwitchCost)} für das Kochfeld. ` +
+    'Gerechnet über den Betrachtungszeitraum wie die Kennzahlen; Umstellen unter „Kochen nach dem Umstieg“.';
+  return saving > 0
+    ? hint('important', `Kochen mit Strom statt Gas spart ca. ${eur(saving)}`, detail)
+    : hint('info', `Kochen mit Strom statt Gas würde ca. ${eur(-saving)} mehr kosten`, detail);
 }
 
 function fundingHints(inp: Inputs, run: RunResult, start: number): KeyEvent[] {

@@ -15,6 +15,7 @@ SPA (Vite + TypeScript, ohne UI-Framework, Chart.js) zur Wirtschaftlichkeitsrech
   - `sources.ts` – Herkunft jedes Standardwerts (Popover „i“); bei Änderung eines Defaults mitpflegen, neues Feld braucht Eintrag (Test erzwingt das)
   - `prices.ts` (Energiepreise, CO₂-Pfad, Bio-Treppe), `funding.ts` (KfW 458, 358/359), `tax.ts` (§ 35c), `loan.ts` (Annuitätendarlehen)
   - `validate.ts` – Grenzen/Prüfung aller Eingaben aus Link, Datei und Speicher (neues Zahlenfeld mit Schleifen-/Divisionswirkung → Grenze in `NUMBER_LIMITS`, neues Monats-/Auswahlfeld → `MONTH_FIELDS`/`SELECT_VALUES`)
+  - `house.ts` – Einordnung des Hauses (F18): kWh/m², Effizienzklasse, Baualter, Sanierung, Heizlast; `prices.ts#energySplit` teilt den Verbrauch in Raumwärme/Warmwasser/Kochen (F17)
   - `simulation.ts` (Szenarien ref/kfw/tax, Amortisation), `compare.ts` (Installationszeitpunkte), `events.ts` (wichtige Ereignisse & Hinweise, F10), `tariff.ts` (Stromtarifvergleich, F13), `serialize.ts` (localStorage/Link/JSON)
 - `hilfe.html` + `src/help.ts`/`help-main.ts`/`help.css` – Hilfeseite, rendert `docs/BENUTZERHANDBUCH.md`
 - `lizenz.html`, `lizenzen-drittanbieter.html` + `src/pages/*` – rendern `LICENSE.md` bzw. `THIRD-PARTY-NOTICES.md`; gemeinsamer Seitenaufbau in `src/doc-page.ts` (neue Dokumentseite: HTML-Datei, Eintrag in `vite.config.ts` und `DOC_LINKS`)

@@ -136,6 +136,15 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 - F16.2 Export-Dateiname `waermepumpe-rechner-<Bezeichnung>-JJJJ-MM.json`; Bezeichnung dateinamentauglich (Umlaute umschreiben, andere Zeichen → `-`, max. 60 Zeichen); ohne Bezeichnung `waermepumpe-rechner-JJJJ-MM.json`. *(Test: serialize)*
 - F16.3 Ältere Exporte ohne diese Felder lassen sich weiter importieren (leere Werte). *(Test: serialize)*
 
+### F17 – Verbrauchsaufteilung: Raumwärme, Warmwasser, Kochen
+- F17.1 Eingaben: Baujahr (ersetzt „Gebäudealter“; ältere Datenstände werden umgerechnet: Baujahr = Startjahr − Alter), beheizte Wohnfläche, Jahr und Umfang der letzten energetischen Sanierung; „Warmwasser über die Heizung“ mit Anteil am Verbrauch (Default ja, 15 %); „Kochen mit Gas“ mit Anteil (Default nein, 3 %) und „Kochen nach dem Umstieg“ (Induktion oder weiter Gas). *(Test: house, serialize)*
+- F17.2 Rechnung: Gesamtverbrauch = Kochen + Warmwasser + Raumwärme. Kochen läuft nicht über den Kessel (kein Nutzungsgrad, keine Bio-Treppe). Nutzwärme Raumwärme und Warmwasser mit eigenem Monatsprofil (Warmwasser fast gleichmäßig, Raumwärme winterlastig; bei 15 % Warmwasser entspricht die Summe dem bisherigen Profil). Die WP deckt Raumwärme und – falls über die Heizung – Warmwasser mit der JAZ (Gesamtanlage). Kochen nach dem Umstieg: Induktion = Gas-kWh × 0,55 zum Haushaltsstrompreis (Faktor als Experten-Konstante) oder weiter Gas inkl. Gas-Grundpreis. Der Stromtarifvergleich (F13) rechnet die Kochkosten heraus. Steuerbonus: Gebäudealter bei Abschluss = Abschlussjahr − Baujahr. *(Test: house, tariff)*
+- F17.3 Eingabe „Investition neues Kochfeld (Induktion)“ (Default 800 €, Schätzung): beim Umstieg auf Strom einmalige Ausgabe im Installationsmonat mit Investitionskosten-Steigerung, nicht förderfähig, nicht kreditfinanziert, kein Restwert. *(Test: house)*
+- F17.4 Bleibt der Gasherd, zeigt ein Hinweis, wie viel der Umstieg auf Induktion im Betrachtungszeitraum sparen bzw. kosten würde (Vergleich der jeweils besten Variante inkl. Opportunitätszins und Kochfeld-Investition), mit Grundpreis, Gas- und Stromkosten pro Jahr. *(Test: house)*
+
+### F18 – Einordnung des Hauses
+- F18.1 Karte „Einordnung des Hauses“: Verbrauchskennwert Endenergie Heizung + Warmwasser (ohne Kochen) je m² beheizter Wohnfläche, Effizienzklasse A+…H nach GEG Anlage 10, Baualtersklasse mit typischem Verbrauch unsaniert (Schätzung), erwarteter Bereich nach Sanierung (Einzelmaßnahmen −10…25 %, umfassend −40…60 %), Vergleich besser/typisch/höher, Aufteilung des Verbrauchs, grobe Heizlast (Wärmebedarf ÷ 2.000 h), Eignung für die WP nach Raumwärme je m² (≤ 100 gut, ≤ 150 geeignet, darüber prüfen). Hinweise: keine Witterungsbereinigung, Bezug Wohnfläche statt Nutzfläche. *(Test: house, ui)*
+
 ### F9 – Persistenz
 - F9.1 Eingaben werden automatisch im localStorage gespeichert und beim Laden wiederhergestellt. *(Test: serialize)*
 - F9.2 „Link teilen": Eingaben (nur Abweichungen von den Defaults) als Base64url-JSON im URL-Hash `#s=…`; ein Link hat Vorrang vor localStorage. *(Test: serialize)*
@@ -200,3 +209,5 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 | 2026-11-12 | F12.6 Tilgungstermin der Sondertilgung getrennt von der Verfügbarkeit; Zinsersparnis und Übersicht in der Finanzierungskarte. Default leer – Ergebnisse unverändert. |
 | 2026-11-12 | N8 Lizenz PolyForm Noncommercial 1.0.0 gewählt (Wunsch: nicht-kommerziell kostenfrei; damit „source available“, nicht OSI-Open-Source), Drittanbieter-Hinweise, Fußzeile. Rechenergebnisse unverändert. |
 | 2026-11-12 | N8 Lizenzangaben zusätzlich als HTML-Seiten (`lizenz.html`, `lizenzen-drittanbieter.html`); Hilfe- und Lizenzseiten nutzen gemeinsam `src/doc-page.ts`. |
+| 2026-11-12 | F17/F18 Baujahr, Wohnfläche, Sanierung, Warmwasser- und Kochanteil; Rechnung trennt Raumwärme, Warmwasser und Kochen; Karte „Einordnung des Hauses“. Regressions-Snapshots bewusst aktualisiert: Profil aus Raumwärme- und Warmwasseranteil (gerundet) sowie Gebäudealter aus dem Baujahr – nur Rundungsabweichungen. |
+| 2026-11-12 | F17.3/F17.4 Investition neues Kochfeld beim Umstieg auf Strom; Hinweis zur Ersparnis, wenn weiter mit Gas gekocht wird. Default ohne Gasherd – Ergebnisse unverändert. |

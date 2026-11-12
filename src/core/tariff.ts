@@ -57,7 +57,8 @@ export function tariffComparison(inp: Inputs): TariffComparison | null {
       if (r.system !== 'wp') continue;
       const y = yearOf(r.month);
       const e = m.get(y) ?? { cost: 0, kwh: 0, months: 0 };
-      e.cost += r.energy + r.fixed;
+      // Kochen (Gas oder Induktion am Haushaltszähler) gehört nicht zum WP-Strom
+      e.cost += r.energy + r.fixed - r.cookingCost;
       e.kwh += (r.heatKWh / inp.heatPump.jaz) * (1 - inp.heatPump.pvShare);
       e.months += 1;
       m.set(y, e);

@@ -8,7 +8,7 @@ import { defaults } from './helpers';
 /** Szenario aus der Nutzerfrage (Gasheizung 16 J., Restlebensdauer 5 J., Einkommen 120 T€). */
 function userCase(mut?: (i: Inputs) => void): Inputs {
   const i = defaults();
-  i.building.buildingAgeYears = 76;
+  i.building.constructionYear = 1950;
   i.building.householdIncome = 120000;
   i.oldHeating.consumption = 11000;
   i.oldHeating.ageYears = 16;

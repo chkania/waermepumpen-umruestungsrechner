@@ -20,7 +20,13 @@ export const NUMBER_LIMITS: Record<string, [number, number]> = {
   'general.investIncrease': [-0.5, 1],
   'general.vat': [0, 1],
   'building.units': [1, 500],
-  'building.buildingAgeYears': [0, 1000],
+  'building.constructionYear': [1500, 2100],
+  'building.heatedArea': [10, 100000],
+  'building.renovationYear': [0, 2100],
+  'oldHeating.dhwShare': [0, 0.6],
+  'oldHeating.cookingShare': [0, 0.3],
+  'oldHeating.cookingSwitchCost': [0, 50000],
+  'prices.cookingElecFactor': [0.1, 2],
   'oldHeating.consumption': [0, 1e7],
   'oldHeating.efficiency': [0.1, 1.5],
   'oldHeating.ageYears': [0, 200],
@@ -71,6 +77,8 @@ const MONTH_YEARS: [number, number] = [2000, 2150];
 
 export const SELECT_VALUES: Record<string, readonly string[]> = {
   'oldHeating.fuel': ['gas', 'oil'],
+  'oldHeating.cookingAfter': ['electric', 'gas'],
+  'building.renovationScope': ['partial', 'full'],
   'financing.windfallTarget': ['auto', 'kfw', 'bank'],
 };
 

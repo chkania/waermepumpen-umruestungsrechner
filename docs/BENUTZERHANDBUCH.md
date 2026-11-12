@@ -84,7 +84,13 @@ Beschreibt das Szenario; beide Felder ändern die Rechnung nicht.
 | Feld | Bedeutung |
 |---|---|
 | **Energieträger** | Erdgas oder Heizöl. Beim Wechsel wird der Verbrauch umgerechnet (10 kWh je Liter). |
-| **Verbrauch pro Jahr** | Gas in kWh bzw. Öl in Litern, für Heizung und Warmwasser – am besten der Durchschnitt mehrerer Jahresabrechnungen. |
+| **Verbrauch pro Jahr** | Gas in kWh bzw. Öl in Litern laut Abrechnung – der gesamte Verbrauch inklusive Warmwasser und ggf. Kochen, am besten der Durchschnitt mehrerer Jahre. |
+| **Warmwasser über die Heizung** | Ankreuzen, wenn der Kessel auch das Warmwasser bereitet. Dann übernimmt das künftig die Wärmepumpe. Nicht ankreuzen bei Durchlauferhitzer oder elektrischem Speicher (diese bleiben unverändert). |
+| **Anteil Warmwasser am Verbrauch** | Typisch 10–20 %. Warmwasser wird das ganze Jahr gebraucht, Raumwärme vor allem im Winter – das verteilt die Kosten über die Monate realistischer. |
+| **Kochen mit Gas** | Nur bei Erdgas: Gasherd am selben Anschluss. Kochen läuft nicht über den Kessel; sein Anteil wird deshalb nicht mit dem Nutzungsgrad in Wärme umgerechnet. |
+| **Anteil Kochen am Verbrauch** | Typisch 1–3 % (ein Gasherd braucht etwa 300–600 kWh im Jahr). |
+| **Kochen nach dem Umstieg** | **Mit Strom (Induktion):** Der Gasanschluss entfällt; gerechnet wird mit Haushaltsstrom (je kWh Gas rund 0,55 kWh Strom). **Weiter mit Gas:** Gas-Grundpreis und Gas fürs Kochen fallen auch mit Wärmepumpe weiter an. Dann zeigt der Rechner unter „Wichtige Ereignisse & Hinweise“, wie viel der Umstieg auf Induktion sparen würde. |
+| **Investition neues Kochfeld (Induktion)** | Einmalige Kosten für Kochfeld, Einbau und ggf. neue Töpfe. Wird nur beim Umstieg auf Strom im Monat der Inbetriebnahme gerechnet (mit Preissteigerung), ist nicht förderfähig und wird nicht über den Kredit finanziert. |
 | **Nutzungsgrad Altanlage** | Anteil des Brennstoffs, der als Wärme im Haus ankommt. Daraus ergibt sich der Wärmebedarf, den später die Wärmepumpe decken muss. |
 | **Alter der Heizung** | Für den Klimageschwindigkeitsbonus: Gasheizungen müssen bei Antragstellung mindestens 20 Jahre alt sein. |
 | **Restlebensdauer** | Wie lange die Anlage voraussichtlich noch hält. Danach rechnet das Szenario „ohne Wärmepumpe“ mit einem neuen Kessel. |
@@ -143,7 +149,10 @@ Beschreibt das Szenario; beide Felder ändern die Rechnung nicht.
 |---|---|
 | **Selbstgenutzt (Hauptwohnsitz)** | Voraussetzung für Klimageschwindigkeits- und Einkommensbonus, den zinsgünstigen KfW-Kredit 358 und den Steuerbonus. |
 | **Wohneinheiten** | Bestimmt die förderfähigen Höchstbeträge. Boni gelten nur für den Anteil der selbstgenutzten Wohneinheit. |
-| **Gebäudealter** | Der Steuerbonus setzt ein Gebäudealter von über 10 Jahren voraus. |
+| **Baujahr des Gebäudes** | Der Steuerbonus setzt voraus, dass das Gebäude bei Abschluss der Maßnahme mindestens 10 Jahre alt ist. Außerdem Grundlage der Einordnung des Hauses. Ältere gespeicherte oder exportierte Stände mit „Gebäudealter“ werden automatisch umgerechnet. |
+| **Beheizte Wohnfläche** | Für den Verbrauchskennwert in kWh je m² und Jahr. |
+| **Letzte energetische Sanierung** | Jahr der letzten Maßnahme an der Gebäudehülle (Dämmung, Fenster, Dach); 0 = keine. |
+| **Umfang der Sanierung** | Einzelne Maßnahmen oder umfassende Sanierung – bestimmt, welcher Verbrauch für Ihr Haus zu erwarten wäre. |
 | **Zu versteuerndes Haushaltseinkommen** | Durchschnitt des 2. und 3. Jahres vor Antragstellung laut Steuerbescheid. Maßgeblich für Einkommensbonus und KfW 358. |
 | **Kindergeldberechtigtes Kind unter 18** | Familienzuschlag: Die Einkommensgrenzen steigen um 10.000 €. |
 | **Einkommensteuerschuld** | Begrenzt den Steuerbonus pro Jahr. 0 = keine Begrenzung. |
@@ -202,7 +211,7 @@ Diese Abschnitte enthalten die geltenden Förder-, Kredit- und Steuerregeln mit 
 
 **Experten: Sondertilgungsregeln** – KfW: Mindestbetrag Sondertilgung, KfW: Vorfälligkeitsentschädigung nach Zinsbindung, Bank: Vorfälligkeitsentschädigung, Bank: Entschädigung bei Restlaufzeit ≤ 1 Jahr.
 
-**Experten: Steuerbonus § 35c & Konstanten** – Steuerbonus Jahr 1, Steuerbonus Jahr 2, Steuerbonus Jahr 3, Max. Steuerermäßigung, Max. begünstigte Kosten, Abschluss spätestens, Mindestalter Gebäude, CO₂-Faktor Erdgas, CO₂-Faktor Heizöl, Heizwert Heizöl, Mehrwertsteuer.
+**Experten: Steuerbonus § 35c & Konstanten** – Steuerbonus Jahr 1, Steuerbonus Jahr 2, Steuerbonus Jahr 3, Max. Steuerermäßigung, Max. begünstigte Kosten, Abschluss spätestens, Mindestalter Gebäude, CO₂-Faktor Erdgas, CO₂-Faktor Heizöl, Heizwert Heizöl, Strom je kWh Gas beim Kochen (Induktion), Mehrwertsteuer.
 
 ## Ergebnisse
 
@@ -219,6 +228,15 @@ Diese Abschnitte enthalten die geltenden Förder-, Kredit- und Steuerregeln mit 
 Alle Beträge sind brutto, inklusive Opportunitätszins. Positive Werte in Tabellen sind Ausgaben, negative Einnahmen (Zuschuss, Steuerbonus, Kreditauszahlung, Restwert).
 
 Hinweis zur Amortisation: Der Rechner betrachtet Zahlungsströme. Eine Sondertilgung oder ein hoher Eigenkapitaleinsatz verschiebt die Amortisation nach hinten, obwohl die Gesamtkosten sinken. Für die Entscheidung sind die Gesamtkosten aussagekräftiger.
+
+### Einordnung des Hauses
+
+Ordnet Ihr Haus anhand von Verbrauch, Fläche, Baujahr und Sanierung ein:
+
+- **Verbrauchskennwert** in kWh je m² und Jahr (Endenergie für Heizung und Warmwasser, ohne Kochen) und die **Effizienzklasse** A+ bis H wie im Energieausweis. Der Wert ist nicht witterungsbereinigt und bezieht sich auf die beheizte Wohnfläche – er kann daher vom Energieausweis abweichen.
+- **Vergleich mit dem Baualter:** typischer Verbrauch unsanierter Häuser dieser Baualtersklasse und – abhängig von Ihrer Sanierung – der zu erwartende Bereich. Liegt Ihr Haus darüber, lohnt ein Blick auf Dämmung und Heizungseinstellung. Die Werte sind grobe Schätzungen.
+- **Heizlast (grob):** Wärmebedarf geteilt durch 2.000 Volllaststunden – ein erster Anhaltspunkt für die Größe der Wärmepumpe, kein Ersatz für eine Heizlastberechnung durch den Fachbetrieb.
+- **Eignung für die Wärmepumpe** nach dem Raumwärmebedarf je m²: bis 100 kWh gute Voraussetzungen, bis 150 kWh geeignet (Vorlauftemperatur prüfen), darüber ist die Wärmepumpe weniger effizient – größere Heizkörper oder einzelne Dämmmaßnahmen helfen.
 
 ### Wichtige Ereignisse & Hinweise
 

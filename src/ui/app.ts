@@ -5,6 +5,8 @@ import { createDefaults, FUNDING_SOURCE_DATE } from '../core/defaults';
 import { DEFAULT_SOURCES, OFFICIAL_REFS, SOURCE_KIND_LABEL } from '../core/sources';
 import { priceRows, runAll, type RunResult } from '../core/simulation';
 import { tariffComparison } from '../core/tariff';
+import { EFFICIENCY_CLASSES, rateHouse } from '../core/house';
+import { energySplit } from '../core/prices';
 import { decodeHash, encodeHash, exportFileName, exportJson, importJson, mergeInputs } from '../core/serialize';
 import type { Inputs, ScenarioKind, ScenarioResult } from '../core/types';
 import { NUMBER_LIMITS, numberRange, TEXT_LIMITS, validMonth, type InputIssue } from '../core/validate';
@@ -391,6 +393,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     renderKpis(run);
     renderWarnings(run);
     renderEvents(events);
+    renderHouse();
     renderDetails(run);
     renderTariff();
     renderInstallTable(cmp);
@@ -473,6 +476,47 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       <h2>Wichtige Ereignisse &amp; Hinweise</h2>
       ${hints ? `<div class="hints">${hints}</div>` : ''}
       ${items ? `<ol class="timeline">${items}</ol>` : ''}`;
+  }
+
+  /** Einordnung des Hauses (F18). */
+  function renderHouse(): void {
+    const h = rateHouse(inputs);
+    const s = energySplit(inputs);
+    const n0 = (x: number) => fmtNum(x, 0);
+    const cmpText = {
+      better: 'besser als für Baualter und Sanierungsstand zu erwarten',
+      typical: 'im zu erwartenden Bereich',
+      worse: 'höher als für Baualter und Sanierungsstand zu erwarten – Einsparpotenzial durch Dämmung oder Heizungsoptimierung',
+    }[h.comparison];
+    const fuelUnit = inputs.oldHeating.fuel === 'gas' ? 'Gas' : 'Heizöl';
+    const parts = [
+      `Raumwärme ${n0(s.spaceHeat / inputs.oldHeating.efficiency)} kWh`,
+      s.dhwHeat > 0 ? `Warmwasser ${n0(s.dhwHeat / inputs.oldHeating.efficiency)} kWh` : '',
+      s.cookingFuel > 0 ? `Kochen ${n0(s.cookingFuel)} kWh` : '',
+    ].filter(Boolean);
+    $<HTMLElement>('#house').innerHTML = `
+      <h2>Einordnung des Hauses</h2>
+      <div class="house-head">
+        <div class="house-kpi"><span class="house-val">${n0(h.kwhPerM2)}</span> <span class="house-unit">kWh/(m²·a)</span>
+          <div class="muted small">Endenergie ${h.includesDhw ? 'Heizung + Warmwasser' : 'nur Heizung'}, ohne Kochen</div></div>
+        <ol class="eff-scale" aria-label="Effizienzklasse ${h.efficiencyClass} (Skala A+ bis H nach GEG)">
+          ${EFFICIENCY_CLASSES.map((c, i) => `<li class="eff-${i}${c.cls === h.efficiencyClass ? ' is-current' : ''}"${c.cls === h.efficiencyClass ? ' aria-current="true"' : ''}>${c.cls}</li>`).join('')}
+        </ol>
+      </div>
+      <dl class="house-dl">
+        <dt>Effizienzklasse</dt><dd><strong>${h.efficiencyClass}</strong> <small>Skala des Energieausweises (GEG)</small></dd>
+        <dt>Baujahr</dt><dd>${inputs.building.constructionYear} <small>${h.buildingAge} Jahre · ${escapeHtml(h.ageClass.label)}</small></dd>
+        <dt>Sanierung</dt><dd>${escapeHtml(h.renovation.state)} <small>${escapeHtml(h.renovation.text)}</small></dd>
+        <dt>Zu erwarten</dt><dd>${h.expected[0]}–${h.expected[1]} kWh/(m²·a) <small>unsaniert typisch ${h.ageClass.range[0]}–${h.ageClass.range[1]}</small></dd>
+        <dt>Ihr Haus</dt><dd><span class="cmp-${h.comparison}">${escapeHtml(cmpText)}</span></dd>
+        <dt>Verbrauch</dt><dd>${n0(s.fuelTotal)} kWh ${fuelUnit} auf ${n0(h.area)} m² <small>${parts.join(' · ')}</small></dd>
+        <dt>Heizlast (grob)</dt><dd>ca. ${fmtNum(h.heatLoadKW, 1)} kW <small>Wärmebedarf ÷ 2.000 Volllaststunden – ersetzt keine Heizlastberechnung nach DIN EN 12831</small></dd>
+      </dl>
+      <div class="hint level-${h.wpSuitability.level === 'check' ? 'warning' : h.wpSuitability.level === 'ok' ? 'info' : 'important'}">
+        <div class="hint-title">Eignung für die Wärmepumpe (Raumwärme ${n0(h.spaceHeatPerM2)} kWh/m²)</div>
+        <div class="hint-detail">${escapeHtml(h.wpSuitability.text)}</div>
+      </div>
+      <p class="muted small">${h.notes.map(escapeHtml).join(' ')} Typische Werte nach Baualter sind grobe Schätzungen.</p>`;
   }
 
   function renderDetails(run: RunResult): void {
@@ -911,6 +955,7 @@ function layout(): string {
       <p id="horizon-note" class="muted small"></p>
       <div id="warnings"></div>
       <div id="events" class="card events"></div>
+      <div id="house" class="card house"></div>
       <div class="card">
         <h2 class="visually-hidden">Diagramme</h2>
         <div class="tabs" role="tablist" aria-label="Diagramme">

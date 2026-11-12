@@ -22,7 +22,14 @@ export interface GeneralInputs {
 export interface BuildingInputs {
   ownerOccupied: boolean;
   units: number;
-  buildingAgeYears: number;
+  /** Baujahr des Gebäudes (F17). */
+  constructionYear: number;
+  /** Beheizte Wohnfläche (m²). */
+  heatedArea: number;
+  /** Jahr der letzten energetischen Sanierung; 0 = keine. */
+  renovationYear: number;
+  /** Umfang der letzten Sanierung. */
+  renovationScope: 'partial' | 'full';
   /** Zu versteuerndes Haushaltsjahreseinkommen (€). */
   householdIncome: number;
   hasChild: boolean;
@@ -36,6 +43,18 @@ export interface OldHeatingInputs {
   consumption: number;
   efficiency: number;
   ageYears: number;
+  /** Warmwasser wird über die Heizung bereitet (F17). */
+  dhwViaHeating: boolean;
+  /** Anteil Warmwasser am Gesamtverbrauch (0–1). */
+  dhwShare: number;
+  /** Gasherd am selben Anschluss (nur Gas). */
+  cookingWithGas: boolean;
+  /** Anteil Kochen am Gesamtverbrauch (0–1). */
+  cookingShare: number;
+  /** Kochen nach dem Umstieg: Strom (Induktion) oder weiter Gas (Anschluss bleibt). */
+  cookingAfter: 'electric' | 'gas';
+  /** Einmalige Kosten für ein neues Kochfeld (Induktion) beim Umstieg auf Strom (€, heutige Preise). */
+  cookingSwitchCost: number;
   remainingLifeYears: number;
   /** Wartung + Schornsteinfeger €/Jahr. */
   maintenance: number;
@@ -61,6 +80,8 @@ export interface PriceInputs {
   /** Bio-Treppe "Jahr:Anteil%, …". */
   bioSteps: string;
   bioPremiumCt: number;
+  /** Strombedarf beim Kochen je kWh Gas (Induktion statt Gasherd). */
+  cookingElecFactor: number;
 }
 
 export interface HeatPumpInputs {
@@ -216,7 +237,10 @@ export interface CostBreakdown {
 
 export interface MonthRow extends CostBreakdown {
   month: number;
+  /** Nutzwärme der Heizung (Raumwärme + ggf. Warmwasser). */
   heatKWh: number;
+  /** Davon enthaltene Kosten fürs Kochen (in energy/fixed), z. B. für den Tarifvergleich. */
+  cookingCost: number;
   /** 'old' | 'new' (Ersatzkessel) | 'wp' */
   system: 'old' | 'new' | 'wp';
 }

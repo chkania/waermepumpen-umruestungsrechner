@@ -16,9 +16,17 @@ import type { Inputs } from './types';
  */
 export const FUNDING_SOURCE_DATE = '2026-11-11';
 
+/** Jan … Dez – Anteil am Jahreswärmebedarf (Raumwärme + 15 % Warmwasser), Summe = 1. */
 export const HEAT_PROFILE: readonly number[] = [
-  // Jan … Dez – Anteil am Jahreswärmebedarf (Raumwärme + Warmwasser), Summe = 1
   0.165, 0.145, 0.125, 0.08, 0.045, 0.025, 0.02, 0.02, 0.035, 0.075, 0.12, 0.145,
+];
+/** Monatsprofil Warmwasser (fast gleichmäßig, im Winter etwas mehr wegen kälteren Zulaufwassers), Summe = 1. */
+export const DHW_PROFILE: readonly number[] = [
+  0.093, 0.087, 0.091, 0.085, 0.083, 0.077, 0.075, 0.075, 0.077, 0.083, 0.085, 0.089,
+];
+/** Monatsprofil Raumwärme, so abgeleitet, dass 85 % Raumwärme + 15 % Warmwasser = HEAT_PROFILE (F17), Summe = 1. */
+export const SPACE_PROFILE: readonly number[] = [
+  0.1777, 0.1552, 0.131, 0.0791, 0.0383, 0.0158, 0.0103, 0.0103, 0.0276, 0.0736, 0.1262, 0.1549,
 ];
 
 export function createDefaults(today: Date = new Date()): Inputs {
@@ -38,7 +46,10 @@ export function createDefaults(today: Date = new Date()): Inputs {
     building: {
       ownerOccupied: true,
       units: 1,
-      buildingAgeYears: 40,
+      constructionYear: Math.floor(parseMonth(start) / 12) - 40,
+      heatedArea: 140,
+      renovationYear: 0,
+      renovationScope: 'partial',
       householdIncome: 60000,
       hasChild: false,
       incomeTax: 0,
@@ -48,6 +59,12 @@ export function createDefaults(today: Date = new Date()): Inputs {
       consumption: 20000,
       efficiency: 0.9,
       ageYears: 22,
+      dhwViaHeating: true,
+      dhwShare: 0.15,
+      cookingWithGas: false,
+      cookingShare: 0.03,
+      cookingAfter: 'electric',
+      cookingSwitchCost: 800,
       remainingLifeYears: 5,
       maintenance: 200,
       replacementCost: 12000,
@@ -67,6 +84,7 @@ export function createDefaults(today: Date = new Date()): Inputs {
       bioEnabled: true,
       bioSteps: '2029:10, 2030:15, 2035:30, 2040:60',
       bioPremiumCt: 3,
+      cookingElecFactor: 0.55,
     },
     heatPump: {
       investment: 32000,

@@ -58,6 +58,8 @@ export interface PriceModel {
   bioShare(year: number): number;
   /** Strompreis ct/kWh für die WP (WP-Tarif oder Haushaltsstrom) im Monat `month`. */
   elecCt(month: number): number;
+  /** Haushaltsstrompreis ct/kWh im Monat `month` (z. B. Kochen mit Induktion). */
+  householdCt(month: number): number;
   /** Faktor der Strompreissteigerung im Monat `month` (1 im Startmonat). */
   elecGrowth(month: number): number;
   /** Gas-Grundpreis €/Jahr im Monat `month`. */
@@ -104,6 +106,9 @@ export function createPriceModel(inp: Inputs): PriceModel {
       const base = hp.separateTariff ? hp.elecPriceCt : hp.householdPriceCt;
       return base * g(hp.elecIncrease, month);
     },
+    householdCt(month) {
+      return hp.householdPriceCt * g(hp.elecIncrease, month);
+    },
     elecGrowth(month) {
       return g(hp.elecIncrease, month);
     },
@@ -119,7 +124,42 @@ export function fuelKWh(inp: Inputs): number {
   return o.fuel === 'gas' ? o.consumption : o.consumption * inp.prices.oilKwhPerLiter;
 }
 
-/** Jahreswärmebedarf (Nutzwärme, kWh). */
+/**
+ * Aufteilung des Verbrauchs (F17): Kochen (Gas, läuft nicht über den Kessel), Warmwasser und Raumwärme.
+ * Raumwärme und Warmwasser werden mit dem Nutzungsgrad in Nutzwärme umgerechnet.
+ */
+export interface EnergySplit {
+  /** Gesamtverbrauch Endenergie (kWh). */
+  fuelTotal: number;
+  /** Endenergie fürs Kochen (kWh Gas). */
+  cookingFuel: number;
+  /** Endenergie Heizung (Raumwärme + Warmwasser), ohne Kochen. */
+  heatingFuel: number;
+  /** Nutzwärme Raumheizung (kWh). */
+  spaceHeat: number;
+  /** Nutzwärme Warmwasser (kWh). */
+  dhwHeat: number;
+}
+
+export function energySplit(inp: Inputs): EnergySplit {
+  const o = inp.oldHeating;
+  const fuelTotal = fuelKWh(inp);
+  const cookShare = o.fuel === 'gas' && o.cookingWithGas ? Math.max(0, o.cookingShare) : 0;
+  const dhwShare = o.dhwViaHeating ? Math.max(0, o.dhwShare) : 0;
+  const cookingFuel = fuelTotal * cookShare;
+  const heatingFuel = fuelTotal - cookingFuel;
+  const dhwFuel = fuelTotal * Math.min(dhwShare, 1 - cookShare);
+  return {
+    fuelTotal,
+    cookingFuel,
+    heatingFuel,
+    spaceHeat: (heatingFuel - dhwFuel) * o.efficiency,
+    dhwHeat: dhwFuel * o.efficiency,
+  };
+}
+
+/** Jahreswärmebedarf der Heizung (Nutzwärme Raumwärme + Warmwasser, ohne Kochen, kWh). */
 export function annualHeatDemand(inp: Inputs): number {
-  return fuelKWh(inp) * inp.oldHeating.efficiency;
+  const s = energySplit(inp);
+  return s.spaceHeat + s.dhwHeat;
 }

@@ -11,7 +11,18 @@ const isObj = (v: unknown): v is Obj => typeof v === 'object' && v !== null && !
  * ggf. begrenzt bzw. durch den Standardwert ersetzt (F9.5). Befunde landen in `issues`.
  */
 export function mergeInputs(defaults: Inputs, data: unknown, issues: InputIssue[] = []): Inputs {
-  return mergeObj(defaults as unknown as Obj, data, '', issues) as unknown as Inputs;
+  return mergeObj(defaults as unknown as Obj, migrate(defaults, data), '', issues) as unknown as Inputs;
+}
+
+/** Ältere Datenstände übernehmen: Gebäudealter (Jahre) → Baujahr (F17). */
+function migrate(defaults: Inputs, data: unknown): unknown {
+  if (!isObj(data) || !isObj(data.building)) return data;
+  const b = data.building;
+  if (typeof b.buildingAgeYears !== 'number' || b.constructionYear !== undefined || !Number.isFinite(b.buildingAgeYears)) return data;
+  const g = isObj(data.general) ? data.general : {};
+  const m = /^(\d{4})-/.exec(typeof g.startMonth === 'string' ? g.startMonth : defaults.general.startMonth);
+  const startYear = m ? Number(m[1]) : Number(defaults.general.startMonth.slice(0, 4));
+  return { ...data, building: { ...b, constructionYear: Math.round(startYear - b.buildingAgeYears) } };
 }
 
 function mergeObj(base: Obj, data: unknown, prefix: string, issues: InputIssue[]): Obj {

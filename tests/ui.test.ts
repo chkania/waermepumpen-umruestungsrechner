@@ -344,6 +344,25 @@ describe('UI (Smoke-Test)', () => {
     expect(card).toContain('Zinsersparnis');
   });
 
+  it('F18 Einordnung des Hauses reagiert auf Fläche und Sanierung; Kochfelder nur bei Gas', () => {
+    const { root } = mount();
+    const card = () => root.querySelector('#house')!.textContent!.replace(/\s+/g, ' ');
+    expect(card()).toContain('143 kWh/(m²·a)');
+    expect(root.querySelector('.eff-scale [aria-current]')!.textContent).toBe('E');
+    setValue(root, 'building.heatedArea', '200');
+    expect(card()).toContain('100 kWh/(m²·a)');
+    expect(root.querySelector('.eff-scale [aria-current]')!.textContent).toBe('D');
+    const scope = root.querySelector<HTMLElement>('[data-field="building.renovationScope"]')!;
+    expect(scope.hidden).toBe(true);
+    setValue(root, 'building.renovationYear', '2010');
+    expect(scope.hidden).toBe(false);
+    expect(card()).toContain('teilsaniert');
+    const cooking = root.querySelector<HTMLElement>('[data-field="oldHeating.cookingWithGas"]')!;
+    expect(cooking.hidden).toBe(false);
+    setValue(root, 'oldHeating.fuel', 'oil');
+    expect(cooking.hidden).toBe(true);
+  });
+
   it('F15 Hilfe-Link öffnet das Benutzerhandbuch in neuem Tab', () => {
     const { root } = mount();
     const a = root.querySelector<HTMLAnchorElement>('#btn-help')!;
