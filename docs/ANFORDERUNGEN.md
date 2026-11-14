@@ -158,6 +158,10 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 - F21.1 Schaltfläche „Weiterempfehlen“ in der Werkzeugleiste öffnet einen Dialog mit WhatsApp (`whatsapp://send?text=`, öffnet die App direkt – über `wa.me` ging der Text in WhatsApp Desktop für macOS verloren), „Andere“ (Teilen-Menü des Geräts per Web Share API, z. B. für Signal, das keinen Teilen-Link anbietet; sonst Text in die Zwischenablage), Threema (`threema.id/compose?text=`), E-Mail (`mailto:` mit Betreff und Text) und „Link kopieren“; bewusst ohne Facebook und X. *(Test: share, ui, help)*
 - F21.2 Geteilt wird nur die Adresse des Rechners (ohne `#s=…` und Query-Parameter), nie die Eingaben; Empfehlungstext in `src/ui/share.ts`. *(Test: share)*
 
+### F22 – Regelmäßige Prüfung der Annahmen
+- F22.1 Workflow „Annahmen prüfen“ (`.github/workflows/annahmen-pruefen.yml`) legt vierteljährlich (1. Januar, April, Juli, Oktober) und manuell ein Issue mit Label `annahmen-pruefen` an: Checkliste aller zeitkritischen Standardwerte (Herkunft „Offizielle Quelle“, „Gesetz / Regelung“, „Marktdaten“) mit Abrufdatum und Links, erzeugt aus `src/core/sources.ts` (`scripts/assumptions-checklist.ts`, reines Node ohne npm). Ist noch ein Prüf-Issue offen, wird dort nur erinnert. *(Test: freshness)*
+- F22.2 Liegt die letzte Prüfung (`FUNDING_SOURCE_DATE` in `defaults.ts`) mindestens 6 Monate zurück, zeigt der Rechner über den Ergebnissen den Hinweis „Annahmen möglicherweise veraltet“ mit Prüfdatum und Link zum Fehlerformular; ausblendbar bis zum nächsten Laden. *(Test: freshness, ui)*
+
 ### F9 – Persistenz
 - F9.1 Eingaben werden automatisch im localStorage gespeichert und beim Laden wiederhergestellt. *(Test: serialize)*
 - F9.2 „Link mit Werten teilen" (bis 1.4: „Link teilen"): Eingaben (nur Abweichungen von den Defaults) als Base64url-JSON im URL-Hash `#s=…`; ein Link hat Vorrang vor localStorage. *(Test: serialize)*
@@ -239,3 +243,4 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 | 2026-11-14 | F20 Einführung beim ersten Besuch (Dialog mit Zweck, Bedienung, Link zur Hilfe; Knopf „Einführung“). |
 | 2026-11-14 | F21 Weiterempfehlen per WhatsApp, Threema, E-Mail, Link und Teilen-Menü des Geräts („Andere“, z. B. Signal) (ohne Facebook/X), nur mit der Adresse des Rechners. |
 | 2026-11-14 | Schaltfläche „Link teilen“ in „Link mit Werten teilen“ umbenannt, um sie vom Weiterempfehlen (nur Adresse des Rechners) zu unterscheiden. |
+| 2026-11-14 | F22 vierteljährliches Prüf-Issue für die Annahmen und Hinweis im Rechner, wenn die letzte Prüfung über 6 Monate zurückliegt. |

@@ -1,0 +1,49 @@
+name: Annahmen prüfen
+
+# Quarterly reminder to review the default assumptions (F22): opens an issue with a checklist of all
+# time-sensitive defaults (official sources, laws, market data) generated from src/core/sources.ts.
+# Plain Node only (no npm ci) – no third-party package code runs with the issues permission.
+
+on:
+  schedule:
+    # 1 January, April, July, October, 06:00 UTC
+    - cron: '0 6 1 1,4,7,10 *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: annahmen-pruefen
+  cancel-in-progress: false
+
+jobs:
+  issue:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      LABEL: annahmen-pruefen
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+      - name: Checkliste erzeugen
+        run: node scripts/assumptions-checklist.ts review
+      - name: Issue anlegen (oder an offenes erinnern)
+        run: |
+          gh label create "$LABEL" --color FBCA04 --description "Regelmäßige Prüfung der Standardwerte" --force
+          open=$(gh issue list --label "$LABEL" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$open" ]; then
+            gh issue comment "$open" --body "Ein neues Quartal hat begonnen und diese Prüfung ist noch offen. Bitte abschließen – eine neue Checkliste wird erst angelegt, wenn dieses Issue geschlossen ist."
+            echo "Offenes Prüf-Issue #$open – Erinnerung kommentiert." >> "$GITHUB_STEP_SUMMARY"
+          else
+            url=$(gh issue create --title "$(cat review/title.txt)" --body-file review/body.md --label "$LABEL" --assignee "${{ github.repository_owner }}")
+            echo "Neues Prüf-Issue: $url" >> "$GITHUB_STEP_SUMMARY"
+          fi

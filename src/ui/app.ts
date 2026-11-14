@@ -3,6 +3,7 @@ import { keyEvents, type KeyEvent, type KeyEvents } from '../core/events';
 import { tryParseMonth } from '../core/dates';
 import { APP_VERSION } from '../version';
 import { createDefaults, FUNDING_SOURCE_DATE } from '../core/defaults';
+import { assumptionsAgeMonths, assumptionsStale } from '../core/freshness';
 import { DEFAULT_SOURCES, OFFICIAL_REFS, SOURCE_KIND_LABEL } from '../core/sources';
 import { priceRows, runAll, type RunResult } from '../core/simulation';
 import { tariffComparison } from '../core/tariff';
@@ -157,6 +158,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
 
   // ---------- Notices on load: shared link, invalid values (F9.5, F9.6) ----------
   const notice = $<HTMLElement>('#notice');
+  let staleDismissed = false;
   function renderNotice(): void {
     const parts: string[] = [];
     if (sharedView) {
@@ -176,6 +178,13 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
           .join('')}${loadIssues.issues.length > 12 ? `<li>… und ${loadIssues.issues.length - 12} weitere</li>` : ''}</ul>
         <button type="button" data-notice="dismiss" class="ghost">Ausblenden</button></div>`);
     }
+    // F22: assumptions not reviewed for a long time
+    const today = env.today ?? new Date();
+    if (assumptionsStale(today) && !staleDismissed) {
+      parts.push(`<div class="notice-stale">
+        <p><strong>Annahmen möglicherweise veraltet.</strong> Förderbedingungen, Preise und Zinsen wurden zuletzt am ${FUNDING_SOURCE_DATE.split('-').reverse().join('.')} geprüft (vor ${assumptionsAgeMonths(today)} Monaten). Prüfen Sie wichtige Werte vor einer Entscheidung bei KfW, Ihrem Energieversorger oder einer Energieberatung. Ist Ihnen ein veralteter Wert aufgefallen? <a href="${BUG_REPORT_URL}" target="_blank" rel="noopener">Hier melden</a>.</p>
+        <button type="button" data-notice="stale" class="ghost">Ausblenden</button></div>`);
+    }
     notice.innerHTML = parts.join('');
     notice.hidden = parts.length === 0;
   }
@@ -186,6 +195,11 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   }
   notice.addEventListener('click', (e) => {
     const action = (e.target as HTMLElement).closest<HTMLElement>('[data-notice]')?.dataset.notice;
+    if (action === 'stale') {
+      staleDismissed = true;
+      renderNotice();
+      return;
+    }
     if (action === 'adopt') {
       sharedView = false;
       persist();
