@@ -521,3 +521,9 @@ td.ev-cell { white-space: normal; min-width: 220px; }
   font-size: 0.9rem;
 }
 .toolbar > .tool-link:hover { border-color: var(--accent); }
+
+/* Invitation to contribute (F19) */
+.contribute h2 { margin-top: 0; }
+.contribute p, .contribute li { font-size: 0.9rem; line-height: 1.5; }
+.contribute ul { margin: 6px 0 8px; padding-left: 20px; }
+.contribute li { margin-bottom: 4px; }

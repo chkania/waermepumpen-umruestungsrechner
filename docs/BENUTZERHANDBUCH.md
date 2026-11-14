@@ -296,6 +296,16 @@ Ein Test mit Screenreadern steht noch aus.
 
 Die aktuelle Version steht im Kopf des Rechners neben der Beschreibung (z. B. „Version 1.0.0“) und in der Fußzeile. Ein Klick öffnet die Seite **Änderungen** (changelog.html) mit allen Versionen. Die Nummer folgt dem Schema Major.Minor.Patch: Eine neue **Minor**-Version bringt neue Funktionen oder geänderte Annahmen – die Ergebnisse können sich dann ändern. Eine neue **Major**-Version wird es nur geben, wenn ältere Export-Dateien oder Links nicht mehr übernommen werden können. Exportierte Dateien enthalten die Version, mit der sie erstellt wurden (`appVersion`).
 
+## Mitmachen
+
+Der Rechner ist ein offenes Projekt auf GitHub: [github.com/chkania/waermepumpen-umruestungsrechner](https://github.com/chkania/waermepumpen-umruestungsrechner). Förderprogramme, Energiepreise und Steuerregeln ändern sich laufend – damit die Ergebnisse verlässlich bleiben, ist deine Hilfe willkommen, auch ohne Programmierkenntnisse:
+
+- **Fehler oder veraltete Werte melden:** Nutze auf GitHub das Formular [Fehler oder veralteter Wert](https://github.com/chkania/waermepumpen-umruestungsrechner/issues/new?template=bug_report.yml) – am besten mit Quelle, z. B. eine geänderte KfW-Regel, ein neuer Preis oder ein Rechenergebnis, das dir unplausibel vorkommt. Ein exportierter Datensatz oder ein Link hilft beim Nachvollziehen (prüf vorher, ob er persönliche Angaben enthält).
+- **Ideen vorschlagen:** Welche Frage beantwortet der Rechner noch nicht? Welche Erklärung war für dich unklar? Nutze dafür das Formular [Idee oder Frage](https://github.com/chkania/waermepumpen-umruestungsrechner/issues/new?template=feature_request.yml).
+- **Selbst mitentwickeln:** Rechenlogik, Texte, Tests oder Barrierefreiheit – wie Änderungen ablaufen, beschreibt [CONTRIBUTING.md](https://github.com/chkania/waermepumpen-umruestungsrechner/blob/main/CONTRIBUTING.md).
+
+Im Rechner findest du dazu den Kasten **Mitmachen** unter den Ergebnissen und den Link **Quellcode auf GitHub** im Seitenfuß.
+
 ## Lizenz
 
 Der Rechner steht unter der **PolyForm Noncommercial License 1.0.0** (Copyright © 2026 Christoph Kania). Sie dürfen ihn für nicht-kommerzielle Zwecke kostenfrei nutzen, verändern und weitergeben – z. B. privat, in Forschung und Lehre, in gemeinnützigen Organisationen oder Behörden. Kommerzielle Nutzung, etwa als Teil eines Beratungs- oder Verkaufsangebots, erfordert eine gesonderte Vereinbarung. Bei der Weitergabe müssen der Lizenztext (oder seine Adresse) und der Copyright-Hinweis mitgegeben werden.
