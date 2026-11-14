@@ -12,10 +12,12 @@ describe('N9 Versionierung', () => {
     expect(APP_VERSION).toBe(JSON.parse(read('package.json')).version);
   });
 
-  it('CHANGELOG: Abschnitt „Unveröffentlicht“ und aktuelle Version als neueste Version mit Datum', () => {
+  it('CHANGELOG: aktuelle Version als neueste Version mit Datum, kein „Unveröffentlicht“ (Trunk-Based)', () => {
     const log = read('CHANGELOG.md');
     const versions = [...log.matchAll(/^## (\d+\.\d+\.\d+) – (\d{4}-\d{2}-\d{2})$/gm)].map((m) => m[1]);
-    expect(log).toMatch(/^## Unveröffentlicht$/m);
+    expect(log).not.toMatch(/^## Unveröffentlicht/m);
+    // nach dem Einleitungstext folgt direkt die neueste Version
+    expect(log.match(/^## .*$/m)![0]).toBe(`## ${APP_VERSION} – ${log.match(/^## \S+ – (\S+)$/m)![1]}`);
     expect(versions[0]).toBe(APP_VERSION);
     // absteigend sortiert, keine doppelten Versionen
     const num = (v: string) => v.split('.').reduce((a, x) => a * 1000 + Number(x), 0);

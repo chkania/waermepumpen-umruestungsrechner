@@ -2,16 +2,19 @@
 
 Alle wesentlichen Änderungen am Wärmepumpen-Investitionsrechner. Das Format orientiert sich an
 [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), die Versionsnummern folgen
-[Semantic Versioning](https://semver.org/lang/de/):
+[Semantic Versioning](https://semver.org/lang/de/). Jede für Nutzer sichtbare Änderung bekommt sofort eine neue Version – es gibt keine gesammelten Releases:
 
 - **Major** (x.0.0): inkompatible Änderungen, z. B. am Format von Export-Dateien oder geteilten Links, die ältere Stände nicht mehr übernehmen können.
 - **Minor** (1.x.0): neue Funktionen oder Eingaben sowie bewusst geänderte Rechenmodelle oder Standardwerte (Ergebnisse können sich ändern).
 - **Patch** (1.0.x): Fehlerkorrekturen, Texte, Darstellung – ohne neue Funktionen.
 
-## Unveröffentlicht
+## 1.1.0 – 2026-11-14
 
 ### Neu
-- „Wann umrüsten?“ erklärt, warum der günstigste Zeitpunkt am günstigsten ist: Vergleich mit dem vorherigen und nächsten Zeitpunkt nach Kostenarten, Hauptgrund und Ursachen (Heizwinter, Zuschuss, Steuerbonus, Ersatzkessel).
+- „Wann umrüsten?“ erklärt, warum der günstigste Zeitpunkt am günstigsten ist: Vergleich mit dem vorherigen und nächsten Zeitpunkt nach Kostenarten, Hauptgrund und Ursachen (Heizwinter, Zuschuss, Steuerbonus, Ersatzkessel, steigende Investitionskosten, Restwert).
+
+### Sonstiges
+- Fünf Beispieldateien zum Import im Ordner `beispiele/` (Altbau mit Ölheizung, Gas-Brennwert mit PV und Steuerbonus, vermietetes Mehrfamilienhaus, Reihenhaus mit Sondertilgung und Gasherd, Stresstest mit teurem Strom); Übersicht in `beispiele/README.md`.
 
 ## 1.0.0 – 2026-11-12
 
