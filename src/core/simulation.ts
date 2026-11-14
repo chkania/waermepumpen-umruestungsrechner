@@ -19,15 +19,15 @@ const SUBSIDY = 'Zuschuss';
 const WINDFALL = 'Einmalzahlung';
 
 /**
- * § 14a EnWG Modul 1 wird je Marktlokation (Zähler) gewährt, nicht je Gerät (F13.6).
- * Hängt die WP am Haushaltszähler, an dem schon eine steuerbare Verbrauchseinrichtung (z. B. Wallbox)
- * die Pauschale erhält, bringt sie keine zusätzliche Reduzierung.
+ * § 14a EnWG module 1 is granted per metering point (Marktlokation) (meter), not per device (F13.6).
+ * If the heat pump is connected to the household meter (Haushaltszähler), where a controllable consumer (steuerbare Verbrauchseinrichtung) (e.g. wallbox)
+ * already receives the flat-rate reduction (Pauschale), it brings no additional reduction.
  */
 export function para14aFor(hp: Inputs['heatPump']): number {
   return hp.separateTariff || !hp.existing14aOnHousehold ? hp.para14aReduction : 0;
 }
 
-/** Sondertilgungsregeln KfW 358/359 (Merkblatt S. 5). */
+/** Special repayment (Sondertilgung) rules KfW 358/359 (fact sheet (Merkblatt) p. 5). */
 function kfwRules(inp: Inputs): PrepaymentRules {
   const f = inp.financing;
   return {
@@ -40,7 +40,7 @@ function kfwRules(inp: Inputs): PrepaymentRules {
   };
 }
 
-/** Sondertilgungsregeln Verbraucherkredit (§ 500 Abs. 2, § 502 BGB). */
+/** Special repayment (Sondertilgung) rules for consumer loans (§ 500 (2), § 502 BGB). */
 function bankRules(inp: Inputs): PrepaymentRules {
   const f = inp.financing;
   return {
@@ -53,7 +53,7 @@ function bankRules(inp: Inputs): PrepaymentRules {
   };
 }
 
-/** Reihenfolge der Kredite für die Einmalzahlung: gewählter Kredit zuerst, sonst höchster Zins zuerst. */
+/** Order of loans for the one-off payment (Einmalzahlung): chosen loan first, otherwise highest interest rate first. */
 function windfallOrder<T extends { name: string; spec: LoanSpec }>(loans: T[], target: string, month: number): T[] {
   const rateAt = (l: T) => (l.spec.fixMonths > 0 && month - l.spec.startMonth > l.spec.fixMonths ? l.spec.followUpRate : l.spec.rate);
   const isKfw = (l: T) => l.name.startsWith('KfW');
@@ -109,8 +109,8 @@ interface Asset {
 }
 
 /**
- * Simuliert ein Szenario monatlich.
- * @param installOverride absoluter Installationsmonat (überschreibt inputs.heatPump.installMonth)
+ * Simulates a scenario month by month.
+ * @param installOverride absolute installation month (overrides inputs.heatPump.installMonth)
  */
 export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: number): ScenarioResult {
   const warnings: string[] = [];
@@ -118,7 +118,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
   const H = Math.max(1, Math.round(inp.general.horizonYears * 12));
   const end = start + H;
   const pm = createPriceModel(inp);
-  // Raumwärme, Warmwasser und Kochen getrennt (F17)
+  // Space heating (Raumwärme), hot water (Warmwasser) and cooking handled separately (F17)
   const split = energySplit(inp);
   const cookStaysGas = split.cookingFuel > 0 && inp.oldHeating.cookingAfter === 'gas';
   const o = inp.oldHeating;
@@ -142,7 +142,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
     }
   }
 
-  // Ersatzkessel (Referenz bzw. WP-Szenario, falls Altanlage vor Installation ausfällt)
+  // Replacement boiler (Ersatzkessel) (reference or heat pump scenario, if the old system fails before installation)
   const oldEnd = start + Math.max(0, Math.round(o.remainingLifeYears * 12));
   const fossilEnd = install ?? end;
   const replLife = Math.max(1, Math.round(o.replacementLifeYears * 12));
@@ -166,11 +166,11 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
     const cost = o.replacementCost * growth(inp.general.investIncrease, b - start);
     rows[b - start].investment += cost;
     boilerPurchases.push({ month: b, cost });
-    // Restwert nur, wenn der Kessel bis zum Ende läuft; im WP-Szenario wird er bei der Installation ersetzt
+    // Residual value (Restwert) only if the boiler runs until the end; in the heat pump scenario it is replaced at installation
     if (install === null) assets.push({ cost, install: b, lifeMonths: replLife });
   }
 
-  // Laufende Kosten
+  // Running costs
   for (const r of rows) {
     const abs = r.month;
     const year = yearOf(abs);
@@ -188,7 +188,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
       r.fixed = ((hp.separateTariff ? hp.meterFee * pm.elecGrowth(abs) : 0) - para14aFor(hp)) / 12;
       r.maintenance = (hp.maintenance * maintGrowth) / 12;
       if (cookM > 0) {
-        // Kochen: weiter mit Gas (Anschluss inkl. Grundpreis bleibt) oder Induktion am Haushaltszähler
+        // Cooking: stays on gas (connection incl. standing charge (Grundpreis) remains) or induction on the household meter (Haushaltszähler)
         if (cookStaysGas) {
           const gas = (cookM * pm.fuelCt('gas', abs)) / 100;
           const base = pm.gasBaseFee(abs) / 12;
@@ -207,7 +207,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
       const eff = isNew ? o.replacementEfficiency : o.efficiency;
       const fuelKWh = heatM / eff;
       const ct = pm.fuelCt(fuel, abs) + (isNew ? pm.bioSurchargeCt(year) : 0);
-      // Kochen läuft nicht über den Kessel und ohne Bio-Pflicht
+      // Cooking does not run through the boiler and has no bio obligation (Bio-Pflicht)
       const cook = (cookM * pm.fuelCt(fuel, abs)) / 100;
       r.energy = (fuelKWh * ct) / 100 + cook;
       r.cookingCost = cook;
@@ -224,19 +224,19 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
   if (install !== null) {
     const iIdx = install - start;
     const wpGross = hp.investment * growth(inp.general.investIncrease, iIdx);
-    // Zweiter Zähler (Zählerschrank-Umbau) nur bei separatem WP-Tarif (F13.5)
+    // Second meter (meter cabinet conversion (Zählerschrank-Umbau)) only with a separate heat pump tariff (Wärmepumpentarif) (F13.5)
     const meterSetup = hp.separateTariff ? Math.max(0, hp.meterSetupCost) * growth(inp.general.investIncrease, iIdx) : 0;
     const extra = hp.extraCost * growth(inp.general.investIncrease, iIdx) + (hp.meterSetupEligible ? 0 : meterSetup);
     const eligibleGross = wpGross * hp.eligibleShare + (hp.meterSetupEligible ? meterSetup : 0);
     const total = wpGross + extra + (hp.meterSetupEligible ? meterSetup : 0);
     rows[iIdx].investment += total;
-    // Neues Kochfeld beim Umstieg auf Strom (F17.3): einmalig, nicht förderfähig, aus Eigenmitteln
+    // New cooktop (Kochfeld) when switching to electricity (F17.3): one-off, not eligible for funding, paid from own funds
     if (split.cookingFuel > 0 && !cookStaysGas) {
       rows[iIdx].investment += Math.max(0, inp.oldHeating.cookingSwitchCost) * growth(inp.general.investIncrease, iIdx);
     }
     const hpLife = Math.max(1, Math.round(hp.lifeYears * 12));
     assets.push({ cost: wpGross, install, lifeMonths: hpLife });
-    // Ersatz-WP, wenn der Zeitraum länger ist als die Lebensdauer (ohne Förderung, analog zum Ersatzkessel)
+    // Replacement heat pump (Ersatz-Wärmepumpe) if the period is longer than its lifetime (without funding, like the replacement boiler (Ersatzkessel))
     for (let b = install + hpLife; b < end; b += hpLife) {
       const cost = hp.investment * growth(inp.general.investIncrease, b - start);
       rows[b - start].investment += cost;
@@ -295,13 +295,13 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
       });
     };
 
-    /** Kredite berechnen und die Einmalzahlung (z. B. Lebensversicherung) als Sondertilgung verteilen. */
+    /** Calculates the loans and distributes the one-off payment (Einmalzahlung) (e.g. life insurance) as special repayment (Sondertilgung). */
     const runLoans = (planned: { name: string; spec: LoanSpec }[]) => {
       const active = planned.filter((l) => l.spec.principal > 0);
       const results = new Map(active.map((l) => [l, loanScheduleDetailed(l.spec)] as const));
       const avail = tryParseMonth(fin.windfallMonth);
       if (fin.windfallAmount > 0 && avail !== null) {
-        // Tilgungstermin (F12.6): leer = sofort bei Verfügbarkeit; früher als verfügbar ist nicht möglich
+        // Repayment date (F12.6): empty = immediately when available; earlier than available is not possible
         let wfMonth = tryParseMonth(fin.windfallRepayMonth) ?? avail;
         if (wfMonth < avail) {
           warnings.push(
@@ -376,7 +376,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
       if (subsidyMonth < end) {
         rows[subsidyMonth - start].subsidy -= kfwRes.subsidy;
       } else if (kfwRes.subsidy > 0) {
-        // Anspruch besteht – wie die Restschuld der Kredite am Ende des Zeitraums eingerechnet
+        // The claim exists – included like the remaining debt (Restschuld) of the loans at the end of the period
         rows[H - 1].subsidy -= kfwRes.subsidy;
         warnings.push(
           `KfW-Zuschuss wird erst ${formatMonthDe(subsidyMonth)} ausgezahlt – als Forderung am Ende des Betrachtungszeitraums eingerechnet.`,
@@ -456,7 +456,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
     }
   }
 
-  // Restwerte
+  // Residual values (Restwert)
   if (inp.general.residualValue) {
     for (const a of assets) {
       const remaining = a.install + a.lifeMonths - end;
@@ -464,7 +464,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
     }
   }
 
-  // Summen und Aufzinsung
+  // Totals and compounding
   const q = Math.pow(1 + inp.general.opportunityRate, 1 / 12) - 1;
   const cumulative: number[] = [];
   let cum = 0;
@@ -539,8 +539,8 @@ export function aggregateYears(rows: MonthRow[], cumulative: number[]): YearRow[
 }
 
 /**
- * Amortisationszeitpunkt: erster Monat, ab dem die kumulierten Kosten des WP-Szenarios
- * bis zum Ende dauerhaft ≤ Referenz sind. null = keine Amortisation im Zeitraum.
+ * Break-even point (Amortisation): first month from which the cumulative costs of the heat pump scenario
+ * stay ≤ the reference until the end. null = no break-even within the period.
  */
 export function breakEven(ref: ScenarioResult, wp: ScenarioResult): number | null {
   const n = Math.min(ref.cumulative.length, wp.cumulative.length);
@@ -555,7 +555,7 @@ export interface PriceRow {
   co2Price: number;
   fuelCt: number;
   elecCt: number;
-  /** Kosten je kWh Nutzwärme (ct): fossil = Brennstoff / Nutzungsgrad, WP = Strom / JAZ. */
+  /** Cost per kWh of useful heat (Nutzwärme) (ct): fossil = fuel / efficiency, heat pump = electricity / SPF (JAZ). */
   heatCtFossil: number;
   heatCtWp: number;
 }
@@ -566,7 +566,7 @@ export function priceRows(inp: Inputs): PriceRow[] {
   const n = Math.ceil(inp.general.horizonYears) + 1;
   for (let i = 0; i < n; i++) {
     const year = pm.startYear + i;
-    // Preis zu Jahresbeginn (im Startjahr: Startmonat)
+    // Price at the start of the year (in the start year: start month)
     const month = Math.max(pm.startMonth, year * 12);
     const fuelCt = pm.fuelCt(inp.oldHeating.fuel, month);
     const elecCt = pm.elecCt(month);

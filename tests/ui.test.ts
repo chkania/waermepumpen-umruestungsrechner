@@ -49,7 +49,7 @@ describe('UI (Smoke-Test)', () => {
     expect(kpis).toMatch(/12\.880/);
     expect(root.querySelector('#details')!.textContent).toContain('Klimageschwindigkeitsbonus');
     expect(root.querySelectorAll('#install-table > table > tbody > tr')).toHaveLength(9);
-    // F7.3 Begründung des günstigsten Zeitpunkts
+    // F7.3 explanation of the cheapest point in time
     const why = root.querySelector('#install-table .best-why')!;
     const bestMonth = root.querySelector('#install-table tr.best td')!.textContent!.replace('günstigster', '').trim();
     expect(why.querySelector('h3')!.textContent).toBe(`Warum ist ${bestMonth} am günstigsten?`);
@@ -149,7 +149,7 @@ describe('UI (Smoke-Test)', () => {
     expect(btn.getAttribute('aria-expanded')).toBe('true');
     expect(pop.textContent).toContain('Marktdaten');
     expect(pop.textContent).toContain('12.000 €');
-    // nur ein Popover gleichzeitig
+    // only one popover at a time
     root.querySelector<HTMLButtonElement>('[data-field="funding.kgbRate"] .info-btn')!.click();
     expect(pop.hidden).toBe(true);
     const kgb = root.querySelector('[data-field="funding.kgbRate"] .src-pop')!;
@@ -194,9 +194,9 @@ describe('UI (Smoke-Test)', () => {
     expect(document.documentElement.dataset.design).toBe('classic');
     expect(classic.getAttribute('aria-pressed')).toBe('true');
     expect(store.getItem(DESIGN_KEY)).toBe('classic');
-    // Design ist Ansichtseinstellung, nicht Teil der Eingaben
+    // Design is a view setting, not part of the inputs
     expect(JSON.stringify(app.getInputs())).not.toContain('classic');
-    // beim nächsten Laden wiederhergestellt
+    // restored on the next load
     const again = mount();
     expect(again.app.getDesign()).toBe('classic');
     store.setItem(DESIGN_KEY, 'unsinn');
@@ -233,11 +233,11 @@ describe('UI (Smoke-Test)', () => {
     expect(heading.hidden).toBe(false);
     expect(heading.textContent).toBe('Angebot A');
     expect(document.title).toContain('Angebot A');
-    expect(app.lastResult()).toBe(before); // keine Neuberechnung
+    expect(app.lastResult()).toBe(before); // no recalculation
     expect(JSON.parse(store.getItem(STORAGE_KEY)!).scenario).toEqual({ name: 'Angebot A', notes: 'Zeile 1\nZeile 2' });
-    // kein Herkunfts-Popover für Freitextfelder
+    // no origin popover for free-text fields
     expect(name.closest('.field')!.querySelector('.info-btn')).toBeNull();
-    // wird beim Laden wiederhergestellt
+    // restored on load
     const again = mount();
     expect(again.root.querySelector<HTMLTextAreaElement>('textarea[data-path="scenario.notes"]')!.value).toBe('Zeile 1\nZeile 2');
   });
@@ -273,9 +273,9 @@ describe('UI (Smoke-Test)', () => {
     const notice = root.querySelector<HTMLElement>('#notice')!;
     expect(notice.textContent).toContain('Geteiltes Szenario');
     setValue(root, 'heatPump.jaz', '4');
-    expect(JSON.parse(store.getItem(STORAGE_KEY)!).heatPump.investment).toBe(25000); // eigene Daten unverändert
-    expect(location.hash).toMatch(/^#s=/); // Änderung wirkt auf den Link
-    // eigene Eingaben laden
+    expect(JSON.parse(store.getItem(STORAGE_KEY)!).heatPump.investment).toBe(25000); // own data unchanged
+    expect(location.hash).toMatch(/^#s=/); // change affects the link
+    // load own inputs
     notice.querySelector<HTMLButtonElement>('[data-notice="own"]')!.click();
     expect(app.getInputs().heatPump.investment).toBe(25000);
     expect(location.hash).toBe('');
@@ -314,7 +314,7 @@ describe('UI (Smoke-Test)', () => {
     setValue(root, 'general.horizonYears', '25');
     expect(el.hasAttribute('aria-invalid')).toBe(false);
     expect(err.hidden).toBe(true);
-    // Prozentfelder in Prozent
+    // percentage fields in percent
     expect(setValue(root, 'heatPump.pvShare', '150').closest('.field')!.textContent).toContain('0 bis 100 %');
   });
 

@@ -15,7 +15,7 @@ Bedienung: [docs/BENUTZERHANDBUCH.md](docs/BENUTZERHANDBUCH.md) – im Browser u
 
 Anforderungen, Annahmen und Quellen: [docs/ANFORDERUNGEN.md](docs/ANFORDERUNGEN.md).
 
-Die aktuelle Version und alle Änderungen stehen in [CHANGELOG.md](CHANGELOG.md) (im Browser: `changelog.html`). Versionierung nach [Semantic Versioning](https://semver.org/lang/de/).
+Die aktuelle Version und alle Änderungen stehen in [CHANGELOG.md](CHANGELOG.md) (im Browser: `changelog.html`). Versionierung nach [Semantic Versioning](https://semver.org/lang/de/), automatisch aus den Commit-Nachrichten – Ablauf und Commit-Format in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Keine Finanz-, Steuer- oder Förderberatung; alle Angaben ohne Gewähr.
 

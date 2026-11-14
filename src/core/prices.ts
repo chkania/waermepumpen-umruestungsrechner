@@ -6,7 +6,7 @@ export interface PathPoint {
   value: number;
 }
 
-/** Parst "2026:55, 2027:65" → sortierte Stützstellen. Ungültige Einträge werden ignoriert. */
+/** Parses "2026:55, 2027:65" → sorted support points. Invalid entries are ignored. */
 export function parsePath(text: string): PathPoint[] {
   const points: PathPoint[] = [];
   for (const part of String(text ?? '').split(/[,;\n]+/)) {
@@ -18,7 +18,7 @@ export function parsePath(text: string): PathPoint[] {
   return points;
 }
 
-/** Linear interpoliert; außerhalb der Stützstellen konstant. Leerer Pfad → 0. */
+/** Linear interpolation; constant outside the support points. Empty path → 0. */
 export function interpolate(points: PathPoint[], year: number): number {
   if (points.length === 0) return 0;
   if (year <= points[0].year) return points[0].value;
@@ -34,7 +34,7 @@ export function interpolate(points: PathPoint[], year: number): number {
   return last.value;
 }
 
-/** Treppenfunktion: Wert der letzten Stützstelle mit year ≤ Jahr, davor 0. */
+/** Step function: value of the last support point with year ≤ year, 0 before that. */
 export function stepValue(points: PathPoint[], year: number): number {
   let v = 0;
   for (const p of points) if (p.year <= year) v = p.value;
@@ -42,27 +42,27 @@ export function stepValue(points: PathPoint[], year: number): number {
 }
 
 /**
- * Vorbereitete Preisfunktionen (alle Werte brutto, ct/kWh).
- * Preissteigerungen wirken stetig ab dem Startmonat ((1 + Rate)^(Monate/12)), wie Wartung und Investition.
- * Der CO₂-Preis folgt dem Pfad je Kalenderjahr (gesetzliche Festlegung je Jahr).
+ * Prepared price functions (all values gross, ct/kWh).
+ * Price increases apply continuously from the start month ((1 + rate)^(months/12)), like maintenance and investment.
+ * The CO₂ price follows the path per calendar year (set by law per year).
  */
 export interface PriceModel {
   startYear: number;
   startMonth: number;
   co2Price(year: number): number;
   co2SurchargeCt(fuel: Fuel, year: number): number;
-  /** Brennstoffpreis ct/kWh (Endenergie) inkl. CO2 im Monat `month` (absolut). */
+  /** Fuel price ct/kWh (final energy (Endenergie)) incl. CO2 in month `month` (absolute). */
   fuelCt(fuel: Fuel, month: number): number;
-  /** Bio-Mehrkosten ct/kWh für neu eingebaute fossile Kessel. */
+  /** Bio surcharge (Bio-Mehrkosten) ct/kWh for newly installed fossil boilers. */
   bioSurchargeCt(year: number): number;
   bioShare(year: number): number;
-  /** Strompreis ct/kWh für die WP (WP-Tarif oder Haushaltsstrom) im Monat `month`. */
+  /** Electricity price ct/kWh for the heat pump (heat pump tariff (Wärmepumpentarif) or household electricity (Haushaltsstrom)) in month `month`. */
   elecCt(month: number): number;
-  /** Haushaltsstrompreis ct/kWh im Monat `month` (z. B. Kochen mit Induktion). */
+  /** Household electricity (Haushaltsstrom) price ct/kWh in month `month` (e.g. induction cooking). */
   householdCt(month: number): number;
-  /** Faktor der Strompreissteigerung im Monat `month` (1 im Startmonat). */
+  /** Electricity price growth factor in month `month` (1 in the start month). */
   elecGrowth(month: number): number;
-  /** Gas-Grundpreis €/Jahr im Monat `month`. */
+  /** Gas standing charge (Grundpreis) €/year in month `month`. */
   gasBaseFee(month: number): number;
 }
 
@@ -118,26 +118,26 @@ export function createPriceModel(inp: Inputs): PriceModel {
   };
 }
 
-/** Endenergie (kWh) aus Verbrauchsangabe der Altanlage. */
+/** Final energy (Endenergie) (kWh) from the consumption figure of the old system. */
 export function fuelKWh(inp: Inputs): number {
   const o = inp.oldHeating;
   return o.fuel === 'gas' ? o.consumption : o.consumption * inp.prices.oilKwhPerLiter;
 }
 
 /**
- * Aufteilung des Verbrauchs (F17): Kochen (Gas, läuft nicht über den Kessel), Warmwasser und Raumwärme.
- * Raumwärme und Warmwasser werden mit dem Nutzungsgrad in Nutzwärme umgerechnet.
+ * Split of consumption (F17): cooking (gas, does not run through the boiler), hot water (Warmwasser) and space heating (Raumwärme).
+ * Space heating and hot water are converted into useful heat (Nutzwärme) using the efficiency.
  */
 export interface EnergySplit {
-  /** Gesamtverbrauch Endenergie (kWh). */
+  /** Total final energy (Endenergie) consumption (kWh). */
   fuelTotal: number;
-  /** Endenergie fürs Kochen (kWh Gas). */
+  /** Final energy (Endenergie) for cooking (kWh gas). */
   cookingFuel: number;
-  /** Endenergie Heizung (Raumwärme + Warmwasser), ohne Kochen. */
+  /** Final energy (Endenergie) for heating (space heating (Raumwärme) + hot water (Warmwasser)), without cooking. */
   heatingFuel: number;
-  /** Nutzwärme Raumheizung (kWh). */
+  /** Useful heat (Nutzwärme) for space heating (Raumwärme) (kWh). */
   spaceHeat: number;
-  /** Nutzwärme Warmwasser (kWh). */
+  /** Useful heat (Nutzwärme) for hot water (Warmwasser) (kWh). */
   dhwHeat: number;
 }
 
@@ -158,7 +158,7 @@ export function energySplit(inp: Inputs): EnergySplit {
   };
 }
 
-/** Jahreswärmebedarf der Heizung (Nutzwärme Raumwärme + Warmwasser, ohne Kochen, kWh). */
+/** Annual heat demand (Wärmebedarf) of the heating system (useful heat (Nutzwärme) for space heating (Raumwärme) + hot water (Warmwasser), without cooking, kWh). */
 export function annualHeatDemand(inp: Inputs): number {
   const s = energySplit(inp);
   return s.spaceHeat + s.dhwHeat;

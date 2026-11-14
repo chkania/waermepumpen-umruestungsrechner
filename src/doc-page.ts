@@ -3,21 +3,21 @@ import { renderHelp } from './help';
 import { APP_VERSION } from './version';
 
 export interface DocPage {
-  /** Markdown-Quelle (per `?raw` eingebunden, bleibt als .md-Datei im Repo). */
+  /** Markdown source (imported via `?raw`, stays as .md file in the repo). */
   markdown: string;
-  /** Unterzeile im Kopf. */
+  /** Subtitle in the header. */
   subtitle: string;
-  /** Optionaler HTML-Vorspann vor dem Inhalt (z. B. deutsche Kurzfassung). */
+  /** Optional HTML preamble before the content (e.g. German summary). */
   intro?: string;
-  /** Inhaltsverzeichnis anzeigen (ab zwei Einträgen). */
+  /** Show table of contents (from two entries). */
   toc?: boolean;
-  /** Sprache des Markdown-Inhalts, falls nicht Deutsch (WCAG 3.1.2), z. B. 'en'. */
+  /** Language of the Markdown content if not German (WCAG 3.1.2), e.g. 'en'. */
   contentLang?: string;
-  /** Sprache der Codeblöcke (z. B. englische Lizenztexte), falls nicht Deutsch. */
+  /** Language of the code blocks (e.g. English license texts) if not German. */
   codeLang?: string;
 }
 
-/** Fußzeile aller Dokumentseiten: Rechner, Hilfe, Lizenz, Drittanbieter (N8). */
+/** Footer of all document pages: calculator, help, license, third parties (N8). */
 export const DOC_LINKS: [string, string][] = [
   ['./index.html', 'Rechner'],
   ['./hilfe.html', 'Hilfe'],
@@ -26,7 +26,7 @@ export const DOC_LINKS: [string, string][] = [
   ['./changelog.html', `Änderungen (Version ${APP_VERSION})`],
 ];
 
-/** Rendert eine Markdown-Dokumentseite im Stil des Rechners (Handbuch F15, Lizenzseiten N8). */
+/** Renders a Markdown document page in the calculator's style (manual F15, license pages N8). */
 export function renderDocPage(page: DocPage): { html: string; title: string } {
   const rendered = renderHelp(page.markdown);
   const { toc, title } = rendered;
@@ -67,7 +67,7 @@ export function renderDocPage(page: DocPage): { html: string; title: string } {
   return { html: body, title };
 }
 
-/** Seite einhängen und Design/Hell-Dunkel wie im Rechner halten (auch bei Änderung im anderen Tab). */
+/** Mounts the page and keeps design/light-dark in sync with the calculator (also on changes in another tab). */
 export function mountDocPage(root: HTMLElement, page: DocPage): void {
   root.innerHTML = renderDocPage(page).html;
 
@@ -91,7 +91,7 @@ export function mountDocPage(root: HTMLElement, page: DocPage): void {
     if (e.key === 'wp-investitionsrechner:theme') applyTheme();
   });
 
-  // Sprungziel nach dem Rendern anfahren
+  // Scroll to the anchor target after rendering
   if (location.hash) {
     try {
       document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView();

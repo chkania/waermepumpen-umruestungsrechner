@@ -2,7 +2,7 @@
 
 Alle wesentlichen Änderungen am Wärmepumpen-Investitionsrechner. Das Format orientiert sich an
 [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), die Versionsnummern folgen
-[Semantic Versioning](https://semver.org/lang/de/). Jede für Nutzer sichtbare Änderung bekommt sofort eine neue Version – es gibt keine gesammelten Releases:
+[Semantic Versioning](https://semver.org/lang/de/). Jede für Nutzer sichtbare Änderung bekommt sofort eine neue Version – es gibt keine gesammelten Releases. Ab Version 1.1.0 werden Version und Einträge automatisch aus den Commit-Nachrichten erzeugt (siehe `CONTRIBUTING.md`):
 
 - **Major** (x.0.0): inkompatible Änderungen, z. B. am Format von Export-Dateien oder geteilten Links, die ältere Stände nicht mehr übernehmen können.
 - **Minor** (1.x.0): neue Funktionen oder Eingaben sowie bewusst geänderte Rechenmodelle oder Standardwerte (Ergebnisse können sich ändern).

@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
-/** N7 Barrierefreiheit: Farbkontraste der Design-Tokens (WCAG 2.1 AA, 1.4.3). */
+/** N7 accessibility: colour contrasts of the design tokens (WCAG 2.1 AA, 1.4.3). */
 const css = (f: string) => readFileSync(new URL(`../src/${f}`, import.meta.url), 'utf8');
 const tokens = (text: string, selector: string): Record<string, string> => {
   const start = text.indexOf(`${selector} {`);

@@ -7,15 +7,15 @@ type Obj = Record<string, unknown>;
 const isObj = (v: unknown): v is Obj => typeof v === 'object' && v !== null && !Array.isArray(v);
 
 /**
- * Mischt einen (teilweisen, evtl. fremden) Datenstand in die Defaults.
- * Nur bekannte Schlüssel mit passendem Typ werden übernommen (F9.3); Werte werden geprüft und
- * ggf. begrenzt bzw. durch den Standardwert ersetzt (F9.5). Befunde landen in `issues`.
+ * Merges a (partial, possibly foreign) data set into the defaults.
+ * Only known keys with a matching type are adopted (F9.3); values are validated and
+ * clamped or replaced by the default if necessary (F9.5). Findings end up in `issues`.
  */
 export function mergeInputs(defaults: Inputs, data: unknown, issues: InputIssue[] = []): Inputs {
   return mergeObj(defaults as unknown as Obj, migrate(defaults, data), '', issues) as unknown as Inputs;
 }
 
-/** Ältere Datenstände übernehmen: Gebäudealter (Jahre) → Baujahr (F17). */
+/** Migrates older data sets: building age (years) → construction year (F17). */
 function migrate(defaults: Inputs, data: unknown): unknown {
   if (!isObj(data) || !isObj(data.building)) return data;
   const b = data.building;
@@ -53,7 +53,7 @@ function mergeObj(base: Obj, data: unknown, prefix: string, issues: InputIssue[]
   return out;
 }
 
-/** Nur die Abweichungen gegenüber den Defaults (für kurze Links). */
+/** Only the differences from the defaults (for short links). */
 export function diffInputs(defaults: Inputs, inputs: Inputs): Obj {
   return diffObj(defaults as unknown as Obj, inputs as unknown as Obj);
 }
@@ -86,12 +86,12 @@ function fromBase64Url(s: string): string {
   return new TextDecoder().decode(bytes);
 }
 
-/** Erzeugt den URL-Hash "#s=…" (F9.2). */
+/** Creates the URL hash "#s=…" (F9.2). */
 export function encodeHash(defaults: Inputs, inputs: Inputs): string {
   return '#s=' + toBase64Url(JSON.stringify(diffInputs(defaults, inputs)));
 }
 
-/** Liest einen URL-Hash; null bei fehlendem/ungültigem Inhalt. */
+/** Reads a URL hash; null for missing/invalid content. */
 export function decodeHash(defaults: Inputs, hash: string, issues: InputIssue[] = []): Inputs | null {
   const m = /[#&]s=([A-Za-z0-9_-]+)/.exec(hash);
   if (!m) return null;
@@ -104,7 +104,7 @@ export function decodeHash(defaults: Inputs, hash: string, issues: InputIssue[] 
   }
 }
 
-/** Dateinamen-tauglicher Teil aus der Szenario-Bezeichnung (Umlaute umschreiben, max. 60 Zeichen). */
+/** File-name-safe part of the scenario name (umlauts transliterated, max. 60 characters). */
 export function fileSlug(text: string): string {
   return text
     .normalize('NFC')
@@ -118,7 +118,7 @@ export function fileSlug(text: string): string {
     .replace(/-+$/g, '');
 }
 
-/** Dateiname des Exports: waermepumpe-rechner[-bezeichnung]-JJJJ-MM.json (F16.2). */
+/** Export file name: waermepumpe-rechner[-name]-YYYY-MM.json (F16.2). */
 export function exportFileName(inputs: Inputs, now: Date): string {
   const slug = fileSlug(inputs.scenario?.name ?? '');
   const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -126,12 +126,12 @@ export function exportFileName(inputs: Inputs, now: Date): string {
 }
 
 export function exportJson(inputs: Inputs): string {
-  // Programmversion zur Nachvollziehbarkeit (N9); beim Import ignoriert
+  // App version for traceability (N9); ignored on import
   const { version, ...rest } = inputs;
   return JSON.stringify({ version, appVersion: APP_VERSION, ...rest }, null, 2);
 }
 
-/** Import einer JSON-Datei; wirft bei ungültigem Inhalt (F9.3). */
+/** Imports a JSON file; throws on invalid content (F9.3). */
 export function importJson(defaults: Inputs, text: string, issues: InputIssue[] = []): Inputs {
   let data: unknown;
   try {

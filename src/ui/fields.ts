@@ -3,7 +3,7 @@ import type { Inputs } from '../core/types';
 export type FieldType = 'number' | 'percent' | 'checkbox' | 'select' | 'month' | 'text' | 'textarea';
 
 export interface Field {
-  /** Pfad im Inputs-Objekt, z. B. "heatPump.jaz". */
+  /** Path in the Inputs object, e.g. "heatPump.jaz". */
   path: string;
   label: string;
   type: FieldType;
@@ -14,12 +14,12 @@ export interface Field {
   options?: [string, string][];
   help?: string;
   placeholder?: string;
-  /** Kein Standardwert mit Herkunft (z. B. Freitext) – kein „i“-Popover. */
+  /** No default value with an origin (e.g. free text) – no "i" popover. */
   noSource?: boolean;
-  /** Ändert die Rechnung nicht (nur speichern, kein Neuberechnen). */
+  /** Does not change the calculation (save only, no recalculation). */
   noRecalc?: boolean;
   show?: (i: Inputs) => boolean;
-  /** Reaktion auf Änderung (z. B. Einheitenumrechnung). */
+  /** Reaction to a change (e.g. unit conversion). */
   onChange?: (i: Inputs, prev: unknown) => void;
 }
 

@@ -2,29 +2,29 @@ import { formatMonth, monthFromDate, parseMonth } from './dates';
 import type { Inputs } from './types';
 
 /**
- * Zentrale Default-Annahmen. Quellen und Stand siehe docs/ANFORDERUNGEN.md (Abschnitt 5/6).
+ * Central default assumptions. Sources and dates: see docs/ANFORDERUNGEN.md (sections 5/6).
  *
- * Förderung KfW 458 – Stand der KfW-Seite, abgerufen 2026-11-11:
- *  - Grundförderung 30 %; ab Q1/2027 für Wärmepumpen 15 % + 15 % Wertschöpfungs-Bonus bei EU-Ursprung (RL Nr. 8.4.1 c, 8.4.6)
- *  - Klimageschwindigkeitsbonus 16 %, ab 01.02.2027 halbjährlich −4 %-Punkte, ab Anträgen 01.08.2028 entfallen
- *  - Einkommensbonus 40/30/10 % bis 30/40/50 T€ zvE (mit Kind +10 T€), gültig seit 21.07.2026
- *  - Höchstsatz 70 % (80 % bei niedrigstem Einkommen)
- *  - förderfähige Kosten 28.000 € (1. WE), ab 01.02.2027 halbjährlich −750 € bis 22.000 € ab 08/2030; 2.–6. WE 15.000 €, ab 7. WE 8.000 €
- * KfW 358/359: bis 120.000 € je WE; 358 bis 90.000 € Haushaltseinkommen. Zinsen laut Sekundärquelle (hausvoraus.de, 10.11.2026).
- * Markt- und Preiswerte: recherchiert am 11.11.2026, Quellen je Feld in sources.ts.
- * § 35c EStG: 20 % (7/7/6), max. 40.000 €, Kosten max. 200.000 €, Abschluss bis Ende 2029.
+ * KfW 458 funding – as stated on the KfW website, retrieved 2026-11-11:
+ *  - Base funding (Grundförderung) 30 %; from Q1/2027 for heat pumps 15 % + 15 % value-added bonus (Wertschöpfungs-Bonus) for EU origin (guideline (Richtlinie) no. 8.4.1 c, 8.4.6)
+ *  - Climate speed bonus (Klimageschwindigkeitsbonus) 16 %, from 2027-02-01 reduced by 4 percentage points every six months, dropped for applications from 2028-08-01
+ *  - Income bonus (Einkommensbonus) 40/30/10 % up to 30/40/50 k€ taxable income (zu versteuerndes Einkommen) (+10 k€ with child), valid since 2026-07-21
+ *  - Maximum rate (Höchstsatz) 70 % (80 % for the lowest income bracket)
+ *  - Eligible costs (förderfähige Kosten) 28,000 € (1st dwelling unit (Wohneinheit)), from 2027-02-01 reduced by 750 € every six months down to 22,000 € from 08/2030; 2nd–6th unit 15,000 €, from 7th unit 8,000 €
+ * KfW 358/359: up to 120,000 € per dwelling unit; 358 up to 90,000 € household income. Interest rates from a secondary source (hausvoraus.de, 2026-11-10).
+ * Market and price values: researched on 2026-11-11, sources per field in sources.ts.
+ * § 35c EStG: 20 % (7/7/6), max. 40,000 €, costs max. 200,000 €, completion by end of 2029.
  */
 export const FUNDING_SOURCE_DATE = '2026-11-11';
 
-/** Jan … Dez – Anteil am Jahreswärmebedarf (Raumwärme + 15 % Warmwasser), Summe = 1. */
+/** Jan … Dec – share of the annual heat demand (Wärmebedarf) (space heating (Raumwärme) + 15 % hot water (Warmwasser)), sum = 1. */
 export const HEAT_PROFILE: readonly number[] = [
   0.165, 0.145, 0.125, 0.08, 0.045, 0.025, 0.02, 0.02, 0.035, 0.075, 0.12, 0.145,
 ];
-/** Monatsprofil Warmwasser (fast gleichmäßig, im Winter etwas mehr wegen kälteren Zulaufwassers), Summe = 1. */
+/** Monthly profile for hot water (Warmwasser) (almost uniform, slightly higher in winter due to colder inlet water), sum = 1. */
 export const DHW_PROFILE: readonly number[] = [
   0.093, 0.087, 0.091, 0.085, 0.083, 0.077, 0.075, 0.075, 0.077, 0.083, 0.085, 0.089,
 ];
-/** Monatsprofil Raumwärme, so abgeleitet, dass 85 % Raumwärme + 15 % Warmwasser = HEAT_PROFILE (F17), Summe = 1. */
+/** Monthly profile for space heating (Raumwärme), derived so that 85 % space heating + 15 % hot water (Warmwasser) = HEAT_PROFILE (F17), sum = 1. */
 export const SPACE_PROFILE: readonly number[] = [
   0.1777, 0.1552, 0.131, 0.0791, 0.0383, 0.0158, 0.0103, 0.0103, 0.0276, 0.0736, 0.1262, 0.1549,
 ];

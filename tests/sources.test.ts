@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { DEFAULT_SOURCES, OFFICIAL_REFS, SOURCE_KIND_LABEL } from '../src/core/sources';
 import { SECTIONS } from '../src/ui/fields';
 
-// Freitextfelder (Szenario-Bezeichnung, Bemerkungen) haben keinen Standardwert mit Herkunft
+// Free-text fields (scenario name, notes) have no default value with an origin
 const paths = SECTIONS.flatMap((s) => s.fields.filter((f) => !f.noSource).map((f) => f.path));
 
 describe('F11 Herkunft der Standardwerte', () => {
@@ -30,7 +30,7 @@ describe('F11 Herkunft der Standardwerte', () => {
       expect(DEFAULT_SOURCES[path], path).toBeDefined();
       for (const r of refs) expect(r.url, path).toMatch(/^https:\/\//);
     }
-    // jede KfW-Förderregel verweist auf Richtlinie bzw. Merkblatt
+    // every KfW funding rule refers to the guideline (Richtlinie) or fact sheet (Merkblatt)
     for (const p of paths.filter((x) => x.startsWith('funding.'))) {
       expect(OFFICIAL_REFS[p]?.some((r) => /Richtlinie|Merkblatt/.test(r.label)), p).toBe(true);
     }

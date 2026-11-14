@@ -58,9 +58,9 @@ describe('F2.1/F2.2 Gaspreis', () => {
     const pm = createPriceModel(i);
     const co2_26 = pm.co2SurchargeCt('gas', 2026);
     const base = 11.5 - co2_26;
-    // Januar 2027: erst 2 Monate Steigerung, aber schon CO2-Preis 2027
+    // January 2027: only 2 months of increase, but already the 2027 CO2 price
     expect(pm.fuelCt('gas', M('2027-01'))).toBeCloseTo(base * 1.03 ** (2 / 12) + pm.co2SurchargeCt('gas', 2027), 10);
-    // 12 Monate nach Start: volle Jahressteigerung
+    // 12 months after start: full annual increase
     expect(pm.fuelCt('gas', M('2027-11'))).toBeCloseTo(base * 1.03 + pm.co2SurchargeCt('gas', 2027), 10);
   });
 

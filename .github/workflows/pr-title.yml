@@ -1,0 +1,26 @@
+name: PR-Titel
+
+# The PR title becomes the commit message on main when squash-merging and thereby determines the version (N9).
+# Format per Conventional Commits: <type>[(scope)][!]: <description>, e.g. "feat: Vergleich mit PV-Anlage".
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: lts/*
+      - name: Titel prüfen
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: node scripts/release.ts --lint "$TITLE" | tee -a "$GITHUB_STEP_SUMMARY"

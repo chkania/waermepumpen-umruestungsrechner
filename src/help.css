@@ -1,4 +1,4 @@
-/* Benutzerhandbuch (F15) – nutzt die Farbtokens beider Designs */
+/* User manual (F15) – uses the colour tokens of both designs */
 .help-layout {
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);
@@ -51,7 +51,7 @@
   .help-content .anchor { display: none; }
 }
 
-/* Modernes Design: Mono-Labels wie im Rechner */
+/* Modern design: mono labels as in the calculator */
 :root[data-design='modern'] .help-toc-title {
   font-family: var(--font-mono);
   text-transform: uppercase;
@@ -63,10 +63,10 @@
 :root[data-design='modern'] .help-content blockquote { border-radius: var(--radius-sm); }
 :root[data-design='modern'] .help-content code { font-family: var(--font-mono); }
 
-/* Dokumentseiten ohne Inhaltsverzeichnis (Lizenz) */
+/* Document pages without table of contents (license) */
 .help-layout.no-toc { grid-template-columns: minmax(0, 1fr); max-width: 860px; }
 
-/* Deutsche Kurzfassung über dem Lizenztext */
+/* German summary above the license text */
 .doc-intro {
   margin: 0 0 28px;
   padding: 14px 18px;
@@ -77,10 +77,10 @@
 }
 .doc-intro h2 { margin-top: 0; }
 
-/* Lizenztexte in Codeblöcken umbrechen statt seitlich scrollen */
+/* Wrap license texts in code blocks instead of scrolling sideways */
 .help-content pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 
-/* Fußzeile aller Dokumentseiten */
+/* Footer of all document pages */
 .doc-footer {
   max-width: 1180px;
   margin: 0 auto;

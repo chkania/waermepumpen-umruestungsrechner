@@ -23,16 +23,25 @@ SPA (Vite + TypeScript, ohne UI-Framework, Chart.js) zur Wirtschaftlichkeitsrech
 - `tests/` – Vitest; `ui.test.ts` läuft mit happy-dom; `helpers.ts` fixiert den Stichtag 2026-11-11 und feste Testpreise (`pinPrices`/`neutral`). Markt-Defaults aktualisieren → nur Regressions-Snapshots ändern sich (`npm test -- -u`, im Änderungsprotokoll begründen).
 
 ## Version & Changelog
-Semantic Versioning (N9), Quelle `package.json`. Trunk-Based: Es gibt keine gesonderten Releases und keinen Abschnitt „Unveröffentlicht“ – jeder Stand auf `main` gilt als veröffentlicht. Jede für Nutzer sichtbare Änderung erhöht deshalb im selben Commit die Version (`npm version --no-git-tag-version x.y.z`; Major = Export/Link inkompatibel, Minor = Funktion/Rechenmodell/Defaults, Patch = Fehlerkorrektur/Text/Darstellung) und bekommt in `CHANGELOG.md` oben einen Abschnitt „## x.y.z – JJJJ-MM-TT“. Mehrere Änderungen am selben Tag ohne Commit dazwischen → ein gemeinsamer Abschnitt. Nicht sichtbare Änderungen (Tests, Refactoring, Doku im Repo) brauchen keine neue Version. `tests/version.test.ts` prüft die Übereinstimmung.
+Semantic Versioning (N9), Quelle `package.json`; Version und `CHANGELOG.md` werden **automatisch** aus den Commit-Nachrichten abgeleitet (`scripts/release.ts`, Workflow `release.yml` nach jedem Push auf `main`). Nie von Hand ändern – sonst entstehen bei paralleler Arbeit Konflikte.
+- Commit-Nachrichten/PR-Titel nach Conventional Commits, Beschreibung auf Deutsch aus Nutzersicht (erscheint so im Changelog): `feat:` neue Funktion/Eingabe/geändertes Rechenmodell/Defaults → Minor; `fix:` Fehler/Text/Darstellung → Patch; `perf:` → Patch; `!` bzw. `BREAKING CHANGE:` bei inkompatiblem Export-/Link-Format → Major; `docs/test/refactor/style/build/ci/chore` → keine Version.
+- Ablauf und Beispiele: `CONTRIBUTING.md`. Vorschau: `npm run release:preview`.
 
 ## Lizenz
 PolyForm Noncommercial 1.0.0 (`LICENSE.md`). Neue/aktualisierte Laufzeit-Abhängigkeit → `npm run notices` (erzeugt `THIRD-PARTY-NOTICES.md`; `tests/license.test.ts` prüft die Aktualität). Nur Abhängigkeiten mit kompatibler, freizügiger Lizenz (MIT, BSD, Apache-2.0, ISC, OFL) aufnehmen.
+
+## CI & Dependabot
+- `.github/workflows/ci.yml` – Tests, Build und `npm audit` (Laufzeit, ab „high“) für Push auf `main` und PRs.
+- `.github/dependabot.yml` – wöchentliche Updates (npm mit 7 Tagen Cooldown, GitHub Actions); Patch/Minor gruppiert.
+- `.github/workflows/release.yml` – leitet nach Push auf `main` die Version ab und committet `chore(release): x.y.z` (nur Node/Git, kein `npm ci`). `.github/workflows/pr-title.yml` – prüft PR-Titel auf Conventional Commits.
+- `.github/workflows/dependabot.yml` – prüft Dependabot-PRs ohne Schreibrechte, committet aktualisierte `THIRD-PARTY-NOTICES.md` und merged Patch/Minor automatisch (Squash); Major bleibt zur manuellen Prüfung offen. Abhängigkeits-Updates erhöhen die App-Version nicht.
 
 ## Befehle
 - `npm run dev` – Entwicklungsserver (Port 5173, siehe `.claude/launch.json`)
 - `npm test` – alle Tests · `npm run build` – Typecheck + statischer Build nach `dist/`
 
 ## Konventionen
+- Sprache im Code: Kommentare (auch JSDoc, YAML-/CSS-/HTML-Kommentare) sowie Namen von Klassen, Typen, Funktionen/Methoden, Variablen und Dateien immer auf **Englisch**. Deutsch bleiben alle für Nutzer sichtbaren Texte (UI, Meldungen, Handbuch, Changelog) und die Beschreibung in Commit-Nachrichten/PR-Titeln (erscheint im Changelog). Fachbegriffe im Kommentar mit dem deutschen Begriff in Klammern, beim ersten Vorkommen je Kommentar, z. B. „special repayment (Sondertilgung)“, „climate speed bonus (Klimageschwindigkeitsbonus)“, „SPF (JAZ)“.
 - Zwei Designs: `src/style.css` = Basis/„Klassisch“, `src/style-modern.css` = „Modern“ (nur Regeln unter `:root[data-design='modern']`). Neue UI-Elemente in beiden Designs und in Hell/Dunkel prüfen. Dunkle Farben nur über `:root[data-theme='dark']` (keine `prefers-color-scheme`-Media-Queries).
 - Sicherheit: dynamische Texte in HTML immer mit `escapeHtml`; keine Inline-Skripte/-Event-Handler/`style="…"` im Markup (CSP aus `csp.ts` im Build). Gebauten Stand prüfen: `npm run build`, dann Vorschau „preview“ (Port 4173).
 - Barrierefreiheit (N7, WCAG 2.1 AA): Farben nur über Tokens; neue Text-/Flächenfarben müssen ≥ 4,5 : 1 erreichen (`tests/a11y.test.ts` prüft die Tokens), Text auf Akzentflächen mit `--on-accent`; kein `outline: none`; neue Diagramme brauchen `role="img"`-Beschreibung und eine Tabelle in `chartTables()`; Fehler als Text, nicht nur per Farbe.

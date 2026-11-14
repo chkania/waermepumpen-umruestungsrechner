@@ -3,7 +3,7 @@ import { simulate } from '../src/core/simulation';
 import { tariffComparison } from '../src/core/tariff';
 import { neutral } from './helpers';
 
-// neutral: WP-Tarif 26 ct, Haushalt 34 ct, Zähler 100 €, § 14a 130 €, JAZ 3,3, Wärme 18.000 kWh, keine Steigerung
+// neutral: heat pump tariff (Wärmepumpentarif) 26 ct, household 34 ct, meter 100 €, § 14a 130 €, SPF (JAZ) 3.3, heat 18,000 kWh, no increase
 const base = (mut?: Parameters<typeof neutral>[0]) =>
   neutral((i) => {
     i.oldHeating.remainingLifeYears = 100;
@@ -34,7 +34,7 @@ describe('F13 Stromkosten mit/ohne Wärmepumpentarif', () => {
   });
 
   it('kleiner Verbrauch: Haushaltsstrom günstiger', () => {
-    const t = tariffComparison(base((i) => (i.oldHeating.consumption = 3000)))!; // ≈ 818 kWh WP-Strom
+    const t = tariffComparison(base((i) => (i.oldHeating.consumption = 3000)))!; // ≈ 818 kWh heat pump electricity
     expect(t.firstFullYear!.gridKWh).toBeLessThan(1250);
     expect(t.cheaper).toBe('without');
     expect(t.saving).toBeLessThan(0);
@@ -61,12 +61,12 @@ describe('F13 Stromkosten mit/ohne Wärmepumpentarif', () => {
 
   it('F13.5 Zählerschrank-Umbau: einmalig in „mit WP-Tarif“, Amortisation', () => {
     const t = tariffComparison(base((i) => (i.heatPump.meterSetupCost = 1500)))!;
-    expect(t.setupCost).toBe(1500); // Inbetriebnahme sofort, keine Preissteigerung
+    expect(t.setupCost).toBe(1500); // commissioning (Inbetriebnahme) immediately, no price increase
     expect(t.setupSubsidy).toBe(0);
     const annual = kwh * 0.08 - 100;
     expect(t.setupPaybackYears).toBeCloseTo(1500 / annual, 6);
     expect(t.saving).toBeCloseTo(20 * annual - 1500, 4);
-    // ohne Preisvorteil amortisiert sich der Umbau nie
+    // without a price advantage the conversion never pays off
     expect(tariffComparison(base((i) => {
       i.heatPump.meterSetupCost = 1500;
       i.heatPump.householdPriceCt = 26;
@@ -80,11 +80,11 @@ describe('F13 Stromkosten mit/ohne Wärmepumpentarif', () => {
       i.heatPump.meterSetupCost = 1500;
       i.heatPump.meterSetupEligible = true;
     }))!;
-    expect(under.setupSubsidy).toBeCloseTo(1500 * 0.46, 6); // 30 % + 16 % Klimageschwindigkeitsbonus
+    expect(under.setupSubsidy).toBeCloseTo(1500 * 0.46, 6); // 30 % + 16 % climate speed bonus (Klimageschwindigkeitsbonus)
     const capped = tariffComparison(base((i) => {
       i.heatPump.meterSetupCost = 1500;
       i.heatPump.meterSetupEligible = true;
-    }))!; // 32.000 € > 28.000 € Höchstbetrag
+    }))!; // 32,000 € > 28,000 € cap
     expect(capped.setupSubsidy).toBe(0);
   });
 });
@@ -113,13 +113,13 @@ describe('F13.6 § 14a je Zähler (Wallbox am Haushaltszähler)', () => {
   it('ohne WP-Tarif keine zusätzliche Pauschale, mit eigenem WP-Zähler schon', () => {
     const t = tariffComparison(base((i) => (i.heatPump.existing14aOnHousehold = true)))!;
     const y = t.firstFullYear!;
-    expect(y.withoutTariff).toBeCloseTo(kwh * 0.34, 6); // keine −130 €
+    expect(y.withoutTariff).toBeCloseTo(kwh * 0.34, 6); // no −130 €
     expect(y.withTariff).toBeCloseTo(kwh * 0.26 + 100 - 130, 6);
     expect(t.saving).toBeCloseTo(20 * (kwh * 0.08 - 100 + 130), 4);
   });
 
   it('F13.3 Schwelle: zusätzliche § 14a-Pauschale mindert die Zählerkosten', () => {
-    // 100 € Grundpreis − 130 € Pauschale < 0 → lohnt sich bei jedem Verbrauch
+    // 100 € standing charge (Grundpreis) − 130 € flat rate (Pauschale) < 0 → pays off at any consumption
     expect(tariffComparison(base((i) => (i.heatPump.existing14aOnHousehold = true)))!.breakEvenKWh).toBe(0);
     const t = tariffComparison(base((i) => {
       i.heatPump.existing14aOnHousehold = true;

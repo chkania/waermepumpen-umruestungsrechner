@@ -11,7 +11,7 @@ import type { Inputs } from '../src/core/types';
 import { defaults, neutral } from './helpers';
 
 const sum = (xs: readonly number[]) => xs.reduce((a, b) => a + b, 0);
-/** WP ab Start, Altanlage hält, konstante Preise: 26 ct WP, 34 ct Haushalt, Gas 11,5 ct, Grundpreis 180 €. */
+/** Heat pump from the start, old system lasts, constant prices: 26 ct heat pump, 34 ct household, gas 11.5 ct, standing charge (Grundpreis) 180 €. */
 const wp = (mut?: (i: Inputs) => void) =>
   neutral((i) => {
     i.oldHeating.remainingLifeYears = 100;
@@ -30,13 +30,13 @@ describe('F17 Aufteilung Raumwärme / Warmwasser / Kochen', () => {
 
   it('Kochen läuft nicht über den Kessel; Warmwasser-Anteil vom Gesamtverbrauch', () => {
     const i = defaults();
-    i.oldHeating.cookingWithGas = true; // 3 % von 20.000 = 600 kWh
+    i.oldHeating.cookingWithGas = true; // 3 % of 20,000 = 600 kWh
     const s = energySplit(i);
     expect(s.cookingFuel).toBeCloseTo(600, 6);
     expect(s.heatingFuel).toBeCloseTo(19400, 6);
     expect(s.dhwHeat).toBeCloseTo(3000 * 0.9, 6);
     expect(s.spaceHeat).toBeCloseTo(16400 * 0.9, 6);
-    // Öl: kein Kochen
+    // Oil: no cooking
     i.oldHeating.fuel = 'oil';
     i.oldHeating.consumption = 2000;
     expect(energySplit(i).cookingFuel).toBe(0);
@@ -48,7 +48,7 @@ describe('F17 Aufteilung Raumwärme / Warmwasser / Kochen', () => {
   });
 
   it('Referenz: Gesamtverbrauch unverändert, Kochen zum Gaspreis ohne Kesselverlust', () => {
-    const base = year2027(wp(), 'ref').energy; // 20.000 kWh × 11,5 ct
+    const base = year2027(wp(), 'ref').energy; // 20,000 kWh × 11.5 ct
     expect(base).toBeCloseTo(2300, 6);
     expect(year2027(wp((i) => (i.oldHeating.cookingWithGas = true)), 'ref').energy).toBeCloseTo(2300, 6);
   });
@@ -56,7 +56,7 @@ describe('F17 Aufteilung Raumwärme / Warmwasser / Kochen', () => {
   it('WP: Kochen mit Induktion zum Haushaltsstrom, Gasanschluss entfällt', () => {
     const plain = year2027(wp(), 'kfw');
     const ind = year2027(wp((i) => (i.oldHeating.cookingWithGas = true)), 'kfw');
-    // Heizung: 19.400 statt 20.000 kWh Brennstoff; Kochen: 600 × 0,55 × 34 ct
+    // Heating: 19,400 instead of 20,000 kWh fuel; cooking: 600 × 0.55 × 34 ct
     const heatShare = 19400 / 20000;
     expect(ind.energy).toBeCloseTo(plain.energy * heatShare + 600 * 0.55 * 0.34, 4);
     expect(ind.fixed).toBeCloseTo(plain.fixed, 6);
@@ -110,7 +110,7 @@ describe('F18 Einordnung des Hauses', () => {
     expect(h.renovation.state).toBe('unsaniert');
     expect(h.comparison).toBe('typical');
     expect(h.heatLoadKW).toBeCloseTo(18000 / 2000, 6);
-    expect(h.wpSuitability.level).toBe('ok'); // Raumwärme 15.300 kWh / 140 m² ≈ 109
+    expect(h.wpSuitability.level).toBe('ok'); // Space heating (Raumwärme) 15,300 kWh / 140 m² ≈ 109
   });
 
   it('Sanierung senkt die Erwartung; Kochen zählt nicht zum Kennwert', () => {
@@ -119,7 +119,7 @@ describe('F18 Einordnung des Hauses', () => {
     i.building.renovationScope = 'full';
     const h = rateHouse(i);
     expect(h.renovation.state).toBe('umfassend saniert');
-    expect(h.expected).toEqual([48, 102]); // 120 × 0,4 … 170 × 0,6
+    expect(h.expected).toEqual([48, 102]); // 120 × 0.4 … 170 × 0.6
     i.oldHeating.cookingWithGas = true;
     expect(rateHouse(i).kwhPerM2).toBeCloseTo(19400 / 140, 6);
   });
@@ -157,11 +157,11 @@ describe('F17.3/F17.4 Kochfeld und Umstiegs-Hinweis', () => {
     const best = (r: typeof run) => (r.best === 'tax' ? r.tax.totalCost : r.kfw.totalCost);
     const saving = cookingSwitchSaving(i, run)!;
     expect(saving).toBeCloseTo(best(run) - best(alt), 6);
-    expect(saving).toBeGreaterThan(0); // 180 € Grundpreis/Jahr entfallen
+    expect(saving).toBeGreaterThan(0); // 180 € standing charge (Grundpreis) per year no longer applies
     const h = keyEvents(i, run).hints.find((x) => /Kochen mit Strom statt Gas spart/.test(x.title))!;
     expect(h.level).toBe('important');
     expect(h.detail).toMatch(/Grundpreis 180 €/);
-    // kein Hinweis, wenn schon Induktion gewählt oder kein Gasherd
+    // no notice if induction is already selected or there is no gas cooker (Gasherd)
     expect(cookingSwitchSaving(cooking('electric'))).toBeNull();
     expect(cookingSwitchSaving(wp())).toBeNull();
   });

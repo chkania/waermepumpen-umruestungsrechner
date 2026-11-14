@@ -10,11 +10,11 @@ export default defineConfig({
   ],
   build: {
     rollupOptions: {
-      // Rechner und Benutzerhandbuch als eigene Seiten
+      // Calculator and user manual as separate pages
       input: {
         main: resolve(__dirname, 'index.html'),
         hilfe: resolve(__dirname, 'hilfe.html'),
-        // Lizenzseiten (N8): rendern LICENSE.md und THIRD-PARTY-NOTICES.md
+        // License pages (N8): render LICENSE.md and THIRD-PARTY-NOTICES.md
         lizenz: resolve(__dirname, 'lizenz.html'),
         drittanbieter: resolve(__dirname, 'lizenzen-drittanbieter.html'),
         // Changelog (N9)

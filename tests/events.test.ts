@@ -5,7 +5,7 @@ import { runAll } from '../src/core/simulation';
 import type { Inputs } from '../src/core/types';
 import { defaults } from './helpers';
 
-/** Szenario aus der Nutzerfrage (Gasheizung 16 J., Restlebensdauer 5 J., Einkommen 120 T€). */
+/** Scenario from the user's question (gas heating 16 years, remaining life 5 years, income 120 k€). */
 function userCase(mut?: (i: Inputs) => void): Inputs {
   const i = defaults();
   i.building.constructionYear = 1950;
@@ -59,7 +59,7 @@ describe('F10 Wichtige Ereignisse', () => {
     expect(find(timeline, /Auszahlung KfW-Zuschuss/)!.amount).toBe(-8400);
     expect(find(timeline, /Zinsbindung endet/)).toBeDefined();
     expect(find(timeline, /Bankkredit vollständig getilgt/)).toBeDefined();
-    // chronologisch sortiert
+    // sorted chronologically
     const months = timeline.map((e) => e.month!);
     expect([...months].sort((a, b) => a - b)).toEqual(months);
   });
@@ -133,7 +133,7 @@ describe('F10 Wichtige Ereignisse', () => {
       i.heatPump.euOrigin = false;
     })).hints;
     expect(find(nonEu, /Nur 15 % Grundförderung/)!.level).toBe('warning');
-    // Antrag 12/2026 (vor dem Stichtag): kein Hinweis
+    // Application 12/2026 (before the cut-off date (Stichtag)): no notice
     expect(find(ev(userCase((i) => (i.heatPump.installMonth = '2027-04'))).hints, /Grundförderung/)).toBeUndefined();
   });
 });

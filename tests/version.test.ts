@@ -16,10 +16,10 @@ describe('N9 Versionierung', () => {
     const log = read('CHANGELOG.md');
     const versions = [...log.matchAll(/^## (\d+\.\d+\.\d+) – (\d{4}-\d{2}-\d{2})$/gm)].map((m) => m[1]);
     expect(log).not.toMatch(/^## Unveröffentlicht/m);
-    // nach dem Einleitungstext folgt direkt die neueste Version
+    // the newest version follows directly after the introduction
     expect(log.match(/^## .*$/m)![0]).toBe(`## ${APP_VERSION} – ${log.match(/^## \S+ – (\S+)$/m)![1]}`);
     expect(versions[0]).toBe(APP_VERSION);
-    // absteigend sortiert, keine doppelten Versionen
+    // sorted descending, no duplicate versions
     const num = (v: string) => v.split('.').reduce((a, x) => a * 1000 + Number(x), 0);
     expect(versions.map(num)).toEqual([...versions.map(num)].sort((a, b) => b - a));
     expect(new Set(versions).size).toBe(versions.length);

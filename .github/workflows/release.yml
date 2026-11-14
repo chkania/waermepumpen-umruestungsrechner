@@ -1,0 +1,55 @@
+name: Release
+
+# After every push to main, derives the version from the commit messages (N9, Conventional Commits → SemVer):
+# feat → MINOR, fix/perf → PATCH, "!" or "BREAKING CHANGE:" → MAJOR, otherwise no new version.
+# Writes package.json, package-lock.json and CHANGELOG.md and commits "chore(release): x.y.z" to main.
+# Uses only Node built-ins and Git – no npm ci, so no third-party package code runs with write permissions.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Run releases one after another, never cancel (a version could get lost otherwise)
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: lts/*
+      - name: Version ableiten und committen
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # On concurrent pushes to main: reset to the new head and recalculate
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+            node scripts/release.ts
+            if git diff --quiet; then
+              echo "Keine neue Version."
+              exit 0
+            fi
+            version=$(node -p "require('./package.json').version")
+            git commit -q -am "chore(release): ${version}"
+            if git push origin HEAD:main; then
+              echo "### Version ${version}" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            echo "main hat sich geändert – neuer Versuch ${attempt}"
+          done
+          exit 1

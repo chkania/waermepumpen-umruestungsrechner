@@ -76,7 +76,7 @@ describe('F5.1 Förderfähige Kosten', () => {
   });
 
   it('Mehrfamilienhaus: 1. WE + 5×15.000 + Rest×8.000', () => {
-    expect(capTotalAt(M('2026-12'), 7, P())).toBe(28000 + 5 * 15000 + 8000); // 111.000 (KfW-Beispiel)
+    expect(capTotalAt(M('2026-12'), 7, P())).toBe(28000 + 5 * 15000 + 8000); // 111,000 (KfW example)
     expect(capTotalAt(M('2026-12'), 2, P())).toBe(43000);
   });
 });
@@ -122,7 +122,7 @@ describe('F5.1 Zuschuss gesamt', () => {
 
   it('Boni nur auf den Anteil der selbstgenutzten WE', () => {
     const r = kfwSubsidy(req({ units: 2, eligibleCost: 50000 }), P());
-    // Kosten 43.000 (Höchstbetrag), je WE 21.500 → 0,3×21.500 + 0,46×21.500
+    // Costs 43,000 (cap), 21,500 per unit → 0.3×21,500 + 0.46×21,500
     expect(r.subsidy).toBeCloseTo(0.3 * 21500 + 0.46 * 21500, 2);
   });
 
@@ -130,7 +130,7 @@ describe('F5.1 Zuschuss gesamt', () => {
     const p = P();
     expect(grundRateAt(M('2026-12'), p)).toBe(0.3);
     expect(grundRateAt(M('2027-01'), p)).toBe(0.15);
-    // Vermieter, keine Boni: EU-WP weiterhin 30 %, Nicht-EU nur 15 %
+    // Landlord (Vermieter), no bonuses: EU heat pump still 30 %, non-EU only 15 %
     const eu = kfwSubsidy(req({ appMonth: M('2027-03'), ownerOccupied: false, eligibleCost: 20000 }), p);
     expect(eu.wsbRate).toBe(0.15);
     expect(eu.subsidy).toBe(6000);
@@ -138,7 +138,7 @@ describe('F5.1 Zuschuss gesamt', () => {
     expect(nonEu.wsbRate).toBe(0);
     expect(nonEu.subsidy).toBe(3000);
     expect(nonEu.notes.join()).toMatch(/EU-Ursprung/);
-    // vor dem Stichtag spielt der Ursprung keine Rolle
+    // before the cut-off date (Stichtag) the origin does not matter
     expect(kfwSubsidy(req({ euOrigin: false }), p).subsidy).toBe(12880);
   });
 });

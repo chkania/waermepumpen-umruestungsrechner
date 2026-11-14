@@ -1,11 +1,11 @@
 /*
- * Modernes Design (F14), angelehnt an chkania.net (F14.4):
- * warmes Off-White, Sand-Flächen, feine Linien, Anthrazit, gedämpftes Grau, ruhiges Blau;
- * Inter für Text, JetBrains Mono (Großbuchstaben) für Labels/Metadaten; fast eckige Kanten, keine Verläufe.
- * Alle Regeln gelten nur bei <html data-design="modern">. Das klassische Design (style.css) bleibt unverändert.
+ * Modern design (F14), inspired by chkania.net (F14.4):
+ * warm off-white, sand surfaces, fine lines, anthracite, muted grey, calm blue;
+ * Inter for text, JetBrains Mono (upper case) for labels/metadata; nearly square corners, no gradients.
+ * All rules apply only with <html data-design="modern">. The classic design (style.css) stays unchanged.
  */
 
-/* ---------- Tokens (Farben von chkania.net) ---------- */
+/* ---------- Tokens (colours from chkania.net) ---------- */
 :root[data-design='modern'] {
   --bg: #fdfcfa;
   --surface: #ffffff;
@@ -13,13 +13,13 @@
   --border: #e4e2dd;
   --c-text: #23252a;
   --c-text-2: #5b5a53;
-  --c-muted: #68665e; /* ≥ 4,5:1 auf allen Flächen (WCAG 1.4.3) */
+  --c-muted: #68665e; /* ≥ 4.5:1 on all surfaces (WCAG 1.4.3) */
   --c-grid: #eceae5;
   --accent: #2864a6;
   --accent-strong: #1f4e82;
   --accent-soft: #e9f0f8;
   --on-accent: #ffffff;
-  /* Szenariofarben: Blau = Akzent, dazu gedeckte, warme Ergänzungen */
+  /* Scenario colours: blue = accent, plus muted, warm complements */
   --c-ref: #b4532a;
   --c-kfw: #2864a6;
   --c-tax: #4b7f52;
@@ -41,8 +41,8 @@
   color-scheme: light;
 }
 
-/* chkania.net hat keinen Dunkelmodus – abgeleitete, gleich warme Variante */
-/* Dunkel: per data-theme (Auto folgt dem System, Hell/Dunkel übersteuern) */
+/* chkania.net has no dark mode – derived variant with the same warmth */
+/* Dark: via data-theme (auto follows the system, light/dark override it) */
 :root[data-design='modern'][data-theme='dark'] {
   --bg: #17181b;
   --surface: #1d1f23;
@@ -72,7 +72,7 @@
   color-scheme: dark;
 }
 
-/* ---------- Typografie ---------- */
+/* ---------- Typography ---------- */
 :root[data-design='modern'] body {
   font-family: var(--font-body);
   font-size: 15px;
@@ -87,7 +87,7 @@
 :root[data-design='modern'] h2 { font-size: 1.15rem; }
 :root[data-design='modern'] h3 { font-size: 1rem; }
 
-/* Mono-Labels wie die Metadaten auf chkania.net */
+/* Mono labels like the metadata on chkania.net */
 :root[data-design='modern'] .kpi-label,
 :root[data-design='modern'] .ev-date,
 :root[data-design='modern'] th,
@@ -105,7 +105,7 @@
   font-weight: 500;
 }
 
-/* ---------- Kopfbereich ---------- */
+/* ---------- Header ---------- */
 :root[data-design='modern'] .top {
   background: var(--bg);
   border-bottom: 1px solid var(--border);
@@ -173,7 +173,7 @@
   :root[data-design='modern'] .layout { padding-top: 16px; }
 }
 
-/* ---------- Eingaben ---------- */
+/* ---------- Inputs ---------- */
 :root[data-design='modern'] .inputs { gap: 10px; }
 :root[data-design='modern'] .section {
   border-radius: var(--radius);
@@ -213,7 +213,7 @@
 :root[data-design='modern'] .field .control input:focus,
 :root[data-design='modern'] .field .control select:focus,
 :root[data-design='modern'] .field .control textarea:focus {
-  /* deutlich sichtbarer Fokus (WCAG 2.4.7) */
+  /* clearly visible focus (WCAG 2.4.7) */
   outline: 2px solid var(--accent);
   outline-offset: 1px;
   border-color: var(--accent);
@@ -246,7 +246,7 @@
 :root[data-design='modern'] .src-refs a,
 :root[data-design='modern'] .src-meta a { color: var(--accent); text-underline-offset: 2px; }
 
-/* ---------- Kennzahlen ---------- */
+/* ---------- Key figures ---------- */
 :root[data-design='modern'] .kpis { gap: 12px; grid-template-columns: repeat(auto-fit, minmax(158px, 1fr)); }
 :root[data-design='modern'] .kpi {
   border: 1px solid var(--border);
@@ -285,7 +285,7 @@
 }
 :root[data-design='modern'] #horizon-note { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.02em; }
 
-/* ---------- Karten, Tabs, Tabellen ---------- */
+/* ---------- Cards, tabs, tables ---------- */
 :root[data-design='modern'] .card {
   border-radius: var(--radius);
   padding: 20px 22px;
@@ -329,7 +329,7 @@
 
 :root[data-design='modern'] .alert { border-radius: var(--radius); }
 
-/* ---------- Ereignisse & Hinweise ---------- */
+/* ---------- Events & notices ---------- */
 :root[data-design='modern'] .hints { gap: 10px; }
 :root[data-design='modern'] .hint {
   border-radius: var(--radius);
@@ -384,13 +384,13 @@
 :root[data-design='modern'] .chip { border: 1px solid currentColor; border-radius: var(--radius-sm); padding: 0 6px; font-size: 0.62rem; }
 :root[data-design='modern'] .ev-tag { border-radius: var(--radius-sm); }
 
-/* ---------- Tarifvergleich ---------- */
+/* ---------- Tariff comparison ---------- */
 :root[data-design='modern'] .tariff-col { border-radius: var(--radius); padding: 14px 16px; background: var(--surface-2); }
 :root[data-design='modern'] .tariff-col.is-cheaper { background: var(--surface); border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 :root[data-design='modern'] .tariff-head { font-size: 0.66rem; }
 :root[data-design='modern'] .tariff-val { font-size: 1.55rem; font-weight: 700; letter-spacing: -0.025em; }
 
-/* ---------- Sonstiges ---------- */
+/* ---------- Miscellaneous ---------- */
 :root[data-design='modern'] a { color: var(--accent); }
 :root[data-design='modern'] .toast { border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.8rem; box-shadow: var(--shadow-lg); }
 :root[data-design='modern'] .disclaimer { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.02em; }

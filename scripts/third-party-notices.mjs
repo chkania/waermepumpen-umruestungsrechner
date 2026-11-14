@@ -1,5 +1,5 @@
-// Erzeugt THIRD-PARTY-NOTICES.md aus den Lizenzdateien der Laufzeit-Abhängigkeiten (package.json → dependencies).
-// Aufruf: npm run notices  (nach Änderungen an dependencies; tests/license.test.ts prüft die Aktualität)
+// Generates THIRD-PARTY-NOTICES.md from the license files of the runtime dependencies (package.json → dependencies).
+// Usage: npm run notices  (after changes to dependencies; tests/license.test.ts checks that it is up to date)
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 

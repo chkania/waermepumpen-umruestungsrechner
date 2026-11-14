@@ -2,36 +2,36 @@ import { halfYearSteps, tryParseMonth } from './dates';
 import type { Fuel, FundingParams, KfwResult } from './types';
 
 export interface KfwRequest {
-  /** Förderfähige Bruttokosten (€). */
+  /** Eligible gross costs (förderfähige Kosten) (€). */
   eligibleCost: number;
-  /** Antragsmonat (absoluter Index). */
+  /** Application month (Antragsmonat) (absolute index). */
   appMonth: number;
   fuel: Fuel;
-  /** Alter der Altanlage zum Antragszeitpunkt (Jahre). */
+  /** Age of the old system at the time of application (years). */
   oldHeatingAge: number;
   ownerOccupied: boolean;
   units: number;
   householdIncome: number;
   hasChild: boolean;
-  /** Wärmepumpe mit Ursprung in der EU (Wertschöpfungs-Bonus, Richtlinie Nr. 8.4.6). Default: true. */
+  /** Heat pump of EU origin (value-added bonus (Wertschöpfungs-Bonus), guideline (Richtlinie) no. 8.4.6). Default: true. */
   euOrigin?: boolean;
 }
 
 const round2 = (x: number) => Math.round(x * 100) / 100;
 
-/** Grundförderung zum Antragsmonat (ab Q1/2027 für Wärmepumpen reduziert, Richtlinie Nr. 8.4.1 c). */
+/** Base funding (Grundförderung) in the application month (Antragsmonat) (reduced for heat pumps from Q1/2027, guideline (Richtlinie) no. 8.4.1 c). */
 export function grundRateAt(appMonth: number, p: FundingParams): number {
   const from = tryParseMonth(p.grundRateNewFrom);
   return from !== null && appMonth >= from ? p.grundRateNew : p.grundRate;
 }
 
-/** Wertschöpfungs-Bonus für Wärmepumpen mit EU-Ursprung (Richtlinie Nr. 8.4.6), gilt ab demselben Stichtag. */
+/** Value-added bonus (Wertschöpfungs-Bonus) for heat pumps of EU origin (guideline (Richtlinie) no. 8.4.6), applies from the same cut-off date (Stichtag). */
 export function wsbRateAt(appMonth: number, euOrigin: boolean, p: FundingParams): number {
   const from = tryParseMonth(p.grundRateNewFrom);
   return euOrigin && from !== null && appMonth >= from ? p.wsbRate : 0;
 }
 
-/** Klimageschwindigkeitsbonus-Satz zum Antragsmonat (ohne Berechtigungsprüfung). */
+/** Climate speed bonus (Klimageschwindigkeitsbonus) rate in the application month (Antragsmonat) (without eligibility check). */
 export function kgbRateAt(appMonth: number, p: FundingParams): number {
   const end = tryParseMonth(p.kgbEnd);
   if (end !== null && appMonth >= end) return 0;
@@ -42,11 +42,11 @@ export function kgbRateAt(appMonth: number, p: FundingParams): number {
 
 const round4 = (x: number) => Math.round(x * 10000) / 10000;
 
-/** Höchstbetrag förderfähiger Kosten für die erste Wohneinheit zum Antragsmonat. */
+/** Cap on eligible costs (Höchstbetrag förderfähiger Kosten) for the first dwelling unit (Wohneinheit) in the application month (Antragsmonat). */
 export function cap1At(appMonth: number, p: FundingParams): number {
   const start = tryParseMonth(p.capDegressionStart);
   const steps = start === null ? 0 : halfYearSteps(appMonth, start);
-  // Richtlinie Nr. 8.3.1 a: Absenkung endet bei der Untergrenze (ab 1. August 2030: 22.000 €)
+  // Guideline (Richtlinie) no. 8.3.1 a: the reduction stops at the floor (from 1 August 2030: 22,000 €)
   return Math.max(Math.min(p.capFloor, p.cap1), p.cap1 - steps * p.capStep);
 }
 
@@ -63,7 +63,7 @@ export function incomeBonusRate(income: number, hasChild: boolean, p: FundingPar
   return 0;
 }
 
-/** Berechnet den KfW-458-Zuschuss. */
+/** Calculates the KfW 458 subsidy (Zuschuss). */
 export function kfwSubsidy(req: KfwRequest, p: FundingParams): KfwResult {
   const notes: string[] = [];
   const units = Math.max(1, Math.floor(req.units));
@@ -122,7 +122,7 @@ export function kfwSubsidy(req: KfwRequest, p: FundingParams): KfwResult {
   };
 }
 
-/** KfW-Ergänzungskredit: 358 (zinsverbilligt) oder 359. */
+/** KfW supplementary loan (Ergänzungskredit): 358 (interest-subsidised) or 359. */
 export function kfwLoanVariant(
   ownerOccupied: boolean,
   units: number,

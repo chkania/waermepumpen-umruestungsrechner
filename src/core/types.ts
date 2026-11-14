@@ -1,19 +1,19 @@
 import type { ExtraResult } from './loan';
 
-/** Brennstoff der Bestandsheizung. */
+/** Fuel of the existing heating (Bestandsheizung). */
 export type Fuel = 'gas' | 'oil';
 
-/** Monate werden als ISO-String "YYYY-MM" eingegeben und intern als absoluter Monatsindex (Jahr*12 + Monat-1) gerechnet. */
+/** Months are entered as ISO string "YYYY-MM" and handled internally as absolute month index (year*12 + month-1). */
 export type MonthString = string;
 
 export interface GeneralInputs {
   startMonth: MonthString;
   horizonYears: number;
-  /** Opportunitätszins p. a. als Anteil (0.02 = 2 %). */
+  /** Opportunity interest rate (Opportunitätszins) p. a. as a fraction (0.02 = 2 %). */
   opportunityRate: number;
-  /** Allgemeine Kostensteigerung (Wartung) p. a. */
+  /** General cost increase (maintenance) p. a. */
   costIncrease: number;
-  /** Steigerung der Investitionskosten (WP, Kessel) p. a. bis zum Kaufzeitpunkt. */
+  /** Increase of investment costs (heat pump, boiler) p. a. until the purchase date. */
   investIncrease: number;
   residualValue: boolean;
   vat: number;
@@ -22,41 +22,41 @@ export interface GeneralInputs {
 export interface BuildingInputs {
   ownerOccupied: boolean;
   units: number;
-  /** Baujahr des Gebäudes (F17). */
+  /** Construction year of the building (F17). */
   constructionYear: number;
-  /** Beheizte Wohnfläche (m²). */
+  /** Heated living area (m²). */
   heatedArea: number;
-  /** Jahr der letzten energetischen Sanierung; 0 = keine. */
+  /** Year of the last energy-related renovation (energetische Sanierung); 0 = none. */
   renovationYear: number;
-  /** Umfang der letzten Sanierung. */
+  /** Scope of the last renovation. */
   renovationScope: 'partial' | 'full';
-  /** Zu versteuerndes Haushaltsjahreseinkommen (€). */
+  /** Taxable annual household income (zu versteuerndes Einkommen) (€). */
   householdIncome: number;
   hasChild: boolean;
-  /** Jährliche Einkommensteuerschuld (€) als Obergrenze für § 35c; 0 = unbegrenzt. */
+  /** Annual income tax liability (Einkommensteuerschuld) (€) as cap for § 35c; 0 = unlimited. */
   incomeTax: number;
 }
 
 export interface OldHeatingInputs {
   fuel: Fuel;
-  /** Gas: kWh/Jahr, Öl: Liter/Jahr. */
+  /** Gas: kWh/year, oil: litres/year. */
   consumption: number;
   efficiency: number;
   ageYears: number;
-  /** Warmwasser wird über die Heizung bereitet (F17). */
+  /** Hot water (Warmwasser) is produced by the heating system (F17). */
   dhwViaHeating: boolean;
-  /** Anteil Warmwasser am Gesamtverbrauch (0–1). */
+  /** Share of hot water (Warmwasser) in total consumption (0–1). */
   dhwShare: number;
-  /** Gasherd am selben Anschluss (nur Gas). */
+  /** Gas cooker (Gasherd) on the same connection (gas only). */
   cookingWithGas: boolean;
-  /** Anteil Kochen am Gesamtverbrauch (0–1). */
+  /** Share of cooking in total consumption (0–1). */
   cookingShare: number;
-  /** Kochen nach dem Umstieg: Strom (Induktion) oder weiter Gas (Anschluss bleibt). */
+  /** Cooking after the switch: electricity (induction) or still gas (connection remains). */
   cookingAfter: 'electric' | 'gas';
-  /** Einmalige Kosten für ein neues Kochfeld (Induktion) beim Umstieg auf Strom (€, heutige Preise). */
+  /** One-off cost of a new cooktop (Kochfeld) (induction) when switching to electricity (€, today's prices). */
   cookingSwitchCost: number;
   remainingLifeYears: number;
-  /** Wartung + Schornsteinfeger €/Jahr. */
+  /** Maintenance + chimney sweep (Schornsteinfeger) €/year. */
   maintenance: number;
   replacementCost: number;
   replacementEfficiency: number;
@@ -64,23 +64,23 @@ export interface OldHeatingInputs {
 }
 
 export interface PriceInputs {
-  /** Aktueller Gaspreis ct/kWh brutto inkl. CO2. */
+  /** Current gas price ct/kWh gross incl. CO2. */
   gasPriceCt: number;
   gasBaseFee: number;
   gasIncrease: number;
-  /** Aktueller Heizölpreis €/Liter brutto inkl. CO2. */
+  /** Current heating oil price €/litre gross incl. CO2. */
   oilPriceEur: number;
   oilIncrease: number;
   oilKwhPerLiter: number;
-  /** CO2-Preispfad "Jahr:€/t, Jahr:€/t, …". */
+  /** CO2 price path "year:€/t, year:€/t, …". */
   co2Path: string;
   gasCo2Factor: number;
   oilCo2Factor: number;
   bioEnabled: boolean;
-  /** Bio-Treppe "Jahr:Anteil%, …". */
+  /** Bio step-up (Bio-Treppe) "year:share%, …". */
   bioSteps: string;
   bioPremiumCt: number;
-  /** Strombedarf beim Kochen je kWh Gas (Induktion statt Gasherd). */
+  /** Electricity needed for cooking per kWh of gas (induction instead of gas cooker (Gasherd)). */
   cookingElecFactor: number;
 }
 
@@ -93,19 +93,19 @@ export interface HeatPumpInputs {
   lifeYears: number;
   installMonth: MonthString;
   leadMonths: number;
-  /** Wärmepumpe mit Ursprung in der EU (Wertschöpfungs-Bonus). */
+  /** Heat pump of EU origin (value-added bonus (Wertschöpfungs-Bonus)). */
   euOrigin: boolean;
   separateTariff: boolean;
   elecPriceCt: number;
   householdPriceCt: number;
   elecIncrease: number;
   meterFee: number;
-  /** Einmalige Kosten für den zweiten Zähler (Zählerschrank-Umbau), nur mit separatem WP-Tarif. */
+  /** One-off cost of the second meter (meter cabinet conversion (Zählerschrank-Umbau)), only with a separate heat pump tariff (Wärmepumpentarif). */
   meterSetupCost: number;
-  /** Zählerschrank-Umbau als förderfähig anerkannt (vom Fachbetrieb zu bestätigen). */
+  /** Meter cabinet conversion (Zählerschrank-Umbau) recognised as eligible (to be confirmed by the installer). */
   meterSetupEligible: boolean;
   para14aReduction: number;
-  /** Am Haushaltszähler hängt bereits eine steuerbare Verbrauchseinrichtung mit § 14a (z. B. Wallbox). */
+  /** A controllable consumer (steuerbare Verbrauchseinrichtung) with § 14a (e.g. wallbox) is already connected to the household meter (Haushaltszähler). */
   existing14aOnHousehold: boolean;
   pvShare: number;
   feedInCt: number;
@@ -120,7 +120,7 @@ export interface FinancingInputs {
   kfwGraceYears: number;
   kfwFixYears: number;
   followUpRate: number;
-  /** KfW-Ergänzungskredit 358/359 beantragen; false = Fremdfinanzierung nur über den Bankkredit. */
+  /** Apply for KfW supplementary loan (Ergänzungskredit) 358/359; false = external financing via the bank loan only. */
   useKfwLoan: boolean;
   subsidyAsSpecialRepayment: boolean;
   bankRate: number;
@@ -128,30 +128,30 @@ export interface FinancingInputs {
   bankGraceYears: number;
   subsidyDelayMonths: number;
   taxRefundMonth: number;
-  /** Einmalzahlung in der Zukunft (z. B. Lebensversicherung) für Sondertilgungen; 0 = keine. */
+  /** Future one-off payment (Einmalzahlung) (e.g. life insurance) for special repayments (Sondertilgung); 0 = none. */
   windfallAmount: number;
   windfallMonth: MonthString;
-  /** Monat der Sondertilgung (JJJJ-MM); leer = sofort bei Verfügbarkeit. */
+  /** Month of the special repayment (Sondertilgung) (YYYY-MM); empty = immediately when available. */
   windfallRepayMonth: string;
-  /** Welcher Kredit zuerst: 'auto' = höchster Zins zuerst. */
+  /** Which loan first: 'auto' = highest interest rate first. */
   windfallTarget: 'auto' | 'kfw' | 'bank';
-  /** KfW: Mindestbetrag Sondertilgung innerhalb der ersten Zinsbindung. */
+  /** KfW: minimum special repayment (Sondertilgung) within the first fixed-rate period (Zinsbindung). */
   kfwMinPrepay: number;
-  /** KfW: Vorfälligkeitsentschädigung nach Ende der Zinsbindung (Anteil, Annahme). */
+  /** KfW: early repayment charge (Vorfälligkeitsentschädigung) after the fixed-rate period (Zinsbindung) (fraction, assumption). */
   kfwFeeAfterFix: number;
-  /** Bank: Vorfälligkeitsentschädigung (§ 502 BGB max. 1 %). */
+  /** Bank: early repayment charge (Vorfälligkeitsentschädigung) (§ 502 BGB max. 1 %). */
   bankPrepayFee: number;
-  /** Bank: Vorfälligkeitsentschädigung bei Restlaufzeit ≤ 1 Jahr (§ 502 BGB max. 0,5 %). */
+  /** Bank: early repayment charge (Vorfälligkeitsentschädigung) for a remaining term ≤ 1 year (§ 502 BGB max. 0.5 %). */
   bankPrepayFeeShort: number;
 }
 
 export interface FundingParams {
   grundRate: number;
-  /** Grundförderung für Wärmepumpen ab grundRateNewFrom (Richtlinie Nr. 8.4.1 c: 15 %). */
+  /** Base funding (Grundförderung) for heat pumps from grundRateNewFrom (guideline (Richtlinie) no. 8.4.1 c: 15 %). */
   grundRateNew: number;
-  /** Ab diesem Antragsmonat gelten grundRateNew und der Wertschöpfungs-Bonus; leer = nie. */
+  /** From this application month (Antragsmonat) grundRateNew and the value-added bonus (Wertschöpfungs-Bonus) apply; empty = never. */
   grundRateNewFrom: MonthString;
-  /** Wertschöpfungs-Bonus für Wärmepumpen mit EU-Ursprung (Richtlinie Nr. 8.4.6). */
+  /** Value-added bonus (Wertschöpfungs-Bonus) for heat pumps of EU origin (guideline (Richtlinie) no. 8.4.6). */
   wsbRate: number;
   kgbRate: number;
   kgbStep: number;
@@ -169,7 +169,7 @@ export interface FundingParams {
   maxRateLowIncome: number;
   cap1: number;
   capStep: number;
-  /** Untergrenze nach Ende der Degression (ab 08/2030: 22.000 €). */
+  /** Floor after the end of the degression (from 08/2030: 22,000 €). */
   capFloor: number;
   capDegressionStart: MonthString;
   cap2to6: number;
@@ -184,7 +184,7 @@ export interface TaxParams {
   rateYear3: number;
   maxBonus: number;
   maxCost: number;
-  /** Letzter zulässiger Abschlussmonat. */
+  /** Last permitted completion month. */
   deadline: MonthString;
   minBuildingAge: number;
 }
@@ -194,11 +194,11 @@ export interface CompareInputs {
   count: number;
 }
 
-/** Beschreibung des Szenarios (F16) – ohne Einfluss auf die Rechnung. */
+/** Description of the scenario (F16) – does not affect the calculation. */
 export interface ScenarioInfo {
-  /** Bezeichnung, z. B. „Variante Herbst 2027“; fließt in den Export-Dateinamen ein. */
+  /** Name, e.g. "Variante Herbst 2027"; used in the export file name. */
   name: string;
-  /** Freitext: Beschreibung, Annahmen, Angebote … */
+  /** Free text: description, assumptions, quotes … */
   notes: string;
 }
 
@@ -218,7 +218,7 @@ export interface Inputs {
 
 export type ScenarioKind = 'ref' | 'kfw' | 'tax';
 
-/** Kostenkategorien; positive Werte = Ausgaben, negative = Einnahmen. */
+/** Cost categories; positive values = expenses, negative = income. */
 export interface CostBreakdown {
   energy: number;
   fixed: number;
@@ -227,7 +227,7 @@ export interface CostBreakdown {
   loanPayout: number;
   interest: number;
   principal: number;
-  /** Vorfälligkeitsentschädigungen. */
+  /** Early repayment charges (Vorfälligkeitsentschädigung). */
   fees: number;
   subsidy: number;
   taxBonus: number;
@@ -237,17 +237,17 @@ export interface CostBreakdown {
 
 export interface MonthRow extends CostBreakdown {
   month: number;
-  /** Nutzwärme der Heizung (Raumwärme + ggf. Warmwasser). */
+  /** Useful heat (Nutzwärme) of the heating system (space heating (Raumwärme) + hot water (Warmwasser) if applicable). */
   heatKWh: number;
-  /** Davon enthaltene Kosten fürs Kochen (in energy/fixed), z. B. für den Tarifvergleich. */
+  /** Of which costs for cooking (in energy/fixed), e.g. for the tariff comparison. */
   cookingCost: number;
-  /** 'old' | 'new' (Ersatzkessel) | 'wp' */
+  /** 'old' | 'new' (replacement boiler (Ersatzkessel)) | 'wp' */
   system: 'old' | 'new' | 'wp';
 }
 
 export interface YearRow extends CostBreakdown {
   year: number;
-  /** Kumulierte Kosten (inkl. Opportunitätszins) am Jahresende. */
+  /** Cumulative costs (incl. opportunity interest (Opportunitätszins)) at year end. */
   cumulative: number;
 }
 
@@ -258,7 +258,7 @@ export interface KfwResult {
   wsbRate: number;
   kgbRate: number;
   incomeRate: number;
-  /** Effektiver Fördersatz der selbstgenutzten WE (nach Höchstsatz). */
+  /** Effective subsidy rate (Fördersatz) of the owner-occupied (selbstgenutzt) unit (after the maximum rate (Höchstsatz)). */
   ownerUnitRate: number;
   maxRate: number;
   capTotal: number;
@@ -281,16 +281,16 @@ export interface LoanInfo {
   rate: number;
   totalInterest: number;
   startMonth: number;
-  /** Erste Tilgungsrate (nach tilgungsfreier Zeit); null ohne Anlaufzeit. */
+  /** First repayment instalment (Rate) (after the repayment-free period (tilgungsfreie Anlaufzeit)); null without an initial period. */
   repaymentStartMonth: number | null;
-  /** Ende der Zinsbindung, falls vor Tilgungsende; danach gilt followUpRate. */
+  /** End of the fixed-rate period (Zinsbindung) if before the end of repayment; followUpRate applies afterwards. */
   fixEndMonth: number | null;
   followUpRate: number;
-  /** Monat der letzten Rate, falls im Betrachtungszeitraum. */
+  /** Month of the last instalment (Rate), if within the analysis period (Betrachtungszeitraum). */
   payoffMonth: number | null;
-  /** Restschuld am Ende des Zeitraums (als Ablösung eingerechnet). */
+  /** Remaining debt (Restschuld) at the end of the period (included as payoff). */
   balanceAtEnd: number;
-  /** Ergebnisse der Sondertilgungen (Zuschuss, Einmalzahlung). */
+  /** Results of the special repayments (Sondertilgung) (subsidy (Zuschuss), one-off payment (Einmalzahlung)). */
   extras: ExtraResult[];
   totalFees: number;
 }
@@ -305,19 +305,19 @@ export interface WindfallAttempt {
 }
 
 export interface WindfallInfo {
-  /** Monat der Sondertilgung. */
+  /** Month of the special repayment (Sondertilgung). */
   month: number;
-  /** Monat, ab dem das Geld verfügbar ist. */
+  /** Month from which the money is available. */
   availableMonth: number;
-  /** Ersparte Kreditzinsen im Betrachtungszeitraum durch die Sondertilgung. */
+  /** Loan interest saved within the analysis period (Betrachtungszeitraum) by the special repayment (Sondertilgung). */
   interestSaved: number;
-  /** Vorfälligkeitsentschädigungen der Sondertilgung. */
+  /** Early repayment charges (Vorfälligkeitsentschädigung) of the special repayment (Sondertilgung). */
   fees: number;
   amount: number;
   used: number;
   unused: number;
   attempts: WindfallAttempt[];
-  /** Hinweis, warum nichts eingesetzt wurde (z. B. außerhalb des Zeitraums, kein Kredit). */
+  /** Note why nothing was applied (e.g. outside the period, no loan). */
   note?: string;
 }
 
@@ -328,18 +328,18 @@ export interface ScenarioResult {
   installMonth: number | null;
   months: MonthRow[];
   years: YearRow[];
-  /** Kumulierte Kosten je Monatsende (inkl. Opportunitätszins). */
+  /** Cumulative costs at each month end (incl. opportunity interest (Opportunitätszins)). */
   cumulative: number[];
   totalCost: number;
-  /** Summe ohne Verzinsung. */
+  /** Total without interest. */
   nominalCost: number;
   warnings: string[];
   kfw?: KfwResult;
   tax?: TaxResult;
   loans: LoanInfo[];
-  /** Käufe von Ersatzkesseln (Monat, Bruttokosten). */
+  /** Purchases of replacement boilers (Ersatzkessel) (month, gross cost). */
   boilerPurchases: { month: number; cost: number }[];
-  /** Ersatz-Wärmepumpen nach Ablauf der Lebensdauer (Monat, Kosten brutto). */
+  /** Replacement heat pumps (Ersatz-Wärmepumpe) after the end of their lifetime (month, gross cost). */
   hpReplacements: { month: number; cost: number }[];
   windfall?: WindfallInfo;
 }

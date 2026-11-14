@@ -2,20 +2,20 @@ import { tryParseMonth, yearOf } from './dates';
 import type { TaxParams, TaxResult } from './types';
 
 export interface TaxRequest {
-  /** Begünstigte Aufwendungen (€). */
+  /** Eligible expenses (begünstigte Aufwendungen) (€). */
   cost: number;
-  /** Abschlussmonat der Maßnahme (absolut). */
+  /** Completion month of the measure (absolute). */
   completionMonth: number;
   ownerOccupied: boolean;
-  /** Gebäudealter zum Abschluss (Jahre). */
+  /** Building age at completion (years). */
   buildingAgeAtCompletion: number;
-  /** Jährliche Einkommensteuerschuld; 0 = unbegrenzt. */
+  /** Annual income tax liability (Einkommensteuerschuld); 0 = unlimited. */
   incomeTax: number;
 }
 
 const round2 = (x: number) => Math.round(x * 100) / 100;
 
-/** Steuerermäßigung nach § 35c EStG (7 % / 7 % / 6 %). */
+/** Tax reduction (Steuerermäßigung) under § 35c EStG (7 % / 7 % / 6 %). */
 export function taxBonus(req: TaxRequest, p: TaxParams): TaxResult {
   const notes: string[] = [];
   const completionYear = yearOf(req.completionMonth);

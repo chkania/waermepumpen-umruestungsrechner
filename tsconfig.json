@@ -12,7 +12,8 @@
     "isolatedModules": true,
     "resolveJsonModule": true,
     "noEmit": true,
+    "allowImportingTsExtensions": true,
     "types": ["vitest/globals"]
   },
-  "include": ["src", "tests", "vite.config.ts", "csp.ts"]
+  "include": ["src", "tests", "scripts/**/*.ts", "vite.config.ts", "csp.ts"]
 }

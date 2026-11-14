@@ -1,7 +1,7 @@
 /**
- * Herkunft der Standardwerte (F11). Für jedes Eingabefeld ist dokumentiert, woher der Default stammt.
- * Wichtig: ehrlich kennzeichnen – „Schätzung" heißt: keine konkrete Erhebung, sondern eine plausible
- * Annahme mit typischer Spanne. Bei Änderungen an defaults.ts diese Datei mitpflegen.
+ * Origin of the default values (F11). For every input field it documents where the default comes from.
+ * Important: label honestly – "Schätzung" (estimate) means: no specific survey, but a plausible
+ * assumption with a typical range. Keep this file in sync when changing defaults.ts.
  */
 
 export type SourceKind = 'quelle' | 'gesetz' | 'markt' | 'schaetzung' | 'beispiel' | 'technik' | 'annahme';
@@ -10,12 +10,12 @@ export interface DefaultSource {
   kind: SourceKind;
   text: string;
   url?: string;
-  /** Abrufdatum bzw. Stand, falls relevant. */
+  /** Retrieval date or status, if relevant. */
   asOf?: string;
 }
 
 export interface OfficialRef {
-  /** Dokument und Fundstelle, z. B. „BEG-EM-Richtlinie Nr. 8.4.5“. */
+  /** Document and reference, e.g. "BEG-EM-Richtlinie Nr. 8.4.5". */
   label: string;
   url: string;
 }
@@ -45,7 +45,7 @@ const tax = (text: string): DefaultSource => ({ kind: 'gesetz', text, url: ESTG_
 const own = 'Bitte durch den eigenen Wert ersetzen.';
 
 export const DEFAULT_SOURCES: Record<string, DefaultSource> = {
-  // ---------- Bestandsheizung ----------
+  // ---------- Existing heating (Bestandsheizung) ----------
   'oldHeating.fuel': { kind: 'beispiel', text: `Beispiel Erdgas. ${own}` },
   'oldHeating.consumption': {
     kind: 'beispiel',
@@ -71,7 +71,7 @@ export const DEFAULT_SOURCES: Record<string, DefaultSource> = {
   'oldHeating.replacementEfficiency': { kind: 'technik', text: 'Typischer Jahresnutzungsgrad eines neuen Brennwertkessels.' },
   'oldHeating.replacementLifeYears': { kind: 'schaetzung', text: 'Schätzung der üblichen Nutzungsdauer eines Gas-/Ölkessels (ca. 18–25 Jahre).' },
 
-  // ---------- Energiepreise ----------
+  // ---------- Energy prices ----------
   'prices.gasPriceCt': mkt('BDEW-Gaspreisanalyse: Ø 12,23 ct/kWh im Oktober 2026 (Einfamilienhaus, brutto inkl. CO₂-Abgabe); Destatis: Ø 11,58 ct/kWh im 1. Halbjahr 2026. Neukundentarife liegen aktuell eher bei 12,4–14,4 ct/kWh. Arbeitspreis aus der eigenen Gasrechnung eintragen.', 'https://www.bdew.de/service/daten-und-grafiken/bdew-gaspreisanalyse/'),
   'prices.gasBaseFee': { kind: 'schaetzung', text: 'Kein bundesweiter Durchschnitt gefunden. Beispiele aus Preisblättern 2026: ca. 110–190 €/Jahr brutto (z. B. Grundversorgung Stadtwerke Stade 171 €). Default = Mittelwert. Steht auf der eigenen Gasrechnung.' },
   'prices.gasIncrease': {
@@ -107,7 +107,7 @@ export const DEFAULT_SOURCES: Record<string, DefaultSource> = {
   'prices.oilKwhPerLiter': { kind: 'technik', text: 'Heizwert von Heizöl EL: rund 10 kWh je Liter.' },
   'prices.cookingElecFactor': { kind: 'technik', text: 'Ein Gasherd nutzt etwa 40–55 % der Energie für das Kochgut, ein Induktionskochfeld etwa 80–90 %. Je kWh Gas braucht Induktion daher grob 0,5–0,6 kWh Strom (Schätzung).' },
 
-  // ---------- Wärmepumpe ----------
+  // ---------- Heat pump ----------
   'heatPump.installMonth': { kind: 'annahme', text: 'Annahme: Inbetriebnahme 6 Monate nach Start (Planung, Förderantrag, Lieferzeit). Eigenen Plan eintragen.' },
   'heatPump.investment': { kind: 'schaetzung', text: 'Keine amtliche Kostenerhebung verfügbar. Ratgeber nennen für Luft/Wasser-Wärmepumpen im Einfamilienhaus inkl. Installation meist 27.000–40.000 € (für Bestandsgebäude teils bis ca. 43.000 €); günstigere Angaben (ab ca. 15.000 €) beziehen sich meist auf einfache Fälle. Angebot einholen.' },
   'heatPump.eligibleShare': { kind: 'annahme', text: 'Annahme: alle Kosten förderfähig. Förderfähig sind neben der Wärmepumpe u. a. Umfeldmaßnahmen wie Heizkörpertausch, Elektroinstallation, Fundament, Demontage und Entsorgung der Altanlage. Nicht förderfähige Posten aus dem Angebot abziehen.' },
@@ -122,7 +122,7 @@ export const DEFAULT_SOURCES: Record<string, DefaultSource> = {
   },
   'heatPump.euOrigin': { kind: 'beispiel', text: 'Annahme: Wärmepumpe aus der EU. Ohne EU-Ursprung gibt es ab dem 1. Quartal 2027 nur 15 % Grundförderung (kein Wertschöpfungs-Bonus). Herkunft beim Angebot erfragen.' },
 
-  // ---------- Strom ----------
+  // ---------- Electricity ----------
   'heatPump.separateTariff': { kind: 'annahme', text: 'Annahme: eigener Zähler mit Wärmepumpentarif. Ohne separaten Tarif läuft die WP über den Haushaltsstrom.' },
   'heatPump.elecPriceCt': mkt('Verivox: günstigste Wärmepumpentarife für Neukunden um 20,7 ct/kWh (7.500 kWh/Jahr); Ratgeber nennen für übliche WP-Tarife 22–28 ct/kWh, Bestandsverträge oft mehr. Default = typischer Neuvertrag. Tarife vergleichen.', 'https://www.verivox.de/heizstrom/waermepumpenstrom-preisentwicklung/'),
   'heatPump.meterFee': { kind: 'schaetzung', text: 'Schätzung für Grundpreis und Messstellenbetrieb des zweiten Zählers pro Jahr.' },
@@ -144,7 +144,7 @@ export const DEFAULT_SOURCES: Record<string, DefaultSource> = {
     asOf: '01.08.2026',
   },
 
-  // ---------- Haushalt & Gebäude ----------
+  // ---------- Household & building ----------
   'building.ownerOccupied': { kind: 'beispiel', text: 'Beispiel: selbstgenutzt. Voraussetzung für Klimageschwindigkeits- und Einkommensbonus sowie den Steuerbonus.' },
   'building.units': { kind: 'beispiel', text: `Beispiel Einfamilienhaus. ${own}` },
   'building.constructionYear': { kind: 'beispiel', text: `Beispiel: 40 Jahre vor dem Startjahr. Für den Steuerbonus muss das Gebäude bei Abschluss mindestens 10 Jahre alt sein; außerdem dient das Baujahr der Einordnung des Hauses. ${own}` },
@@ -155,7 +155,7 @@ export const DEFAULT_SOURCES: Record<string, DefaultSource> = {
   'building.hasChild': { kind: 'beispiel', text: 'Familienzuschlag: Ist mindestens ein Kind unter 18 (bei Antragstellung) mit Hauptwohnsitz in der Wohneinheit gemeldet und besteht für es Kindergeldberechtigung im Haushalt, erhöhen sich die Einkommensgrenzen einmalig um 10.000 € – unabhängig von der Zahl der Kinder. Nachweis per Meldebestätigung.' },
   'building.incomeTax': { kind: 'annahme', text: 'Standard 0 = keine Begrenzung. Liegt die Einkommensteuer unter dem jährlichen Steuerbonus, verfällt der Rest (kein Vor-/Rücktrag).' },
 
-  // ---------- Finanzierung ----------
+  // ---------- Financing ----------
   'financing.kfwEquity': { kind: 'beispiel', text: `Beispiel. ${own}` },
   'financing.taxEquity': { kind: 'beispiel', text: `Beispiel. ${own}` },
   'financing.kfwRate358': {
@@ -190,7 +190,7 @@ export const DEFAULT_SOURCES: Record<string, DefaultSource> = {
   'financing.bankPrepayFee': { kind: 'gesetz', text: 'Verbraucherdarlehen dürfen jederzeit ganz oder teilweise vorzeitig zurückgezahlt werden (§ 500 Abs. 2 BGB). Die Vorfälligkeitsentschädigung beträgt höchstens 1 % des vorzeitig zurückgezahlten Betrags und nie mehr als die Sollzinsen bis zum Laufzeitende (§ 502 BGB). Viele Banken erlauben Sondertilgungen kostenfrei – dann 0 % eintragen.', url: 'https://www.gesetze-im-internet.de/bgb/__502.html' },
   'financing.bankPrepayFeeShort': { kind: 'gesetz', text: 'Beträgt die Restlaufzeit höchstens ein Jahr, ist die Entschädigung auf 0,5 % begrenzt (§ 502 Abs. 3 BGB).', url: 'https://www.gesetze-im-internet.de/bgb/__502.html' },
 
-  // ---------- Betrachtung ----------
+  // ---------- Analysis period (Betrachtungszeitraum) ----------
   'general.startMonth': { kind: 'annahme', text: 'Aktueller Monat beim ersten Öffnen.' },
   'general.horizonYears': { kind: 'annahme', text: 'Annahme: 20 Jahre ≈ Lebensdauer einer Wärmepumpe.' },
   'general.opportunityRate': { kind: 'annahme', text: 'Annahme: entgangene Verzinsung des eingesetzten Geldes, etwa auf Tagesgeld-/Festgeldniveau.' },
@@ -242,7 +242,7 @@ export const DEFAULT_SOURCES: Record<string, DefaultSource> = {
   'general.vat': { kind: 'gesetz', text: 'Regelsteuersatz 19 % (UStG), gilt für Gas, Heizöl und Strom.' },
 };
 
-// ---------- Offizielle Fundstellen (F11.4) ----------
+// ---------- Official references (F11.4) ----------
 const RL = 'https://www.bundesanzeiger.de/pub/publication/jLXvW09kHTQoDINAdoC/content/jLXvW09kHTQoDINAdoC/BAnz%20AT%2027.08.2026%20B1.pdf?inline';
 const M458 = 'https://www.kfw.de/PDF/Download-Center/F%C3%B6rderprogramme-(Inlandsf%C3%B6rderung)/PDF-Dokumente/6000005131_M_458.pdf';
 const M358 = 'https://www.kfw.de/PDF/Download-Center/F%C3%B6rderprogramme-(Inlandsf%C3%B6rderung)/PDF-Dokumente/6000005135_M_358_359.pdf';

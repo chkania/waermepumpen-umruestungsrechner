@@ -1,8 +1,8 @@
 /**
- * Regressions-Snapshot des Default-Szenarios (N3).
- * Schlägt dieser Test nach einer Änderung fehl, ist entweder ein Fehler entstanden
- * oder die Rechenlogik wurde bewusst geändert. Im zweiten Fall: `npm test -- -u`
- * und die Änderung in docs/ANFORDERUNGEN.md (Änderungsprotokoll) begründen.
+ * Regression snapshot of the default scenario (N3).
+ * If this test fails after a change, either a bug was introduced
+ * or the calculation logic was changed on purpose. In the latter case: `npm test -- -u`
+ * and justify the change in docs/ANFORDERUNGEN.md (change log).
  */
 import { describe, expect, it } from 'vitest';
 import { compareInstallTimes } from '../src/core/compare';

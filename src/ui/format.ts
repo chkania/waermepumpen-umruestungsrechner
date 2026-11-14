@@ -12,7 +12,7 @@ export function escapeHtml(s: string): string {
   return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 }
 
-/** Dauer in Monaten als "x J. y M." */
+/** Duration in months as "x J. y M." */
 export function fmtDuration(months: number): string {
   const y = Math.floor(months / 12);
   const m = months % 12;

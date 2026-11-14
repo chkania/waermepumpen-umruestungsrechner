@@ -6,7 +6,7 @@ export interface TocEntry {
   level: 2 | 3;
 }
 
-/** Erzeugt eine URL-taugliche ID aus einer deutschen Überschrift. */
+/** Creates a URL-safe ID from a German heading. */
 export function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -20,7 +20,7 @@ export function slugify(text: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-/** Rendert das Handbuch (Markdown) zu HTML mit Anker-IDs und Inhaltsverzeichnis (F15). */
+/** Renders the manual (Markdown) to HTML with anchor IDs and table of contents (F15). */
 export function renderHelp(markdown: string): { html: string; toc: TocEntry[]; title: string } {
   let html = marked.parse(markdown, { async: false, gfm: true }) as string;
   const toc: TocEntry[] = [];
@@ -39,7 +39,7 @@ export function renderHelp(markdown: string): { html: string; toc: TocEntry[]; t
     toc.push({ id, text, level: level as 2 | 3 });
     return `<h${level} id="${id}"><a class="anchor" href="#${id}" aria-hidden="true">#</a>${inner}</h${level}>`;
   });
-  // Tabellen scrollbar machen (Mobil)
+  // Make tables scrollable (mobile)
   html = html.replace(/<table>/g, '<div class="table-wrap"><table>').replace(/<\/table>/g, '</table></div>');
   return { html, toc, title };
 }
