@@ -156,7 +156,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
 
   const rows: MonthRow[] = [];
   for (let m = 0; m < H; m++) {
-    rows.push({ month: start + m, heatKWh: 0, cookingCost: 0, system: 'old', ...emptyBreakdown() });
+    rows.push({ month: start + m, heatKWh: 0, cookingCost: 0, system: 'old', co2Kg: 0, ...emptyBreakdown() });
   }
   const assets: Asset[] = [];
 
@@ -185,6 +185,8 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
       const elec = heatM / hp.jaz;
       const gridCt = pm.elecCt(abs);
       r.energy = (elec * (1 - hp.pvShare) * gridCt + elec * hp.pvShare * hp.feedInCt) / 100;
+      // CO2 (F25): grid electricity with the electricity mix (Strommix), own PV electricity counts as emission-free
+      r.co2Kg = elec * (1 - hp.pvShare) * pm.gridCo2Kg(year);
       r.fixed = ((hp.separateTariff ? hp.meterFee * pm.elecGrowth(abs) : 0) - para14aFor(hp)) / 12;
       r.maintenance = (hp.maintenance * maintGrowth) / 12;
       if (cookM > 0) {
@@ -195,10 +197,12 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
           r.energy += gas;
           r.fixed += base;
           r.cookingCost = gas + base;
+          r.co2Kg += cookM * (1 - pm.currentBioShare) * pm.fuelCo2Kg('gas');
         } else {
           const el = (cookM * inp.prices.cookingElecFactor * pm.householdCt(abs)) / 100;
           r.energy += el;
           r.cookingCost = el;
+          r.co2Kg += cookM * inp.prices.cookingElecFactor * pm.gridCo2Kg(year);
         }
       }
     } else {
@@ -211,6 +215,10 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
       const cook = (cookM * pm.fuelCt(fuel, abs)) / 100;
       r.energy = (fuelKWh * ct) / 100 + cook;
       r.cookingCost = cook;
+      // CO2 (F25): bio share (Bio-Anteil) counts as climate-neutral (as in the BEHG) – today's tariff share,
+      // for a replacement boiler at least the legally required share (Bio-Treppe)
+      const bioHeat = isNew ? Math.max(pm.currentBioShare, pm.bioShare(year)) : pm.currentBioShare;
+      r.co2Kg = (fuelKWh * (1 - bioHeat) + cookM * (1 - pm.currentBioShare)) * pm.fuelCo2Kg(fuel);
       r.fixed = fuel === 'gas' ? pm.gasBaseFee(abs) / 12 : 0;
       r.maintenance = (o.maintenance * maintGrowth) / 12;
     }
@@ -498,6 +506,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
     years,
     cumulative,
     totalCost: cum,
+    co2Tons: rows.reduce((sum, r) => sum + r.co2Kg, 0) / 1000,
     nominalCost: nominal,
     warnings,
     kfw: kfwRes,

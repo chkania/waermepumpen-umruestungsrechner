@@ -81,9 +81,11 @@ export function createDefaults(today: Date = new Date()): Inputs {
       co2Path: '2026:55, 2027:65, 2028:80, 2030:110, 2035:160, 2040:200, 2045:220',
       gasCo2Factor: 0.201,
       oilCo2Factor: 0.266,
+      gridCo2Path: '2025:344, 2030:250, 2035:150, 2040:80, 2045:30',
       bioEnabled: true,
       bioSteps: '2029:10, 2030:15, 2035:30, 2040:60',
       bioPremiumCt: 3,
+      currentBioShare: 0,
       cookingElecFactor: 0.55,
     },
     heatPump: {
@@ -107,6 +109,7 @@ export function createDefaults(today: Date = new Date()): Inputs {
       existing14aOnHousehold: false,
       pvShare: 0,
       feedInCt: 7.7,
+      greenElectricity: false,
     },
     financing: {
       kfwEquity: 10000,

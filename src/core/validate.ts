@@ -42,6 +42,7 @@ export const NUMBER_LIMITS: Record<string, [number, number]> = {
   'heatPump.leadMonths': [0, 120],
   'heatPump.elecIncrease': [-0.5, 1],
   'heatPump.pvShare': [0, 1],
+  'prices.currentBioShare': [0, 1],
   'financing.kfwRate358': [-0.1, 1],
   'financing.kfwRate359': [-0.1, 1],
   'financing.kfwTermYears': [1, 50],

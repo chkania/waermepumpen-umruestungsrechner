@@ -56,6 +56,12 @@ export interface PriceModel {
   /** Bio surcharge (Bio-Mehrkosten) ct/kWh for newly installed fossil boilers. */
   bioSurchargeCt(year: number): number;
   bioShare(year: number): number;
+  /** CO2 emission factor (kg/kWh) of a fuel; the bio share (Bio-Anteil) counts as climate-neutral like in the BEHG (F25). */
+  fuelCo2Kg(fuel: Fuel): number;
+  /** CO2 emission factor (kg/kWh) of grid electricity (Strommix) in calendar year `year`; 0 with a green tariff (Ökostromtarif) (F25). */
+  gridCo2Kg(year: number): number;
+  /** Bio share (Bio-Anteil) bought today (0–1), climate-neutral in the CO2 balance (F25.4). */
+  currentBioShare: number;
   /** Electricity price ct/kWh for the heat pump (heat pump tariff (Wärmepumpentarif) or household electricity (Haushaltsstrom)) in month `month`. */
   elecCt(month: number): number;
   /** Household electricity (Haushaltsstrom) price ct/kWh in month `month` (e.g. induction cooking). */
@@ -70,10 +76,12 @@ export function createPriceModel(inp: Inputs): PriceModel {
   const startMonth = parseMonth(inp.general.startMonth);
   const startYear = yearOf(startMonth);
   const co2 = parsePath(inp.prices.co2Path);
+  const grid = parsePath(inp.prices.gridCo2Path);
   const bio = parsePath(inp.prices.bioSteps);
   const vat = inp.general.vat;
   const p = inp.prices;
   const hp = inp.heatPump;
+  const currentBio = Math.min(1, Math.max(0, p.currentBioShare));
 
   const co2Price = (year: number) => interpolate(co2, year);
   const factor = (fuel: Fuel) => (fuel === 'gas' ? p.gasCo2Factor : p.oilCo2Factor);
@@ -92,6 +100,9 @@ export function createPriceModel(inp: Inputs): PriceModel {
     startMonth,
     co2Price,
     co2SurchargeCt,
+    fuelCo2Kg: factor,
+    gridCo2Kg: (year) => (hp.greenElectricity ? 0 : Math.max(0, interpolate(grid, year)) / 1000),
+    currentBioShare: currentBio,
     fuelCt(fuel, month) {
       const base = fuel === 'gas' ? gasBase0 * g(p.gasIncrease, month) : oilBase0 * g(p.oilIncrease, month);
       return base + co2SurchargeCt(fuel, yearOf(month));
@@ -100,7 +111,8 @@ export function createPriceModel(inp: Inputs): PriceModel {
       return p.bioEnabled ? stepValue(bio, year) / 100 : 0;
     },
     bioSurchargeCt(year) {
-      return p.bioEnabled ? (stepValue(bio, year) / 100) * p.bioPremiumCt : 0;
+      // A bio share (Bio-Anteil) already bought today is included in the entered price; only the missing part costs extra
+      return p.bioEnabled ? Math.max(0, stepValue(bio, year) / 100 - currentBio) * p.bioPremiumCt : 0;
     },
     elecCt(month) {
       const base = hp.separateTariff ? hp.elecPriceCt : hp.householdPriceCt;

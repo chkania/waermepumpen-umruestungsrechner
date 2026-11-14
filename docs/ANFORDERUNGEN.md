@@ -169,6 +169,12 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 
 ### F24 – Alle Eingabeabschnitte auf-/zuklappen
 - F24.1 Über den Eingabeabschnitten der linken Spalte stehen „Alle aufklappen“ und „Alle zuklappen“; sie öffnen bzw. schließen alle Abschnitte (auch die Experten-Abschnitte). Die Leiste bleibt beim Scrollen der Spalte sichtbar. Der Zustand wird nicht gespeichert, beim Laden gilt wie bisher die Voreinstellung je Abschnitt. *(Test: ui, help)*
+
+### F25 – CO₂-Bilanz
+- F25.1 Kennzahl „CO₂-Einsparung“ (bzw. „CO₂-Mehrausstoß“): Tonnen CO₂ im Betrachtungszeitraum ohne Wärmepumpe minus mit Wärmepumpe (bester Weg), mit beiden Summen in der Unterzeile. *(Test: ui, simulation)*
+- F25.2 Monatliche Emissionen für Heizung, Warmwasser und Kochen (`MonthRow.co2Kg`, Summe `ScenarioResult.co2Tons`): fossil = Brennstoff-kWh × Emissionsfaktor (`gasCo2Factor`/`oilCo2Factor`), Bio-Anteil eines neuen Kessels klimaneutral (wie im BEHG); Wärmepumpe = Netzstrom (ohne PV-Eigenanteil) × CO₂-Faktor Strommix des Kalenderjahres; Kochen nach dem Umstieg mit Gas bzw. Induktion am Haushaltszähler (Strommix). Direkte Emissionen ohne Vorketten und Herstellung. *(Test: simulation)*
+- F25.3 Eingabe „CO₂-Faktor Strommix“ (`prices.gridCo2Path`, `Jahr:g/kWh`, linear interpoliert, konstant außerhalb der Stützstellen, negative Werte → 0). Default: 2025 344 g/kWh (Umweltbundesamt, Schätzung März 2026), danach Annahme 2030 250, 2035 150, 2040 80, 2045 30 g/kWh. Rechenergebnisse in Euro unverändert. *(Test: simulation)*
+- F25.4 Eingaben „Ökostromtarif“ (`heatPump.greenElectricity`, Default nein): Netzstrom in der CO₂-Bilanz mit 0 g/kWh (marktbezogen); „Bio-Anteil im heutigen Tarif“ (`prices.currentBioShare`, 0–100 %, Default 0): klimaneutral für Altanlage, Kochen mit Gas und neuen Kessel (dort mindestens der Anteil der Bio-Treppe). Kosten: der heutige Anteil steckt im eingegebenen Preis, beim neuen Kessel kostet nur der darüber hinaus nötige Bio-Anteil den Mehrpreis; Feldhilfe, Handbuch und ein Hinweis unter „Wichtige Ereignisse & Hinweise“ (Warnung, nur bei Bio-Anteil > 0) weisen darauf hin, dass dafür der Preis genau dieses Tarifs eingetragen sein muss. Mit den Defaults Ergebnisse unverändert. *(Test: simulation, events)*
 ### F9 – Persistenz
 - F9.1 Eingaben werden automatisch im localStorage gespeichert und beim Laden wiederhergestellt. *(Test: serialize)*
 - F9.2 „Link mit Werten teilen" (bis 1.4: „Link teilen"): Eingaben (nur Abweichungen von den Defaults) als Base64url-JSON im URL-Hash `#s=…`; ein Link hat Vorrang vor localStorage. *(Test: serialize)*
@@ -256,3 +262,5 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 | 2026-11-14 | F23 Logo (Haus mit Umstiegskurve) in der Kopfzeile, als Favicon und als Dateien für Präsentationen; ersetzt die Marke „~wp“. |
 | 2026-11-14 | F24 Schaltflächen „Alle aufklappen“ / „Alle zuklappen“ für die Eingabeabschnitte. |
 | 2026-11-14 | N9 Changelog: Änderungen aus einem Squash-Merge mit mehreren Änderungen werden einzeln aufgeführt, nicht zusammengefasst. |
+| 2026-11-14 | F25 CO₂-Bilanz: Kennzahl „CO₂-Einsparung“ und Eingabe „CO₂-Faktor Strommix“. Kostenergebnisse und Regressions-Snapshots unverändert. |
+| 2026-11-14 | F25.4 CO₂-Bilanz berücksichtigt Ökostromtarif und heute schon bezogenen Bio-Anteil; Bio-Mehrpreis eines neuen Kessels nur für den zusätzlich nötigen Anteil. Defaults und Regressions-Snapshots unverändert. |

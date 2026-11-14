@@ -445,12 +445,15 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
         : install !== null && be > install
           ? `${fmtMonth(be)} <small>(${fmtDuration(be - install)} nach Inbetriebnahme)</small>`
           : fmtMonth(be);
+    // CO2 balance (F25): heating and cooking, heat pump with the electricity mix (Strommix)
+    const co2Saved = run.ref.co2Tons - best.co2Tons;
     $<HTMLElement>('#kpis').innerHTML = `
       ${kpi('Ohne Wärmepumpe', fmtEur(run.ref.totalCost), 'ref', 'Gesamtkosten im Zeitraum')}
       ${kpi('WP + KfW-Zuschuss', fmtEur(run.kfw.totalCost), 'kfw', `Zuschuss ${fmtEur(run.kfw.kfw?.subsidy ?? 0)}`, run.best === 'kfw')}
       ${kpi('WP + Steuerbonus', run.tax.feasible ? fmtEur(run.tax.totalCost) : 'nicht möglich', 'tax', run.tax.feasible ? `Steuerbonus ${fmtEur(run.tax.tax?.total ?? 0)}` : (run.tax.tax?.notes[0] ?? ''), run.best === 'tax')}
       ${kpi(saving >= 0 ? 'Ersparnis mit WP' : 'Mehrkosten mit WP', fmtEur(Math.abs(saving)), saving >= 0 ? 'good' : 'bad', `bester Weg: ${run.best === 'tax' ? 'Steuerbonus' : 'KfW'}`)}
       ${kpi('Amortisation', beText, 'neutral', 'kumulierte Kosten dauerhaft unter Referenz')}
+      ${kpi(co2Saved >= 0 ? 'CO₂-Einsparung' : 'CO₂-Mehrausstoß', `${fmtTons(Math.abs(co2Saved))} t`, co2Saved >= 0 ? 'good' : 'bad', `im Zeitraum: ohne WP ${fmtTons(run.ref.co2Tons)} t, mit WP ${fmtTons(best.co2Tons)} t`)}
     `;
     $<HTMLElement>('#horizon-note').textContent =
       `Betrachtung ${fmtMonth(run.ref.months[0].month)} – ${fmtMonth(run.ref.months[run.ref.months.length - 1].month)}, ` +
@@ -905,6 +908,11 @@ const SCENARIO_LABEL = { all: 'beide WP-Wege', ref: 'ohne WP', kfw: 'KfW-Weg', t
 
 function scenarioChip(e: KeyEvent): string {
   return `<span class="chip chip-${e.scenario}">${SCENARIO_LABEL[e.scenario]}</span>`;
+}
+
+/** Tonnes with one decimal place, German format. */
+function fmtTons(t: number): string {
+  return t.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 }
 
 function kpi(label: string, value: string, tone: string, sub: string, best = false): string {

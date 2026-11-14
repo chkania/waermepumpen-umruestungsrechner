@@ -195,6 +195,18 @@ describe('UI (Smoke-Test)', () => {
     expect(root.querySelector('#tariff')!.textContent).toMatch(/§ 14a schon für andere Einrichtung genutzt/);
   });
 
+  it('F25 Kennzahl CO₂-Einsparung mit beiden Summen', () => {
+    const { root, app } = mount();
+    const r = app.lastResult()!.run;
+    const best = r.best === 'tax' ? r.tax : r.kfw;
+    const text = root.querySelector('#kpis')!.textContent!.replace(/\s+/g, ' ');
+    expect(r.ref.co2Tons).toBeGreaterThan(best.co2Tons);
+    expect(text).toContain('CO₂-Einsparung');
+    const t = (x: number) => x.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    expect(text).toContain(`${t(r.ref.co2Tons - best.co2Tons)} t`);
+    expect(text).toContain(`ohne WP ${t(r.ref.co2Tons)} t, mit WP ${t(best.co2Tons)} t`);
+  });
+
   it('F24 alle Eingabeabschnitte auf- und zuklappen', () => {
     const { root } = mount();
     const sections = [...root.querySelectorAll<HTMLDetailsElement>('#inputs details.section')];

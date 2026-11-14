@@ -20,6 +20,21 @@ function userCase(mut?: (i: Inputs) => void): Inputs {
 const ev = (i: Inputs) => keyEvents(i, runAll(i));
 const find = (list: KeyEvent[], re: RegExp) => list.find((e) => re.test(e.title));
 
+describe('F25.4 Hinweis Bio-Anteil im heutigen Tarif', () => {
+  it('nur mit Bio-Anteil; nennt Brennstoff und Preisfeld', () => {
+    expect(find(ev(userCase()).hints, /im heutigen Tarif/)).toBeUndefined();
+    const gas = find(ev(userCase((i) => (i.prices.currentBioShare = 0.4))).hints, /im heutigen Tarif/)!;
+    expect(gas.title).toBe('40 % Biogas im heutigen Tarif: Gaspreis dieses Tarifs eintragen');
+    expect(gas.level).toBe('warning');
+    expect(gas.detail).toMatch(/Ersparnis der Wärmepumpe fällt zu niedrig aus/);
+    const oil = find(ev(userCase((i) => {
+      i.oldHeating.fuel = 'oil';
+      i.prices.currentBioShare = 0.1;
+    })).hints, /im heutigen Tarif/)!;
+    expect(oil.title).toBe('10 % Bioöl im heutigen Tarif: Heizölpreis dieses Tarifs eintragen');
+  });
+});
+
 describe('F10 Wichtige Ereignisse', () => {
   it('F10.1 Kauf des Ersatzkessels im Referenzszenario mit Betrag', () => {
     const { timeline } = ev(userCase());

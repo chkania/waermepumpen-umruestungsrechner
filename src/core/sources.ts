@@ -103,6 +103,13 @@ export const DEFAULT_SOURCES: Record<string, DefaultSource> = {
     kind: 'technik',
     text: 'Emissionsfaktor Erdgas 0,201 kg CO₂/kWh (bezogen auf den Heizwert), wie in den CO₂-Faktoren des BAFA bzw. im Brennstoffemissionshandel verwendet.',
   },
+  'prices.gridCo2Path': {
+    kind: 'quelle',
+    text: 'Umweltbundesamt: 2025 wurden je verbrauchter Kilowattstunde Strom bei der Erzeugung durchschnittlich 344 g CO₂ ausgestoßen (Schätzung; 2024: 353 g, 2023: 379 g). Der weitere Pfad ist eine Modellannahme: Er sinkt mit dem Ausbau der erneuerbaren Energien (Ziel 80 % am Bruttostromverbrauch 2030, Klimaneutralität 2045), langsamer als die Ziele vorgeben. Mit „Ökostromtarif“ zählt der Netzstrom mit 0 g/kWh; selbst erzeugter PV-Strom wird über den PV-Eigenanteil als CO₂-frei gerechnet.',
+    url: 'https://www.umweltbundesamt.de/themen/co2-emissionen-pro-kilowattstunde-strom-2025-nur',
+    asOf: 'März 2026',
+  },
+  'prices.currentBioShare': { kind: 'beispiel', text: 'Standard 0 % (reines Erdgas bzw. Heizöl). Biogas-Tarife enthalten oft 5–20 % Biomethan, einige 100 %. Der Anteil steht in der Tarifbeschreibung bzw. auf der Rechnung. In der CO₂-Bilanz gilt er wie im Brennstoffemissionshandel als klimaneutral. Bei einem neuen Kessel zählt mindestens der Anteil der Bio-Treppe; den dafür nötigen Aufpreis rechnet der Rechner nur für den Teil, der über den heutigen Anteil hinausgeht.' },
   'prices.oilCo2Factor': { kind: 'technik', text: 'Emissionsfaktor Heizöl 0,266 kg CO₂/kWh (bezogen auf den Heizwert), wie in den CO₂-Faktoren des BAFA verwendet.' },
   'prices.oilKwhPerLiter': { kind: 'technik', text: 'Heizwert von Heizöl EL: rund 10 kWh je Liter.' },
   'prices.cookingElecFactor': { kind: 'technik', text: 'Ein Gasherd nutzt etwa 40–55 % der Energie für das Kochgut, ein Induktionskochfeld etwa 80–90 %. Je kWh Gas braucht Induktion daher grob 0,5–0,6 kWh Strom (Schätzung).' },
@@ -136,6 +143,7 @@ export const DEFAULT_SOURCES: Record<string, DefaultSource> = {
     url: 'https://www.vattenfall.de/steuerbare-verbrauchseinrichtungen-14a-enwg',
   },
   'heatPump.existing14aOnHousehold': { kind: 'quelle', text: 'Bundesnetzagentur: Die pauschale Netzentgeltreduzierung (Modul 1) wird je Marktlokation gewährt, über die der Verbrauch der steuerbaren Verbrauchseinrichtung abgerechnet wird. Sie bleibt gleich hoch, auch wenn dort mehrere steuerbare Verbrauchseinrichtungen (Wärmepumpe, Wallbox, Klimaanlage, Batteriespeicher) betrieben werden. Mit eigenem WP-Zähler (eigene Marktlokation) gibt es die Pauschale dort zusätzlich. Standard: nein.', url: 'https://www.bundesnetzagentur.de/DE/Vportal/Energie/SteuerbareVBE/Netzentgelt_table.html', asOf: ASOF },
+  'heatPump.greenElectricity': { kind: 'beispiel', text: 'Standard: kein Ökostromtarif. Mit Ökostromtarif wird der Netzstrom in der CO₂-Bilanz mit 0 g CO₂/kWh gerechnet (marktbezogene Bilanzierung über Herkunftsnachweise, wie sie Energieversorger ausweisen). Ortsbezogen gerechnet ändert ein Ökostromtarif den deutschen Strommix nicht – dann das Häkchen weglassen.' },
   'heatPump.pvShare': { kind: 'beispiel', text: 'Standard 0 % (keine PV-Anlage). Mit PV im Winter typischerweise nur ein kleiner Anteil des WP-Stroms.' },
   'heatPump.feedInCt': {
     kind: 'gesetz',

@@ -76,10 +76,14 @@ export interface PriceInputs {
   co2Path: string;
   gasCo2Factor: number;
   oilCo2Factor: number;
+  /** CO2 emission factor of the German electricity mix (Strommix) "year:g/kWh, …" (F25). */
+  gridCo2Path: string;
   bioEnabled: boolean;
   /** Bio step-up (Bio-Treppe) "year:share%, …". */
   bioSteps: string;
   bioPremiumCt: number;
+  /** Share of biogas/bio oil (Biogas/Bioöl) bought today (0–1, e.g. biogas tariff); counts as climate-neutral (F25.4). */
+  currentBioShare: number;
   /** Electricity needed for cooking per kWh of gas (induction instead of gas cooker (Gasherd)). */
   cookingElecFactor: number;
 }
@@ -109,6 +113,8 @@ export interface HeatPumpInputs {
   existing14aOnHousehold: boolean;
   pvShare: number;
   feedInCt: number;
+  /** Grid electricity from a green tariff (Ökostromtarif): counted with 0 g CO2/kWh in the CO2 balance (F25.4). */
+  greenElectricity: boolean;
 }
 
 export interface FinancingInputs {
@@ -243,6 +249,8 @@ export interface MonthRow extends CostBreakdown {
   cookingCost: number;
   /** 'old' | 'new' (replacement boiler (Ersatzkessel)) | 'wp' */
   system: 'old' | 'new' | 'wp';
+  /** CO2 emissions of heating and cooking in kg (F25). */
+  co2Kg: number;
 }
 
 export interface YearRow extends CostBreakdown {
@@ -331,6 +339,8 @@ export interface ScenarioResult {
   /** Cumulative costs at each month end (incl. opportunity interest (Opportunitätszins)). */
   cumulative: number[];
   totalCost: number;
+  /** CO2 emissions of heating and cooking over the period in tonnes (F25). */
+  co2Tons: number;
   /** Total without interest. */
   nominalCost: number;
   warnings: string[];

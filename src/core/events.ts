@@ -174,9 +174,34 @@ export function keyEvents(inp: Inputs, run: RunResult): KeyEvents {
     if (cook) hints.push(cook);
     hints.push(...fundingHints(inp, run, start));
   }
+  const bio = bioTariffHint(inp);
+  if (bio) hints.push(bio);
 
   timeline.sort((a, b) => a.month! - b.month! || order(a) - order(b));
   return { hints, timeline };
+}
+
+/**
+ * Bio share (Bio-Anteil) bought today (F25.4): the entered fuel price must be the price of that tariff,
+ * because the bio premium (Bio-Mehrpreis) is not charged again for a replacement boiler (Ersatzkessel).
+ */
+function bioTariffHint(inp: Inputs): KeyEvent | null {
+  const share = inp.prices.currentBioShare;
+  if (!(share > 0)) return null;
+  const gas = inp.oldHeating.fuel === 'gas';
+  const fuel = gas ? 'Biogas' : 'Bioöl';
+  const price = gas ? 'Gaspreis' : 'Heizölpreis';
+  return {
+    month: null,
+    scenario: 'ref',
+    level: 'warning',
+    title: `${pct(share)} ${fuel} im heutigen Tarif: ${price} dieses Tarifs eintragen`,
+    detail:
+      `Der Rechner nimmt an, dass der Bio-Aufpreis im eingetragenen ${price} steckt, und rechnet ihn bei einem neuen Kessel ` +
+      `(Bio-Treppe) nicht noch einmal. Steht dort der Preis von reinem ${gas ? 'Erdgas' : 'Heizöl'}, wird der Weiterbetrieb ` +
+      `ohne Wärmepumpe zu günstig gerechnet und die Ersparnis der Wärmepumpe fällt zu niedrig aus. ` +
+      `In der CO₂-Bilanz zählt der Bio-Anteil als klimaneutral.`,
+  };
 }
 
 function order(e: KeyEvent): number {
