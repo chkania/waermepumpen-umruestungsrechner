@@ -195,6 +195,29 @@ describe('UI (Smoke-Test)', () => {
     expect(root.querySelector('#tariff')!.textContent).toMatch(/§ 14a schon für andere Einrichtung genutzt/);
   });
 
+  it('F26 JAZ-Schätzung unter dem Feld, folgt den Heizflächen, Übernehmen setzt die Mitte', () => {
+    const { root, app } = mount();
+    const box = () => root.querySelector('#jaz-estimate')!.textContent!.replace(/\s+/g, ' ');
+    expect(box()).toContain('JAZ 2,9–3,5');
+    expect(box()).toContain('Vorlauf ca. 50 °C');
+    const emitter = root.querySelector<HTMLSelectElement>('[data-path="heatPump.emitter"]')!;
+    emitter.value = 'floor';
+    emitter.dispatchEvent(new Event('change', { bubbles: true }));
+    app.recalc();
+    expect(box()).toContain('JAZ 3,6–4,2');
+    expect(box()).toContain('liegt unter der Schätzung');
+    root.querySelector<HTMLButtonElement>('[data-jaz-apply]')!.click();
+    expect(app.getInputs().heatPump.jaz).toBe(3.9);
+    expect(root.querySelector<HTMLInputElement>('[data-path="heatPump.jaz"]')!.value).toBe('3.9');
+    expect(root.querySelector('[data-jaz-apply]')!.getAttribute('aria-pressed')).toBe('true');
+    // optimistic value → warning below the field
+    const jaz = root.querySelector<HTMLInputElement>('[data-path="heatPump.jaz"]')!;
+    jaz.value = '5';
+    jaz.dispatchEvent(new Event('change', { bubbles: true }));
+    app.recalc();
+    expect(box()).toContain('Achtung: Ihr Wert 5,0 liegt über der Schätzung');
+  });
+
   it('F25 Kennzahl CO₂-Einsparung mit beiden Summen', () => {
     const { root, app } = mount();
     const r = app.lastResult()!.run;

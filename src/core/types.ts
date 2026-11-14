@@ -2,6 +2,10 @@ import type { ExtraResult } from './loan';
 
 /** Fuel of the existing heating (Bestandsheizung). */
 export type Fuel = 'gas' | 'oil';
+/** Heat emitters (Heizflächen) of the house (F26). */
+export type HeatEmitter = 'floor' | 'largeRadiators' | 'radiators';
+/** Heat source (Wärmequelle) of the heat pump (F26). */
+export type HeatSource = 'air' | 'ground';
 
 /** Months are entered as ISO string "YYYY-MM" and handled internally as absolute month index (year*12 + month-1). */
 export type MonthString = string;
@@ -93,6 +97,10 @@ export interface HeatPumpInputs {
   eligibleShare: number;
   extraCost: number;
   jaz: number;
+  /** Heat source (Wärmequelle): outside air or ground (Erdwärme) – basis of the SPF (JAZ) estimate (F26). */
+  source: HeatSource;
+  /** Heat emitters (Heizflächen) – basis of the SPF (JAZ) estimate (F26). */
+  emitter: HeatEmitter;
   maintenance: number;
   lifeYears: number;
   installMonth: MonthString;

@@ -79,6 +79,8 @@ const MONTH_YEARS: [number, number] = [2000, 2150];
 export const SELECT_VALUES: Record<string, readonly string[]> = {
   'oldHeating.fuel': ['gas', 'oil'],
   'oldHeating.cookingAfter': ['electric', 'gas'],
+  'heatPump.source': ['air', 'ground'],
+  'heatPump.emitter': ['floor', 'largeRadiators', 'radiators'],
   'building.renovationScope': ['partial', 'full'],
   'financing.windfallTarget': ['auto', 'kfw', 'bank'],
 };

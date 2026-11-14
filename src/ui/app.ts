@@ -8,6 +8,7 @@ import { DEFAULT_SOURCES, OFFICIAL_REFS, SOURCE_KIND_LABEL } from '../core/sourc
 import { priceRows, runAll, type RunResult } from '../core/simulation';
 import { tariffComparison } from '../core/tariff';
 import { EFFICIENCY_CLASSES, rateHouse } from '../core/house';
+import { estimateJaz } from '../core/jaz';
 import { energySplit } from '../core/prices';
 import { decodeHash, encodeHash, exportFileName, exportJson, importJson, mergeInputs } from '../core/serialize';
 import type { Inputs, ScenarioKind, ScenarioResult } from '../core/types';
@@ -251,6 +252,15 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     if (e.key === 'Escape') closePopovers();
   });
 
+  // Apply the SPF (JAZ) estimate (F26): sets the field like a user input
+  form.addEventListener('click', (e) => {
+    if (!(e.target as HTMLElement).closest('[data-jaz-apply]')) return;
+    inputs.heatPump.jaz = estimateJaz(inputs).mid;
+    writeForm();
+    persist();
+    recalc();
+  });
+
   form.addEventListener('input', (e) => {
     const el = e.target as HTMLInputElement;
     if (el.dataset.path) readField(el);
@@ -414,6 +424,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     renderWarnings(run);
     renderEvents(events);
     renderHouse();
+    renderJazEstimate();
     renderDetails(run);
     renderTariff();
     renderInstallTable(cmp);
@@ -499,6 +510,29 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       <h2>Wichtige Ereignisse &amp; Hinweise</h2>
       ${hints ? `<div class="hints">${hints}</div>` : ''}
       ${items ? `<ol class="timeline">${items}</ol>` : ''}`;
+  }
+
+  /** SPF (JAZ) estimate below the SPF field with explanation and "apply" button (F26). */
+  function renderJazEstimate(): void {
+    const box = root.querySelector<HTMLElement>('#jaz-estimate');
+    if (!box) return;
+    const e = estimateJaz(inputs);
+    const d1 = (x: number) => fmtNum(x, 1);
+    const jaz = inputs.heatPump.jaz;
+    const fit =
+      jaz > e.high + 1e-9
+        ? `<p class="jaz-fit is-high">Achtung: Ihr Wert ${d1(jaz)} liegt über der Schätzung – nur übernehmen, wenn der Fachbetrieb ihn bestätigt.</p>`
+        : jaz < e.low - 1e-9
+          ? `<p class="jaz-fit">Ihr Wert ${d1(jaz)} liegt unter der Schätzung (vorsichtig gerechnet).</p>`
+          : '';
+    box.innerHTML = `
+      <div class="jaz-head"><span>Schätzung für Ihr Haus: <strong>JAZ ${d1(e.low)}–${d1(e.high)}</strong> (Mitte ${d1(e.mid)}, Vorlauf ca. ${e.supplyTemp} °C)</span>
+        <button type="button" data-jaz-apply${Math.abs(jaz - e.mid) < 1e-9 ? ' aria-pressed="true"' : ''}>${Math.abs(jaz - e.mid) < 1e-9 ? 'Übernommen' : `${d1(e.mid)} übernehmen`}</button></div>
+      ${fit}
+      <details class="jaz-why"><summary>Wie wird geschätzt?</summary>
+        <ol>${e.steps.map((s) => `<li>${escapeHtml(s)}</li>`).join('')}</ol>
+        <p>Grobe Orientierung. Die tatsächliche JAZ hängt von Auslegung, Einstellung (Heizkurve), Warmwasseranteil und Witterung ab. Selbsttest: An einem kalten Tag den Kessel auf 55 °C Vorlauf stellen – wird es in allen Räumen warm, reichen die Heizkörper für eine Wärmepumpe.</p>
+      </details>`;
   }
 
   /** Rating of the house (F18). */
@@ -1048,10 +1082,12 @@ function sectionsToggleHtml(): string {
 }
 
 function sectionHtml(s: (typeof SECTIONS)[number], defaults: Inputs): string {
+  // SPF (JAZ) estimate (F26) directly below the SPF field
+  const after = (f: Field) => (f.path === 'heatPump.jaz' ? '<div id="jaz-estimate" class="jaz-estimate" aria-live="polite"></div>' : '');
   return `<details class="section${s.expert ? ' expert' : ''}" ${s.open ? 'open' : ''}>
     <summary>${escapeHtml(s.title)}</summary>
     ${s.note ? `<p class="note">${escapeHtml(s.note)}</p>` : ''}
-    <div class="fields">${s.fields.map((f) => fieldHtml(f, defaults)).join('')}</div>
+    <div class="fields">${s.fields.map((f) => fieldHtml(f, defaults) + after(f)).join('')}</div>
   </details>`;
 }
 

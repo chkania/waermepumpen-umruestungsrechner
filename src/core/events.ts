@@ -1,6 +1,7 @@
 import { formatMonthDe, halfYearSteps, parseMonth, tryParseMonth, yearOf } from './dates';
 import { cap1At, incomeBonusRate, kfwLoanVariant, kgbRateAt } from './funding';
 import { annualHeatDemand, createPriceModel, energySplit, parsePath } from './prices';
+import { estimateJaz } from './jaz';
 import { runAll, type RunResult } from './simulation';
 import type { Inputs, ScenarioResult } from './types';
 
@@ -174,11 +175,31 @@ export function keyEvents(inp: Inputs, run: RunResult): KeyEvents {
     if (cook) hints.push(cook);
     hints.push(...fundingHints(inp, run, start));
   }
+  const jazHint = jazAboveEstimateHint(inp);
+  if (install !== null && jazHint) hints.push(jazHint);
   const bio = bioTariffHint(inp);
   if (bio) hints.push(bio);
 
   timeline.sort((a, b) => a.month! - b.month! || order(a) - order(b));
   return { hints, timeline };
+}
+
+/** Entered SPF (JAZ) above the estimate for the house (F26): savings are probably overestimated. */
+function jazAboveEstimateHint(inp: Inputs): KeyEvent | null {
+  const e = estimateJaz(inp);
+  const jaz = inp.heatPump.jaz;
+  if (!(jaz > e.high + 1e-9)) return null;
+  const d1 = (x: number) => x.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  return {
+    month: null,
+    scenario: 'all',
+    level: 'warning',
+    title: `JAZ ${d1(jaz)} liegt über der Schätzung für Ihr Haus (${d1(e.low)}–${d1(e.high)})`,
+    detail:
+      `Mit den angegebenen Heizflächen und dem Wärmebedarf ist an kalten Tagen ein Vorlauf von ca. ${e.supplyTemp} °C zu erwarten. ` +
+      `Eine zu hohe JAZ unterschätzt die Stromkosten und überschätzt Ersparnis und CO₂-Einsparung. ` +
+      `Den Wert nur so ansetzen, wenn der Fachbetrieb ihn für Ihr Haus bestätigt.`,
+  };
 }
 
 /**

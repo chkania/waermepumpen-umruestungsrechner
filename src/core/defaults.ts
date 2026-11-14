@@ -93,6 +93,8 @@ export function createDefaults(today: Date = new Date()): Inputs {
       eligibleShare: 1,
       extraCost: 0,
       jaz: 3.3,
+      source: 'air',
+      emitter: 'radiators',
       maintenance: 150,
       lifeYears: 20,
       installMonth: formatMonth(parseMonth(start) + 6),

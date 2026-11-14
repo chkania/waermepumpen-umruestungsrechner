@@ -133,7 +133,9 @@ Beschreibt das Szenario; beide Felder ändern die Rechnung nicht.
 | **Investition gesamt (brutto)** | Angebotspreis inkl. Installation und Umfeldmaßnahmen (Heizkörper, Elektrik, Rückbau Altanlage). |
 | **davon förderfähig** | Anteil, den die KfW anerkennt. Rückbau und Entsorgung der Altanlage inkl. Öl-/Gastank sind förderfähig. |
 | **Nicht förderfähige Nebenkosten** | Z. B. die Stilllegung des Gasanschlusses durch den Netzbetreiber. |
-| **Jahresarbeitszahl (JAZ)** | Wie viel Wärme die Wärmepumpe aus 1 kWh Strom erzeugt. Luft/Wasser im Bestand typisch 3,0–3,5. |
+| **Wärmequelle** | Luft (Luft/Wasser-Wärmepumpe, am häufigsten) oder Erdwärme (Sole/Wasser). Für die Schätzung der JAZ. |
+| **Heizflächen im Haus** | Normale Heizkörper, große (Niedertemperatur-)Heizkörper oder Fußbodenheizung. Bei gemischten Heizflächen die überwiegende Art wählen; oft bestimmen einzelne zu kleine Heizkörper die nötige Vorlauftemperatur. |
+| **Jahresarbeitszahl (JAZ)** | Wie viel Wärme die Wärmepumpe aus 1 kWh Strom erzeugt – der wichtigste Wert für die Stromkosten. Unter dem Feld steht eine **Schätzung für Ihr Haus** mit Spanne und Erklärung („Wie wird geschätzt?“); mit **„… übernehmen“** setzen Sie die Mitte der Spanne ein. Ein Wert aus dem Angebot oder der Auslegung des Fachbetriebs ist besser. |
 | **Wartung** | Jährliche Wartungskosten der Wärmepumpe. |
 | **Lebensdauer** | Für den Restwert am Ende des Betrachtungszeitraums. Ist der Betrachtungszeitraum länger, rechnet der Rechner danach eine Ersatz-Wärmepumpe ohne Förderung ein. |
 | **Wärmepumpe mit Ursprung in der EU** | Ab dem 1. Quartal 2027 gibt es den vollen Fördersatz (15 % Grundförderung + 15 % Wertschöpfungs-Bonus) nur für Wärmepumpen aus der EU. |
@@ -215,6 +217,16 @@ Es gelten die Kreditbedingungen: Beim KfW-Kredit sind Teil-Sondertilgungen nur i
 | **Restwert am Ende berücksichtigen** | Noch nutzbare Anlagen werden am Ende anteilig gutgeschrieben, damit spät gekaufte Anlagen fair bewertet werden. Ein Ersatzkessel, den die Wärmepumpe schon ersetzt hat, zählt nicht. Zuschüsse oder Steuererstattungen, die erst nach dem Zeitraum fließen, werden im letzten Monat gutgeschrieben. |
 | **Zeitpunktvergleich: Abstand** | Abstand der verglichenen Umrüstzeitpunkte in Monaten. |
 | **Zeitpunktvergleich: Anzahl** | Wie viele Zeitpunkte verglichen werden. |
+
+### Schätzung der Jahresarbeitszahl
+
+Kaum jemand kennt die JAZ seiner künftigen Wärmepumpe. Der Rechner schätzt sie in drei Schritten:
+
+1. **Vorlauftemperatur aus den Heizflächen:** An kalten Tagen braucht eine Fußbodenheizung etwa 35 °C, große Heizkörper etwa 42 °C, normale Heizkörper etwa 50 °C.
+2. **Anpassung an den Wärmebedarf** (Raumwärme je m² aus der Einordnung des Hauses): bis 70 kWh/m² etwa 5 K weniger, 120–170 kWh/m² etwa 5 K mehr, darüber etwa 8 K mehr. Bei Fußbodenheizung nur die Hälfte.
+3. **JAZ aus der Vorlauftemperatur:** Im Feldtest des Fraunhofer ISE erreichten Luft/Wasser-Wärmepumpen im Bestand im Mittel 3,4, Erdwärmepumpen 4,3. Je 10 K weniger Vorlauf steigt die JAZ um etwa 0,45. Die Spanne reicht 0,3 um die Mitte.
+
+Liegt die eingetragene JAZ über der Spanne, erscheint unter „Wichtige Ereignisse & Hinweise“ eine Warnung: Ersparnis und CO₂-Einsparung werden dann wahrscheinlich überschätzt. Die Schätzung ist eine grobe Orientierung und ersetzt nicht die Auslegung durch den Fachbetrieb. Ein einfacher Selbsttest: an einem kalten Tag den Kessel auf 55 °C Vorlauf stellen – wird es in allen Räumen warm, reichen die Heizkörper für eine Wärmepumpe.
 
 ### Experten-Abschnitte
 

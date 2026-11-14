@@ -148,7 +148,27 @@ export const SECTIONS: Section[] = [
       { path: 'heatPump.investment', label: 'Investition gesamt (brutto)', type: 'number', unit: '€', step: 500, min: 0, help: 'Gerät, Installation, Umfeldmaßnahmen (z. B. Heizkörper, Elektrik).' },
       { path: 'heatPump.eligibleShare', label: 'davon förderfähig', type: 'percent', unit: '%', step: 5, min: 0, max: 100 },
       { path: 'heatPump.extraCost', label: 'Nicht förderfähige Nebenkosten', type: 'number', unit: '€', step: 100, min: 0, help: 'z. B. Stilllegung des Gasanschlusses. Rückbau und Entsorgung der Altanlage inkl. Öl-/Gastank sind förderfähig.' },
-      { path: 'heatPump.jaz', label: 'Jahresarbeitszahl (JAZ)', type: 'number', step: 0.1, min: 1, help: 'Luft/Wasser typ. 3,0–4,0; Sole/Wasser 4,0–4,8.' },
+      {
+        path: 'heatPump.source',
+        label: 'Wärmequelle',
+        type: 'select',
+        options: [
+          ['air', 'Luft (Luft/Wasser-Wärmepumpe)'],
+          ['ground', 'Erdwärme (Sole/Wasser)'],
+        ],
+      },
+      {
+        path: 'heatPump.emitter',
+        label: 'Heizflächen im Haus',
+        type: 'select',
+        options: [
+          ['radiators', 'Normale Heizkörper'],
+          ['largeRadiators', 'Große Heizkörper (Niedertemperatur)'],
+          ['floor', 'Fußbodenheizung'],
+        ],
+        help: 'Für die Schätzung der Jahresarbeitszahl. Gemischt: die überwiegende Art wählen; einzelne zu kleine Heizkörper bestimmen oft die nötige Vorlauftemperatur.',
+      },
+      { path: 'heatPump.jaz', label: 'Jahresarbeitszahl (JAZ)', type: 'number', step: 0.1, min: 1, help: 'Wie viel Wärme die Wärmepumpe je kWh Strom liefert. Unten steht eine Schätzung für Ihr Haus; einen Wert aus dem Angebot oder der Auslegung des Fachbetriebs bevorzugen.' },
       { path: 'heatPump.maintenance', label: 'Wartung', type: 'number', unit: '€/Jahr', step: 10, min: 0 },
       { path: 'heatPump.lifeYears', label: 'Lebensdauer', type: 'number', unit: 'Jahre', step: 1, min: 1 },
       { path: 'heatPump.euOrigin', label: 'Wärmepumpe mit Ursprung in der EU', type: 'checkbox', help: 'Ab dem 1. Quartal 2027: 15 % Grundförderung + 15 % Wertschöpfungs-Bonus nur für Wärmepumpen aus der EU, sonst nur 15 %.' },
