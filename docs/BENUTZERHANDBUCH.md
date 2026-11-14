@@ -17,17 +17,13 @@ Jedes Eingabefeld hat einen kleinen **„i“-Knopf**. Er zeigt den Standardwert
 
 ## Aufbau der Oberfläche
 
-- **Kopfbereich:** Titel und Werkzeugleiste (Design, Hell/Dunkel, Hilfe, Teilen, Export, Import, Zurücksetzen).
+- **Kopfbereich:** Titel und Werkzeugleiste (Hell/Dunkel, Hilfe, Teilen, Export, Import, Zurücksetzen).
 - **Links – Eingaben:** in aufklappbare Abschnitte gegliedert. Ein Klick auf die Überschrift klappt einen Abschnitt auf oder zu. Abschnitte mit „Experten“ enthalten die Förder- und Steuerregeln; sie müssen normalerweise nicht geändert werden.
 - **Rechts – Ergebnisse:** Kennzahlen, wichtige Ereignisse und Hinweise, Diagramme, Förderdetails, Stromtarifvergleich, Vergleich der Umrüstzeitpunkte und Jahresübersicht.
 
 Auf dem Smartphone stehen die Eingaben oben und die Ergebnisse darunter.
 
 ## Werkzeugleiste
-
-### Design: Modern | Klassisch
-
-Schaltet zwischen dem modernen und dem klassischen Erscheinungsbild um. Inhalt und Berechnung sind identisch. Die Wahl wird im Browser gespeichert.
 
 ### Hell | Dunkel | Auto
 
@@ -74,7 +70,7 @@ Lädt eine zuvor exportierte JSON-Datei. Felder, die in der Datei fehlen oder un
 
 ### Zurücksetzen
 
-Setzt nach Rückfrage **alle Eingaben auf die Standardwerte** zurück. Design und Hell/Dunkel bleiben erhalten. Tipp: Vorher exportieren, wenn Sie den Stand behalten möchten.
+Setzt nach Rückfrage **alle Eingaben auf die Standardwerte** zurück. Die Einstellung Hell/Dunkel bleibt erhalten. Tipp: Vorher exportieren, wenn Sie den Stand behalten möchten.
 
 ### Automatisches Speichern
 
@@ -302,8 +298,8 @@ Tabelle je Jahr mit allen Kostenarten (Energie, Grundkosten, Wartung, Investitio
 
 Der Rechner orientiert sich an WCAG 2.1 Stufe AA (Grundlage der EN 301 549):
 
-- vollständig per Tastatur bedienbar, sichtbarer Fokusrahmen in beiden Designs;
-- Textkontrast mindestens 4,5 : 1 in allen vier Kombinationen aus Design und Hell/Dunkel;
+- vollständig per Tastatur bedienbar, sichtbarer Fokusrahmen;
+- Textkontrast mindestens 4,5 : 1 in Hell und Dunkel;
 - ungültige Eingaben werden mit einem Text unter dem Feld erklärt und für Screenreader gekennzeichnet;
 - jedes Diagramm hat eine Textbeschreibung und eine Tabelle mit denselben Werten;
 - Hinweise (z. B. „Link kopiert“) werden von Screenreadern angesagt.

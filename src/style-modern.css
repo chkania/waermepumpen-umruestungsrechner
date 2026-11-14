@@ -2,7 +2,8 @@
  * Modern design (F14), inspired by chkania.net (F14.4):
  * warm off-white, sand surfaces, fine lines, anthracite, muted grey, calm blue;
  * Inter for text, JetBrains Mono (upper case) for labels/metadata; nearly square corners, no gradients.
- * All rules apply only with <html data-design="modern">. The classic design (style.css) stays unchanged.
+ * Layer on top of the base styles (style.css); all rules apply under <html data-design="modern">,
+ * which every page sets statically (the former classic design was removed).
  */
 
 /* ---------- Tokens (colours from chkania.net) ---------- */

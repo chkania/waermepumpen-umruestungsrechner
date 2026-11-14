@@ -1,7 +1,8 @@
 // @vitest-environment happy-dom
+import { readdirSync, readFileSync } from 'node:fs';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { SECTIONS, getPath } from '../src/ui/fields';
-import { DESIGN_KEY, INTRO_KEY, mountApp, STORAGE_KEY, THEME_KEY } from '../src/ui/app';
+import { INTRO_KEY, LEGACY_DESIGN_KEY, mountApp, STORAGE_KEY, THEME_KEY } from '../src/ui/app';
 import { encodeHash } from '../src/core/serialize';
 import { APP_VERSION } from '../src/version';
 import { defaults, TODAY } from './helpers';
@@ -194,22 +195,21 @@ describe('UI (Smoke-Test)', () => {
     expect(root.querySelector('#tariff')!.textContent).toMatch(/§ 14a schon für andere Einrichtung genutzt/);
   });
 
-  it('F14 Design-Umschalter: Default modern, Wechsel setzt Attribut und wird gespeichert', () => {
-    const { root, app } = mount();
-    expect(app.getDesign()).toBe('modern');
+  it('F14 nur modernes Design: kein Umschalter, frühere Wahl „Klassisch“ wird gelöscht', () => {
+    store.setItem(LEGACY_DESIGN_KEY, 'classic');
+    const { root } = mount();
     expect(document.documentElement.dataset.design).toBe('modern');
-    const classic = root.querySelector<HTMLButtonElement>('[data-design-choice="classic"]')!;
-    classic.click();
-    expect(document.documentElement.dataset.design).toBe('classic');
-    expect(classic.getAttribute('aria-pressed')).toBe('true');
-    expect(store.getItem(DESIGN_KEY)).toBe('classic');
-    // Design is a view setting, not part of the inputs
-    expect(JSON.stringify(app.getInputs())).not.toContain('classic');
-    // restored on the next load
-    const again = mount();
-    expect(again.app.getDesign()).toBe('classic');
-    store.setItem(DESIGN_KEY, 'unsinn');
-    expect(mount().app.getDesign()).toBe('modern');
+    expect(root.querySelector('[data-design-choice]')).toBeNull();
+    expect(root.textContent).not.toContain('Klassisch');
+    expect(store.getItem(LEGACY_DESIGN_KEY)).toBeNull();
+  });
+
+  it('F14.2 alle Seiten setzen das moderne Design fest', () => {
+    for (const f of readdirSync(process.cwd()).filter((n) => n.endsWith('.html'))) {
+      const html = readFileSync(`${process.cwd()}/${f}`, 'utf8');
+      expect(html, f).toContain('<html lang="de" data-design="modern">');
+      expect(html, f).not.toContain('wp-investitionsrechner:design');
+    }
   });
 
   it('F14.5 Hell/Dunkel/Auto übersteuert die Browser-Einstellung und wird gespeichert', () => {

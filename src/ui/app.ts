@@ -19,10 +19,8 @@ import { RECOMMEND_SUBJECT, RECOMMEND_TEXT, recommendLinks } from './share';
 import { BUG_REPORT_URL, CONTRIBUTING_URL, FEATURE_REQUEST_URL, REPO_URL } from '../project';
 
 export const STORAGE_KEY = 'wp-investitionsrechner:v1';
-/** Selected design (view setting, not part of the inputs/links). */
-export const DESIGN_KEY = 'wp-investitionsrechner:design';
-export type Design = 'modern' | 'classic';
-export const DEFAULT_DESIGN: Design = 'modern';
+/** Former design choice (modern/classic, F14); only the modern design remains, the stored value is removed. */
+export const LEGACY_DESIGN_KEY = 'wp-investitionsrechner:design';
 /** Light/dark: 'auto' follows the browser/system setting, 'light'/'dark' override it (F14.5). */
 export const THEME_KEY = 'wp-investitionsrechner:theme';
 export type ThemeChoice = 'auto' | 'light' | 'dark';
@@ -41,8 +39,6 @@ export interface AppController {
   setInputs(i: Inputs): void;
   recalc(): void;
   lastResult(): { run: RunResult; cmp: InstallComparison; events: KeyEvents } | null;
-  getDesign(): Design;
-  setDesign(d: Design): void;
   getTheme(): ThemeChoice;
   setTheme(t: ThemeChoice): void;
   /** Opens the introduction dialog (F20). */
@@ -366,19 +362,14 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     b.addEventListener('click', () => controller.setTheme(b.dataset.themeChoice as ThemeChoice)),
   );
 
-  // ---------- Design switch ----------
-  let design: Design = readDesign(storage);
-  const applyDesign = (d: Design) => {
-    design = d;
-    document.documentElement.dataset.design = d;
-    root.querySelectorAll<HTMLButtonElement>('[data-design-choice]').forEach((b) =>
-      b.setAttribute('aria-pressed', String(b.dataset.designChoice === d)),
-    );
-  };
-  applyDesign(design);
-  root.querySelectorAll<HTMLButtonElement>('[data-design-choice]').forEach((b) =>
-    b.addEventListener('click', () => controller.setDesign(b.dataset.designChoice as Design)),
-  );
+  // ---------- Design ----------
+  // Only the modern design (F14); the HTML pages set the attribute before the first paint as well.
+  document.documentElement.dataset.design = 'modern';
+  try {
+    storage?.removeItem(LEGACY_DESIGN_KEY);
+  } catch {
+    /* Speicher nicht verfügbar */
+  }
 
   // ---------- Calculation ----------
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -821,7 +812,6 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     },
     recalc,
     lastResult: () => last,
-    getDesign: () => design,
     getTheme: () => theme,
     setTheme(t) {
       if (t === theme) return;
@@ -834,16 +824,6 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       redrawCharts();
     },
     showIntro,
-    setDesign(d) {
-      if (d === design) return;
-      applyDesign(d);
-      try {
-        storage?.setItem(DESIGN_KEY, d);
-      } catch {
-        /* Speicher nicht verfügbar */
-      }
-      redrawCharts();
-    },
   };
 
   writeForm();
@@ -899,16 +879,6 @@ function readTheme(storage: Storage | null): ThemeChoice {
     /* ignorieren */
   }
   return 'auto';
-}
-
-function readDesign(storage: Storage | null): Design {
-  try {
-    const v = storage?.getItem(DESIGN_KEY);
-    if (v === 'modern' || v === 'classic') return v;
-  } catch {
-    /* ignorieren */
-  }
-  return DEFAULT_DESIGN;
 }
 
 function safeStorage(): Storage | null {
@@ -1072,10 +1042,6 @@ function layout(): string {
         <a id="app-version" class="version-link" href="./changelog.html" target="_blank" rel="noopener" title="Änderungen dieser und früherer Versionen (Changelog)">Version ${APP_VERSION}</a></p>
     </div>
     <div class="toolbar">
-      <div class="design-switch" role="group" aria-label="Design">
-        <button type="button" data-design-choice="modern" aria-pressed="false">Modern</button>
-        <button type="button" data-design-choice="classic" aria-pressed="false">Klassisch</button>
-      </div>
       <div class="design-switch theme-switch" role="group" aria-label="Hell oder dunkel">
         <button type="button" data-theme-choice="light" aria-pressed="false" title="Helles Design">Hell</button>
         <button type="button" data-theme-choice="dark" aria-pressed="false" title="Dunkles Design">Dunkel</button>

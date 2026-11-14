@@ -20,11 +20,12 @@ const ratio = (a: string, b: string) => {
 
 const base = css('style.css');
 const modern = css('style-modern.css');
-const classicLight = tokens(base, ':root');
-const classicDark = { ...classicLight, ...tokens(base, ":root[data-theme='dark']") };
-const modernLight = { ...classicLight, ...tokens(modern, ":root[data-design='modern']") };
-const modernDark = { ...classicDark, ...modernLight, ...tokens(modern, ":root[data-design='modern'][data-theme='dark']") };
-const themes = { classicLight, classicDark, modernLight, modernDark };
+// base tokens (style.css) overlaid by the modern design layer – the only design (F14)
+const baseLight = tokens(base, ':root');
+const baseDark = { ...baseLight, ...tokens(base, ":root[data-theme='dark']") };
+const modernLight = { ...baseLight, ...tokens(modern, ":root[data-design='modern']") };
+const modernDark = { ...baseDark, ...modernLight, ...tokens(modern, ":root[data-design='modern'][data-theme='dark']") };
+const themes = { modernLight, modernDark };
 
 describe('N7 Kontraste (WCAG 1.4.3, ≥ 4,5:1)', () => {
   for (const [name, t] of Object.entries(themes)) {

@@ -1,4 +1,4 @@
-/* User manual (F15) – uses the colour tokens of both designs */
+/* User manual (F15) – uses the colour tokens of the calculator */
 .help-layout {
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);
