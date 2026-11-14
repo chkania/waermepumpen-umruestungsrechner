@@ -379,3 +379,46 @@ function energyTable(e: EnergyYear): ChartTable {
     ],
   };
 }
+
+/**
+ * Chart of the variant comparison (F31): cumulative costs of the best heat pump way (solid) and without heat pump
+ * (dashed) per variant, one colour per variant. Returns null without canvas support (e.g. tests).
+ */
+export function variantsChart(
+  canvas: HTMLCanvasElement,
+  curves: { years: number[]; series: { name: string; best: (number | null)[]; ref: (number | null)[] }[] },
+): { destroy(): void } | null {
+  if (!canvas.getContext?.('2d')) return null;
+  const c = palette();
+  Chart.defaults.color = c.text;
+  Chart.defaults.borderColor = c.grid;
+  const colors = [c.kfw, c.ref, c.tax];
+  const datasets = curves.series.flatMap((s, i) => {
+    const color = colors[i % colors.length];
+    const line = (label: string, data: (number | null)[], dashed: boolean) => ({
+      label,
+      data,
+      borderColor: color,
+      backgroundColor: color,
+      borderWidth: 2,
+      borderDash: dashed ? [6, 4] : [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: 0.2,
+      spanGaps: false,
+    });
+    return [line(`${s.name} – mit WP`, s.best, false), line(`${s.name} – ohne WP`, s.ref, true)];
+  });
+  return new Chart(canvas, {
+    type: 'line',
+    data: { labels: curves.years.map(String), datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      interaction: { mode: 'index', intersect: false },
+      scales: { y: eurAxis('Kumulierte Kosten') },
+      plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${fmtEur(ctx.parsed.y ?? 0)}` } } },
+    },
+  });
+}

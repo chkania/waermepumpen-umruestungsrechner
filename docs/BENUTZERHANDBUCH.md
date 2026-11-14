@@ -60,6 +60,16 @@ Erzeugt einen Link, der alle **vom Standard abweichenden Eingaben** enthält, un
 - Ein geöffneter Link hat Vorrang vor den im Browser gespeicherten Eingaben – er **überschreibt sie aber nicht**. Haben Sie eigene Eingaben gespeichert, erscheint über den Ergebnissen der Hinweis „Geteiltes Szenario geöffnet“. Änderungen wirken dann nur auf den Link. Mit **Als meine Eingaben übernehmen** speichern Sie das Szenario als Ihre eigenen Eingaben, mit **Eigene Eingaben laden** kehren Sie zu Ihrem gespeicherten Stand zurück. Import und Zurücksetzen beenden die Link-Ansicht ebenfalls.
 - Werte im Link werden geprüft: Ungültige Monate oder Auswahlwerte werden durch den Standardwert ersetzt, extreme Zahlen (z. B. 1.000.000 Jahre Laufzeit) auf sinnvolle Grenzen begrenzt. Was ersetzt wurde, steht im Hinweis über den Ergebnissen.
 
+### Varianten vergleichen
+
+Vergleicht zwei oder drei Varianten nebeneinander, etwa „Angebot A“ und „Angebot B“ oder Umrüsten „jetzt“ und „2028“. So gehen Sie vor:
+
+1. Jede Variante im Rechner eingeben, eine **Bezeichnung des Szenarios** vergeben und mit **Export** als Datei speichern.
+2. **Varianten vergleichen** öffnen und mit **Export-Dateien laden …** zwei oder drei Dateien auswählen (auch mehrere auf einmal). **Aktuelle Eingaben hinzufügen** übernimmt den Stand im Rechner als Variante.
+3. Der Dialog zeigt die **Kennzahlen** nebeneinander (Gesamtkosten, bester Weg, Ersparnis, Amortisation, CO₂-Einsparung, Inbetriebnahme, Investition, Förderung, JAZ, Zeitraum) – die höchste Ersparnis ist mit ★ markiert –, die **kumulierten Kosten** aller Varianten in einem Diagramm (durchgezogen mit Wärmepumpe, gestrichelt ohne) und die **Unterschiede in den Eingaben**.
+
+Jede Variante wird für sich gerechnet, mit ihrer eigenen Referenz „ohne Wärmepumpe“. Als Name dient die Bezeichnung des Szenarios, sonst der Dateiname. **Im Rechner öffnen** übernimmt eine Variante in den Rechner (nach Rückfrage; die bisherigen Eingaben werden ersetzt). Die Varianten werden nicht gespeichert – nach dem Neuladen der Seite laden Sie die Dateien erneut.
+
 ### Bericht drucken
 
 Erstellt eine **kompakte Zusammenfassung** für das Gespräch mit Energieberatung, Handwerksbetrieb oder Bank und öffnet den Druckdialog des Browsers. Dort wählen Sie einen Drucker oder **„Als PDF speichern“**. Der Bericht enthält:

@@ -409,6 +409,38 @@ describe('UI (Smoke-Test)', () => {
     expect(root.querySelector<HTMLElement>('[data-field="heatPump.batteryKwh"]')!.hidden).toBe(false);
   });
 
+  it('F31 Varianten vergleichen: aktuelle Eingaben und Dateien, Tabelle, Unterschiede, höchstens drei', async () => {
+    const { root, app } = mount();
+    root.querySelector<HTMLButtonElement>('#btn-variants')!.click();
+    root.querySelector<HTMLButtonElement>('#var-current')!.click();
+    expect(app.getVariants()).toEqual(['Aktuelle Eingaben']);
+    expect(root.querySelector('#var-result')!.textContent).toContain('mindestens eine weitere Variante');
+    // load two export files at once
+    const exp = (name: string, month: string) => {
+      const i = app.getInputs();
+      const d = structuredClone(i);
+      d.scenario.name = name;
+      d.heatPump.installMonth = month;
+      return new File([JSON.stringify({ ...d, version: 1 })], `${name}.json`, { type: 'application/json' });
+    };
+    const input = root.querySelector<HTMLInputElement>('#var-file-input')!;
+    Object.defineProperty(input, 'files', { value: [exp('jetzt', '2027-01'), exp('2028', '2028-05')], configurable: true });
+    input.dispatchEvent(new Event('change'));
+    await new Promise((r) => setTimeout(r, 20));
+    expect(app.getVariants()).toEqual(['Aktuelle Eingaben', 'jetzt', '2028']);
+    const result = root.querySelector('#var-result')!;
+    expect(result.querySelectorAll('.variants-table')[0].querySelectorAll('thead th')).toHaveLength(4);
+    expect(result.textContent).toContain('Unterschiede in den Eingaben');
+    expect(result.textContent).toContain('05/2028');
+    // a fourth one is refused
+    root.querySelector<HTMLButtonElement>('#var-current')!.click();
+    expect(app.getVariants()).toHaveLength(3);
+    expect(root.querySelector('#var-status')!.textContent).toContain('Höchstens 3 Varianten');
+    // remove
+    root.querySelector<HTMLButtonElement>('[data-var-remove="0"]')!.click();
+    expect(app.getVariants()).toEqual(['jetzt', '2028']);
+  });
+
   it('F30 Bericht: wird aufgebaut, druckt hell und stellt das Design danach wieder her', () => {
     const { app } = mount();
     document.documentElement.dataset.theme = 'dark';

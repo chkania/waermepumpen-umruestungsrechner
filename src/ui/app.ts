@@ -12,12 +12,14 @@ import { estimateJaz } from '../core/jaz';
 import { energyYear, type EnergyYear } from '../core/energy';
 import { pvSummary } from '../core/pv';
 import { reportHtml } from './report';
+import { MAX_VARIANTS, variantName, variantResult, type Variant } from '../core/variants';
+import { VARIANTS_LIMIT_TEXT, variantCurves, variantCurvesTableHtml, variantDiffsHtml, variantsTableHtml } from './variants';
 import { sensitivity, type Sensitivity } from '../core/sensitivity';
 import { energySplit } from '../core/prices';
 import { decodeHash, encodeHash, exportFileName, exportJson, importJson, mergeInputs } from '../core/serialize';
 import type { Inputs, ScenarioKind, ScenarioResult } from '../core/types';
 import { NUMBER_LIMITS, numberRange, TEXT_LIMITS, validMonth, type InputIssue } from '../core/validate';
-import { Charts, chartTables, type ChartId } from './charts';
+import { Charts, chartTables, variantsChart, type ChartId } from './charts';
 import { SECTIONS, getPath, setPath, type Field } from './fields';
 import { escapeHtml, fmtDuration, fmtEur, fmtMonth, fmtNum, fmtPct } from './format';
 import { RECOMMEND_SUBJECT, RECOMMEND_TEXT, calculatorUrl, recommendLinks } from './share';
@@ -51,6 +53,8 @@ export interface AppController {
   showIntro(): void;
   /** Builds the printable report (F30) and returns its element (null without result). */
   buildReport(): HTMLElement | null;
+  /** Names of the variants in the comparison (F31). */
+  getVariants(): string[];
 }
 
 const CHART_TABS: [ChartId, string][] = [
@@ -933,7 +937,103 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     },
     showIntro,
     buildReport,
+    getVariants: () => getVariants(),
   };
+
+  // ---------- Compare variants (F31) ----------
+  const varDialog = $<HTMLDialogElement>('#variants');
+  const varList = $<HTMLElement>('#var-list');
+  const varResult = $<HTMLElement>('#var-result');
+  const varStatus = $<HTMLElement>('#var-status');
+  const varFiles = $<HTMLInputElement>('#var-file-input');
+  let variants: Variant[] = [];
+  let varChart: { destroy(): void } | null = null;
+  const setVarStatus = (text: string, isError = false) => {
+    varStatus.textContent = text;
+    varStatus.classList.toggle('is-error', isError);
+  };
+  const addVariant = (inp: Inputs, fallback: string): boolean => {
+    if (variants.length >= MAX_VARIANTS) {
+      setVarStatus(VARIANTS_LIMIT_TEXT, true);
+      return false;
+    }
+    variants.push({ name: variantName(inp, fallback, variants.map((v) => v.name)), inputs: structuredClone(inp) });
+    return true;
+  };
+  function renderVariants(): void {
+    varList.innerHTML = variants
+      .map(
+        (v, i) => `<li><span class="variants-name">${escapeHtml(v.name)}</span>
+          <button type="button" data-var-open="${i}" title="Diese Variante in den Rechner übernehmen">Im Rechner öffnen</button>
+          <button type="button" data-var-remove="${i}" aria-label="${escapeHtml(v.name)} entfernen">Entfernen</button></li>`,
+      )
+      .join('');
+    varChart?.destroy();
+    varChart = null;
+    if (variants.length === 0) {
+      varResult.innerHTML = '';
+      return;
+    }
+    const rs = variants.map(variantResult);
+    varResult.innerHTML = `
+      ${variants.length < 2 ? '<p class="muted">Fügen Sie mindestens eine weitere Variante hinzu, um zu vergleichen.</p>' : ''}
+      <h3>Kennzahlen</h3>${variantsTableHtml(rs)}
+      <h3>Kumulierte Kosten</h3>
+      <div class="chart-wrap"><canvas role="img" aria-label="Diagramm: kumulierte Kosten je Variante, mit und ohne Wärmepumpe. Die Werte stehen in der Tabelle darunter."></canvas></div>
+      <details class="chart-data"><summary>Werte als Tabelle</summary><div class="table-wrap">${variantCurvesTableHtml(rs)}</div></details>
+      ${variants.length > 1 ? `<h3>Unterschiede in den Eingaben</h3>${variantDiffsHtml(rs)}` : ''}`;
+    varChart = variantsChart(varResult.querySelector('canvas')!, variantCurves(rs));
+  }
+  $<HTMLButtonElement>('#btn-variants').addEventListener('click', () => {
+    setVarStatus('');
+    renderVariants();
+    varDialog.showModal?.();
+  });
+  varDialog.addEventListener('close', () => {
+    varChart?.destroy();
+    varChart = null;
+  });
+  $<HTMLButtonElement>('#var-current').addEventListener('click', () => {
+    if (addVariant(inputs, 'Aktuelle Eingaben')) setVarStatus('Aktuelle Eingaben hinzugefügt.');
+    renderVariants();
+  });
+  $<HTMLButtonElement>('#var-files').addEventListener('click', () => varFiles.click());
+  varFiles.addEventListener('change', async () => {
+    const messages: string[] = [];
+    for (const file of [...(varFiles.files ?? [])]) {
+      try {
+        const issues: InputIssue[] = [];
+        const imported = importJson(defaults, await file.text(), issues);
+        if (!addVariant(imported, file.name.replace(/\.json$/i, ''))) break;
+        messages.push(`„${file.name}“ geladen${issues.length ? ` (${issues.length} Wert(e) korrigiert)` : ''}.`);
+      } catch (err) {
+        messages.push(`„${file.name}“: ${(err as Error).message}`);
+      }
+    }
+    varFiles.value = '';
+    if (messages.length) setVarStatus(messages.join(' '), messages.some((m) => !m.endsWith('.') || m.includes(': ')));
+    renderVariants();
+  });
+  varList.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('button');
+    if (!btn) return;
+    if (btn.dataset.varRemove !== undefined) {
+      variants.splice(Number(btn.dataset.varRemove), 1);
+      setVarStatus('');
+      renderVariants();
+    } else if (btn.dataset.varOpen !== undefined) {
+      const v = variants[Number(btn.dataset.varOpen)];
+      if (!v || !confirm(`Die Eingaben im Rechner durch „${v.name}“ ersetzen? Sichern Sie die aktuellen Eingaben vorher bei Bedarf per Export.`)) return;
+      leaveShared();
+      loadIssues = null;
+      controller.setInputs(structuredClone(v.inputs));
+      renderNotice();
+      varDialog.close();
+      toast(`„${v.name}“ in den Rechner übernommen.`);
+    }
+  });
+  /** For tests: currently compared variants. */
+  const getVariants = () => variants.map((v) => v.name);
 
   // ---------- Printable report (F30) ----------
   /** Theme before printing; the report is always printed light. */
@@ -1261,6 +1361,7 @@ function layout(): string {
       <a id="btn-help" class="tool-link" href="./hilfe.html" target="_blank" rel="noopener" title="Benutzerhandbuch in neuem Tab öffnen">Hilfe</a>
       <button id="btn-recommend" type="button" aria-haspopup="dialog" title="Den Rechner per WhatsApp, Threema, E-Mail, Link oder einer anderen App (z. B. Signal) weiterempfehlen">Weiterempfehlen</button>
       <button id="btn-share" type="button" title="Link mit Ihren aktuellen Eingaben kopieren – zum Sichern oder Weitergeben Ihrer Berechnung">Link mit Werten teilen</button>
+      <button id="btn-variants" type="button" aria-haspopup="dialog" title="Zwei oder drei Varianten (Export-Dateien oder aktuelle Eingaben) nebeneinander vergleichen">Varianten vergleichen</button>
       <button id="btn-report" type="button" title="Kompakte Zusammenfassung mit Eingaben, Ergebnissen, Diagrammen, Förderung und Finanzierung – drucken oder als PDF speichern">Bericht drucken</button>
       <button id="btn-export" type="button">Export</button>
       <button id="btn-import" type="button">Import</button>
@@ -1325,7 +1426,28 @@ function layout(): string {
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   ${introHtml()}
-  ${recommendHtml()}`;
+  ${recommendHtml()}
+  ${variantsHtml()}`;
+}
+
+/** Dialog for comparing variants (F31). */
+function variantsHtml(): string {
+  return `
+  <dialog id="variants" class="intro variants" aria-labelledby="variants-title">
+    <form method="dialog" class="intro-body">
+      <h2 id="variants-title">Varianten vergleichen</h2>
+      <p class="intro-lead">Laden Sie zwei oder drei Export-Dateien, etwa „Angebot A“ und „Angebot B“ oder „jetzt“ und „2028“, oder übernehmen Sie die aktuellen Eingaben. Die Varianten werden nur für diesen Vergleich gerechnet und nicht gespeichert.</p>
+      <div class="variants-actions">
+        <button type="button" id="var-current">Aktuelle Eingaben hinzufügen</button>
+        <button type="button" id="var-files">Export-Dateien laden …</button>
+        <input id="var-file-input" type="file" accept="application/json,.json" multiple hidden>
+      </div>
+      <ul id="var-list" class="variants-list" aria-label="Geladene Varianten"></ul>
+      <p id="var-status" class="rec-status" role="status" aria-live="polite"></p>
+      <div id="var-result"></div>
+      <div class="intro-actions"><span></span><button type="submit" value="close" class="primary">Schließen</button></div>
+    </form>
+  </dialog>`;
 }
 
 /** Dialog for recommending the calculator (F21); hrefs are set when it opens. */
