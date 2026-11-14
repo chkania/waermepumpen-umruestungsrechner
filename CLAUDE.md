@@ -27,7 +27,7 @@ SPA (Vite + TypeScript, ohne UI-Framework, Chart.js) zur Wirtschaftlichkeitsrech
 
 ## Version & Changelog
 Semantic Versioning (N9), Quelle `package.json`; Version und `CHANGELOG.md` werden **automatisch** aus den Commit-Nachrichten abgeleitet (`scripts/release.ts`, Workflow `release.yml` nach jedem Push auf `main`). Nie von Hand ändern – sonst entstehen bei paralleler Arbeit Konflikte.
-- Commit-Nachrichten/PR-Titel nach Conventional Commits, Beschreibung auf Deutsch aus Nutzersicht (erscheint so im Changelog): `feat:` neue Funktion/Eingabe/geändertes Rechenmodell/Defaults → Minor; `fix:` Fehler/Text/Darstellung → Patch; `perf:` → Patch; `!` bzw. `BREAKING CHANGE:` bei inkompatiblem Export-/Link-Format → Major; `docs/test/refactor/style/build/ci/chore` → keine Version.
+- Commit-Nachrichten/PR-Titel nach Conventional Commits (beim Squash-Merge wird jeder Commit des PRs ein eigener Changelog-Eintrag – Zwischenkorrekturen daher nicht als `fix:`), Beschreibung auf Deutsch aus Nutzersicht (erscheint so im Changelog): `feat:` neue Funktion/Eingabe/geändertes Rechenmodell/Defaults → Minor; `fix:` Fehler/Text/Darstellung → Patch; `perf:` → Patch; `!` bzw. `BREAKING CHANGE:` bei inkompatiblem Export-/Link-Format → Major; `docs/test/refactor/style/build/ci/chore` → keine Version.
 - Ablauf und Beispiele: `CONTRIBUTING.md`. Vorschau: `npm run release:preview`.
 
 ## Lizenz
