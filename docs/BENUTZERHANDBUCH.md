@@ -279,6 +279,21 @@ Förderbedingungen, Preise und Zinsen werden regelmäßig geprüft. Liegt die le
 - **Jährliche Kosten:** Kosten pro Jahr; Spitzen zeigen Investitionen.
 - **Preisentwicklung:** Kosten je kWh Wärme aus Altanlage und Wärmepumpe sowie der CO₂-Preis.
 - **Zeitpunkt der Umrüstung:** Gesamtkosten je Umrüstzeitpunkt im Vergleich zu „ohne Wärmepumpe“.
+- **Einflussgrößen:** beantwortet „Was beeinflusst mein Ergebnis am stärksten?“. Jede wichtige Annahme wird einzeln etwas niedriger und höher gerechnet, alle anderen bleiben gleich. Die Balken zeigen, wie sich die **Ersparnis mit Wärmepumpe** dadurch ändert; der längste Balken steht oben. Blau = Annahme niedriger, orange = Annahme höher. Darüber steht in einem Satz, welche Annahme am stärksten wirkt. Durchgerechnet werden:
+
+  | Annahme | Variation |
+  |---|---|
+  | Gas- bzw. Ölpreis heute | ±20 % |
+  | Steigerung Gas-/Ölpreis | ±2 Prozentpunkte |
+  | Strompreis heute | ±20 % |
+  | Steigerung Strompreis | ±2 Prozentpunkte |
+  | Jahresarbeitszahl | ±0,5 |
+  | Investition Wärmepumpe | ±20 % |
+  | CO₂-Preis | ±30 % |
+  | Kreditzinsen (nur mit Kredit) | ±1 Prozentpunkt |
+  | Opportunitätszins | ±1 Prozentpunkt |
+
+  Je Variante wird der jeweils bessere Weg (KfW-Zuschuss oder Steuerbonus) neu bestimmt. Die Annahmen mit den längsten Balken lohnt es sich am ehesten genauer zu prüfen, z. B. durch ein Angebot oder die eigene Rechnung.
 
 Unter jedem Diagramm zeigt **Werte als Tabelle** dieselben Zahlen zum Nachlesen (auch für Screenreader). Die Reiter wechseln Sie mit der Maus oder per Tastatur: Tab auf die Reiterleiste, dann Pfeiltasten links/rechts, Pos1 und Ende.
 

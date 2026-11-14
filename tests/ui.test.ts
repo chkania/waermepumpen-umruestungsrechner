@@ -384,15 +384,28 @@ describe('UI (Smoke-Test)', () => {
     const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
     expect(tabs[0].getAttribute('aria-controls')).toBe('panel-cumulative');
     expect(root.querySelector('#panel-cumulative')!.getAttribute('role')).toBe('tabpanel');
-    expect(tabs.map((t) => t.tabIndex)).toEqual([0, -1, -1, -1]);
+    expect(tabs.map((t) => t.tabIndex)).toEqual([0, -1, -1, -1, -1]);
     tabs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     expect(tabs[1].getAttribute('aria-selected')).toBe('true');
-    expect(tabs.map((t) => t.tabIndex)).toEqual([-1, 0, -1, -1]);
+    expect(tabs.map((t) => t.tabIndex)).toEqual([-1, 0, -1, -1, -1]);
     expect(root.querySelector<HTMLElement>('#panel-annual')!.hidden).toBe(false);
     tabs[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
-    expect(tabs[3].getAttribute('aria-selected')).toBe('true');
-    tabs[3].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(tabs[4].getAttribute('aria-selected')).toBe('true');
+    tabs[4].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     expect(tabs[0].getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('F27 Einflussgrößen: Reiter, Tabelle sortiert nach Spanne, Zusammenfassung', () => {
+    const { root, app } = mount();
+    const canvas = root.querySelector('canvas[data-chart="sensitivity"]')!;
+    expect(canvas.getAttribute('role')).toBe('img');
+    expect(canvas.getAttribute('aria-label')).toContain('Einflussgrößen');
+    const rows = [...root.querySelectorAll('[data-chart-table="sensitivity"] tbody tr')];
+    const sens = app.lastResult()!.sens;
+    expect(rows).toHaveLength(sens.items.length);
+    expect(rows[0].querySelector('th')!.textContent).toBe(`${sens.items[0].label} (±20 %)`);
+    const note = root.querySelector('[data-chart-note="sensitivity"]')!.textContent!;
+    expect(note).toContain(`Am stärksten wirkt ${sens.items[0].label}`);
   });
 
   it('F12.6 Finanzierungskarte zeigt Sondertilgung mit Termin und Zinsersparnis', () => {

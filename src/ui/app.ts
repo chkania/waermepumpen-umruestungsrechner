@@ -9,6 +9,7 @@ import { priceRows, runAll, type RunResult } from '../core/simulation';
 import { tariffComparison } from '../core/tariff';
 import { EFFICIENCY_CLASSES, rateHouse } from '../core/house';
 import { estimateJaz } from '../core/jaz';
+import { sensitivity, type Sensitivity } from '../core/sensitivity';
 import { energySplit } from '../core/prices';
 import { decodeHash, encodeHash, exportFileName, exportJson, importJson, mergeInputs } from '../core/serialize';
 import type { Inputs, ScenarioKind, ScenarioResult } from '../core/types';
@@ -40,7 +41,7 @@ export interface AppController {
   getInputs(): Inputs;
   setInputs(i: Inputs): void;
   recalc(): void;
-  lastResult(): { run: RunResult; cmp: InstallComparison; events: KeyEvents } | null;
+  lastResult(): { run: RunResult; cmp: InstallComparison; events: KeyEvents; sens: Sensitivity } | null;
   getTheme(): ThemeChoice;
   setTheme(t: ThemeChoice): void;
   /** Opens the introduction dialog (F20). */
@@ -52,6 +53,7 @@ const CHART_TABS: [ChartId, string][] = [
   ['annual', 'Jährliche Kosten'],
   ['prices', 'Preisentwicklung'],
   ['install', 'Zeitpunkt der Umrüstung'],
+  ['sensitivity', 'Einflussgrößen'],
 ];
 
 export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
@@ -64,7 +66,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   let loadIssues: { origin: string; issues: InputIssue[] } | null = initial.issues.length
     ? { origin: initial.source === 'hash' ? 'dem Link' : 'den gespeicherten Eingaben', issues: initial.issues }
     : null;
-  let last: { run: RunResult; cmp: InstallComparison; events: KeyEvents } | null = null;
+  let last: { run: RunResult; cmp: InstallComparison; events: KeyEvents; sens: Sensitivity } | null = null;
   let tableKind: ScenarioKind = 'kfw';
   let activeChart: ChartId = 'cumulative';
 
@@ -358,7 +360,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
 
   const redrawCharts = () => {
     charts.reset();
-    if (last) charts.update(last.run, priceRows(inputs), last.cmp, last.events);
+    if (last) charts.update(last.run, priceRows(inputs), last.cmp, last.events, last.sens);
   };
   // ---------- Light/dark ----------
   const media = typeof matchMedia === 'function' ? matchMedia('(prefers-color-scheme: dark)') : null;
@@ -411,15 +413,17 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     let run: RunResult;
     let cmp: InstallComparison;
     let events: KeyEvents;
+    let sens: Sensitivity;
     try {
       run = runAll(inputs);
       cmp = compareInstallTimes(inputs);
       events = keyEvents(inputs, run);
+      sens = sensitivity(inputs);
     } catch (err) {
       $<HTMLElement>('#warnings').innerHTML = `<div class="alert error">${escapeHtml((err as Error).message)}</div>`;
       return;
     }
-    last = { run, cmp, events };
+    last = { run, cmp, events, sens };
     renderKpis(run);
     renderWarnings(run);
     renderEvents(events);
@@ -430,12 +434,23 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     renderInstallTable(cmp);
     renderYearTable(run, events);
     const prices = priceRows(inputs);
-    charts.update(run, prices, cmp, events);
-    renderChartTables(run, prices, cmp);
+    charts.update(run, prices, cmp, events, sens);
+    renderChartTables(run, prices, cmp, sens);
   }
 
-  function renderChartTables(run: RunResult, prices: ReturnType<typeof priceRows>, cmp: InstallComparison): void {
-    const tables = chartTables(run, prices, cmp);
+  function renderChartTables(run: RunResult, prices: ReturnType<typeof priceRows>, cmp: InstallComparison, sens: Sensitivity): void {
+    const tables = chartTables(run, prices, cmp, sens);
+    // Summary of the sensitivity analysis (F27) above the chart
+    const note = root.querySelector<HTMLElement>('[data-chart-note="sensitivity"]');
+    const top = sens.items[0];
+    if (note && top) {
+      const lo = Math.min(top.low, top.high);
+      const hi = Math.max(top.low, top.high);
+      note.innerHTML =
+        `Jede Annahme wird einzeln etwas niedriger und höher gerechnet, alle anderen bleiben gleich. ` +
+        `Am stärksten wirkt <strong>${escapeHtml(top.label)}</strong>: Die Ersparnis liegt dann zwischen ${fmtEur(lo)} und ${fmtEur(hi)} (heute ${fmtEur(sens.base)}).` +
+        (lo < 0 ? ' Schon diese eine Annahme kann die Wärmepumpe unwirtschaftlich machen.' : '');
+    }
     for (const [id, t] of Object.entries(tables)) {
       const el = root.querySelector<HTMLElement>(`[data-chart-table="${id}"]`);
       if (!el) continue;
@@ -1133,6 +1148,7 @@ function layout(): string {
         </div>
         ${CHART_TABS.map(
           ([id, l], i) => `<div role="tabpanel" id="panel-${id}" aria-labelledby="tab-${id}" data-panel="${id}" ${i === 0 ? '' : 'hidden'}>
+            ${id === 'sensitivity' ? '<p class="chart-note muted small" data-chart-note="sensitivity"></p>' : ''}
             <div class="chart-wrap"><canvas data-chart="${id}" role="img" aria-label="Diagramm ${l}. Die Werte stehen in der Tabelle darunter."></canvas></div>
             <details class="chart-data"><summary>Werte als Tabelle</summary><div class="table-wrap" data-chart-table="${id}"></div></details>
           </div>`,

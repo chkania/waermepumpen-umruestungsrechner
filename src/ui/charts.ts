@@ -15,12 +15,16 @@ import {
 } from 'chart.js';
 import type { InstallComparison } from '../core/compare';
 import type { KeyEvent, KeyEvents } from '../core/events';
+import { VARIATION_TEXT, type Sensitivity } from '../core/sensitivity';
 import type { PriceRow, RunResult } from '../core/simulation';
 import { fmtEur, fmtMonth, fmtNum } from './format';
 
 Chart.register(BarController, BarElement, CategoryScale, LinearScale, LineController, LineElement, PointElement, Legend, Tooltip);
 
-export type ChartId = 'cumulative' | 'annual' | 'prices' | 'install';
+export type ChartId = 'cumulative' | 'annual' | 'prices' | 'install' | 'sensitivity';
+
+/** Bar label of a sensitivity item incl. its variation, e.g. "JAZ (±0,5)". */
+export const sensitivityLabel = (id: string, label: string) => `${label} (${VARIATION_TEXT[id] ?? ''})`;
 
 function css(name: string, fallback: string): string {
   const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -48,7 +52,7 @@ export class Charts {
 
   constructor(private canvases: Record<ChartId, HTMLCanvasElement>) {}
 
-  update(run: RunResult, prices: PriceRow[], cmp: InstallComparison, events?: KeyEvents): void {
+  update(run: RunResult, prices: PriceRow[], cmp: InstallComparison, events?: KeyEvents, sens?: Sensitivity): void {
     const c = palette();
     Chart.defaults.color = c.text;
     Chart.defaults.borderColor = c.grid;
@@ -179,6 +183,44 @@ export class Charts {
         plugins: { tooltip: tooltipEur },
       },
     });
+
+    // Sensitivity (F27): tornado chart – bars from the base saving to the saving with the lower/higher assumption
+    if (sens) {
+      const items = sens.items;
+      const floating = (label: string, color: string, pick: 'low' | 'high') => ({
+        label,
+        data: items.map((x) => [sens.base, x[pick]] as [number, number]),
+        backgroundColor: color,
+        borderColor: color,
+        grouped: false,
+        barPercentage: 0.7,
+      });
+      this.render('sensitivity', {
+        type: 'bar',
+        data: {
+          labels: items.map((x) => sensitivityLabel(x.id, x.label)),
+          datasets: [floating('Annahme niedriger', c.kfw, 'low'), floating('Annahme höher', c.ref, 'high')],
+        } as ChartConfiguration['data'],
+        options: {
+          indexAxis: 'y',
+          scales: {
+            x: { ...eurAxis(`Ersparnis mit Wärmepumpe (heute: ${fmtEur(sens.base)})`) },
+            y: { ticks: { autoSkip: false } },
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: (ctx: TooltipItem<ChartType>) => {
+                  const x = items[ctx.dataIndex];
+                  const high = ctx.datasetIndex === 1;
+                  return `${high ? 'höher' : 'niedriger'}: ${high ? x.highValue : x.lowValue} → Ersparnis ${fmtEur(high ? x.high : x.low)}`;
+                },
+              },
+            },
+          },
+        },
+      });
+    }
   }
 
   private render(id: ChartId, cfg: ChartConfiguration & { type: ChartType }): void {
@@ -211,7 +253,7 @@ export interface ChartTable {
 }
 
 /** Returns the same values as a table for every chart – also without canvas (e.g. screen readers, tests). */
-export function chartTables(run: RunResult, prices: PriceRow[], cmp: InstallComparison): Record<ChartId, ChartTable> {
+export function chartTables(run: RunResult, prices: PriceRow[], cmp: InstallComparison, sens?: Sensitivity): Partial<Record<ChartId, ChartTable>> {
   const scen = [
     ['Ohne WP', run.ref],
     ['WP + KfW', run.kfw],
@@ -232,5 +274,22 @@ export function chartTables(run: RunResult, prices: PriceRow[], cmp: InstallComp
       head: ['Inbetriebnahme', 'WP + KfW', 'WP + Steuerbonus', 'Ohne WP'],
       rows: cmp.rows.map((r) => [fmtMonth(r.installMonth), fmtEur(r.kfwTotal), r.taxFeasible ? fmtEur(r.taxTotal) : 'nicht möglich', fmtEur(cmp.refTotal)]),
     },
+    ...(sens
+      ? {
+          sensitivity: {
+            caption: `Ersparnis mit Wärmepumpe, wenn jeweils eine Annahme niedriger oder höher ist (heute: ${fmtEur(sens.base)}), sortiert nach Einfluss`,
+            head: ['Annahme', 'heute', 'niedriger', 'Ersparnis', 'höher', 'Ersparnis', 'Spanne'],
+            rows: sens.items.map((x) => [
+              sensitivityLabel(x.id, x.label),
+              x.base,
+              x.lowValue,
+              fmtEur(x.low),
+              x.highValue,
+              fmtEur(x.high),
+              fmtEur(Math.abs(x.high - x.low)),
+            ]),
+          },
+        }
+      : {}),
   };
 }
