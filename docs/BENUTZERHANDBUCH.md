@@ -120,7 +120,7 @@ Beschreibt das Szenario; beide Felder ändern die Rechnung nicht.
 | **Steigerung Ölpreis (ohne CO₂)** | Jährliche Steigerung ohne CO₂-Anteil. |
 | **Bio-Anteil im heutigen Tarif** | Anteil Biogas bzw. Bioöl, den Sie heute schon beziehen (z. B. Tarif mit 10 % Biogas). Er gilt in der CO₂-Bilanz als klimaneutral – für die Altanlage, für einen neuen Kessel (mindestens der Anteil der Bio-Treppe) und für das Kochen mit Gas. **Wichtig:** Als Gas- bzw. Heizölpreis muss dann der Preis genau dieses Tarifs eingetragen sein. Der Rechner nimmt an, dass der Bio-Aufpreis darin steckt, und rechnet bei einem neuen Kessel nur den zusätzlich nötigen Bio-Anteil mit dem Mehrpreis. Steht dort der Preis von reinem Erdgas, wird der Weiterbetrieb mit Gas zu günstig gerechnet und die Ersparnis der Wärmepumpe fällt zu niedrig aus. |
 | **CO₂-Preispfad** | Stützstellen im Format `Jahr:€/t`, z. B. `2026:55, 2030:110`. Dazwischen wird linear interpoliert. Der CO₂-Aufschlag wird aus Preis und Emissionsfaktor berechnet. |
-| **CO₂-Faktor Strommix** | Für die CO₂-Bilanz: CO₂ je kWh Netzstrom im Format `Jahr:g/kWh`, linear interpoliert. 2025 waren es laut Umweltbundesamt 344 g/kWh; der weitere Rückgang ist eine Annahme. Mit **Ökostromtarif** (Abschnitt Strom) zählt Netzstrom als CO₂-frei, eigener PV-Strom über den PV-Eigenanteil ebenso. |
+| **CO₂-Faktor Strommix** | Für die CO₂-Bilanz: CO₂ je kWh Netzstrom im Format `Jahr:g/kWh`, linear interpoliert. 2025 waren es laut Umweltbundesamt 344 g/kWh; der weitere Rückgang ist eine Annahme. Mit **Ökostromtarif** (Abschnitt Strom) zählt Netzstrom als CO₂-frei, eigener PV-Strom der Wärmepumpe ebenso. |
 | **Bio-Treppe für neuen fossilen Kessel** | Neu eingebaute Gas-/Ölheizungen müssen ab 2029 einen steigenden Bio-Anteil nutzen. Gilt nur für einen neuen Kessel, nicht für die Altanlage. |
 | **Bio-Anteil** | Stufen im Format `Jahr:%`. |
 | **Mehrpreis Biogas/-öl** | Aufpreis je kWh für den Bio-Anteil. |
@@ -155,8 +155,15 @@ Beschreibt das Szenario; beide Felder ändern die Rechnung nicht.
 | **Netzentgeltreduzierung § 14a EnWG** | Pauschale für steuerbare Verbrauchseinrichtungen (Modul 1) laut Preisblatt des Netzbetreibers. Gibt es einmal je Zähler. |
 | **Haushaltszähler hat schon § 14a (z. B. Wallbox)** | Ankreuzen, wenn am Haushaltszähler bereits eine Wallbox o. Ä. die Pauschale erhält. Dann bringt die Wärmepumpe ohne eigenen Zähler keine zusätzliche Reduzierung. |
 | **Ökostromtarif** | Für die CO₂-Bilanz: Netzstrom für Wärmepumpe und ggf. Induktionsherd zählt mit 0 g CO₂/kWh statt mit dem Strommix (so, wie Versorger Ökostrom ausweisen). Wer strenger rechnen möchte – Ökostrom ändert den deutschen Strommix nicht –, lässt das Häkchen weg. Die Kosten ändert das nicht; der Strompreis wird oben eingetragen. |
-| **Anteil PV-Eigenverbrauch** | Anteil des Wärmepumpenstroms aus der eigenen PV-Anlage. |
+| **PV-Anlage: Leistung** | Leistung der eigenen PV-Anlage in kWp; 0 = keine PV. Wie viel PV-Strom die Wärmepumpe nutzen kann, rechnet der Rechner Monat für Monat (siehe unten). |
+| **PV: Jahresertrag je kWp** | Erzeugter Strom je kWp und Jahr, in Deutschland meist 800–1.100 kWh (Süddach eher mehr, Ost/West weniger). Steht im Anlagenmonitor. |
+| **Batteriespeicher (nutzbar)** | Nutzbare Kapazität in kWh; 0 = kein Speicher. |
+| **Haushaltsstrom ohne Wärmepumpe** | Jahresverbrauch des übrigen Haushalts. Er nutzt den PV-Strom schon heute; die Wärmepumpe bekommt nur, was übrig bleibt. |
 | **Einspeisevergütung (entgangen)** | Wert des selbst genutzten PV-Stroms (er wird nicht mehr eingespeist). |
+
+**So rechnet der Rechner mit PV:** Der Jahresertrag wird typisch auf die Monate verteilt – im Dezember kommt nur etwa ein Sechstel dessen, was im Juni kommt. In jedem Monat nutzt zuerst der Haushalt den PV-Strom. Von der Überschneidung aus Erzeugung und Verbrauch wird ohne Speicher nur etwa die Hälfte gleichzeitig verbraucht (die Sonne scheint mittags, geheizt wird auch morgens, abends und nachts). Ein Speicher verschiebt Überschuss in Abend und Nacht – höchstens eine Ladung je Tag, mit 10 % Verlust. Unter den Feldern zeigt der Rechner, welchen Anteil des Wärmepumpenstroms PV im Jahr, im Winter und im Sommer deckt, mit Monatswerten zum Aufklappen. Typisch: Im Winter, wenn die Wärmepumpe am meisten Strom braucht, deckt PV nur wenige Prozent.
+
+Ältere Links und Exporte mit dem früheren festen „Anteil PV-Eigenverbrauch“ werden ohne PV gerechnet; ein Hinweis bittet darum, die Leistung der PV-Anlage einzutragen.
 
 ### Haushalt & Gebäude
 

@@ -12,11 +12,23 @@ const isObj = (v: unknown): v is Obj => typeof v === 'object' && v !== null && !
  * clamped or replaced by the default if necessary (F9.5). Findings end up in `issues`.
  */
 export function mergeInputs(defaults: Inputs, data: unknown, issues: InputIssue[] = []): Inputs {
-  return mergeObj(defaults as unknown as Obj, migrate(defaults, data), '', issues) as unknown as Inputs;
+  return mergeObj(defaults as unknown as Obj, migrate(defaults, data, issues), '', issues) as unknown as Inputs;
 }
 
-/** Migrates older data sets: building age (years) → construction year (F17). */
-function migrate(defaults: Inputs, data: unknown): unknown {
+/**
+ * Migrates older data sets: building age (years) → construction year (F17);
+ * fixed PV share (PV-Anteil) → notice, because PV is now calculated from the PV system (F28).
+ */
+function migrate(defaults: Inputs, data: unknown, issues: InputIssue[]): unknown {
+  if (isObj(data) && isObj(data.heatPump)) {
+    const share = data.heatPump.pvShare;
+    if (typeof share === 'number' && share > 0 && data.heatPump.pvKwp === undefined) {
+      issues.push({
+        path: 'heatPump.pvKwp',
+        reason: `der feste PV-Anteil (${Math.round(share * 100)} %) wird nicht mehr verwendet – bitte Leistung der PV-Anlage eintragen; bis dahin ohne PV gerechnet`,
+      });
+    }
+  }
   if (!isObj(data) || !isObj(data.building)) return data;
   const b = data.building;
   if (typeof b.buildingAgeYears !== 'number' || b.constructionYear !== undefined || !Number.isFinite(b.buildingAgeYears)) return data;

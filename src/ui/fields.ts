@@ -32,6 +32,7 @@ export interface Section {
   fields: Field[];
 }
 
+const hasPv = (i: Inputs) => i.heatPump.pvKwp > 0;
 const isGas = (i: Inputs) => i.oldHeating.fuel === 'gas';
 const isOil = (i: Inputs) => i.oldHeating.fuel === 'oil';
 
@@ -189,8 +190,11 @@ export const SECTIONS: Section[] = [
       { path: 'heatPump.para14aReduction', label: 'Netzentgeltreduzierung § 14a EnWG', type: 'number', unit: '€/Jahr', step: 10, help: 'Modul 1: pauschale Reduzierung je Zähler, abhängig vom Netzbetreiber.' },
       { path: 'heatPump.existing14aOnHousehold', label: 'Haushaltszähler hat schon § 14a (z. B. Wallbox)', type: 'checkbox', help: 'Die Pauschale gibt es nur einmal je Zähler. Ohne eigenen WP-Zähler bringt die Wärmepumpe dann keine zusätzliche Reduzierung.' },
       { path: 'heatPump.greenElectricity', label: 'Ökostromtarif', type: 'checkbox', help: 'Für die CO₂-Bilanz: Netzstrom für Wärmepumpe (und ggf. Induktionsherd) zählt mit 0 g CO₂/kWh statt mit dem Strommix.' },
-      { path: 'heatPump.pvShare', label: 'Anteil PV-Eigenverbrauch', type: 'percent', unit: '%', step: 5, min: 0, max: 100, help: 'Anteil des WP-Stroms aus eigener PV-Anlage.' },
-      { path: 'heatPump.feedInCt', label: 'Einspeisevergütung (entgangen)', type: 'number', unit: 'ct/kWh', step: 0.1, min: 0, show: (i) => i.heatPump.pvShare > 0 },
+      { path: 'heatPump.pvKwp', label: 'PV-Anlage: Leistung', type: 'number', unit: 'kWp', step: 0.5, min: 0, help: '0 = keine PV-Anlage. Wie viel PV-Strom die Wärmepumpe nutzen kann, wird Monat für Monat berechnet – im Winter ist es wenig.' },
+      { path: 'heatPump.pvYield', label: 'PV: Jahresertrag je kWp', type: 'number', unit: 'kWh/kWp', step: 25, min: 0, show: hasPv, help: 'Süddach typisch 900–1.100, Ost/West 750–900. Steht im Anlagenmonitor oder in der Abrechnung des Netzbetreibers.' },
+      { path: 'heatPump.batteryKwh', label: 'Batteriespeicher (nutzbar)', type: 'number', unit: 'kWh', step: 0.5, min: 0, show: hasPv, help: '0 = kein Speicher. Verschiebt Überschuss vom Tag in Abend und Nacht – vor allem im Sommerhalbjahr.' },
+      { path: 'heatPump.householdKwh', label: 'Haushaltsstrom ohne Wärmepumpe', type: 'number', unit: 'kWh/Jahr', step: 100, min: 0, show: hasPv, help: 'Der Haushalt nutzt den PV-Strom schon heute; die Wärmepumpe bekommt nur, was übrig bleibt.' },
+      { path: 'heatPump.feedInCt', label: 'Einspeisevergütung (entgangen)', type: 'number', unit: 'ct/kWh', step: 0.1, min: 0, show: hasPv },
     ],
   },
   {

@@ -40,9 +40,10 @@ describe('F13 Stromkosten mit/ohne Wärmepumpentarif', () => {
     expect(t.saving).toBeLessThan(0);
   });
 
-  it('PV-Anteil senkt den Netzbezug in beiden Varianten', () => {
-    const t = tariffComparison(base((i) => (i.heatPump.pvShare = 0.25)))!;
-    expect(t.firstFullYear!.gridKWh).toBeCloseTo(kwh * 0.75, 6);
+  it('PV-Anlage senkt den Netzbezug in beiden Varianten (Monatsmodell)', () => {
+    const t = tariffComparison(base((i) => (i.heatPump.pvKwp = 8)))!;
+    expect(t.firstFullYear!.gridKWh).toBeLessThan(kwh);
+    expect(t.firstFullYear!.gridKWh).toBeGreaterThan(kwh * 0.7);
   });
 
   it('nur ab Inbetriebnahme; gewählte Variante wird gemeldet', () => {

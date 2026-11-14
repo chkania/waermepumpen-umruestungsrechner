@@ -119,7 +119,14 @@ export interface HeatPumpInputs {
   para14aReduction: number;
   /** A controllable consumer (steuerbare Verbrauchseinrichtung) with § 14a (e.g. wallbox) is already connected to the household meter (Haushaltszähler). */
   existing14aOnHousehold: boolean;
-  pvShare: number;
+  /** Peak power (Leistung) of the own PV system in kWp; 0 = no PV (F28). */
+  pvKwp: number;
+  /** Specific annual yield (spezifischer Ertrag) of the PV system, kWh per kWp and year (F28). */
+  pvYield: number;
+  /** Usable capacity of the battery storage (Batteriespeicher), kWh; 0 = none (F28). */
+  batteryKwh: number;
+  /** Household electricity (Haushaltsstrom) without heat pump, kWh/year – it uses the PV first (F28). */
+  householdKwh: number;
   feedInCt: number;
   /** Grid electricity from a green tariff (Ökostromtarif): counted with 0 g CO2/kWh in the CO2 balance (F25.4). */
   greenElectricity: boolean;
@@ -259,6 +266,8 @@ export interface MonthRow extends CostBreakdown {
   system: 'old' | 'new' | 'wp';
   /** CO2 emissions of heating and cooking in kg (F25). */
   co2Kg: number;
+  /** Heat pump electricity covered by the own PV system (kWh) (F28). */
+  pvKWh: number;
 }
 
 export interface YearRow extends CostBreakdown {

@@ -9,6 +9,7 @@ import { priceRows, runAll, type RunResult } from '../core/simulation';
 import { tariffComparison } from '../core/tariff';
 import { EFFICIENCY_CLASSES, rateHouse } from '../core/house';
 import { estimateJaz } from '../core/jaz';
+import { pvSummary } from '../core/pv';
 import { sensitivity, type Sensitivity } from '../core/sensitivity';
 import { energySplit } from '../core/prices';
 import { decodeHash, encodeHash, exportFileName, exportJson, importJson, mergeInputs } from '../core/serialize';
@@ -429,6 +430,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     renderEvents(events);
     renderHouse();
     renderJazEstimate();
+    renderPvEstimate();
     renderDetails(run);
     renderTariff();
     renderInstallTable(cmp);
@@ -547,6 +549,29 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       <details class="jaz-why"><summary>Wie wird geschätzt?</summary>
         <ol>${e.steps.map((s) => `<li>${escapeHtml(s)}</li>`).join('')}</ol>
         <p>Grobe Orientierung. Die tatsächliche JAZ hängt von Auslegung, Einstellung (Heizkurve), Warmwasseranteil und Witterung ab. Selbsttest: An einem kalten Tag den Kessel auf 55 °C Vorlauf stellen – wird es in allen Räumen warm, reichen die Heizkörper für eine Wärmepumpe.</p>
+      </details>`;
+  }
+
+  /** PV coverage of the heat pump over the year (F28), below the PV inputs. */
+  function renderPvEstimate(): void {
+    const box = root.querySelector<HTMLElement>('#pv-estimate');
+    if (!box) return;
+    box.hidden = !(inputs.heatPump.pvKwp > 0);
+    if (box.hidden) return;
+    const p = pvSummary(inputs);
+    const n0 = (x: number) => fmtNum(x, 0);
+    const pc = (x: number) => `${n0(x * 100)} %`;
+    const MONTHS = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+    box.innerHTML = `
+      <div class="jaz-head"><span>PV deckt rechnerisch <strong>${pc(p.share)}</strong> des Wärmepumpenstroms
+        (${n0(p.annualHpFromPv)} von ${n0(p.annualHp)} kWh im Jahr).</span></div>
+      <p class="jaz-fit">Winter (Dez–Feb): <strong>${pc(p.winterShare)}</strong> · Sommer (Jun–Aug): ${pc(p.summerShare)}. Den Rest bezieht die Wärmepumpe aus dem Netz.</p>
+      <details class="jaz-why"><summary>Monatswerte</summary>
+        <div class="table-wrap"><table class="compact"><caption class="visually-hidden">PV-Ertrag und Wärmepumpenstrom je Monat (typisches Jahr)</caption>
+          <thead><tr><th scope="col">Monat</th><th scope="col" class="num">PV-Ertrag</th><th scope="col" class="num">WP-Strom</th><th scope="col" class="num">davon PV</th></tr></thead>
+          <tbody>${p.months.map((m) => `<tr><th scope="row">${MONTHS[m.month - 1]}</th><td class="num">${n0(m.pvKWh)}</td><td class="num">${n0(m.hpKWh)}</td><td class="num">${n0(m.hpFromPv)}</td></tr>`).join('')}</tbody>
+        </table></div>
+        <p>kWh im typischen Jahr. Der Haushaltsstrom nutzt den PV-Strom zuerst; von der Überschneidung aus Erzeugung und Verbrauch wird nur ein Teil gleichzeitig genutzt, ein Speicher verschiebt Überschuss in Abend und Nacht. Den genutzten PV-Strom rechnet der Rechner mit der entgangenen Einspeisevergütung.</p>
       </details>`;
   }
 
@@ -1098,7 +1123,12 @@ function sectionsToggleHtml(): string {
 
 function sectionHtml(s: (typeof SECTIONS)[number], defaults: Inputs): string {
   // SPF (JAZ) estimate (F26) directly below the SPF field
-  const after = (f: Field) => (f.path === 'heatPump.jaz' ? '<div id="jaz-estimate" class="jaz-estimate" aria-live="polite"></div>' : '');
+  const after = (f: Field) =>
+    f.path === 'heatPump.jaz'
+      ? '<div id="jaz-estimate" class="jaz-estimate" aria-live="polite"></div>'
+      : f.path === 'heatPump.feedInCt'
+        ? '<div id="pv-estimate" class="jaz-estimate pv-estimate" aria-live="polite" hidden></div>'
+        : '';
   return `<details class="section${s.expert ? ' expert' : ''}" ${s.open ? 'open' : ''}>
     <summary>${escapeHtml(s.title)}</summary>
     ${s.note ? `<p class="note">${escapeHtml(s.note)}</p>` : ''}

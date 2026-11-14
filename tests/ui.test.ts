@@ -369,7 +369,7 @@ describe('UI (Smoke-Test)', () => {
     expect(el.hasAttribute('aria-invalid')).toBe(false);
     expect(err.hidden).toBe(true);
     // percentage fields in percent
-    expect(setValue(root, 'heatPump.pvShare', '150').closest('.field')!.textContent).toContain('0 bis 100 %');
+    expect(setValue(root, 'heatPump.eligibleShare', '150').closest('.field')!.textContent).toContain('0 bis 100 %');
   });
 
   it('N7 Diagramme: Textalternative, Datentabellen, Reiter mit Pfeiltasten', () => {
@@ -393,6 +393,20 @@ describe('UI (Smoke-Test)', () => {
     expect(tabs[4].getAttribute('aria-selected')).toBe('true');
     tabs[4].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     expect(tabs[0].getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('F28 PV-Deckung unter den PV-Feldern nur mit PV-Anlage', () => {
+    const { root, app } = mount();
+    const box = root.querySelector<HTMLElement>('#pv-estimate')!;
+    expect(box.hidden).toBe(true);
+    setValue(root, 'heatPump.pvKwp', '8');
+    app.recalc();
+    expect(box.hidden).toBe(false);
+    const text = box.textContent!.replace(/\s+/g, ' ');
+    expect(text).toMatch(/PV deckt rechnerisch \d+ % des Wärmepumpenstroms/);
+    expect(text).toMatch(/Winter \(Dez–Feb\): \d+ %/);
+    expect(box.querySelectorAll('tbody tr')).toHaveLength(12);
+    expect(root.querySelector<HTMLElement>('[data-field="heatPump.batteryKwh"]')!.hidden).toBe(false);
   });
 
   it('F27 Einflussgrößen: Reiter, Tabelle sortiert nach Spanne, Zusammenfassung', () => {

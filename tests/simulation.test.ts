@@ -92,10 +92,12 @@ describe('F4 Wärmepumpe (KfW-Weg)', () => {
     expect(r.months[3].subsidy).toBe(-12880); // F5.1 payout (Auszahlung) after 3 months
   });
 
-  it('F2.6 PV-Anteil zur Einspeisevergütung bewertet', () => {
-    const r = simulate(wp((i) => (i.heatPump.pvShare = 0.5)), 'kfw');
-    const y = r.years.find((x) => x.year === 2027)!;
-    expect(y.energy).toBeCloseTo((18000 / 3.3) * (0.5 * 0.26 + 0.5 * 0.078), 6);
+  it('F2.6/F28 PV-Strom der Wärmepumpe zur Einspeisevergütung bewertet', () => {
+    const r = simulate(wp((i) => (i.heatPump.pvKwp = 8)), 'kfw');
+    const y = r.months.filter((m) => Math.floor(m.month / 12) === 2027);
+    const pv = y.reduce((a, m) => a + m.pvKWh, 0);
+    expect(pv).toBeGreaterThan(0);
+    expect(y.reduce((a, m) => a + m.energy, 0)).toBeCloseTo(((18000 / 3.3 - pv) * 0.26 + pv * 0.078), 6);
   });
 
   it('F2.5 ohne WP-Tarif: Haushaltsstrom, kein Zählergrundpreis', () => {
@@ -335,7 +337,9 @@ describe('F25 CO₂-Bilanz', () => {
   it('Wärmepumpe: Netzstrom × Strommix, PV-Eigenanteil CO₂-frei', () => {
     const elec = 18000 / 3.3;
     expect(simulate(base(), 'kfw').co2Tons).toBeCloseTo((20 * elec * 0.3) / 1000, 6);
-    expect(simulate(base((i) => (i.heatPump.pvShare = 0.5)), 'kfw').co2Tons).toBeCloseTo((20 * elec * 0.5 * 0.3) / 1000, 6);
+    const pv = simulate(base((i) => (i.heatPump.pvKwp = 8)), 'kfw');
+    const pvKWh = pv.months.reduce((a, m) => a + m.pvKWh, 0);
+    expect(pv.co2Tons).toBeCloseTo(((20 * elec - pvKWh) * 0.3) / 1000, 6);
     const run = runAll(base());
     expect(run.ref.co2Tons - run.kfw.co2Tons).toBeGreaterThan(40);
   });

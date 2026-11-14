@@ -3,6 +3,7 @@ import { formatMonthDe, monthOf, parseMonth, tryParseMonth, yearOf } from './dat
 import { kfwLoanVariant, kfwSubsidy } from './funding';
 import { loanScheduleDetailed, type LoanResult, type LoanSpec, type PrepaymentRules } from './loan';
 import { createPriceModel, energySplit } from './prices';
+import { createPvModel, pvSummary } from './pv';
 import { taxBonus } from './tax';
 import type {
   CostBreakdown,
@@ -118,6 +119,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
   const H = Math.max(1, Math.round(inp.general.horizonYears * 12));
   const end = start + H;
   const pm = createPriceModel(inp);
+  const pv = createPvModel(inp);
   // Space heating (Raumwärme), hot water (Warmwasser) and cooking handled separately (F17)
   const split = energySplit(inp);
   const cookStaysGas = split.cookingFuel > 0 && inp.oldHeating.cookingAfter === 'gas';
@@ -156,7 +158,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
 
   const rows: MonthRow[] = [];
   for (let m = 0; m < H; m++) {
-    rows.push({ month: start + m, heatKWh: 0, cookingCost: 0, system: 'old', co2Kg: 0, ...emptyBreakdown() });
+    rows.push({ month: start + m, heatKWh: 0, cookingCost: 0, system: 'old', co2Kg: 0, pvKWh: 0, ...emptyBreakdown() });
   }
   const assets: Asset[] = [];
 
@@ -184,9 +186,12 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
       r.system = 'wp';
       const elec = heatM / hp.jaz;
       const gridCt = pm.elecCt(abs);
-      r.energy = (elec * (1 - hp.pvShare) * gridCt + elec * hp.pvShare * hp.feedInCt) / 100;
+      // Own PV (F28): monthly model – in winter little PV is left for the heat pump; valued at the lost feed-in tariff
+      const fromPv = pv.forHeatPump(mo, elec);
+      r.pvKWh = fromPv;
+      r.energy = ((elec - fromPv) * gridCt + fromPv * hp.feedInCt) / 100;
       // CO2 (F25): grid electricity with the electricity mix (Strommix), own PV electricity counts as emission-free
-      r.co2Kg = elec * (1 - hp.pvShare) * pm.gridCo2Kg(year);
+      r.co2Kg = (elec - fromPv) * pm.gridCo2Kg(year);
       r.fixed = ((hp.separateTariff ? hp.meterFee * pm.elecGrowth(abs) : 0) - para14aFor(hp)) / 12;
       r.maintenance = (hp.maintenance * maintGrowth) / 12;
       if (cookM > 0) {
@@ -572,6 +577,8 @@ export interface PriceRow {
 export function priceRows(inp: Inputs): PriceRow[] {
   const pm = createPriceModel(inp);
   const out: PriceRow[] = [];
+  // Annual average PV share of the heat pump electricity (F28)
+  const pvShare = pvSummary(inp).share;
   const n = Math.ceil(inp.general.horizonYears) + 1;
   for (let i = 0; i < n; i++) {
     const year = pm.startYear + i;
@@ -586,7 +593,7 @@ export function priceRows(inp: Inputs): PriceRow[] {
       fuelCt,
       elecCt,
       heatCtFossil: fuelCt / inp.oldHeating.efficiency,
-      heatCtWp: ((1 - hp.pvShare) * elecCt + hp.pvShare * hp.feedInCt) / hp.jaz,
+      heatCtWp: ((1 - pvShare) * elecCt + pvShare * hp.feedInCt) / hp.jaz,
     });
   }
   return out;

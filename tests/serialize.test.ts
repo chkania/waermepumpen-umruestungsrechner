@@ -51,6 +51,18 @@ describe('F9 Persistenz', () => {
   });
 });
 
+describe('F28 früherer fester PV-Anteil', () => {
+  it('wird ignoriert, mit Hinweis auf die Leistung der PV-Anlage', () => {
+    const issues: { path: string; reason: string }[] = [];
+    const i = mergeInputs(defaults(), { heatPump: { pvShare: 0.25 } }, issues);
+    expect(i.heatPump.pvKwp).toBe(0);
+    expect(issues).toEqual([{ path: 'heatPump.pvKwp', reason: expect.stringContaining('feste PV-Anteil (25 %)') }]);
+    const none: unknown[] = [];
+    mergeInputs(defaults(), { heatPump: { pvShare: 0 } }, none as never);
+    expect(none).toEqual([]);
+  });
+});
+
 describe('F16 Szenario-Beschreibung', () => {
   const now = new Date(2026, 10, 12);
 
