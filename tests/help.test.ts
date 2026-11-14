@@ -27,6 +27,11 @@ describe('F15 Benutzerhandbuch – Vollständigkeit', () => {
     expect(handbook).toContain('„Alle zuklappen“');
   });
 
+  it('F19.3 Entstehung des Rechners ist beschrieben', () => {
+    expect(handbook).toContain('## Über diesen Rechner');
+    expect(handbook).toContain('rein privates Hobbyprojekt');
+  });
+
   it('alle Ergebnisbereiche sind beschrieben', () => {
     for (const t of ['Kennzahlen', 'Wichtige Ereignisse & Hinweise', 'Diagramme', 'Stromkosten: mit oder ohne Wärmepumpentarif', 'Wann umrüsten?', 'Jahresübersicht']) {
       expect(handbook, t).toContain(t);

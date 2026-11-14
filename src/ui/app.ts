@@ -861,6 +861,26 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   });
   introOpener.addEventListener('click', showIntro);
 
+  // ---------- Origin of the calculator (F19.3): jump from the header and the introduction ----------
+  // Scroll instead of changing the URL hash – the hash may carry a shared link with inputs ("#z=…")
+  const showAbout = () => {
+    const box = $<HTMLElement>('#ueber');
+    box.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+    $<HTMLElement>('#about-title').focus({ preventScroll: true });
+    box.classList.add('is-highlighted');
+    setTimeout(() => box.classList.remove('is-highlighted'), 2000);
+  };
+  document.addEventListener('click', (e) => {
+    const link = (e.target as HTMLElement).closest?.('[data-about-link]');
+    if (!link || !root.contains(link)) return;
+    e.preventDefault();
+    if (intro.open) {
+      markIntroSeen();
+      intro.close();
+    }
+    showAbout();
+  });
+
   // ---------- Recommend (F21) ----------
   const recommend = $<HTMLDialogElement>('#recommend');
   const recStatus = $<HTMLElement>('#rec-status');
@@ -1349,7 +1369,8 @@ function layout(): string {
       ${logoSvg()}
       <h1>Wärmepumpen-Umrüstungsrechner</h1>
       <p>Umstieg von Gas oder Öl: Energiepreise, KfW-Förderung, Kredit und Steuerbonus im Vergleich
-        <a id="app-version" class="version-link" href="./changelog.html" title="Änderungen dieser und früherer Versionen (Changelog)">Version ${APP_VERSION}</a></p>
+        <a id="app-version" class="version-link" href="./changelog.html" title="Änderungen dieser und früherer Versionen (Changelog)">Version ${APP_VERSION}</a>
+        <a class="version-link" href="#ueber" data-about-link title="Wie und warum dieser Rechner entstanden ist">Über diesen Rechner</a></p>
     </div>
     <div class="toolbar">
       <div class="design-switch theme-switch" role="group" aria-label="Hell oder dunkel">
@@ -1410,6 +1431,12 @@ function layout(): string {
         <div id="year-table" class="table-wrap"></div>
         <p class="muted small">Positive Werte = Ausgaben, negative = Einnahmen. „Kumuliert" enthält den Opportunitätszins.</p>
       </div>
+      <aside id="ueber" class="card about" aria-labelledby="about-title">
+        <h2 id="about-title" tabindex="-1">Über diesen Rechner</h2>
+        <p>Am Anfang stand eine ganz persönliche Frage: Lohnt sich der Umstieg auf eine Wärmepumpe auch finanziell? Die Antworten, die ich fand, waren oft sehr allgemein – oder beruhten auf Annahmen, die nicht zum eigenen Haus passten. Also habe ich angefangen, selbst nachzurechnen: Förderrichtlinien gelesen, Energie- und CO₂-Preise recherchiert, Steuerbonus und Kredite verglichen. Aus dieser Recherche ist Schritt für Schritt dieser Rechner entstanden.</p>
+        <p>Er ist ein rein privates Hobbyprojekt – ohne Auftraggeber, ohne Werbung und ohne kommerzielles Interesse. Ich bin selbst kein Fachmann für Heizungstechnik oder Energieberatung, sondern jemand, der sich gründlich eingelesen hat. Deshalb sind alle Annahmen offengelegt: Der „i“-Knopf an jedem Feld zeigt, woher ein Standardwert stammt. Der Rechner soll helfen, die eigene Situation zu durchdenken und mit guten Fragen ins Gespräch mit Energieberatung und Fachbetrieb zu gehen – ersetzen kann er dieses Gespräch nicht.</p>
+        <p class="muted small">Wenn Ihnen ein Fehler oder eine veraltete Annahme auffällt, freue ich mich über jeden Hinweis. – Christoph Kania</p>
+      </aside>
       <aside class="card contribute" aria-labelledby="contribute-title">
         <h2 id="contribute-title">Mitmachen</h2>
         <p>Förderprogramme, Energiepreise und Steuerregeln ändern sich laufend – ein Rechner wie dieser ist nur so gut wie seine Annahmen. Er ist ein offenes Projekt, und mit deiner Hilfe wird er besser für alle, die vor der Entscheidung für eine Wärmepumpe stehen:</p>
@@ -1485,6 +1512,7 @@ function introHtml(): string {
         <li><strong>Die Ergebnisse ansehen</strong> (rechts bzw. darunter). Sie aktualisieren sich sofort: Ersparnis und Amortisation, wichtige Termine und Hinweise, Diagramme und „Wann umrüsten?“.</li>
         <li><strong>Varianten sichern und vergleichen:</strong> Ihre Eingaben bleiben in diesem Browser gespeichert; über Export oder „Link mit Werten teilen“ heben Sie Varianten auf oder geben sie weiter.</li>
       </ol>
+      <p class="intro-about">Ein privates Hobbyprojekt: Der Rechner ist aus meiner eigenen Frage entstanden, ob sich der Umstieg finanziell lohnt. <a href="#ueber" data-about-link>Wie und warum er entstanden ist</a></p>
       <p class="muted small">Gerechnet wird nur in Ihrem Browser. Die Ergebnisse sind eine Modellrechnung und ersetzen keine Energie-, Förder- oder Steuerberatung.</p>
       <div class="intro-actions">
         <a href="./hilfe.html" target="_blank" rel="noopener">Ausführliche Anleitung in der Hilfe</a>

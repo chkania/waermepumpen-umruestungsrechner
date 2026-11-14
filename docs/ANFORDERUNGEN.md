@@ -149,6 +149,7 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 ### F19 – Projektlinks und Mitmachen
 - F19.1 Link zum GitHub-Repository im Seitenfuß des Rechners und aller Dokumentseiten (`src/project.ts` als einzige Quelle der Adressen). *(Test: ui, legal)*
 - F19.2 Kasten „Mitmachen“ unter den Ergebnissen, der zur Mitarbeit ermutigt: Fehler/veraltete Werte melden (Issue-Formular „Fehler oder veralteter Wert“, `.github/ISSUE_TEMPLATE/bug_report.yml`), Ideen vorschlagen (Issue-Formular „Idee oder Frage“, `.github/ISSUE_TEMPLATE/feature_request.yml`), mitentwickeln (Link auf `CONTRIBUTING.md`); dazu Abschnitte in Handbuch, README und CONTRIBUTING. *(Test: ui, help)*
+- F19.3 Kasten „Über diesen Rechner“ vor „Mitmachen“ (Sie-Form, Ich-Perspektive des Autors): Entstehung aus eigener Recherche zur Frage, ob sich der Umstieg finanziell lohnt; rein privates Hobbyprojekt ohne kommerzielles Interesse; Autor ist kein Fachmann, Annahmen sind offengelegt; ersetzt keine Energieberatung. Gleicher Text im Handbuch, Kurzfassung im README („Entstehung“). Prominent erreichbar über den Link „Über diesen Rechner“ im Kopf (neben der Version) und einen hervorgehobenen Hinweis mit Link in der Einführung (F20); der Link schließt die Einführung, scrollt zum Kasten, setzt den Fokus auf die Überschrift und hebt den Kasten kurz hervor, ohne den URL-Hash zu ändern (geteilte Links bleiben erhalten). *(Test: ui, help)*
 
 ### F20 – Einführung beim ersten Besuch
 - F20.1 Beim ersten Besuch (keine gespeicherten Eingaben, Einführung noch nie geschlossen) öffnet sich ein modaler Dialog: Zweck des Rechners, Bedienung in drei Schritten (Eingaben links bzw. oben, Ergebnisse rechts bzw. darunter, Varianten sichern), Hinweis auf Berechnung im Browser und fehlende Beratung, Link zur Hilfe. *(Test: ui)*
@@ -299,3 +300,4 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 | 2026-11-14 | F30 Bericht zum Drucken bzw. als PDF für Energieberatung, Handwerksbetrieb oder Bank. |
 | 2026-11-14 | F30.3 QR-Code im Bericht, der den Rechner mit den Eingaben öffnet; F9.2 Link mit Werten jetzt komprimiert (`#z=…`, etwa ein Drittel bis halb so lang), ältere Links `#s=…` bleiben gültig. Neue Laufzeit-Abhängigkeiten `fflate` und `uqr` (MIT). |
 | 2026-11-14 | F31 Varianten vergleichen: zwei oder drei Exporte bzw. die aktuellen Eingaben mit Kennzahlen, Kostenkurven und Unterschieden nebeneinander. |
+| 2026-11-14 | F19.3 Kasten „Über diesen Rechner“ mit der Entstehungsgeschichte als privates Hobbyprojekt. |

@@ -409,6 +409,31 @@ describe('UI (Smoke-Test)', () => {
     expect(root.querySelector<HTMLElement>('[data-field="heatPump.batteryKwh"]')!.hidden).toBe(false);
   });
 
+  it('F19.3 Kasten „Über diesen Rechner“ vor „Mitmachen“', () => {
+    const { root } = mount();
+    const about = root.querySelector('.about')!;
+    expect(about.querySelector('h2')!.textContent).toBe('Über diesen Rechner');
+    expect(about.textContent).toContain('rein privates Hobbyprojekt');
+    expect(about.textContent).toContain('kein Fachmann');
+    expect(about.nextElementSibling!.querySelector('h2')!.textContent).toBe('Mitmachen');
+    // prominent links: header and introduction; jumping keeps the URL hash (shared links)
+    const links = root.querySelectorAll<HTMLAnchorElement>('[data-about-link]');
+    expect(links).toHaveLength(2);
+    expect(root.querySelector('.brand [data-about-link]')!.textContent).toBe('Über diesen Rechner');
+    const intro = root.querySelector<HTMLDialogElement>('#intro')!;
+    intro.setAttribute('open', '');
+    const introLink = intro.querySelector<HTMLAnchorElement>('[data-about-link]')!;
+    expect(introLink.textContent).toBe('Wie und warum er entstanden ist');
+    history.replaceState(null, '', '/#z=abc');
+    introLink.click();
+    expect(intro.open).toBe(false);
+    expect(store.getItem(INTRO_KEY)).toBe('1');
+    expect(document.activeElement?.id).toBe('about-title');
+    expect(about.classList.contains('is-highlighted')).toBe(true);
+    expect(location.hash).toBe('#z=abc');
+    history.replaceState(null, '', '/');
+  });
+
   it('F31 Varianten vergleichen: aktuelle Eingaben und Dateien, Tabelle, Unterschiede, höchstens drei', async () => {
     const { root, app } = mount();
     root.querySelector<HTMLButtonElement>('#btn-variants')!.click();

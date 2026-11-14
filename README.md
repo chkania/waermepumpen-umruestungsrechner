@@ -21,6 +21,12 @@ Die aktuelle Version und alle Änderungen stehen in [CHANGELOG.md](CHANGELOG.md)
 
 Keine Finanz-, Steuer- oder Förderberatung; alle Angaben ohne Gewähr.
 
+## Entstehung
+
+Am Anfang stand eine persönliche Frage: Lohnt sich der Umstieg auf eine Wärmepumpe auch finanziell? Die Antworten, die ich fand, waren oft sehr allgemein oder beruhten auf Annahmen, die nicht zum eigenen Haus passten. Also habe ich selbst nachgerechnet – Förderrichtlinien, Energie- und CO₂-Preise, Steuerbonus, Kredite –, und aus dieser Recherche ist Schritt für Schritt dieser Rechner entstanden.
+
+Er ist ein rein privates Hobbyprojekt, ohne Auftraggeber, Werbung oder kommerzielles Interesse. Ich bin kein Fachmann für Heizungstechnik oder Energieberatung, sondern habe mich gründlich eingelesen; deshalb ist jede Annahme mit ihrer Herkunft offengelegt (`src/core/sources.ts`, [docs/ANFORDERUNGEN.md](docs/ANFORDERUNGEN.md)). Hinweise auf Fehler oder veraltete Werte sind herzlich willkommen. – Christoph Kania
+
 ## Mitmachen
 
 Förderprogramme, Energiepreise und Steuerregeln ändern sich laufend – der Rechner lebt davon, dass Menschen mit Erfahrung, Fachwissen oder einfach einem wachen Blick ihn aktuell halten. Mach mit, jeder Beitrag zählt:
