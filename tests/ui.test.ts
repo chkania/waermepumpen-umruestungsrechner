@@ -384,14 +384,14 @@ describe('UI (Smoke-Test)', () => {
     const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
     expect(tabs[0].getAttribute('aria-controls')).toBe('panel-cumulative');
     expect(root.querySelector('#panel-cumulative')!.getAttribute('role')).toBe('tabpanel');
-    expect(tabs.map((t) => t.tabIndex)).toEqual([0, -1, -1, -1, -1]);
+    expect(tabs.map((t) => t.tabIndex)).toEqual([0, -1, -1, -1, -1, -1]);
     tabs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     expect(tabs[1].getAttribute('aria-selected')).toBe('true');
-    expect(tabs.map((t) => t.tabIndex)).toEqual([-1, 0, -1, -1, -1]);
+    expect(tabs.map((t) => t.tabIndex)).toEqual([-1, 0, -1, -1, -1, -1]);
     expect(root.querySelector<HTMLElement>('#panel-annual')!.hidden).toBe(false);
     tabs[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
-    expect(tabs[4].getAttribute('aria-selected')).toBe('true');
-    tabs[4].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(tabs[5].getAttribute('aria-selected')).toBe('true');
+    tabs[5].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     expect(tabs[0].getAttribute('aria-selected')).toBe('true');
   });
 
@@ -407,6 +407,24 @@ describe('UI (Smoke-Test)', () => {
     expect(text).toMatch(/Winter \(Dez–Feb\): \d+ %/);
     expect(box.querySelectorAll('tbody tr')).toHaveLength(12);
     expect(root.querySelector<HTMLElement>('[data-field="heatPump.batteryKwh"]')!.hidden).toBe(false);
+  });
+
+  it('F29 Energie je Monat: Reiter, Tabelle mit 12 Monaten + Jahr, Zusammenfassung', () => {
+    const { root, app } = mount();
+    expect(root.querySelector('canvas[data-chart="energy"]')!.getAttribute('aria-label')).toContain('Energie je Monat');
+    const table = root.querySelector('[data-chart-table="energy"] table')!;
+    expect(table.querySelectorAll('tbody tr')).toHaveLength(13);
+    const head = () => [...root.querySelectorAll('[data-chart-table="energy"] thead th')].map((th) => th.textContent);
+    expect(head()).toEqual(['Monat', 'Bedarf Heizen', 'Bedarf Warmwasser', 'Bedarf gesamt', 'Gas – Altanlage', 'Strom – Wärmepumpe']);
+    const note = () => root.querySelector('[data-chart-note="energy"]')!.textContent!;
+    expect(note()).toMatch(/Bedarf [\d.]+ kWh für Heizen und Warmwasser\./);
+    expect(note()).toMatch(/kWh Strom/);
+    // cooking with gas that stays on gas after the switch
+    root.querySelector<HTMLInputElement>('[data-path="oldHeating.cookingWithGas"]')!.click();
+    setValue(root, 'oldHeating.cookingAfter', 'gas');
+    app.recalc();
+    expect(head()).toEqual(['Monat', 'Bedarf Heizen', 'Bedarf Warmwasser', 'Bedarf Kochen', 'Bedarf gesamt', 'Gas – Altanlage', 'Strom – Wärmepumpe', 'Gas zum Kochen – mit Wärmepumpe']);
+    expect(note()).toMatch(/Heizen, Warmwasser und Kochen.*kWh Gas zum Kochen/);
   });
 
   it('F27 Einflussgrößen: Reiter, Tabelle sortiert nach Spanne, Zusammenfassung', () => {

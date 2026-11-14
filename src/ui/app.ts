@@ -9,6 +9,7 @@ import { priceRows, runAll, type RunResult } from '../core/simulation';
 import { tariffComparison } from '../core/tariff';
 import { EFFICIENCY_CLASSES, rateHouse } from '../core/house';
 import { estimateJaz } from '../core/jaz';
+import { energyYear, type EnergyYear } from '../core/energy';
 import { pvSummary } from '../core/pv';
 import { sensitivity, type Sensitivity } from '../core/sensitivity';
 import { energySplit } from '../core/prices';
@@ -54,6 +55,7 @@ const CHART_TABS: [ChartId, string][] = [
   ['annual', 'Jährliche Kosten'],
   ['prices', 'Preisentwicklung'],
   ['install', 'Zeitpunkt der Umrüstung'],
+  ['energy', 'Energie je Monat'],
   ['sensitivity', 'Einflussgrößen'],
 ];
 
@@ -361,7 +363,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
 
   const redrawCharts = () => {
     charts.reset();
-    if (last) charts.update(last.run, priceRows(inputs), last.cmp, last.events, last.sens);
+    if (last) charts.update(last.run, priceRows(inputs), last.cmp, last.events, last.sens, energyYear(inputs));
   };
   // ---------- Light/dark ----------
   const media = typeof matchMedia === 'function' ? matchMedia('(prefers-color-scheme: dark)') : null;
@@ -436,12 +438,14 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     renderInstallTable(cmp);
     renderYearTable(run, events);
     const prices = priceRows(inputs);
-    charts.update(run, prices, cmp, events, sens);
-    renderChartTables(run, prices, cmp, sens);
+    const energy = energyYear(inputs);
+    charts.update(run, prices, cmp, events, sens, energy);
+    renderChartTables(run, prices, cmp, sens, energy);
   }
 
-  function renderChartTables(run: RunResult, prices: ReturnType<typeof priceRows>, cmp: InstallComparison, sens: Sensitivity): void {
-    const tables = chartTables(run, prices, cmp, sens);
+  function renderChartTables(run: RunResult, prices: ReturnType<typeof priceRows>, cmp: InstallComparison, sens: Sensitivity, energy: EnergyYear): void {
+    const tables = chartTables(run, prices, cmp, sens, energy);
+    renderEnergyNote(energy);
     // Summary of the sensitivity analysis (F27) above the chart
     const note = root.querySelector<HTMLElement>('[data-chart-note="sensitivity"]');
     const top = sens.items[0];
@@ -460,6 +464,22 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
         <thead><tr>${t.head.map((h, i) => `<th scope="col"${i ? ' class="num"' : ''}>${escapeHtml(h)}</th>`).join('')}</tr></thead>
         <tbody>${t.rows.map((r) => `<tr>${r.map((c, i) => (i ? `<td class="num">${escapeHtml(c)}</td>` : `<th scope="row">${escapeHtml(c)}</th>`)).join('')}</tr>`).join('')}</tbody></table>`;
     }
+  }
+
+  /** Annual summary of the energy chart (F29): how much gas/oil and electricity per kWh of useful energy. */
+  function renderEnergyNote(e: EnergyYear): void {
+    const note = root.querySelector<HTMLElement>('[data-chart-note="energy"]');
+    if (!note) return;
+    const n0 = (x: number) => fmtNum(x, 0);
+    const d2 = (x: number) => fmtNum(x, 2);
+    const t = e.totals;
+    const fuel = e.fuel === 'gas' ? 'Gas' : 'Heizöl';
+    note.innerHTML =
+      `Typisches Jahr: Bedarf <strong>${n0(t.need)} kWh</strong> für ${e.months.some((m) => m.need.cooking > 0) ? 'Heizen, Warmwasser und Kochen' : 'Heizen und Warmwasser'}. ` +
+      `Die Altanlage braucht dafür <strong>${n0(t.old)} kWh ${fuel}</strong> (${d2(t.old / t.need)} kWh je kWh Bedarf), ` +
+      `mit Wärmepumpe sind es <strong>${n0(t.hp)} kWh Strom</strong>${t.hpCookingGas > 0 ? ` und ${n0(t.hpCookingGas)} kWh Gas zum Kochen` : ''} ` +
+      `(${d2((t.hp + t.hpCookingGas) / t.need)} kWh je kWh Bedarf). ` +
+      `Die Jahresarbeitszahl ist ein Jahresmittel – tatsächlich arbeitet die Wärmepumpe an kalten Tagen etwas weniger effizient.`;
   }
 
   function renderKpis(run: RunResult): void {
@@ -1178,7 +1198,7 @@ function layout(): string {
         </div>
         ${CHART_TABS.map(
           ([id, l], i) => `<div role="tabpanel" id="panel-${id}" aria-labelledby="tab-${id}" data-panel="${id}" ${i === 0 ? '' : 'hidden'}>
-            ${id === 'sensitivity' ? '<p class="chart-note muted small" data-chart-note="sensitivity"></p>' : ''}
+            ${id === 'sensitivity' || id === 'energy' ? `<p class="chart-note muted small" data-chart-note="${id}"></p>` : ''}
             <div class="chart-wrap"><canvas data-chart="${id}" role="img" aria-label="Diagramm ${l}. Die Werte stehen in der Tabelle darunter."></canvas></div>
             <details class="chart-data"><summary>Werte als Tabelle</summary><div class="table-wrap" data-chart-table="${id}"></div></details>
           </div>`,

@@ -190,6 +190,10 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 - F28.2 Monatsmodell (`src/core/pv.ts`): Ertrag = kWp × Jahresertrag × Monatsanteil (Jan 3, Feb 5, Mär 8,5, Apr 11,5, Mai 13, Jun 13, Jul 13,5, Aug 12, Sep 9, Okt 6, Nov 3, Dez 2 %, normiert); Haushaltsstrom mit leichtem Winterübergewicht. Gedeckt = 50 % von min(PV, Verbrauch) direkt (Gleichzeitigkeit) + Speicher min(Überschuss × 0,9; Restverbrauch; Kapazität × 0,9 × Tage). PV-Strom der WP = Deckung (Haushalt + WP) − Deckung (Haushalt allein), höchstens der WP-Strom. Wirkt auf Stromkosten (`MonthRow.pvKWh` zur Einspeisevergütung), CO₂-Bilanz, Tarifvergleich und Preisentwicklung (Jahresmittel). *(Test: pv, simulation, tariff)*
 - F28.3 Unter den PV-Feldern: Anteil des WP-Stroms aus PV im Jahr, im Winter (Dez–Feb) und Sommer (Jun–Aug), aufklappbare Monatstabelle (PV-Ertrag, WP-Strom, davon PV) im typischen Jahr. *(Test: ui)*
 - F28.4 Ältere Daten mit festem `pvShare` > 0: Feld wird ignoriert (ohne PV gerechnet), Hinweis beim Laden bittet um die Leistung der PV-Anlage. Mit Defaults (keine PV) Ergebnisse unverändert. *(Test: serialize)*
+
+### F29 – Energie je Monat
+- F29.1 `src/core/energy.ts`: typisches Jahr mit den Monatsprofilen (F17). Bedarf = Raumwärme + Warmwasser (Nutzwärme) + Kochen (Gas × 0,5 als Nutzenergie, nur wenn heute mit Gas gekocht wird); Altanlage = Nutzwärme ÷ Nutzungsgrad + Kochgas; Wärmepumpe = Nutzwärme ÷ JAZ + Induktionsstrom (Kochgas × Faktor) bzw. weiter Kochgas. *(Test: energy)*
+- F29.2 Diagramm-Reiter „Energie je Monat“: je Monat Balken für Bedarf, Gas/Heizöl der Altanlage und Strom der Wärmepumpe (+ Kochgas gestapelt), Tooltip mit Aufteilung Heizen/Warmwasser/Kochen; Satz über dem Diagramm mit Jahressummen und kWh je kWh Bedarf; Hinweis, dass die JAZ ein Jahresmittel ist. Tabelle in `chartTables()` mit Monaten und Jahressumme, Spalte Kochen nur mit Gasherd. *(Test: ui)*
 ### F9 – Persistenz
 - F9.1 Eingaben werden automatisch im localStorage gespeichert und beim Laden wiederhergestellt. *(Test: serialize)*
 - F9.2 „Link mit Werten teilen" (bis 1.4: „Link teilen"): Eingaben (nur Abweichungen von den Defaults) als Base64url-JSON im URL-Hash `#s=…`; ein Link hat Vorrang vor localStorage. *(Test: serialize)*
@@ -282,3 +286,4 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 | 2026-11-14 | F26 Schätzung der Jahresarbeitszahl aus Heizflächen, Wärmequelle und Wärmebedarf je m², mit Erklärung, Übernehmen-Knopf und Warnung bei zu optimistischer JAZ. Ergebnisse unverändert. |
 | 2026-11-14 | F27 Einflussgrößen: Sensitivitätsanalyse der wichtigsten Annahmen als Tornado-Diagramm mit Tabelle. Ergebnisse unverändert. |
 | 2026-11-14 | F28 PV-Anlage im Monatsmodell (Leistung, Ertrag, Speicher, Haushaltsstrom) statt festem PV-Anteil; Anzeige der PV-Deckung je Monat. Beispiel 02 auf 8 kWp mit 5 kWh Speicher umgestellt. Defaults unverändert. |
+| 2026-11-14 | F29 Diagramm „Energie je Monat“: Bedarf für Heizen, Warmwasser und Kochen gegenüber Gas/Öl und Strom in kWh. Ergebnisse unverändert. |

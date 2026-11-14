@@ -15,13 +15,23 @@ import {
 } from 'chart.js';
 import type { InstallComparison } from '../core/compare';
 import type { KeyEvent, KeyEvents } from '../core/events';
+import { energyTotal, type EnergyMonth, type EnergyParts, type EnergyYear } from '../core/energy';
 import { VARIATION_TEXT, type Sensitivity } from '../core/sensitivity';
 import type { PriceRow, RunResult } from '../core/simulation';
 import { fmtEur, fmtMonth, fmtNum } from './format';
 
 Chart.register(BarController, BarElement, CategoryScale, LinearScale, LineController, LineElement, PointElement, Legend, Tooltip);
 
-export type ChartId = 'cumulative' | 'annual' | 'prices' | 'install' | 'sensitivity';
+export type ChartId = 'cumulative' | 'annual' | 'prices' | 'install' | 'energy' | 'sensitivity';
+
+export const MONTH_SHORT = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+/** Dataset labels of the energy chart (F29). */
+export const energyLabels = (e: EnergyYear) => ({
+  need: 'Bedarf (Nutzenergie)',
+  old: e.fuel === 'gas' ? 'Gas – Altanlage' : 'Heizöl – Altanlage',
+  hp: 'Strom – Wärmepumpe',
+  hpGas: 'Gas zum Kochen – mit Wärmepumpe',
+});
 
 /** Bar label of a sensitivity item incl. its variation, e.g. "JAZ (±0,5)". */
 export const sensitivityLabel = (id: string, label: string) => `${label} (${VARIATION_TEXT[id] ?? ''})`;
@@ -52,7 +62,7 @@ export class Charts {
 
   constructor(private canvases: Record<ChartId, HTMLCanvasElement>) {}
 
-  update(run: RunResult, prices: PriceRow[], cmp: InstallComparison, events?: KeyEvents, sens?: Sensitivity): void {
+  update(run: RunResult, prices: PriceRow[], cmp: InstallComparison, events?: KeyEvents, sens?: Sensitivity, energy?: EnergyYear): void {
     const c = palette();
     Chart.defaults.color = c.text;
     Chart.defaults.borderColor = c.grid;
@@ -184,6 +194,44 @@ export class Charts {
       },
     });
 
+    // Energy per month (F29): demand vs. gas/oil and electricity, stacked groups per month
+    if (energy) {
+      const L = energyLabels(energy);
+      const kwh = (x: number) => `${fmtNum(x, 0)} kWh`;
+      const parts = (p: EnergyParts) => [`Heizen ${kwh(p.space)}`, `Warmwasser ${kwh(p.dhw)}`, ...(p.cooking > 0 ? [`Kochen ${kwh(p.cooking)}`] : [])];
+      const group = (label: string, data: number[], color: string, stack: string) => ({ label, data, backgroundColor: color, borderColor: color, stack, maxBarThickness: 18 });
+      const pick = (f: (m: EnergyMonth) => number) => energy.months.map(f);
+      const datasets = [
+        group(L.need, pick((m) => energyTotal(m.need)), c.co2, 'need'),
+        group(L.old, pick((m) => energyTotal(m.old)), c.ref, 'old'),
+        group(L.hp, pick((m) => energyTotal(m.hp)), c.kfw, 'hp'),
+        ...(energy.cookingStaysGas ? [{ ...group(L.hpGas, pick((m) => m.hpCookingGas), c.ref, 'hp'), backgroundColor: `${c.ref}66` }] : []),
+      ];
+      this.render('energy', {
+        type: 'bar',
+        data: { labels: MONTH_SHORT, datasets } as ChartConfiguration['data'],
+        options: {
+          interaction: { mode: 'index', intersect: false },
+          scales: {
+            x: { stacked: true },
+            y: { stacked: true, title: { display: true, text: 'kWh je Monat' }, ticks: { callback: (v) => fmtNum(Number(v), 0) } },
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: (ctx: TooltipItem<ChartType>) => {
+                  const m = energy.months[ctx.dataIndex];
+                  const p = [m.need, m.old, m.hp][ctx.datasetIndex];
+                  const value = `${ctx.dataset.label}: ${kwh(Number(ctx.parsed.y ?? 0))}`;
+                  return p ? [value, `   ${parts(p).join(' · ')}`] : value;
+                },
+              },
+            },
+          },
+        },
+      });
+    }
+
     // Sensitivity (F27): tornado chart – bars from the base saving to the saving with the lower/higher assumption
     if (sens) {
       const items = sens.items;
@@ -253,7 +301,13 @@ export interface ChartTable {
 }
 
 /** Returns the same values as a table for every chart – also without canvas (e.g. screen readers, tests). */
-export function chartTables(run: RunResult, prices: PriceRow[], cmp: InstallComparison, sens?: Sensitivity): Partial<Record<ChartId, ChartTable>> {
+export function chartTables(
+  run: RunResult,
+  prices: PriceRow[],
+  cmp: InstallComparison,
+  sens?: Sensitivity,
+  energy?: EnergyYear,
+): Partial<Record<ChartId, ChartTable>> {
   const scen = [
     ['Ohne WP', run.ref],
     ['WP + KfW', run.kfw],
@@ -274,6 +328,7 @@ export function chartTables(run: RunResult, prices: PriceRow[], cmp: InstallComp
       head: ['Inbetriebnahme', 'WP + KfW', 'WP + Steuerbonus', 'Ohne WP'],
       rows: cmp.rows.map((r) => [fmtMonth(r.installMonth), fmtEur(r.kfwTotal), r.taxFeasible ? fmtEur(r.taxTotal) : 'nicht möglich', fmtEur(cmp.refTotal)]),
     },
+    ...(energy ? { energy: energyTable(energy) } : {}),
     ...(sens
       ? {
           sensitivity: {
@@ -291,5 +346,32 @@ export function chartTables(run: RunResult, prices: PriceRow[], cmp: InstallComp
           },
         }
       : {}),
+  };
+}
+
+/** Table of the energy chart (F29): demand split by use, consumption of the old system and the heat pump, with annual total. */
+function energyTable(e: EnergyYear): ChartTable {
+  const L = energyLabels(e);
+  const n = (x: number) => fmtNum(x, 0);
+  // Cooking only appears if it runs on gas today (otherwise it is outside the calculation)
+  const cooking = e.months.some((m) => m.need.cooking > 0);
+  const row = (label: string, need: EnergyParts, old: number, hp: number, gas: number) => [
+    label,
+    n(need.space),
+    n(need.dhw),
+    ...(cooking ? [n(need.cooking)] : []),
+    n(energyTotal(need)),
+    n(old),
+    n(hp),
+    ...(e.cookingStaysGas ? [n(gas)] : []),
+  ];
+  const sumParts = (f: (m: EnergyMonth) => number) => e.months.reduce((a, m) => a + f(m), 0);
+  return {
+    caption: 'Energie je Monat im typischen Jahr (kWh): Bedarf für Heizen, Warmwasser und Kochen und der Verbrauch dafür',
+    head: ['Monat', 'Bedarf Heizen', 'Bedarf Warmwasser', ...(cooking ? ['Bedarf Kochen'] : []), 'Bedarf gesamt', L.old, L.hp, ...(e.cookingStaysGas ? [L.hpGas] : [])],
+    rows: [
+      ...e.months.map((m) => row(MONTH_SHORT[m.month - 1], m.need, energyTotal(m.old), energyTotal(m.hp), m.hpCookingGas)),
+      row('Jahr', { space: sumParts((m) => m.need.space), dhw: sumParts((m) => m.need.dhw), cooking: sumParts((m) => m.need.cooking) }, e.totals.old, e.totals.hp, e.totals.hpCookingGas),
+    ],
   };
 }
