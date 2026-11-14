@@ -6,6 +6,7 @@
  * - no cookies, Do Not Track is respected, sensitive query parameters are excluded
  * - `discardHashTag`: the URL hash is never sent – shared links carry all inputs in "#s=…" (F9.2)
  * - `setDocumentTitle`: fixed page title, because the window title contains the scenario name (F16.1)
+ * - opt-out (objection, Widerspruch) on the privacy page, stored in localStorage instead of a cookie
  * Only active in the production build (not in the dev server or tests).
  */
 
@@ -42,6 +43,39 @@ const EXCLUDED_QUERY_PARAMS = [
 
 type MatomoQueue = unknown[][];
 
+/** localStorage key for the visitor's objection (Widerspruch) to tracking. */
+export const OPT_OUT_KEY = 'wp-investitionsrechner:analytics-opt-out';
+
+/** Whether the visitor has objected to tracking in this browser. */
+export function isOptedOut(storage: Pick<Storage, 'getItem'> | null = safeStorage()): boolean {
+  try {
+    return storage?.getItem(OPT_OUT_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+/** Stores or removes the objection; returns false if the browser storage is unavailable. */
+export function setOptOut(optOut: boolean, storage: Pick<Storage, 'setItem' | 'removeItem'> | null = safeStorage()): boolean {
+  try {
+    if (!storage) return false;
+    if (optOut) storage.setItem(OPT_OUT_KEY, '1');
+    else storage.removeItem(OPT_OUT_KEY);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function safeStorage(): Storage | null {
+  try {
+    // window.localStorage explicitly: Node ≥ 25 has its own global localStorage that shadows the DOM one in tests
+    return typeof window === 'undefined' ? null : window.localStorage;
+  } catch {
+    return null;
+  }
+}
+
 declare global {
   interface Window {
     _paq?: MatomoQueue;
@@ -53,6 +87,8 @@ export interface AnalyticsOptions {
   enabled?: boolean;
   win?: Window;
   doc?: Document;
+  /** Where the objection is stored; defaults to window.localStorage. */
+  storage?: Pick<Storage, 'getItem'> | null;
 }
 
 /**
@@ -60,8 +96,8 @@ export interface AnalyticsOptions {
  * @param pageTitle fixed title reported to Matomo, e.g. "Rechner" (never user input)
  */
 export function initAnalytics(pageTitle: string, opts: AnalyticsOptions = {}): void {
-  const { enabled = import.meta.env.PROD, win = window, doc = document } = opts;
-  if (!enabled) return;
+  const { enabled = import.meta.env.PROD, win = window, doc = document, storage = safeStorage() } = opts;
+  if (!enabled || isOptedOut(storage)) return;
   const paq: MatomoQueue = (win._paq = win._paq || []);
   // tracker methods like "setCustomDimension" must be called before "trackPageView"
   paq.push(['setDoNotTrack', true]);

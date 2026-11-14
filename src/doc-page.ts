@@ -17,13 +17,15 @@ export interface DocPage {
   codeLang?: string;
 }
 
-/** Footer of all document pages: calculator, help, license, third parties (N8). */
+/** Footer of all document pages: calculator, help, license, third parties (N8), changelog (N9), imprint and privacy (N11). */
 export const DOC_LINKS: [string, string][] = [
   ['./index.html', 'Rechner'],
   ['./hilfe.html', 'Hilfe'],
   ['./lizenz.html', 'Lizenz'],
   ['./lizenzen-drittanbieter.html', 'Lizenzen von Drittanbietern'],
   ['./changelog.html', `Änderungen (Version ${APP_VERSION})`],
+  ['./impressum.html', 'Impressum'],
+  ['./datenschutz.html', 'Datenschutz'],
 ];
 
 /** Renders a Markdown document page in the calculator's style (manual F15, license pages N8). */

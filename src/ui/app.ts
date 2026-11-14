@@ -1019,7 +1019,7 @@ function layout(): string {
         <p class="muted small">Positive Werte = Ausgaben, negative = Einnahmen. „Kumuliert" enthält den Opportunitätszins.</p>
       </div>
       <p class="disclaimer">Keine Finanz-, Steuer- oder Förderberatung. Alle Angaben ohne Gewähr; Förderbedingungen Stand ${FUNDING_SOURCE_DATE.split('-').reverse().join('.')} – bitte vor Antragstellung bei KfW, Energieberatung und Steuerberatung prüfen.</p>
-      <p class="disclaimer license"><a href="./changelog.html" target="_blank" rel="noopener">Version ${APP_VERSION}</a> · © 2026 Christoph Kania · Lizenz: <a href="./lizenz.html" target="_blank" rel="noopener">PolyForm Noncommercial 1.0.0</a> – kostenfreie Nutzung für nicht-kommerzielle Zwecke; kommerzielle Nutzung nur nach Absprache · <a href="./lizenzen-drittanbieter.html" target="_blank" rel="noopener">Lizenzen von Drittanbietern</a></p>
+      <p class="disclaimer license"><a href="./changelog.html" target="_blank" rel="noopener">Version ${APP_VERSION}</a> · © 2026 Christoph Kania · Lizenz: <a href="./lizenz.html" target="_blank" rel="noopener">PolyForm Noncommercial 1.0.0</a> – kostenfreie Nutzung für nicht-kommerzielle Zwecke; kommerzielle Nutzung nur nach Absprache · <a href="./lizenzen-drittanbieter.html" target="_blank" rel="noopener">Lizenzen von Drittanbietern</a> · <a href="./impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="./datenschutz.html" target="_blank" rel="noopener">Datenschutz</a></p>
     </section>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>`;

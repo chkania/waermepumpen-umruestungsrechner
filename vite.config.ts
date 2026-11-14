@@ -19,6 +19,9 @@ export default defineConfig({
         drittanbieter: resolve(__dirname, 'lizenzen-drittanbieter.html'),
         // Changelog (N9)
         changelog: resolve(__dirname, 'changelog.html'),
+        // Legal pages: imprint and privacy policy (N11)
+        impressum: resolve(__dirname, 'impressum.html'),
+        datenschutz: resolve(__dirname, 'datenschutz.html'),
       },
     },
   },

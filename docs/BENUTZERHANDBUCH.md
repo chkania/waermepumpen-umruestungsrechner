@@ -308,4 +308,6 @@ Der Rechner läuft vollständig in Ihrem Browser. Ihre Eingaben und Ergebnisse w
 
 **Besucherstatistik:** Die veröffentlichte Fassung zählt Seitenaufrufe mit Matomo auf einem eigenen Server (analytics.chkania.net), nicht bei Dritten. Dabei werden **keine Cookies** gesetzt, und ist in Ihrem Browser „Do Not Track“ eingeschaltet, wird gar nichts erfasst. Übertragen werden nur allgemeine Angaben wie die aufgerufene Seite (z. B. „Rechner“ oder „Hilfe“), Browser und Bildschirmgröße – **nicht** der Teil der Adresse nach `#`, in dem geteilte Links Ihre Eingaben enthalten, und nicht die Bezeichnung Ihres Szenarios.
 
+Möchten Sie nicht erfasst werden, entfernen Sie auf der Seite **Datenschutz** (Link im Seitenfuß) den Haken bei der Besucherstatistik; die Wahl gilt für diesen Browser. Dort und im **Impressum** finden Sie auch alle rechtlichen Angaben.
+
 Die Content-Security-Policy erlaubt nur die eigenen Skripte des Rechners und die Statistik; eingeschleuster Code aus Links oder Dateien würde nicht ausgeführt.

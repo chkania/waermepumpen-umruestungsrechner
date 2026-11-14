@@ -6,7 +6,7 @@ import type { Plugin } from 'vite';
  * first paint) are allowed via SHA-256 hash. Build only – the Vite dev server needs inline code.
  * frame-ancestors (protection against embedding) cannot be set via <meta>, only as an HTTP header when hosting.
  */
-/** Matomo visitor statistics (N10, src/analytics.ts): script, tracking requests and noscript pixel. */
+/** Matomo visitor statistics (N10, src/analytics.ts): script and tracking requests (image fallback). */
 export const ANALYTICS_ORIGIN = 'https://analytics.chkania.net';
 
 export const CSP_DIRECTIVES = [
