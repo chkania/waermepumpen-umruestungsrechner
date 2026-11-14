@@ -8,6 +8,21 @@ Alle wesentlichen Änderungen am Wärmepumpen-Investitionsrechner. Das Format or
 - **Minor** (1.x.0): neue Funktionen oder Eingaben sowie bewusst geänderte Rechenmodelle oder Standardwerte (Ergebnisse können sich ändern).
 - **Patch** (1.0.x): Fehlerkorrekturen, Texte, Darstellung – ohne neue Funktionen.
 
+## 1.7.0 – 2026-11-14
+
+### Neu
+- CO₂-Bilanz – eingesparte Tonnen CO₂ mit Strommix, Ökostromtarif und Bio-Anteil
+- Jahresarbeitszahl aus Heizflächen, Wärmequelle und Wärmebedarf schätzen
+- Einflussgrößen – welche Annahmen das Ergebnis am stärksten beeinflussen
+- PV-Anlage im Monatsmodell mit Speicher und Haushaltsstrom statt festem PV-Anteil
+- Diagramm „Energie je Monat“ – Bedarf gegenüber Gas, Öl und Strom
+- Bericht zum Drucken bzw. als PDF für Energieberatung, Handwerksbetrieb oder Bank
+- QR-Code im Bericht öffnet die Berechnung; kürzere Links mit Werten
+- Varianten vergleichen – Kennzahlen, Kostenkurven und Unterschiede nebeneinander
+
+### Fehlerkorrekturen
+- Versionsnummer öffnet die Änderungen im selben Tab
+
 ## 1.6.0 – 2026-11-14
 
 ### Neu
