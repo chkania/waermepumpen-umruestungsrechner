@@ -304,4 +304,8 @@ Der Lizenztext und die Lizenzen der enthaltenen Bibliotheken und Schriften (Char
 
 ## Datenschutz
 
-Der Rechner läuft vollständig in Ihrem Browser. Eingaben werden nicht an einen Server übertragen. Die veröffentlichte Fassung erlaubt per Content-Security-Policy nur die eigenen Skripte des Rechners; eingeschleuster Code aus Links oder Dateien würde nicht ausgeführt. Gespeichert wird nur lokal im Browser; geteilt wird nur, was Sie per Link oder Export selbst weitergeben.
+Der Rechner läuft vollständig in Ihrem Browser. Ihre Eingaben und Ergebnisse werden nicht an einen Server übertragen. Gespeichert wird nur lokal im Browser; geteilt wird nur, was Sie per Link oder Export selbst weitergeben.
+
+**Besucherstatistik:** Die veröffentlichte Fassung zählt Seitenaufrufe mit Matomo auf einem eigenen Server (analytics.chkania.net), nicht bei Dritten. Dabei werden **keine Cookies** gesetzt, und ist in Ihrem Browser „Do Not Track“ eingeschaltet, wird gar nichts erfasst. Übertragen werden nur allgemeine Angaben wie die aufgerufene Seite (z. B. „Rechner“ oder „Hilfe“), Browser und Bildschirmgröße – **nicht** der Teil der Adresse nach `#`, in dem geteilte Links Ihre Eingaben enthalten, und nicht die Bezeichnung Ihres Szenarios.
+
+Die Content-Security-Policy erlaubt nur die eigenen Skripte des Rechners und die Statistik; eingeschleuster Code aus Links oder Dateien würde nicht ausgeführt.

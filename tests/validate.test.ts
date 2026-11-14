@@ -86,7 +86,7 @@ describe('N6 Content-Security-Policy im Build', () => {
     const html = '<html><head>\n<meta charset="UTF-8" />\n<script>console.log(1)</script>\n<script type="module" src="/a.js"></script></head></html>';
     const out = await addCsp(html);
     const meta = /<meta http-equiv="Content-Security-Policy" content="([^"]+)"/.exec(out)![1];
-    expect(meta).toContain("script-src 'self' 'sha256-CihokcEcBW4atb/CW/XWsvWwbTjqwQlE9nj9ii5ww5M='");
+    expect(meta).toContain("script-src 'self' https://analytics.chkania.net 'sha256-CihokcEcBW4atb/CW/XWsvWwbTjqwQlE9nj9ii5ww5M='");
     expect(meta).toContain("object-src 'none'");
     expect(meta).toContain("base-uri 'none'");
     expect(meta).not.toContain('unsafe-inline');
