@@ -21,6 +21,25 @@ function userCase(mut?: (i: Inputs) => void): Inputs {
 const ev = (i: Inputs) => keyEvents(i, runAll(i));
 const find = (list: KeyEvent[], re: RegExp) => list.find((e) => re.test(e.title));
 
+describe('F25.4 Bio-Treppe ohne Aufpreis', () => {
+  it('heutiger Bio-Anteil deckt die Pflicht: kein Betrag, Erklärung', () => {
+    const steps = (share: number) =>
+      ev(
+        userCase((i) => {
+          i.oldHeating.remainingLifeYears = 2;
+          i.prices.bioEnabled = true;
+          i.prices.currentBioShare = share;
+        }),
+      ).timeline.filter((e) => e.title.startsWith('Bio-Treppe'));
+    const covered = steps(0.4);
+    expect(covered.length).toBeGreaterThan(0);
+    const low = covered.find((e) => /: (10|15|30) %/.test(e.title))!;
+    expect(low.amount).toBeUndefined();
+    expect(low.detail).toContain('kein Aufpreis');
+    expect(steps(0).every((e) => e.amount === undefined || e.amount > 0)).toBe(true);
+  });
+});
+
 describe('F26 Hinweis bei JAZ über der Schätzung', () => {
   it('nur wenn die JAZ über der Spanne liegt', () => {
     expect(find(ev(userCase()).hints, /liegt über der Schätzung/)).toBeUndefined();

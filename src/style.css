@@ -629,3 +629,74 @@ td.ev-cell { white-space: normal; min-width: 220px; }
 .rec-status { min-height: 1.4em; margin: 4px 0; font-size: 0.9rem; color: var(--good); }
 .rec-status.is-error { color: var(--c-text-2); }
 .rec-fallback { width: 100%; box-sizing: border-box; margin: 4px 0 8px; padding: 8px; border: 1px solid var(--accent); border-radius: var(--radius); background: var(--surface); color: var(--c-text); font: inherit; font-size: 0.85rem; resize: vertical; }
+
+/* ---------- Printable report (F30) ---------- */
+.report { display: none; }
+/* While the charts are drawn: laid out off screen at print width (A4 minus margins) */
+.report.is-rendering { display: block; position: absolute; left: -10000px; top: 0; width: 186mm; }
+.report-chart-wrap { position: relative; height: 70mm; }
+.report-head { display: flex; align-items: center; gap: 4mm; }
+.report-logo { flex: none; width: 14mm; height: 14mm; }
+.report-chart { display: block; width: 100%; height: auto; }
+
+@media print {
+  @page { size: A4; margin: 12mm 12mm 14mm; }
+  body { background: #fff; }
+  body > :not(.report) { display: none !important; }
+  .report {
+    display: block;
+    position: static;
+    width: auto;
+    color: var(--c-text);
+    font-size: 9.5pt;
+    line-height: 1.35;
+  }
+  .report h1 { font-size: 15pt; margin: 0 0 2mm; }
+  .report h2 { font-size: 11.5pt; margin: 5mm 0 2mm; padding-bottom: 1mm; border-bottom: 1px solid var(--border); break-after: avoid; }
+  .report h3 { font-size: 10pt; margin: 3mm 0 1mm; break-after: avoid; }
+  .report p { margin: 1mm 0; }
+  .report .muted { color: var(--c-text-2); }
+  .report-head p { color: var(--c-text-2); margin: 0; }
+  .report-notes { white-space: pre-wrap; }
+  .report table { width: 100%; border-collapse: collapse; }
+  .report th, .report td { text-align: left; padding: 0.8mm 1.5mm; border-bottom: 1px solid var(--border); vertical-align: top; }
+  /* Plain tables in print – ":root[data-design]" outranks the screen rules of the modern design (mono capitals, card padding) */
+  :root[data-design] .report th,
+  :root[data-design] .report td {
+    font-family: inherit;
+    font-size: inherit;
+    text-transform: none;
+    letter-spacing: normal;
+    background: none;
+    color: var(--c-text);
+    padding: 0.8mm 1.5mm;
+    border-bottom: 1px solid var(--border);
+  }
+  :root[data-design] .report td.num { font-family: inherit; font-size: inherit; }
+  :root[data-design] .report thead th { font-weight: 600; border-bottom-color: var(--c-text-2); }
+  :root[data-design] .report-kpis th { font-weight: 400; }
+  :root[data-design] .report-details .card { border: 0; padding: 0; margin: 0 0 2mm; box-shadow: none; background: none; break-inside: avoid; }
+  :root[data-design] .report-details .table-wrap { overflow: visible; }
+  .report .num { text-align: right; white-space: nowrap; }
+  .report-kpis th { width: 38%; }
+  .report-facts, .report-hints { margin: 1mm 0; padding-left: 5mm; }
+  .report-hints li { margin-bottom: 1mm; }
+  .report-charts figure { margin: 0 0 4mm; break-inside: avoid; }
+  .report-charts figcaption { font-weight: 600; margin-bottom: 1mm; }
+  .report-details { break-inside: auto; }
+  .report-details h3 { margin-top: 2mm; }
+  .report-details dl { display: grid; grid-template-columns: 1fr auto; gap: 0.4mm 4mm; margin: 0; }
+  /* Inputs: wider label column so labels wrap less; long values (paths) wrap in their column */
+  .report-groups { font-size: 8.5pt; }
+  .report-groups dl { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 0.3mm 3mm; margin: 0; }
+  .report-groups dd { overflow-wrap: anywhere; }
+  .report-details dd, .report-groups dd { margin: 0; text-align: right; }
+  /* Inputs as an appendix on a new page – keeps the heading together with the lists */
+  .report-inputs { break-before: page; }
+  .report-groups { columns: 2; column-gap: 8mm; }
+  .report-group { break-inside: avoid; }
+  .report-groups dt { color: var(--c-text-2); }
+  .report-timeline { font-size: 8.5pt; }
+  .report-foot { margin-top: 6mm; padding-top: 2mm; border-top: 1px solid var(--border); font-size: 8pt; color: var(--c-text-2); }
+  .report a { color: inherit; text-decoration: none; }
+}

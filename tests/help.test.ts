@@ -17,7 +17,7 @@ describe('F15 Benutzerhandbuch – Vollständigkeit', () => {
   });
 
   it('alle Funktionen der Werkzeugleiste sind beschrieben', () => {
-    for (const t of ['Einführung', 'Weiterempfehlen', 'Link mit Werten teilen', 'Export', 'Import', 'Zurücksetzen', 'Hilfe', 'Hell | Dunkel | Auto']) {
+    for (const t of ['Einführung', 'Weiterempfehlen', 'Link mit Werten teilen', 'Bericht drucken', 'Export', 'Import', 'Zurücksetzen', 'Hilfe', 'Hell | Dunkel | Auto']) {
       expect(handbook, t).toContain(`### ${t}`);
     }
   });

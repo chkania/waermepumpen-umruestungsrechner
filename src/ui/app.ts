@@ -11,6 +11,7 @@ import { EFFICIENCY_CLASSES, rateHouse } from '../core/house';
 import { estimateJaz } from '../core/jaz';
 import { energyYear, type EnergyYear } from '../core/energy';
 import { pvSummary } from '../core/pv';
+import { reportHtml } from './report';
 import { sensitivity, type Sensitivity } from '../core/sensitivity';
 import { energySplit } from '../core/prices';
 import { decodeHash, encodeHash, exportFileName, exportJson, importJson, mergeInputs } from '../core/serialize';
@@ -19,7 +20,7 @@ import { NUMBER_LIMITS, numberRange, TEXT_LIMITS, validMonth, type InputIssue } 
 import { Charts, chartTables, type ChartId } from './charts';
 import { SECTIONS, getPath, setPath, type Field } from './fields';
 import { escapeHtml, fmtDuration, fmtEur, fmtMonth, fmtNum, fmtPct } from './format';
-import { RECOMMEND_SUBJECT, RECOMMEND_TEXT, recommendLinks } from './share';
+import { RECOMMEND_SUBJECT, RECOMMEND_TEXT, calculatorUrl, recommendLinks } from './share';
 import { logoSvg } from '../logo';
 import { BUG_REPORT_URL, CONTRIBUTING_URL, FEATURE_REQUEST_URL, REPO_URL } from '../project';
 
@@ -48,6 +49,8 @@ export interface AppController {
   setTheme(t: ThemeChoice): void;
   /** Opens the introduction dialog (F20). */
   showIntro(): void;
+  /** Builds the printable report (F30) and returns its element (null without result). */
+  buildReport(): HTMLElement | null;
 }
 
 const CHART_TABS: [ChartId, string][] = [
@@ -929,7 +932,90 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       redrawCharts();
     },
     showIntro,
+    buildReport,
   };
+
+  // ---------- Printable report (F30) ----------
+  /** Theme before printing; the report is always printed light. */
+  let themeBeforePrint: string | null = null;
+  let titleBeforePrint = '';
+  function buildReport(): HTMLElement | null {
+    if (!last) return null;
+    let report = document.getElementById('report');
+    if (!report) {
+      report = document.createElement('div');
+      report.id = 'report';
+      report.className = 'report';
+      document.body.appendChild(report);
+    }
+    if (themeBeforePrint === null) {
+      themeBeforePrint = document.documentElement.dataset.theme ?? null;
+      titleBeforePrint = document.title;
+    }
+    document.documentElement.dataset.theme = 'light';
+    // The browser suggests the document title as PDF file name
+    const reportDate = (env.today ?? new Date()).toLocaleDateString('sv-SE');
+    const reportName = inputs.scenario.name.trim();
+    document.title = `Wärmepumpen-Bericht${reportName ? ` – ${reportName}` : ''} – ${reportDate}`;
+    report.innerHTML = reportHtml({
+      inputs,
+      defaults,
+      run: last.run,
+      cmp: last.cmp,
+      events: last.events,
+      today: env.today ?? new Date(),
+      url: calculatorUrl(location.href),
+      detailsHtml: $<HTMLElement>('#details').innerHTML,
+    });
+    // Charts: render off screen in light colours at print width, then keep a static copy of each bitmap.
+    // A copy on a canvas is available immediately – an <img> with a data URL may not be decoded yet when
+    // the browser lays out the print (Ctrl+P / "beforeprint"), and the chart would be missing.
+    report.classList.add('is-rendering');
+    const canvases: Partial<Record<ChartId, HTMLCanvasElement>> = {};
+    for (const fig of report.querySelectorAll<HTMLElement>('[data-report-chart]')) {
+      const wrap = document.createElement('div');
+      wrap.className = 'report-chart-wrap';
+      const canvas = document.createElement('canvas');
+      wrap.appendChild(canvas);
+      fig.appendChild(wrap);
+      canvases[fig.dataset.reportChart as ChartId] = canvas;
+    }
+    const rc = new Charts(canvases, 2);
+    rc.update(last.run, priceRows(inputs), last.cmp, last.events, last.sens, energyYear(inputs));
+    for (const fig of report.querySelectorAll<HTMLElement>('[data-report-chart]')) {
+      const source = fig.querySelector('canvas');
+      const copy = document.createElement('canvas');
+      const ctx = copy.getContext?.('2d');
+      if (!source || !ctx || !source.width) continue;
+      copy.width = source.width;
+      copy.height = source.height;
+      ctx.drawImage(source, 0, 0);
+      copy.className = 'report-chart';
+      copy.setAttribute('role', 'img');
+      copy.setAttribute('aria-label', `Diagramm ${fig.querySelector('figcaption')?.textContent ?? ''}`);
+      fig.querySelector('.muted')?.remove();
+      fig.querySelector('.report-chart-wrap')?.replaceWith(copy);
+    }
+    rc.reset();
+    report.classList.remove('is-rendering');
+    return report;
+  }
+  const restoreTheme = () => {
+    if (themeBeforePrint !== null) {
+      document.documentElement.dataset.theme = themeBeforePrint;
+      document.title = titleBeforePrint;
+    }
+    themeBeforePrint = null;
+  };
+  // Ctrl+P / browser menu prints the report as well
+  window.addEventListener('beforeprint', () => {
+    if (themeBeforePrint === null) buildReport();
+  });
+  window.addEventListener('afterprint', restoreTheme);
+  $<HTMLButtonElement>('#btn-report').addEventListener('click', () => {
+    if (!buildReport()) return;
+    window.print();
+  });
 
   writeForm();
   renderNotice();
@@ -1175,6 +1261,7 @@ function layout(): string {
       <a id="btn-help" class="tool-link" href="./hilfe.html" target="_blank" rel="noopener" title="Benutzerhandbuch in neuem Tab öffnen">Hilfe</a>
       <button id="btn-recommend" type="button" aria-haspopup="dialog" title="Den Rechner per WhatsApp, Threema, E-Mail, Link oder einer anderen App (z. B. Signal) weiterempfehlen">Weiterempfehlen</button>
       <button id="btn-share" type="button" title="Link mit Ihren aktuellen Eingaben kopieren – zum Sichern oder Weitergeben Ihrer Berechnung">Link mit Werten teilen</button>
+      <button id="btn-report" type="button" title="Kompakte Zusammenfassung mit Eingaben, Ergebnissen, Diagrammen, Förderung und Finanzierung – drucken oder als PDF speichern">Bericht drucken</button>
       <button id="btn-export" type="button">Export</button>
       <button id="btn-import" type="button">Import</button>
       <button id="btn-reset" type="button" class="ghost">Zurücksetzen</button>

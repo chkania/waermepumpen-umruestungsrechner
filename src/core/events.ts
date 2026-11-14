@@ -64,14 +64,19 @@ export function keyEvents(inp: Inputs, run: RunResult): KeyEvents {
     for (const step of relevant) {
       const month = Math.max(step.year * 12, firstBoiler.month);
       if (month >= end) continue;
+      const surcharge = (fuelNew * pm.bioSurchargeCt(yearOf(month))) / 100;
+      const zero = Math.round(surcharge) === 0;
+      const covered = zero && inp.prices.currentBioShare > 0;
       timeline.push({
         month,
         scenario: 'ref',
         level: 'info',
         title: `Bio-Treppe: ${step.value} % Bio-Anteil für den neuen Kessel`,
-        detail: 'Gebäudemodernisierungsgesetz – Mehrkosten für Biogas/Bioöl gegenüber fossilem Brennstoff.',
-        amount: (fuelNew * pm.bioSurchargeCt(yearOf(month))) / 100,
-        perYear: true,
+        detail: covered
+          ? `Gebäudemodernisierungsgesetz – kein Aufpreis: Der Bio-Anteil im heutigen Tarif (${pct(inp.prices.currentBioShare)}) deckt die Pflicht bereits.`
+          : 'Gebäudemodernisierungsgesetz – Mehrkosten für Biogas/Bioöl gegenüber fossilem Brennstoff.',
+        // F25.4: a bio share bought today covers the obligation – no "−0 €" amount
+        ...(zero ? {} : { amount: surcharge, perYear: true }),
       });
     }
   }

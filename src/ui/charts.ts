@@ -60,7 +60,11 @@ const eurAxis = (title?: string) => ({
 export class Charts {
   private charts = new Map<ChartId, Chart>();
 
-  constructor(private canvases: Record<ChartId, HTMLCanvasElement>) {}
+  constructor(
+    private canvases: Partial<Record<ChartId, HTMLCanvasElement>>,
+    /** Higher resolution, e.g. for the printed report (F30). */
+    private pixelRatio?: number,
+  ) {}
 
   update(run: RunResult, prices: PriceRow[], cmp: InstallComparison, events?: KeyEvents, sens?: Sensitivity, energy?: EnergyYear): void {
     const c = palette();
@@ -274,7 +278,7 @@ export class Charts {
   private render(id: ChartId, cfg: ChartConfiguration & { type: ChartType }): void {
     const canvas = this.canvases[id];
     if (!canvas || !canvas.getContext?.('2d')) return; // e.g. test environment without canvas
-    cfg.options = { responsive: true, maintainAspectRatio: false, animation: false, ...cfg.options };
+    cfg.options = { responsive: true, maintainAspectRatio: false, animation: false, ...(this.pixelRatio ? { devicePixelRatio: this.pixelRatio } : {}), ...cfg.options };
     const existing = this.charts.get(id);
     if (existing && (existing.config as { type?: string }).type === cfg.type) {
       existing.data = cfg.data;

@@ -409,6 +409,27 @@ describe('UI (Smoke-Test)', () => {
     expect(root.querySelector<HTMLElement>('[data-field="heatPump.batteryKwh"]')!.hidden).toBe(false);
   });
 
+  it('F30 Bericht: wird aufgebaut, druckt hell und stellt das Design danach wieder her', () => {
+    const { app } = mount();
+    document.documentElement.dataset.theme = 'dark';
+    const report = app.buildReport()!;
+    expect(report.id).toBe('report');
+    expect(report.parentElement).toBe(document.body);
+    expect(report.querySelector('h1')!.textContent).toContain('Bericht');
+    expect(report.querySelector('.report-details')!.textContent).toContain('KfW-Zuschuss (458)');
+    expect(report.querySelectorAll('[data-report-chart]')).toHaveLength(3);
+    expect(report.classList.contains('is-rendering')).toBe(false);
+    expect(document.documentElement.dataset.theme).toBe('light');
+    expect(document.title).toMatch(/^Wärmepumpen-Bericht – \d{4}-\d{2}-\d{2}$/);
+    window.dispatchEvent(new Event('afterprint'));
+    expect(document.documentElement.dataset.theme).toBe('dark');
+    expect(document.title).not.toContain('Bericht');
+    // a second build reuses the element
+    app.buildReport();
+    expect(document.querySelectorAll('#report')).toHaveLength(1);
+    window.dispatchEvent(new Event('afterprint'));
+  });
+
   it('F29 Energie je Monat: Reiter, Tabelle mit 12 Monaten + Jahr, Zusammenfassung', () => {
     const { root, app } = mount();
     expect(root.querySelector('canvas[data-chart="energy"]')!.getAttribute('aria-label')).toContain('Energie je Monat');

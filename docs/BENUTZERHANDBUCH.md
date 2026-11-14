@@ -60,6 +60,20 @@ Erzeugt einen Link, der alle **vom Standard abweichenden Eingaben** enthält, un
 - Ein geöffneter Link hat Vorrang vor den im Browser gespeicherten Eingaben – er **überschreibt sie aber nicht**. Haben Sie eigene Eingaben gespeichert, erscheint über den Ergebnissen der Hinweis „Geteiltes Szenario geöffnet“. Änderungen wirken dann nur auf den Link. Mit **Als meine Eingaben übernehmen** speichern Sie das Szenario als Ihre eigenen Eingaben, mit **Eigene Eingaben laden** kehren Sie zu Ihrem gespeicherten Stand zurück. Import und Zurücksetzen beenden die Link-Ansicht ebenfalls.
 - Werte im Link werden geprüft: Ungültige Monate oder Auswahlwerte werden durch den Standardwert ersetzt, extreme Zahlen (z. B. 1.000.000 Jahre Laufzeit) auf sinnvolle Grenzen begrenzt. Was ersetzt wurde, steht im Hinweis über den Ergebnissen.
 
+### Bericht drucken
+
+Erstellt eine **kompakte Zusammenfassung** für das Gespräch mit Energieberatung, Handwerksbetrieb oder Bank und öffnet den Druckdialog des Browsers. Dort wählen Sie einen Drucker oder **„Als PDF speichern“**. Der Bericht enthält:
+
+- Bezeichnung und Bemerkungen des Szenarios, Datum, Version und Betrachtungszeitraum,
+- die Kennzahlen (Gesamtkosten, Ersparnis, Amortisation, CO₂-Einsparung) und den günstigsten Umrüstzeitpunkt,
+- Eckdaten zu Haus und Wärmepumpe (Kennwert, Effizienzklasse, Heizlast, JAZ-Schätzung, ggf. PV-Deckung),
+- die Diagramme „Kumulierte Kosten“, „Energie je Monat“ und „Einflussgrößen“,
+- KfW-Zuschuss, Steuerbonus und Finanzierung,
+- wichtige Ereignisse und Hinweise,
+- alle sichtbaren Eingaben; aus den Experten-Abschnitten nur die Werte, die Sie geändert haben.
+
+Der Bericht wird immer hell gedruckt, auch wenn Sie das dunkle Design nutzen. Als Dateiname für das PDF schlägt der Browser „Wärmepumpen-Bericht – Bezeichnung – Datum“ vor. Tipp: Schalten Sie im Druckdialog unter „Weitere Einstellungen“ die **Kopf- und Fußzeilen** aus – dann fehlen Datum, Seitentitel und Adresse am Seitenrand. Auch der Druckbefehl des Browsers (Strg+P bzw. ⌘+P) druckt den Bericht statt der Bildschirmansicht. Der Bericht entsteht nur in Ihrem Browser und wird nirgendwohin übertragen.
+
 ### Export
 
 Speichert alle Eingaben als **JSON-Datei**, einschließlich Bezeichnung und Bemerkungen des Szenarios. Ist eine **Bezeichnung des Szenarios** eingetragen, steht sie im Dateinamen, z. B. `waermepumpe-rechner-Angebot-Firma-A-2026-11.json` (Umlaute werden umschrieben, Sonderzeichen durch `-` ersetzt); sonst heißt die Datei `waermepumpe-rechner-2026-11.json`. Geeignet zur Sicherung, zur Übertragung auf ein anderes Gerät oder um mehrere Varianten (z. B. „Angebot A“, „Angebot B“) aufzubewahren.
