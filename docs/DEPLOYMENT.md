@@ -71,6 +71,29 @@ Danach `deploy_key`, `deploy_key.pub` und `host_key.txt` lokal löschen. Geht de
 - Der Build nutzt relative Pfade (`base: './'`), funktioniert also auch in einem Unterverzeichnis.
 - Auf dem Webspace muss `rsync` verfügbar sein (bei den meisten Hostern mit SSH-Zugang der Fall).
 
+## Absicherung (öffentliches Repository)
+
+Eingerichtet am 14.11.2026:
+
+| Ebene | Einstellung | Wirkung |
+|---|---|---|
+| Umgebung `production` | **Required reviewers:** chkania | Jedes Deployment wartet auf eine Freigabe (Actions → Lauf → „Review deployments“). |
+| Umgebung `production` | **Deployment branches:** nur `main` | Workflows aus anderen Branches erhalten die SSH-Secrets nicht – auch nicht, wenn jemand den Workflow dort ändert. |
+| Regelsatz „main schützen“ | kein Force-Push, kein Löschen von `main` | Der veröffentlichte Verlauf kann nicht überschrieben werden. |
+| Actions → Fork-PRs | **Freigabe für alle externen Mitwirkenden** | Workflows aus PRs von Forks laufen erst nach Zustimmung. |
+
+Ohnehin gilt: Workflows aus Fork-PRs erhalten keine Secrets, und Deploy startet nur nach dem Release-Workflow auf `main` oder manuell durch Personen mit Schreibrecht.
+
+Weitere Empfehlungen:
+
+- **Schlüssel auf dem Server einschränken** (wirksamster Schutz bei einem gestohlenen Schlüssel): in `~/.ssh/authorized_keys` die Zeile des Deploy-Schlüssels auf rsync in das Zielverzeichnis begrenzen, z. B. `command="rrsync -wo /pfad/zum/ziel",restrict ssh-ed25519 AAAA… github-deploy` (`rrsync` liegt rsync bei; Pfad je nach System, ggf. `/usr/share/doc/rsync/support/rrsync`).
+- **Wenige Personen mit Schreibrecht:** Wer schreiben darf, kann Workflows ändern und so an Secrets gelangen. Stand 14.11.2026 hat nur chkania (Admin) Zugriff. Mitwirkende arbeiten über Forks und Pull Requests; wer beim Sortieren von Issues und PRs hilft, bekommt höchstens die Rolle **Triage** (kein Push), **Write** nur bei echtem Vertrauen, **Admin** bleibt beim Inhaber. Prüfen unter Settings → Collaborators.
+- **„Nur per PR“ und Pflicht-Checks für `main`** sind derzeit nicht aktiv: Bei persönlichen Repositorys kann GitHub Actions nicht als Ausnahme eingetragen werden, und der Release-Workflow muss seinen Commit `chore(release): x.y.z` direkt auf `main` pushen.
+
+### Fehler „No ED25519 host key is known …“
+
+Das Secret `SSH_KNOWN_HOSTS` enthält keinen passenden Eintrag. Häufige Ursachen: Statt der Zeile aus `ssh-keyscan` wurde nur der Fingerabdruck (`SHA256:…`) eingetragen, der Hostname in der Zeile weicht von `DEPLOY_HOST` ab, oder die Zeile ist gehasht (`|1|…`, entsteht mit `ssh-keyscan -H`). Richtig ist eine Zeile der Form `host.example.de ssh-ed25519 AAAA…`.
+
 ### Empfohlene HTTP-Header
 
 Die Content-Security-Policy steht bereits im HTML. Zusätzlich empfehlenswert, z. B. in `.htaccess` (Apache):
