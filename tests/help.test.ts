@@ -17,7 +17,7 @@ describe('F15 Benutzerhandbuch – Vollständigkeit', () => {
   });
 
   it('alle Funktionen der Werkzeugleiste sind beschrieben', () => {
-    for (const t of ['Link teilen', 'Export', 'Import', 'Zurücksetzen', 'Hilfe', 'Modern | Klassisch', 'Hell | Dunkel | Auto']) {
+    for (const t of ['Einführung', 'Link teilen', 'Export', 'Import', 'Zurücksetzen', 'Hilfe', 'Modern | Klassisch', 'Hell | Dunkel | Auto']) {
       expect(handbook, t).toContain(`### ${t.startsWith('Modern') ? 'Design: ' + t : t}`);
     }
   });

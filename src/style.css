@@ -527,3 +527,35 @@ td.ev-cell { white-space: normal; min-width: 220px; }
 .contribute p, .contribute li { font-size: 0.9rem; line-height: 1.5; }
 .contribute ul { margin: 6px 0 8px; padding-left: 20px; }
 .contribute li { margin-bottom: 4px; }
+
+/* Introduction dialog for first-time visitors (F20); uses the tokens of both designs */
+.intro {
+  width: min(640px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--c-text);
+  box-shadow: 0 12px 40px rgb(0 0 0 / 0.25);
+}
+.intro::backdrop { background: rgb(0 0 0 / 0.45); }
+.intro-body { padding: 22px 24px 18px; overflow-y: auto; }
+.intro h2 { margin: 0 0 10px; font-size: 1.25rem; line-height: 1.3; }
+.intro h3 { margin: 16px 0 6px; font-size: 1rem; }
+.intro-lead { margin: 0; line-height: 1.55; }
+.intro-steps { margin: 0 0 12px; padding-left: 22px; line-height: 1.5; }
+.intro-steps li { margin-bottom: 6px; }
+.intro-actions { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; justify-content: space-between; margin-top: 16px; }
+.intro .primary {
+  padding: 8px 18px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--on-accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.intro .primary:hover { filter: brightness(1.08); }
+.intro-again { margin: 12px 0 0; }

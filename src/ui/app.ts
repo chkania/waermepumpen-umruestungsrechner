@@ -24,6 +24,8 @@ export const DEFAULT_DESIGN: Design = 'modern';
 /** Light/dark: 'auto' follows the browser/system setting, 'light'/'dark' override it (F14.5). */
 export const THEME_KEY = 'wp-investitionsrechner:theme';
 export type ThemeChoice = 'auto' | 'light' | 'dark';
+/** Set once the introduction (F20) was closed; it is then no longer shown automatically. */
+export const INTRO_KEY = 'wp-investitionsrechner:intro-seen';
 
 export interface AppEnv {
   storage?: Storage | null;
@@ -41,6 +43,8 @@ export interface AppController {
   setDesign(d: Design): void;
   getTheme(): ThemeChoice;
   setTheme(t: ThemeChoice): void;
+  /** Opens the introduction dialog (F20). */
+  showIntro(): void;
 }
 
 const CHART_TABS: [ChartId, string][] = [
@@ -712,6 +716,33 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       </table>`;
   }
 
+  // ---------- Introduction (F20) ----------
+  const intro = $<HTMLDialogElement>('#intro');
+  const introOpener = $<HTMLButtonElement>('#btn-intro');
+  const showIntro = () => {
+    if (intro.open) return;
+    if (typeof intro.showModal === 'function') intro.showModal();
+    else intro.setAttribute('open', '');
+  };
+  const markIntroSeen = () => {
+    try {
+      storage?.setItem(INTRO_KEY, '1');
+    } catch {
+      /* Speicher nicht verfügbar */
+    }
+  };
+  // Remember at every way of closing; the 'close' event alone is not delivered reliably (e.g. background tabs)
+  intro.querySelector('form')!.addEventListener('submit', markIntroSeen);
+  intro.addEventListener('cancel', markIntroSeen); // Esc
+  intro.addEventListener('close', markIntroSeen);
+  // close when clicking on the backdrop (outside the dialog content)
+  intro.addEventListener('click', (e) => {
+    if (e.target !== intro) return;
+    markIntroSeen();
+    intro.close();
+  });
+  introOpener.addEventListener('click', showIntro);
+
   const controller: AppController = {
     getInputs: () => inputs,
     setInputs(i) {
@@ -734,6 +765,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       }
       redrawCharts();
     },
+    showIntro,
     setDesign(d) {
       if (d === design) return;
       applyDesign(d);
@@ -749,7 +781,17 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   writeForm();
   renderNotice();
   recalc();
+  if (isFirstVisit(storage, initial.storedRaw)) showIntro();
   return controller;
+}
+
+/** First visit: introduction not yet closed and no inputs of an earlier visit stored. */
+function isFirstVisit(storage: Storage | null, storedRaw: string | null): boolean {
+  try {
+    return storage?.getItem(INTRO_KEY) !== '1' && storedRaw === null;
+  } catch {
+    return false;
+  }
 }
 
 interface InitialLoad {
@@ -971,6 +1013,7 @@ function layout(): string {
         <button type="button" data-theme-choice="dark" aria-pressed="false" title="Dunkles Design">Dunkel</button>
         <button type="button" data-theme-choice="auto" aria-pressed="false" title="Wie Browser bzw. System">Auto</button>
       </div>
+      <button id="btn-intro" type="button" aria-haspopup="dialog" title="Kurze Einführung: Wozu dient der Rechner, wie bedient man ihn?">Einführung</button>
       <a id="btn-help" class="tool-link" href="./hilfe.html" target="_blank" rel="noopener" title="Benutzerhandbuch in neuem Tab öffnen">Hilfe</a>
       <button id="btn-share" type="button">Link teilen</button>
       <button id="btn-export" type="button">Export</button>
@@ -1033,5 +1076,29 @@ function layout(): string {
       <p class="disclaimer license"><a href="./changelog.html" target="_blank" rel="noopener">Version ${APP_VERSION}</a> · © 2026 Christoph Kania · Lizenz: <a href="./lizenz.html" target="_blank" rel="noopener">PolyForm Noncommercial 1.0.0</a> – kostenfreie Nutzung für nicht-kommerzielle Zwecke; kommerzielle Nutzung nur nach Absprache · <a href="./lizenzen-drittanbieter.html" target="_blank" rel="noopener">Lizenzen von Drittanbietern</a> · <a href="./impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="./datenschutz.html" target="_blank" rel="noopener">Datenschutz</a> · <a href="${REPO_URL}" target="_blank" rel="noopener">Quellcode auf GitHub</a></p>
     </section>
   </main>
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>`;
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  ${introHtml()}`;
+}
+
+/** Introduction for first-time visitors (F20): purpose, short usage, pointer to the manual. */
+function introHtml(): string {
+  return `
+  <dialog id="intro" class="intro" aria-labelledby="intro-title" aria-describedby="intro-purpose">
+    <form method="dialog" class="intro-body">
+      <h2 id="intro-title">Willkommen beim Wärmepumpen-Investitionsrechner</h2>
+      <p id="intro-purpose" class="intro-lead">Lohnt sich der Umstieg von Ihrer Gas- oder Ölheizung auf eine Wärmepumpe – und wann ist der beste Zeitpunkt? Der Rechner stellt die Gesamtkosten über viele Jahre gegenüber: <strong>bisherige Heizung weiterbetreiben</strong> oder <strong>auf eine Wärmepumpe umsteigen</strong> – mit KfW-Zuschuss oder Steuerbonus, Kredit, steigenden Energie- und CO₂-Preisen und den Kosten des Wartens.</p>
+      <h3>So geht’s</h3>
+      <ol class="intro-steps">
+        <li><strong>Ihre Daten eintragen</strong> (links, auf dem Smartphone oben). Am wichtigsten sind Energieträger und Verbrauch Ihrer Heizung, die Kosten der Wärmepumpe und Ihr Haushaltseinkommen. Für alles andere sind realistische Standardwerte hinterlegt – das „i“ neben einem Feld zeigt, woher sie stammen.</li>
+        <li><strong>Die Ergebnisse ansehen</strong> (rechts bzw. darunter). Sie aktualisieren sich sofort: Ersparnis und Amortisation, wichtige Termine und Hinweise, Diagramme und „Wann umrüsten?“.</li>
+        <li><strong>Varianten sichern und vergleichen:</strong> Ihre Eingaben bleiben in diesem Browser gespeichert; über Export oder „Link teilen“ heben Sie Varianten auf oder geben sie weiter.</li>
+      </ol>
+      <p class="muted small">Gerechnet wird nur in Ihrem Browser. Die Ergebnisse sind eine Modellrechnung und ersetzen keine Energie-, Förder- oder Steuerberatung.</p>
+      <div class="intro-actions">
+        <a href="./hilfe.html" target="_blank" rel="noopener">Ausführliche Anleitung in der Hilfe</a>
+        <button type="submit" value="close" class="primary" autofocus>Los geht’s</button>
+      </div>
+      <p class="muted small intro-again">Diese Einführung können Sie jederzeit über „Einführung“ oben wieder öffnen.</p>
+    </form>
+  </dialog>`;
 }

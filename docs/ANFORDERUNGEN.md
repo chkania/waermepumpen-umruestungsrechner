@@ -150,6 +150,10 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 - F19.1 Link zum GitHub-Repository im Seitenfuß des Rechners und aller Dokumentseiten (`src/project.ts` als einzige Quelle der Adressen). *(Test: ui, legal)*
 - F19.2 Kasten „Mitmachen“ unter den Ergebnissen, der zur Mitarbeit ermutigt: Fehler/veraltete Werte melden (Issue-Formular „Fehler oder veralteter Wert“, `.github/ISSUE_TEMPLATE/bug_report.yml`), Ideen vorschlagen (Issue-Formular „Idee oder Frage“, `.github/ISSUE_TEMPLATE/feature_request.yml`), mitentwickeln (Link auf `CONTRIBUTING.md`); dazu Abschnitte in Handbuch, README und CONTRIBUTING. *(Test: ui, help)*
 
+### F20 – Einführung beim ersten Besuch
+- F20.1 Beim ersten Besuch (keine gespeicherten Eingaben, Einführung noch nie geschlossen) öffnet sich ein modaler Dialog: Zweck des Rechners, Bedienung in drei Schritten (Eingaben links bzw. oben, Ergebnisse rechts bzw. darunter, Varianten sichern), Hinweis auf Berechnung im Browser und fehlende Beratung, Link zur Hilfe. *(Test: ui)*
+- F20.2 Schließen per „Los geht’s“, Esc oder Klick neben den Dialog merkt sich der Browser (`localStorage`); danach ist die Einführung über „Einführung“ in der Werkzeugleiste erreichbar. Barrierefrei als natives `<dialog>` mit Titel, Fokus auf der Hauptschaltfläche. *(Test: ui, help)*
+
 ### F9 – Persistenz
 - F9.1 Eingaben werden automatisch im localStorage gespeichert und beim Laden wiederhergestellt. *(Test: serialize)*
 - F9.2 „Link teilen": Eingaben (nur Abweichungen von den Defaults) als Base64url-JSON im URL-Hash `#s=…`; ein Link hat Vorrang vor localStorage. *(Test: serialize)*
@@ -228,3 +232,4 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 | 2026-11-14 | N11 Impressum und Datenschutzerklärung; N10 um Widerspruch (Opt-out) ergänzt, noscript-Pixel entfernt. |
 | 2026-11-14 | F19 Link zum GitHub-Repository und Hinweis zur Mitarbeit (Rechner, Dokumentseiten, Handbuch, README, CONTRIBUTING). |
 | 2026-11-14 | N12 Deployment-Workflow per SSH/rsync auf einen Webspace mit Anleitung `docs/DEPLOYMENT.md`. |
+| 2026-11-14 | F20 Einführung beim ersten Besuch (Dialog mit Zweck, Bedienung, Link zur Hilfe; Knopf „Einführung“). |

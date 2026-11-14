@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { beforeEach, describe, expect, it } from 'vitest';
 import { SECTIONS, getPath } from '../src/ui/fields';
-import { DESIGN_KEY, mountApp, STORAGE_KEY, THEME_KEY } from '../src/ui/app';
+import { DESIGN_KEY, INTRO_KEY, mountApp, STORAGE_KEY, THEME_KEY } from '../src/ui/app';
 import { encodeHash } from '../src/core/serialize';
 import { APP_VERSION } from '../src/version';
 import { defaults, TODAY } from './helpers';
@@ -391,5 +391,52 @@ describe('UI (Smoke-Test)', () => {
     const a = root.querySelector<HTMLAnchorElement>('#btn-help')!;
     expect(a.getAttribute('href')).toBe('./hilfe.html');
     expect(a.target).toBe('_blank');
+  });
+});
+
+describe('F20 Einführung beim ersten Besuch', () => {
+  beforeEach(() => {
+    store.clear();
+    history.replaceState(null, '', '/');
+  });
+
+  it('erscheint beim ersten Besuch mit Zweck, Bedienung und Link zur Hilfe', () => {
+    const { root } = mount();
+    const intro = root.querySelector<HTMLDialogElement>('#intro')!;
+    expect(intro.open).toBe(true);
+    expect(intro.getAttribute('aria-labelledby')).toBe('intro-title');
+    expect(intro.textContent).toContain('Lohnt sich der Umstieg');
+    expect(intro.querySelectorAll('.intro-steps li')).toHaveLength(3);
+    expect(intro.querySelector('a[href="./hilfe.html"]')).not.toBeNull();
+  });
+
+  it('nach dem Schließen nicht mehr automatisch, aber über „Einführung“ wieder erreichbar', () => {
+    let { root } = mount();
+    // „Los geht’s“ submits the dialog form
+    root.querySelector<HTMLFormElement>('#intro form')!.dispatchEvent(new Event('submit', { cancelable: true }));
+    expect(store.getItem(INTRO_KEY)).toBe('1');
+    ({ root } = mount());
+    const intro = root.querySelector<HTMLDialogElement>('#intro')!;
+    expect(intro.open).toBe(false);
+    root.querySelector<HTMLButtonElement>('#btn-intro')!.click();
+    expect(intro.open).toBe(true);
+  });
+
+  it('nicht automatisch für wiederkehrende Nutzer mit gespeicherten Eingaben', () => {
+    store.setItem(STORAGE_KEY, JSON.stringify(defaults()));
+    const { root } = mount();
+    expect(root.querySelector<HTMLDialogElement>('#intro')!.open).toBe(false);
+  });
+
+  it('Esc und Klick neben den Dialog merken sich das Schließen ebenfalls', () => {
+    let { root } = mount();
+    root.querySelector('#intro')!.dispatchEvent(new Event('cancel', { cancelable: true }));
+    expect(store.getItem(INTRO_KEY)).toBe('1');
+    store.clear();
+    ({ root } = mount());
+    const intro = root.querySelector<HTMLDialogElement>('#intro')!;
+    intro.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(store.getItem(INTRO_KEY)).toBe('1');
+    expect(intro.open).toBe(false);
   });
 });

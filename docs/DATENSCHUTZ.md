@@ -40,7 +40,7 @@ Der Rechner wird aus Sicherheitsgründen über eine verschlüsselte Verbindung (
 
 ### Ihre Eingaben bleiben in Ihrem Browser
 
-Alle Berechnungen laufen lokal in Ihrem Browser. Damit Ihre Eingaben beim nächsten Besuch wieder da sind, speichert der Rechner sie im lokalen Speicher Ihres Browsers (`localStorage`), ebenso die gewählte Darstellung (Design, Hell/Dunkel) und ggf. Ihren Widerspruch gegen die Statistik. Diese Daten verlassen Ihr Gerät nicht und sind für mich nicht einsehbar. Die Speicherung ist für die von Ihnen gewünschte Funktion erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG). Sie können sie jederzeit löschen, indem Sie die Website-Daten in Ihrem Browser entfernen.
+Alle Berechnungen laufen lokal in Ihrem Browser. Damit Ihre Eingaben beim nächsten Besuch wieder da sind, speichert der Rechner sie im lokalen Speicher Ihres Browsers (`localStorage`), ebenso die gewählte Darstellung (Design, Hell/Dunkel), ob Sie die Einführung bereits geschlossen haben, und ggf. Ihren Widerspruch gegen die Statistik. Diese Daten verlassen Ihr Gerät nicht und sind für mich nicht einsehbar. Die Speicherung ist für die von Ihnen gewünschte Funktion erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG). Sie können sie jederzeit löschen, indem Sie die Website-Daten in Ihrem Browser entfernen.
 
 **Links teilen:** Ein über „Link kopieren“ erzeugter Link enthält Ihre Eingaben im Teil der Adresse nach `#`. Dieser Teil wird von Browsern nicht an den Server gesendet und auch nicht an die Besucherstatistik übermittelt. Wem Sie den Link weitergeben, entscheiden allein Sie.
 

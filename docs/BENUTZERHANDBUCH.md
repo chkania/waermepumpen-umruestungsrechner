@@ -36,6 +36,10 @@ Schaltet zwischen dem modernen und dem klassischen Erscheinungsbild um. Inhalt u
 
 Die Wahl wird im Browser gespeichert.
 
+### Einführung
+
+Öffnet die kurze Einführung: wozu der Rechner dient, wie Sie in drei Schritten zu einem Ergebnis kommen und wo es ausführlichere Hilfe gibt. Beim ersten Besuch erscheint sie automatisch; nach dem Schließen („Los geht’s“, Esc oder Klick neben das Fenster) nur noch über diesen Knopf. Wer schon Eingaben gespeichert hat, sieht sie nicht automatisch.
+
 ### Hilfe
 
 Öffnet dieses Handbuch in einem neuen Tab. Es ist auch direkt unter der Adresse **hilfe.html** neben dem Rechner erreichbar.
