@@ -4,7 +4,7 @@
  * Based on the Matomo tracking snippet, moved into a module so the Content Security Policy (N6)
  * needs no inline script. Privacy settings:
  * - no cookies, Do Not Track is respected, sensitive query parameters are excluded
- * - `discardHashTag`: the URL hash is never sent – shared links carry all inputs in "#s=…" (F9.2)
+ * - `discardHashTag`: the URL hash is never sent – shared links carry all inputs in "#z=…" (formerly "#s=…") (F9.2)
  * - `setDocumentTitle`: fixed page title, because the window title contains the scenario name (F16.1)
  * - opt-out (objection, Widerspruch) on the privacy page, stored in localStorage instead of a cookie
  * Only active in the production build (not in the dev server or tests).

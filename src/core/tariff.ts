@@ -59,7 +59,7 @@ export function tariffComparison(inp: Inputs): TariffComparison | null {
       const e = m.get(y) ?? { cost: 0, kwh: 0, months: 0 };
       // Cooking (gas or induction on the household meter (Haushaltszähler)) is not part of the heat pump electricity
       e.cost += r.energy + r.fixed - r.cookingCost;
-      e.kwh += (r.heatKWh / inp.heatPump.jaz) * (1 - inp.heatPump.pvShare);
+      e.kwh += r.heatKWh / inp.heatPump.jaz - r.pvKWh;
       e.months += 1;
       m.set(y, e);
     }

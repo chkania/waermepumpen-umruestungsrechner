@@ -76,7 +76,10 @@
     "meterSetupEligible": false,
     "para14aReduction": 130,
     "existing14aOnHousehold": false,
-    "pvShare": 0.25,
+    "pvKwp": 8,
+    "pvYield": 950,
+    "batteryKwh": 5,
+    "householdKwh": 4000,
     "feedInCt": 7.7
   },
   "financing": {

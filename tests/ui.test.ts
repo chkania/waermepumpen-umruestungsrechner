@@ -195,6 +195,41 @@ describe('UI (Smoke-Test)', () => {
     expect(root.querySelector('#tariff')!.textContent).toMatch(/§ 14a schon für andere Einrichtung genutzt/);
   });
 
+  it('F26 JAZ-Schätzung unter dem Feld, folgt den Heizflächen, Übernehmen setzt die Mitte', () => {
+    const { root, app } = mount();
+    const box = () => root.querySelector('#jaz-estimate')!.textContent!.replace(/\s+/g, ' ');
+    expect(box()).toContain('JAZ 2,9–3,5');
+    expect(box()).toContain('Vorlauf ca. 50 °C');
+    const emitter = root.querySelector<HTMLSelectElement>('[data-path="heatPump.emitter"]')!;
+    emitter.value = 'floor';
+    emitter.dispatchEvent(new Event('change', { bubbles: true }));
+    app.recalc();
+    expect(box()).toContain('JAZ 3,6–4,2');
+    expect(box()).toContain('liegt unter der Schätzung');
+    root.querySelector<HTMLButtonElement>('[data-jaz-apply]')!.click();
+    expect(app.getInputs().heatPump.jaz).toBe(3.9);
+    expect(root.querySelector<HTMLInputElement>('[data-path="heatPump.jaz"]')!.value).toBe('3.9');
+    expect(root.querySelector('[data-jaz-apply]')!.getAttribute('aria-pressed')).toBe('true');
+    // optimistic value → warning below the field
+    const jaz = root.querySelector<HTMLInputElement>('[data-path="heatPump.jaz"]')!;
+    jaz.value = '5';
+    jaz.dispatchEvent(new Event('change', { bubbles: true }));
+    app.recalc();
+    expect(box()).toContain('Achtung: Ihr Wert 5,0 liegt über der Schätzung');
+  });
+
+  it('F25 Kennzahl CO₂-Einsparung mit beiden Summen', () => {
+    const { root, app } = mount();
+    const r = app.lastResult()!.run;
+    const best = r.best === 'tax' ? r.tax : r.kfw;
+    const text = root.querySelector('#kpis')!.textContent!.replace(/\s+/g, ' ');
+    expect(r.ref.co2Tons).toBeGreaterThan(best.co2Tons);
+    expect(text).toContain('CO₂-Einsparung');
+    const t = (x: number) => x.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    expect(text).toContain(`${t(r.ref.co2Tons - best.co2Tons)} t`);
+    expect(text).toContain(`ohne WP ${t(r.ref.co2Tons)} t, mit WP ${t(best.co2Tons)} t`);
+  });
+
   it('F24 alle Eingabeabschnitte auf- und zuklappen', () => {
     const { root } = mount();
     const sections = [...root.querySelectorAll<HTMLDetailsElement>('#inputs details.section')];
@@ -293,7 +328,7 @@ describe('UI (Smoke-Test)', () => {
     expect(notice.textContent).toContain('Geteiltes Szenario');
     setValue(root, 'heatPump.jaz', '4');
     expect(JSON.parse(store.getItem(STORAGE_KEY)!).heatPump.investment).toBe(25000); // own data unchanged
-    expect(location.hash).toMatch(/^#s=/); // change affects the link
+    expect(location.hash).toMatch(/^#z=/); // change affects the link
     // load own inputs
     notice.querySelector<HTMLButtonElement>('[data-notice="own"]')!.click();
     expect(app.getInputs().heatPump.investment).toBe(25000);
@@ -334,7 +369,7 @@ describe('UI (Smoke-Test)', () => {
     expect(el.hasAttribute('aria-invalid')).toBe(false);
     expect(err.hidden).toBe(true);
     // percentage fields in percent
-    expect(setValue(root, 'heatPump.pvShare', '150').closest('.field')!.textContent).toContain('0 bis 100 %');
+    expect(setValue(root, 'heatPump.eligibleShare', '150').closest('.field')!.textContent).toContain('0 bis 100 %');
   });
 
   it('N7 Diagramme: Textalternative, Datentabellen, Reiter mit Pfeiltasten', () => {
@@ -349,15 +384,113 @@ describe('UI (Smoke-Test)', () => {
     const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
     expect(tabs[0].getAttribute('aria-controls')).toBe('panel-cumulative');
     expect(root.querySelector('#panel-cumulative')!.getAttribute('role')).toBe('tabpanel');
-    expect(tabs.map((t) => t.tabIndex)).toEqual([0, -1, -1, -1]);
+    expect(tabs.map((t) => t.tabIndex)).toEqual([0, -1, -1, -1, -1, -1]);
     tabs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     expect(tabs[1].getAttribute('aria-selected')).toBe('true');
-    expect(tabs.map((t) => t.tabIndex)).toEqual([-1, 0, -1, -1]);
+    expect(tabs.map((t) => t.tabIndex)).toEqual([-1, 0, -1, -1, -1, -1]);
     expect(root.querySelector<HTMLElement>('#panel-annual')!.hidden).toBe(false);
     tabs[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
-    expect(tabs[3].getAttribute('aria-selected')).toBe('true');
-    tabs[3].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(tabs[5].getAttribute('aria-selected')).toBe('true');
+    tabs[5].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     expect(tabs[0].getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('F28 PV-Deckung unter den PV-Feldern nur mit PV-Anlage', () => {
+    const { root, app } = mount();
+    const box = root.querySelector<HTMLElement>('#pv-estimate')!;
+    expect(box.hidden).toBe(true);
+    setValue(root, 'heatPump.pvKwp', '8');
+    app.recalc();
+    expect(box.hidden).toBe(false);
+    const text = box.textContent!.replace(/\s+/g, ' ');
+    expect(text).toMatch(/PV deckt rechnerisch \d+ % des Wärmepumpenstroms/);
+    expect(text).toMatch(/Winter \(Dez–Feb\): \d+ %/);
+    expect(box.querySelectorAll('tbody tr')).toHaveLength(12);
+    expect(root.querySelector<HTMLElement>('[data-field="heatPump.batteryKwh"]')!.hidden).toBe(false);
+  });
+
+  it('F31 Varianten vergleichen: aktuelle Eingaben und Dateien, Tabelle, Unterschiede, höchstens drei', async () => {
+    const { root, app } = mount();
+    root.querySelector<HTMLButtonElement>('#btn-variants')!.click();
+    root.querySelector<HTMLButtonElement>('#var-current')!.click();
+    expect(app.getVariants()).toEqual(['Aktuelle Eingaben']);
+    expect(root.querySelector('#var-result')!.textContent).toContain('mindestens eine weitere Variante');
+    // load two export files at once
+    const exp = (name: string, month: string) => {
+      const i = app.getInputs();
+      const d = structuredClone(i);
+      d.scenario.name = name;
+      d.heatPump.installMonth = month;
+      return new File([JSON.stringify({ ...d, version: 1 })], `${name}.json`, { type: 'application/json' });
+    };
+    const input = root.querySelector<HTMLInputElement>('#var-file-input')!;
+    Object.defineProperty(input, 'files', { value: [exp('jetzt', '2027-01'), exp('2028', '2028-05')], configurable: true });
+    input.dispatchEvent(new Event('change'));
+    await new Promise((r) => setTimeout(r, 20));
+    expect(app.getVariants()).toEqual(['Aktuelle Eingaben', 'jetzt', '2028']);
+    const result = root.querySelector('#var-result')!;
+    expect(result.querySelectorAll('.variants-table')[0].querySelectorAll('thead th')).toHaveLength(4);
+    expect(result.textContent).toContain('Unterschiede in den Eingaben');
+    expect(result.textContent).toContain('05/2028');
+    // a fourth one is refused
+    root.querySelector<HTMLButtonElement>('#var-current')!.click();
+    expect(app.getVariants()).toHaveLength(3);
+    expect(root.querySelector('#var-status')!.textContent).toContain('Höchstens 3 Varianten');
+    // remove
+    root.querySelector<HTMLButtonElement>('[data-var-remove="0"]')!.click();
+    expect(app.getVariants()).toEqual(['jetzt', '2028']);
+  });
+
+  it('F30 Bericht: wird aufgebaut, druckt hell und stellt das Design danach wieder her', () => {
+    const { app } = mount();
+    document.documentElement.dataset.theme = 'dark';
+    const report = app.buildReport()!;
+    expect(report.id).toBe('report');
+    expect(report.parentElement).toBe(document.body);
+    expect(report.querySelector('h1')!.textContent).toContain('Bericht');
+    expect(report.querySelector('.report-details')!.textContent).toContain('KfW-Zuschuss (458)');
+    expect(report.querySelectorAll('[data-report-chart]')).toHaveLength(3);
+    expect(report.classList.contains('is-rendering')).toBe(false);
+    expect(document.documentElement.dataset.theme).toBe('light');
+    expect(document.title).toMatch(/^Wärmepumpen-Bericht – \d{4}-\d{2}-\d{2}$/);
+    window.dispatchEvent(new Event('afterprint'));
+    expect(document.documentElement.dataset.theme).toBe('dark');
+    expect(document.title).not.toContain('Bericht');
+    // a second build reuses the element
+    app.buildReport();
+    expect(document.querySelectorAll('#report')).toHaveLength(1);
+    window.dispatchEvent(new Event('afterprint'));
+  });
+
+  it('F29 Energie je Monat: Reiter, Tabelle mit 12 Monaten + Jahr, Zusammenfassung', () => {
+    const { root, app } = mount();
+    expect(root.querySelector('canvas[data-chart="energy"]')!.getAttribute('aria-label')).toContain('Energie je Monat');
+    const table = root.querySelector('[data-chart-table="energy"] table')!;
+    expect(table.querySelectorAll('tbody tr')).toHaveLength(13);
+    const head = () => [...root.querySelectorAll('[data-chart-table="energy"] thead th')].map((th) => th.textContent);
+    expect(head()).toEqual(['Monat', 'Bedarf Heizen', 'Bedarf Warmwasser', 'Bedarf gesamt', 'Gas – Altanlage', 'Strom – Wärmepumpe']);
+    const note = () => root.querySelector('[data-chart-note="energy"]')!.textContent!;
+    expect(note()).toMatch(/Bedarf [\d.]+ kWh für Heizen und Warmwasser\./);
+    expect(note()).toMatch(/kWh Strom/);
+    // cooking with gas that stays on gas after the switch
+    root.querySelector<HTMLInputElement>('[data-path="oldHeating.cookingWithGas"]')!.click();
+    setValue(root, 'oldHeating.cookingAfter', 'gas');
+    app.recalc();
+    expect(head()).toEqual(['Monat', 'Bedarf Heizen', 'Bedarf Warmwasser', 'Bedarf Kochen', 'Bedarf gesamt', 'Gas – Altanlage', 'Strom – Wärmepumpe', 'Gas zum Kochen – mit Wärmepumpe']);
+    expect(note()).toMatch(/Heizen, Warmwasser und Kochen.*kWh Gas zum Kochen/);
+  });
+
+  it('F27 Einflussgrößen: Reiter, Tabelle sortiert nach Spanne, Zusammenfassung', () => {
+    const { root, app } = mount();
+    const canvas = root.querySelector('canvas[data-chart="sensitivity"]')!;
+    expect(canvas.getAttribute('role')).toBe('img');
+    expect(canvas.getAttribute('aria-label')).toContain('Einflussgrößen');
+    const rows = [...root.querySelectorAll('[data-chart-table="sensitivity"] tbody tr')];
+    const sens = app.lastResult()!.sens;
+    expect(rows).toHaveLength(sens.items.length);
+    expect(rows[0].querySelector('th')!.textContent).toBe(`${sens.items[0].label} (±20 %)`);
+    const note = root.querySelector('[data-chart-note="sensitivity"]')!.textContent!;
+    expect(note).toContain(`Am stärksten wirkt ${sens.items[0].label}`);
   });
 
   it('F12.6 Finanzierungskarte zeigt Sondertilgung mit Termin und Zinsersparnis', () => {
@@ -394,6 +527,8 @@ describe('UI (Smoke-Test)', () => {
     const v = root.querySelector<HTMLAnchorElement>('#app-version')!;
     expect(v.textContent).toBe(`Version ${APP_VERSION}`);
     expect(v.getAttribute('href')).toBe('./changelog.html');
+    // same tab: the changelog page leads back to the calculator, inputs are saved
+    expect(root.querySelectorAll('a[href="./changelog.html"][target]')).toHaveLength(0);
   });
 
   it('F15 Hilfe-Link öffnet das Benutzerhandbuch in neuem Tab', () => {

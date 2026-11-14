@@ -49,6 +49,30 @@ export function parseCommit(c: RawCommit): ParsedCommit | null {
   };
 }
 
+const LISTED = /^[*-] +(\S.*)$/;
+
+/**
+ * Splits a squash-merge commit into the commits it contains, so that every change gets its own
+ * changelog entry instead of only the PR title. Contained commits are list lines in the body in
+ * Conventional Commits format – GitHub writes them as `* feat: …` when the squash message is built
+ * from the commit messages; `- feat: …` in the PR description works as well. Lines up to the next
+ * entry belong to that entry (e.g. a `BREAKING CHANGE:` footer). Falls back to the commit itself
+ * if the body lists no change that leads to a version (feat, fix, perf, breaking).
+ */
+export function expandSquash(c: RawCommit): RawCommit[] {
+  const entries: RawCommit[] = [];
+  for (const line of c.body.split(/\r?\n/)) {
+    const m = LISTED.exec(line.trim());
+    if (m && parseCommit({ hash: c.hash, subject: m[1], body: '' })) entries.push({ hash: c.hash, subject: m[1], body: '' });
+    else if (entries.length) entries[entries.length - 1].body += `${line}\n`;
+  }
+  const relevant = entries.some((e) => {
+    const p = parseCommit(e);
+    return p !== null && bumpFor(p) !== null;
+  });
+  return relevant ? entries : [c];
+}
+
 export function bumpFor(c: ParsedCommit): Bump | null {
   if (c.breaking) return 'major';
   if (c.type === 'feat') return 'minor';

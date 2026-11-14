@@ -15,12 +15,26 @@ import {
 } from 'chart.js';
 import type { InstallComparison } from '../core/compare';
 import type { KeyEvent, KeyEvents } from '../core/events';
+import { energyTotal, type EnergyMonth, type EnergyParts, type EnergyYear } from '../core/energy';
+import { VARIATION_TEXT, type Sensitivity } from '../core/sensitivity';
 import type { PriceRow, RunResult } from '../core/simulation';
 import { fmtEur, fmtMonth, fmtNum } from './format';
 
 Chart.register(BarController, BarElement, CategoryScale, LinearScale, LineController, LineElement, PointElement, Legend, Tooltip);
 
-export type ChartId = 'cumulative' | 'annual' | 'prices' | 'install';
+export type ChartId = 'cumulative' | 'annual' | 'prices' | 'install' | 'energy' | 'sensitivity';
+
+export const MONTH_SHORT = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+/** Dataset labels of the energy chart (F29). */
+export const energyLabels = (e: EnergyYear) => ({
+  need: 'Bedarf (Nutzenergie)',
+  old: e.fuel === 'gas' ? 'Gas – Altanlage' : 'Heizöl – Altanlage',
+  hp: 'Strom – Wärmepumpe',
+  hpGas: 'Gas zum Kochen – mit Wärmepumpe',
+});
+
+/** Bar label of a sensitivity item incl. its variation, e.g. "JAZ (±0,5)". */
+export const sensitivityLabel = (id: string, label: string) => `${label} (${VARIATION_TEXT[id] ?? ''})`;
 
 function css(name: string, fallback: string): string {
   const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -46,9 +60,13 @@ const eurAxis = (title?: string) => ({
 export class Charts {
   private charts = new Map<ChartId, Chart>();
 
-  constructor(private canvases: Record<ChartId, HTMLCanvasElement>) {}
+  constructor(
+    private canvases: Partial<Record<ChartId, HTMLCanvasElement>>,
+    /** Higher resolution, e.g. for the printed report (F30). */
+    private pixelRatio?: number,
+  ) {}
 
-  update(run: RunResult, prices: PriceRow[], cmp: InstallComparison, events?: KeyEvents): void {
+  update(run: RunResult, prices: PriceRow[], cmp: InstallComparison, events?: KeyEvents, sens?: Sensitivity, energy?: EnergyYear): void {
     const c = palette();
     Chart.defaults.color = c.text;
     Chart.defaults.borderColor = c.grid;
@@ -179,12 +197,88 @@ export class Charts {
         plugins: { tooltip: tooltipEur },
       },
     });
+
+    // Energy per month (F29): demand vs. gas/oil and electricity, stacked groups per month
+    if (energy) {
+      const L = energyLabels(energy);
+      const kwh = (x: number) => `${fmtNum(x, 0)} kWh`;
+      const parts = (p: EnergyParts) => [`Heizen ${kwh(p.space)}`, `Warmwasser ${kwh(p.dhw)}`, ...(p.cooking > 0 ? [`Kochen ${kwh(p.cooking)}`] : [])];
+      const group = (label: string, data: number[], color: string, stack: string) => ({ label, data, backgroundColor: color, borderColor: color, stack, maxBarThickness: 18 });
+      const pick = (f: (m: EnergyMonth) => number) => energy.months.map(f);
+      const datasets = [
+        group(L.need, pick((m) => energyTotal(m.need)), c.co2, 'need'),
+        group(L.old, pick((m) => energyTotal(m.old)), c.ref, 'old'),
+        group(L.hp, pick((m) => energyTotal(m.hp)), c.kfw, 'hp'),
+        ...(energy.cookingStaysGas ? [{ ...group(L.hpGas, pick((m) => m.hpCookingGas), c.ref, 'hp'), backgroundColor: `${c.ref}66` }] : []),
+      ];
+      this.render('energy', {
+        type: 'bar',
+        data: { labels: MONTH_SHORT, datasets } as ChartConfiguration['data'],
+        options: {
+          interaction: { mode: 'index', intersect: false },
+          scales: {
+            x: { stacked: true },
+            y: { stacked: true, title: { display: true, text: 'kWh je Monat' }, ticks: { callback: (v) => fmtNum(Number(v), 0) } },
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: (ctx: TooltipItem<ChartType>) => {
+                  const m = energy.months[ctx.dataIndex];
+                  const p = [m.need, m.old, m.hp][ctx.datasetIndex];
+                  const value = `${ctx.dataset.label}: ${kwh(Number(ctx.parsed.y ?? 0))}`;
+                  return p ? [value, `   ${parts(p).join(' · ')}`] : value;
+                },
+              },
+            },
+          },
+        },
+      });
+    }
+
+    // Sensitivity (F27): tornado chart – bars from the base saving to the saving with the lower/higher assumption
+    if (sens) {
+      const items = sens.items;
+      const floating = (label: string, color: string, pick: 'low' | 'high') => ({
+        label,
+        data: items.map((x) => [sens.base, x[pick]] as [number, number]),
+        backgroundColor: color,
+        borderColor: color,
+        grouped: false,
+        barPercentage: 0.7,
+      });
+      this.render('sensitivity', {
+        type: 'bar',
+        data: {
+          labels: items.map((x) => sensitivityLabel(x.id, x.label)),
+          datasets: [floating('Annahme niedriger', c.kfw, 'low'), floating('Annahme höher', c.ref, 'high')],
+        } as ChartConfiguration['data'],
+        options: {
+          indexAxis: 'y',
+          scales: {
+            x: { ...eurAxis(`Ersparnis mit Wärmepumpe (heute: ${fmtEur(sens.base)})`) },
+            y: { ticks: { autoSkip: false } },
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: (ctx: TooltipItem<ChartType>) => {
+                  const x = items[ctx.dataIndex];
+                  const high = ctx.datasetIndex === 1;
+                  return `${high ? 'höher' : 'niedriger'}: ${high ? x.highValue : x.lowValue} → Ersparnis ${fmtEur(high ? x.high : x.low)}`;
+                },
+              },
+            },
+          },
+        },
+      });
+    }
   }
 
   private render(id: ChartId, cfg: ChartConfiguration & { type: ChartType }): void {
     const canvas = this.canvases[id];
     if (!canvas || !canvas.getContext?.('2d')) return; // e.g. test environment without canvas
-    cfg.options = { responsive: true, maintainAspectRatio: false, animation: false, ...cfg.options };
+    cfg.options = { responsive: true, maintainAspectRatio: false, animation: false, ...(this.pixelRatio ? { devicePixelRatio: this.pixelRatio } : {}), ...cfg.options };
     const existing = this.charts.get(id);
     if (existing && (existing.config as { type?: string }).type === cfg.type) {
       existing.data = cfg.data;
@@ -211,7 +305,13 @@ export interface ChartTable {
 }
 
 /** Returns the same values as a table for every chart – also without canvas (e.g. screen readers, tests). */
-export function chartTables(run: RunResult, prices: PriceRow[], cmp: InstallComparison): Record<ChartId, ChartTable> {
+export function chartTables(
+  run: RunResult,
+  prices: PriceRow[],
+  cmp: InstallComparison,
+  sens?: Sensitivity,
+  energy?: EnergyYear,
+): Partial<Record<ChartId, ChartTable>> {
   const scen = [
     ['Ohne WP', run.ref],
     ['WP + KfW', run.kfw],
@@ -232,5 +332,93 @@ export function chartTables(run: RunResult, prices: PriceRow[], cmp: InstallComp
       head: ['Inbetriebnahme', 'WP + KfW', 'WP + Steuerbonus', 'Ohne WP'],
       rows: cmp.rows.map((r) => [fmtMonth(r.installMonth), fmtEur(r.kfwTotal), r.taxFeasible ? fmtEur(r.taxTotal) : 'nicht möglich', fmtEur(cmp.refTotal)]),
     },
+    ...(energy ? { energy: energyTable(energy) } : {}),
+    ...(sens
+      ? {
+          sensitivity: {
+            caption: `Ersparnis mit Wärmepumpe, wenn jeweils eine Annahme niedriger oder höher ist (heute: ${fmtEur(sens.base)}), sortiert nach Einfluss`,
+            head: ['Annahme', 'heute', 'niedriger', 'Ersparnis', 'höher', 'Ersparnis', 'Spanne'],
+            rows: sens.items.map((x) => [
+              sensitivityLabel(x.id, x.label),
+              x.base,
+              x.lowValue,
+              fmtEur(x.low),
+              x.highValue,
+              fmtEur(x.high),
+              fmtEur(Math.abs(x.high - x.low)),
+            ]),
+          },
+        }
+      : {}),
   };
+}
+
+/** Table of the energy chart (F29): demand split by use, consumption of the old system and the heat pump, with annual total. */
+function energyTable(e: EnergyYear): ChartTable {
+  const L = energyLabels(e);
+  const n = (x: number) => fmtNum(x, 0);
+  // Cooking only appears if it runs on gas today (otherwise it is outside the calculation)
+  const cooking = e.months.some((m) => m.need.cooking > 0);
+  const row = (label: string, need: EnergyParts, old: number, hp: number, gas: number) => [
+    label,
+    n(need.space),
+    n(need.dhw),
+    ...(cooking ? [n(need.cooking)] : []),
+    n(energyTotal(need)),
+    n(old),
+    n(hp),
+    ...(e.cookingStaysGas ? [n(gas)] : []),
+  ];
+  const sumParts = (f: (m: EnergyMonth) => number) => e.months.reduce((a, m) => a + f(m), 0);
+  return {
+    caption: 'Energie je Monat im typischen Jahr (kWh): Bedarf für Heizen, Warmwasser und Kochen und der Verbrauch dafür',
+    head: ['Monat', 'Bedarf Heizen', 'Bedarf Warmwasser', ...(cooking ? ['Bedarf Kochen'] : []), 'Bedarf gesamt', L.old, L.hp, ...(e.cookingStaysGas ? [L.hpGas] : [])],
+    rows: [
+      ...e.months.map((m) => row(MONTH_SHORT[m.month - 1], m.need, energyTotal(m.old), energyTotal(m.hp), m.hpCookingGas)),
+      row('Jahr', { space: sumParts((m) => m.need.space), dhw: sumParts((m) => m.need.dhw), cooking: sumParts((m) => m.need.cooking) }, e.totals.old, e.totals.hp, e.totals.hpCookingGas),
+    ],
+  };
+}
+
+/**
+ * Chart of the variant comparison (F31): cumulative costs of the best heat pump way (solid) and without heat pump
+ * (dashed) per variant, one colour per variant. Returns null without canvas support (e.g. tests).
+ */
+export function variantsChart(
+  canvas: HTMLCanvasElement,
+  curves: { years: number[]; series: { name: string; best: (number | null)[]; ref: (number | null)[] }[] },
+): { destroy(): void } | null {
+  if (!canvas.getContext?.('2d')) return null;
+  const c = palette();
+  Chart.defaults.color = c.text;
+  Chart.defaults.borderColor = c.grid;
+  const colors = [c.kfw, c.ref, c.tax];
+  const datasets = curves.series.flatMap((s, i) => {
+    const color = colors[i % colors.length];
+    const line = (label: string, data: (number | null)[], dashed: boolean) => ({
+      label,
+      data,
+      borderColor: color,
+      backgroundColor: color,
+      borderWidth: 2,
+      borderDash: dashed ? [6, 4] : [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: 0.2,
+      spanGaps: false,
+    });
+    return [line(`${s.name} – mit WP`, s.best, false), line(`${s.name} – ohne WP`, s.ref, true)];
+  });
+  return new Chart(canvas, {
+    type: 'line',
+    data: { labels: curves.years.map(String), datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      interaction: { mode: 'index', intersect: false },
+      scales: { y: eurAxis('Kumulierte Kosten') },
+      plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${fmtEur(ctx.parsed.y ?? 0)}` } } },
+    },
+  });
 }

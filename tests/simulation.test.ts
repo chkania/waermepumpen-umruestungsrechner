@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { parseMonth } from '../src/core/dates';
+import { createPriceModel } from '../src/core/prices';
 import { breakEven, priceRows, runAll, simulate } from '../src/core/simulation';
 import type { ScenarioResult } from '../src/core/types';
 import { defaults, neutral } from './helpers';
@@ -91,10 +92,12 @@ describe('F4 Wärmepumpe (KfW-Weg)', () => {
     expect(r.months[3].subsidy).toBe(-12880); // F5.1 payout (Auszahlung) after 3 months
   });
 
-  it('F2.6 PV-Anteil zur Einspeisevergütung bewertet', () => {
-    const r = simulate(wp((i) => (i.heatPump.pvShare = 0.5)), 'kfw');
-    const y = r.years.find((x) => x.year === 2027)!;
-    expect(y.energy).toBeCloseTo((18000 / 3.3) * (0.5 * 0.26 + 0.5 * 0.078), 6);
+  it('F2.6/F28 PV-Strom der Wärmepumpe zur Einspeisevergütung bewertet', () => {
+    const r = simulate(wp((i) => (i.heatPump.pvKwp = 8)), 'kfw');
+    const y = r.months.filter((m) => Math.floor(m.month / 12) === 2027);
+    const pv = y.reduce((a, m) => a + m.pvKWh, 0);
+    expect(pv).toBeGreaterThan(0);
+    expect(y.reduce((a, m) => a + m.energy, 0)).toBeCloseTo(((18000 / 3.3 - pv) * 0.26 + pv * 0.078), 6);
   });
 
   it('F2.5 ohne WP-Tarif: Haushaltsstrom, kein Zählergrundpreis', () => {
@@ -312,5 +315,91 @@ describe('F5.3/F8 Gesamtergebnis', () => {
     expect(rows[0].heatCtFossil).toBeCloseTo(11.5 / 0.9, 6);
     expect(rows[0].heatCtWp).toBeCloseTo(26 / 3.3, 6);
     expect(rows).toHaveLength(21);
+  });
+});
+
+describe('F25 CO₂-Bilanz', () => {
+  const base = (mut?: Parameters<typeof neutral>[0]) =>
+    neutral((i) => {
+      i.oldHeating.remainingLifeYears = 100;
+      i.heatPump.installMonth = '2026-11';
+      i.financing.kfwEquity = 1e6;
+      i.prices.gridCo2Path = '2026:300';
+      mut?.(i);
+    });
+
+  it('Referenz: Brennstoff × Emissionsfaktor über den Zeitraum', () => {
+    const r = simulate(base(), 'ref');
+    expect(r.co2Tons).toBeCloseTo((20 * 20000 * 0.201) / 1000, 6);
+    expect(sum(r.months.map((m) => m.co2Kg)) / 1000).toBeCloseTo(r.co2Tons, 9);
+  });
+
+  it('Wärmepumpe: Netzstrom × Strommix, PV-Eigenanteil CO₂-frei', () => {
+    const elec = 18000 / 3.3;
+    expect(simulate(base(), 'kfw').co2Tons).toBeCloseTo((20 * elec * 0.3) / 1000, 6);
+    const pv = simulate(base((i) => (i.heatPump.pvKwp = 8)), 'kfw');
+    const pvKWh = pv.months.reduce((a, m) => a + m.pvKWh, 0);
+    expect(pv.co2Tons).toBeCloseTo(((20 * elec - pvKWh) * 0.3) / 1000, 6);
+    const run = runAll(base());
+    expect(run.ref.co2Tons - run.kfw.co2Tons).toBeGreaterThan(40);
+  });
+
+  it('Bio-Anteil eines neuen Kessels gilt als klimaneutral, Altanlage nicht', () => {
+    const bio = (life: number) =>
+      simulate(
+        base((i) => {
+          i.oldHeating.remainingLifeYears = life;
+          i.prices.bioEnabled = true;
+          i.prices.bioSteps = '2026:50';
+        }),
+        'ref',
+      ).co2Tons;
+    const newBoilerKwh = 18000 / defaults().oldHeating.replacementEfficiency;
+    expect(bio(0)).toBeCloseTo((20 * newBoilerKwh * 0.5 * 0.201) / 1000, 6);
+    expect(bio(100)).toBeCloseTo((20 * 20000 * 0.201) / 1000, 6);
+  });
+
+  it('F25.4 Ökostromtarif: Netzstrom CO₂-frei, Kosten unverändert', () => {
+    const plain = simulate(base(), 'kfw');
+    const green = simulate(base((i) => (i.heatPump.greenElectricity = true)), 'kfw');
+    expect(green.co2Tons).toBe(0);
+    expect(green.totalCost).toBeCloseTo(plain.totalCost, 9);
+  });
+
+  it('F25.4 heutiger Bio-Anteil: Altanlage, Kochen mit Gas, neuer Kessel mindestens Bio-Treppe', () => {
+    const fossil = (20 * 20000 * 0.201) / 1000;
+    expect(simulate(base((i) => (i.prices.currentBioShare = 0.25)), 'ref').co2Tons).toBeCloseTo(fossil * 0.75, 6);
+    const kwhNew = 18000 / defaults().oldHeating.replacementEfficiency;
+    const newBoiler = (current: number) =>
+      simulate(
+        base((i) => {
+          i.oldHeating.remainingLifeYears = 0;
+          i.prices.bioEnabled = true;
+          i.prices.bioSteps = '2026:30';
+          i.prices.currentBioShare = current;
+        }),
+        'ref',
+      );
+    // required 30 %, today 10 % → 30 % neutral, premium for the missing 20 %
+    const low = newBoiler(0.1);
+    expect(low.co2Tons).toBeCloseTo((20 * kwhNew * 0.7 * 0.201) / 1000, 6);
+    // today 50 % → 50 % neutral, no extra premium
+    const high = newBoiler(0.5);
+    expect(high.co2Tons).toBeCloseTo((20 * kwhNew * 0.5 * 0.201) / 1000, 6);
+    const none = newBoiler(0);
+    const bioCost = (r: ScenarioResult) => r.nominalCost - newBoiler(0.3).nominalCost;
+    expect(bioCost(none)).toBeCloseTo((20 * kwhNew * 0.3 * 4) / 100, 6);
+    expect(bioCost(low)).toBeCloseTo((20 * kwhNew * 0.2 * 4) / 100, 6);
+    expect(bioCost(high)).toBeCloseTo(0, 6);
+  });
+
+  it('Strommix-Pfad: linear interpoliert, konstant außerhalb, negative Werte → 0', () => {
+    const pm = (path: string) => createPriceModel(neutral((i) => (i.prices.gridCo2Path = path)));
+    const p = pm('2025:344, 2030:250');
+    expect(p.gridCo2Kg(2020)).toBeCloseTo(0.344, 9);
+    expect(p.gridCo2Kg(2030)).toBeCloseTo(0.25, 9);
+    expect(p.gridCo2Kg(2040)).toBeCloseTo(0.25, 9);
+    expect(pm('2026:-5').gridCo2Kg(2027)).toBe(0);
+    expect(pm('').gridCo2Kg(2027)).toBe(0);
   });
 });

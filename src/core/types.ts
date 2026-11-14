@@ -2,6 +2,10 @@ import type { ExtraResult } from './loan';
 
 /** Fuel of the existing heating (Bestandsheizung). */
 export type Fuel = 'gas' | 'oil';
+/** Heat emitters (Heizflächen) of the house (F26). */
+export type HeatEmitter = 'floor' | 'largeRadiators' | 'radiators';
+/** Heat source (Wärmequelle) of the heat pump (F26). */
+export type HeatSource = 'air' | 'ground';
 
 /** Months are entered as ISO string "YYYY-MM" and handled internally as absolute month index (year*12 + month-1). */
 export type MonthString = string;
@@ -76,10 +80,14 @@ export interface PriceInputs {
   co2Path: string;
   gasCo2Factor: number;
   oilCo2Factor: number;
+  /** CO2 emission factor of the German electricity mix (Strommix) "year:g/kWh, …" (F25). */
+  gridCo2Path: string;
   bioEnabled: boolean;
   /** Bio step-up (Bio-Treppe) "year:share%, …". */
   bioSteps: string;
   bioPremiumCt: number;
+  /** Share of biogas/bio oil (Biogas/Bioöl) bought today (0–1, e.g. biogas tariff); counts as climate-neutral (F25.4). */
+  currentBioShare: number;
   /** Electricity needed for cooking per kWh of gas (induction instead of gas cooker (Gasherd)). */
   cookingElecFactor: number;
 }
@@ -89,6 +97,10 @@ export interface HeatPumpInputs {
   eligibleShare: number;
   extraCost: number;
   jaz: number;
+  /** Heat source (Wärmequelle): outside air or ground (Erdwärme) – basis of the SPF (JAZ) estimate (F26). */
+  source: HeatSource;
+  /** Heat emitters (Heizflächen) – basis of the SPF (JAZ) estimate (F26). */
+  emitter: HeatEmitter;
   maintenance: number;
   lifeYears: number;
   installMonth: MonthString;
@@ -107,8 +119,17 @@ export interface HeatPumpInputs {
   para14aReduction: number;
   /** A controllable consumer (steuerbare Verbrauchseinrichtung) with § 14a (e.g. wallbox) is already connected to the household meter (Haushaltszähler). */
   existing14aOnHousehold: boolean;
-  pvShare: number;
+  /** Peak power (Leistung) of the own PV system in kWp; 0 = no PV (F28). */
+  pvKwp: number;
+  /** Specific annual yield (spezifischer Ertrag) of the PV system, kWh per kWp and year (F28). */
+  pvYield: number;
+  /** Usable capacity of the battery storage (Batteriespeicher), kWh; 0 = none (F28). */
+  batteryKwh: number;
+  /** Household electricity (Haushaltsstrom) without heat pump, kWh/year – it uses the PV first (F28). */
+  householdKwh: number;
   feedInCt: number;
+  /** Grid electricity from a green tariff (Ökostromtarif): counted with 0 g CO2/kWh in the CO2 balance (F25.4). */
+  greenElectricity: boolean;
 }
 
 export interface FinancingInputs {
@@ -243,6 +264,10 @@ export interface MonthRow extends CostBreakdown {
   cookingCost: number;
   /** 'old' | 'new' (replacement boiler (Ersatzkessel)) | 'wp' */
   system: 'old' | 'new' | 'wp';
+  /** CO2 emissions of heating and cooking in kg (F25). */
+  co2Kg: number;
+  /** Heat pump electricity covered by the own PV system (kWh) (F28). */
+  pvKWh: number;
 }
 
 export interface YearRow extends CostBreakdown {
@@ -331,6 +356,8 @@ export interface ScenarioResult {
   /** Cumulative costs at each month end (incl. opportunity interest (Opportunitätszins)). */
   cumulative: number[];
   totalCost: number;
+  /** CO2 emissions of heating and cooking over the period in tonnes (F25). */
+  co2Tons: number;
   /** Total without interest. */
   nominalCost: number;
   warnings: string[];

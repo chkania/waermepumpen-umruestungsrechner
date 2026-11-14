@@ -58,8 +58,8 @@ describe('F9.5 Eingabeprüfung beim Laden', () => {
   });
 
   it('checkValue: Grenzen und unveränderte gültige Werte', () => {
-    expect(checkValue('heatPump.pvShare', 0.3, 0)).toEqual({ value: 0.3 });
-    expect(checkValue('heatPump.pvShare', 2, 0).value).toBe(1);
+    expect(checkValue('heatPump.pvKwp', 9.5, 0)).toEqual({ value: 9.5 });
+    expect(checkValue('heatPump.pvKwp', 500, 0).value).toBe(100);
     expect(checkValue('heatPump.investment', 1e12, 0).value).toBe(1e9);
     expect(checkValue('heatPump.installMonth', '2027-05', 'x')).toEqual({ value: '2027-05' });
     expect(checkValue('heatPump.installMonth', '', '2027-05').value).toBe('2027-05');

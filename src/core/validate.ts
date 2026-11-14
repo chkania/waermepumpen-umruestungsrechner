@@ -41,7 +41,11 @@ export const NUMBER_LIMITS: Record<string, [number, number]> = {
   'heatPump.lifeYears': [1, 100],
   'heatPump.leadMonths': [0, 120],
   'heatPump.elecIncrease': [-0.5, 1],
-  'heatPump.pvShare': [0, 1],
+  'heatPump.pvKwp': [0, 100],
+  'heatPump.pvYield': [300, 1500],
+  'heatPump.batteryKwh': [0, 100],
+  'heatPump.householdKwh': [0, 100000],
+  'prices.currentBioShare': [0, 1],
   'financing.kfwRate358': [-0.1, 1],
   'financing.kfwRate359': [-0.1, 1],
   'financing.kfwTermYears': [1, 50],
@@ -78,6 +82,8 @@ const MONTH_YEARS: [number, number] = [2000, 2150];
 export const SELECT_VALUES: Record<string, readonly string[]> = {
   'oldHeating.fuel': ['gas', 'oil'],
   'oldHeating.cookingAfter': ['electric', 'gas'],
+  'heatPump.source': ['air', 'ground'],
+  'heatPump.emitter': ['floor', 'largeRadiators', 'radiators'],
   'building.renovationScope': ['partial', 'full'],
   'financing.windfallTarget': ['auto', 'kfw', 'bank'],
 };

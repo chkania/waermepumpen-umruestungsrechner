@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   changelogSection,
+  expandSquash,
   insertSection,
   maxBump,
   nextVersion,
@@ -52,6 +53,27 @@ describe('N9 Versionierung aus Conventional Commits', () => {
     expect(b).not.toContain('### Neu');
   });
 
+  it('Squash-Merge: jede enthaltene Änderung bekommt einen eigenen Eintrag', () => {
+    // GitHub format when the squash message is built from the commit messages
+    const squash = {
+      hash: 'abc',
+      subject: 'feat: Name, Logo und Design (#13)',
+      body: '* feat: Neuer Name\n\nDetails zum Namen\n\nCo-Authored-By: X <x@example.invalid>\n\n* feat!: Neues Exportformat\n\nBREAKING CHANGE: alte Dateien neu exportieren\n\n* test: mehr Tests\n\n* fix: Logo-Übergang sauber\n',
+    };
+    const entries = expandSquash(squash);
+    expect(entries.map((e) => e.subject)).toEqual(['feat: Neuer Name', 'feat!: Neues Exportformat', 'test: mehr Tests', 'fix: Logo-Übergang sauber']);
+    const parsed = entries.map(parseCommit).filter((x): x is ParsedCommit => x !== null);
+    expect(parsed[1].breakingNote).toBe('alte Dateien neu exportieren');
+    expect(changelogSection('2.0.0', '2026-11-14', parsed)).toBe(
+      '## 2.0.0 – 2026-11-14\n\n### Inkompatible Änderungen\n- Neues Exportformat – alte Dateien neu exportieren\n\n### Neu\n- Neuer Name\n\n### Fehlerkorrekturen\n- Logo-Übergang sauber\n',
+    );
+    // PR description with a list works as well
+    expect(expandSquash({ hash: 'a', subject: 'feat: Sammel-PR', body: 'Text\n- feat: Eins\n- fix: Zwei\n- **kein Commit**\n' }).map((e) => e.subject)).toEqual(['feat: Eins', 'fix: Zwei']);
+    // no listed change with a version → the commit itself (title) counts
+    const single = { hash: 'b', subject: 'feat: Nur ein Commit (#14)', body: 'Beschreibung\n- **Punkt**\n* docs: Handbuch\n' };
+    expect(expandSquash(single)).toEqual([single]);
+  });
+
   it('neuer Abschnitt steht vor der bisher neuesten Version; Paketversion wird gesetzt', () => {
     const log = '# Changelog\n\nIntro\n\n## 1.1.0 – 2026-11-14\n\n### Neu\n- x\n';
     expect(insertSection(log, '## 1.2.0 – 2026-11-15\n\n### Neu\n- y\n')).toBe(
@@ -91,13 +113,15 @@ describe('N9 Release-Skript im Git-Repository', () => {
     commit('docs: Handbuch ergänzt');
     commit('feat(vergleich): PV-Anlage berücksichtigen');
     commit('Aufräumen ohne Format');
+    // squash merge of a PR with several changes (GitHub: message from the commit messages)
+    commit('feat: Sammel-PR (#7)\n\n* feat: Logo im Kopf\n\n* fix: Favicon im Dunkelmodus\n');
 
     const out = sh('node', script);
     expect(out).toContain('Neue Version 1.2.0');
     expect(JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')).version).toBe('1.2.0');
     expect(JSON.parse(readFileSync(join(dir, 'package-lock.json'), 'utf8')).packages[''].version).toBe('1.2.0');
     const log = readFileSync(join(dir, 'CHANGELOG.md'), 'utf8');
-    expect(log).toMatch(/^# Changelog\n\n## 1\.2\.0 – \d{4}-\d{2}-\d{2}\n\n### Neu\n- PV-Anlage berücksichtigen\n\n### Fehlerkorrekturen\n- Rundung im Export\n\n## 1\.1\.0/);
+    expect(log).toMatch(/^# Changelog\n\n## 1\.2\.0 – \d{4}-\d{2}-\d{2}\n\n### Neu\n- PV-Anlage berücksichtigen\n- Logo im Kopf\n\n### Fehlerkorrekturen\n- Rundung im Export\n- Favicon im Dunkelmodus\n\n## 1\.1\.0/);
     expect(log).not.toContain('Handbuch');
 
     // The release commit becomes the new reference point; afterwards only docs → no new version

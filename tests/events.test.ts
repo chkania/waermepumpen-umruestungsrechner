@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { formatMonth } from '../src/core/dates';
 import { keyEvents, type KeyEvent } from '../src/core/events';
+import { estimateJaz } from '../src/core/jaz';
 import { runAll } from '../src/core/simulation';
 import type { Inputs } from '../src/core/types';
 import { defaults } from './helpers';
@@ -19,6 +20,53 @@ function userCase(mut?: (i: Inputs) => void): Inputs {
 
 const ev = (i: Inputs) => keyEvents(i, runAll(i));
 const find = (list: KeyEvent[], re: RegExp) => list.find((e) => re.test(e.title));
+
+describe('F25.4 Bio-Treppe ohne Aufpreis', () => {
+  it('heutiger Bio-Anteil deckt die Pflicht: kein Betrag, Erklärung', () => {
+    const steps = (share: number) =>
+      ev(
+        userCase((i) => {
+          i.oldHeating.remainingLifeYears = 2;
+          i.prices.bioEnabled = true;
+          i.prices.currentBioShare = share;
+        }),
+      ).timeline.filter((e) => e.title.startsWith('Bio-Treppe'));
+    const covered = steps(0.4);
+    expect(covered.length).toBeGreaterThan(0);
+    const low = covered.find((e) => /: (10|15|30) %/.test(e.title))!;
+    expect(low.amount).toBeUndefined();
+    expect(low.detail).toContain('kein Aufpreis');
+    expect(steps(0).every((e) => e.amount === undefined || e.amount > 0)).toBe(true);
+  });
+});
+
+describe('F26 Hinweis bei JAZ über der Schätzung', () => {
+  it('nur wenn die JAZ über der Spanne liegt', () => {
+    expect(find(ev(userCase()).hints, /liegt über der Schätzung/)).toBeUndefined();
+    const h = find(ev(userCase((i) => (i.heatPump.jaz = 4))).hints, /liegt über der Schätzung/)!;
+    const i = userCase();
+    const e = estimateJaz(i);
+    const d1 = (x: number) => x.toLocaleString('de-DE', { minimumFractionDigits: 1 });
+    expect(h.title).toBe(`JAZ 4,0 liegt über der Schätzung für Ihr Haus (${d1(e.low)}–${d1(e.high)})`);
+    expect(h.level).toBe('warning');
+    expect(h.detail).toContain(`Vorlauf von ca. ${e.supplyTemp} °C`);
+  });
+});
+
+describe('F25.4 Hinweis Bio-Anteil im heutigen Tarif', () => {
+  it('nur mit Bio-Anteil; nennt Brennstoff und Preisfeld', () => {
+    expect(find(ev(userCase()).hints, /im heutigen Tarif/)).toBeUndefined();
+    const gas = find(ev(userCase((i) => (i.prices.currentBioShare = 0.4))).hints, /im heutigen Tarif/)!;
+    expect(gas.title).toBe('40 % Biogas im heutigen Tarif: Gaspreis dieses Tarifs eintragen');
+    expect(gas.level).toBe('warning');
+    expect(gas.detail).toMatch(/Ersparnis der Wärmepumpe fällt zu niedrig aus/);
+    const oil = find(ev(userCase((i) => {
+      i.oldHeating.fuel = 'oil';
+      i.prices.currentBioShare = 0.1;
+    })).hints, /im heutigen Tarif/)!;
+    expect(oil.title).toBe('10 % Bioöl im heutigen Tarif: Heizölpreis dieses Tarifs eintragen');
+  });
+});
 
 describe('F10 Wichtige Ereignisse', () => {
   it('F10.1 Kauf des Ersatzkessels im Referenzszenario mit Betrag', () => {

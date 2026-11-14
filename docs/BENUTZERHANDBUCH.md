@@ -54,11 +54,36 @@ Die Wahl wird im Browser gespeichert.
 
 Erzeugt einen Link, der alle **vom Standard abweichenden Eingaben** enthält, und kopiert ihn in die Zwischenablage (sonst steht er in der Adresszeile). Wer den Link öffnet, sieht den Rechner mit genau Ihren Eingaben.
 
-- Der Link enthält die Eingaben selbst (im Teil nach `#s=`). Es wird **nichts auf einem Server gespeichert**.
+- Der Link enthält die Eingaben selbst, komprimiert im Teil nach `#z=`. Es wird **nichts auf einem Server gespeichert**. Ältere Links (mit `#s=`) funktionieren weiterhin.
 - **Achtung:** Auch persönliche Angaben wie das Haushaltseinkommen stehen im Link. Teilen Sie ihn nur mit Personen, die diese Angaben sehen dürfen.
 - Solange ein geteilter Link in der Adresszeile steht, wird er bei jeder Änderung mit aktualisiert.
 - Ein geöffneter Link hat Vorrang vor den im Browser gespeicherten Eingaben – er **überschreibt sie aber nicht**. Haben Sie eigene Eingaben gespeichert, erscheint über den Ergebnissen der Hinweis „Geteiltes Szenario geöffnet“. Änderungen wirken dann nur auf den Link. Mit **Als meine Eingaben übernehmen** speichern Sie das Szenario als Ihre eigenen Eingaben, mit **Eigene Eingaben laden** kehren Sie zu Ihrem gespeicherten Stand zurück. Import und Zurücksetzen beenden die Link-Ansicht ebenfalls.
 - Werte im Link werden geprüft: Ungültige Monate oder Auswahlwerte werden durch den Standardwert ersetzt, extreme Zahlen (z. B. 1.000.000 Jahre Laufzeit) auf sinnvolle Grenzen begrenzt. Was ersetzt wurde, steht im Hinweis über den Ergebnissen.
+
+### Varianten vergleichen
+
+Vergleicht zwei oder drei Varianten nebeneinander, etwa „Angebot A“ und „Angebot B“ oder Umrüsten „jetzt“ und „2028“. So gehen Sie vor:
+
+1. Jede Variante im Rechner eingeben, eine **Bezeichnung des Szenarios** vergeben und mit **Export** als Datei speichern.
+2. **Varianten vergleichen** öffnen und mit **Export-Dateien laden …** zwei oder drei Dateien auswählen (auch mehrere auf einmal). **Aktuelle Eingaben hinzufügen** übernimmt den Stand im Rechner als Variante.
+3. Der Dialog zeigt die **Kennzahlen** nebeneinander (Gesamtkosten, bester Weg, Ersparnis, Amortisation, CO₂-Einsparung, Inbetriebnahme, Investition, Förderung, JAZ, Zeitraum) – die höchste Ersparnis ist mit ★ markiert –, die **kumulierten Kosten** aller Varianten in einem Diagramm (durchgezogen mit Wärmepumpe, gestrichelt ohne) und die **Unterschiede in den Eingaben**.
+
+Jede Variante wird für sich gerechnet, mit ihrer eigenen Referenz „ohne Wärmepumpe“. Als Name dient die Bezeichnung des Szenarios, sonst der Dateiname. **Im Rechner öffnen** übernimmt eine Variante in den Rechner (nach Rückfrage; die bisherigen Eingaben werden ersetzt). Die Varianten werden nicht gespeichert – nach dem Neuladen der Seite laden Sie die Dateien erneut.
+
+### Bericht drucken
+
+Erstellt eine **kompakte Zusammenfassung** für das Gespräch mit Energieberatung, Handwerksbetrieb oder Bank und öffnet den Druckdialog des Browsers. Dort wählen Sie einen Drucker oder **„Als PDF speichern“**. Der Bericht enthält:
+
+- Bezeichnung und Bemerkungen des Szenarios, Datum, Version und Betrachtungszeitraum,
+- oben rechts einen **QR-Code**: Mit dem Handy gescannt, öffnet er den Rechner mit genau diesen Eingaben – so kann z. B. die Energieberatung direkt weiterrechnen. Die Bemerkungen sind darin nicht enthalten (sie stehen im Bericht),
+- die Kennzahlen (Gesamtkosten, Ersparnis, Amortisation, CO₂-Einsparung) und den günstigsten Umrüstzeitpunkt,
+- Eckdaten zu Haus und Wärmepumpe (Kennwert, Effizienzklasse, Heizlast, JAZ-Schätzung, ggf. PV-Deckung),
+- die Diagramme „Kumulierte Kosten“, „Energie je Monat“ und „Einflussgrößen“,
+- KfW-Zuschuss, Steuerbonus und Finanzierung,
+- wichtige Ereignisse und Hinweise,
+- alle sichtbaren Eingaben; aus den Experten-Abschnitten nur die Werte, die Sie geändert haben.
+
+Der Bericht wird immer hell gedruckt, auch wenn Sie das dunkle Design nutzen. Als Dateiname für das PDF schlägt der Browser „Wärmepumpen-Bericht – Bezeichnung – Datum“ vor. Tipp: Schalten Sie im Druckdialog unter „Weitere Einstellungen“ die **Kopf- und Fußzeilen** aus – dann fehlen Datum, Seitentitel und Adresse am Seitenrand. Auch der Druckbefehl des Browsers (Strg+P bzw. ⌘+P) druckt den Bericht statt der Bildschirmansicht. Der Bericht entsteht nur in Ihrem Browser und wird nirgendwohin übertragen.
 
 ### Export
 
@@ -118,7 +143,9 @@ Beschreibt das Szenario; beide Felder ändern die Rechnung nicht.
 | **Steigerung Gaspreis (ohne CO₂)** | Jährliche Steigerung von Beschaffung, Netzentgelten usw. Sie wirkt gleichmäßig ab dem Startmonat; der CO₂-Aufschlag ändert sich dagegen jeweils zum Jahreswechsel nach dem CO₂-Preispfad. |
 | **Heizölpreis heute (inkl. CO₂)** | Preis je Liter aus der letzten Lieferung. |
 | **Steigerung Ölpreis (ohne CO₂)** | Jährliche Steigerung ohne CO₂-Anteil. |
+| **Bio-Anteil im heutigen Tarif** | Anteil Biogas bzw. Bioöl, den Sie heute schon beziehen (z. B. Tarif mit 10 % Biogas). Er gilt in der CO₂-Bilanz als klimaneutral – für die Altanlage, für einen neuen Kessel (mindestens der Anteil der Bio-Treppe) und für das Kochen mit Gas. **Wichtig:** Als Gas- bzw. Heizölpreis muss dann der Preis genau dieses Tarifs eingetragen sein. Der Rechner nimmt an, dass der Bio-Aufpreis darin steckt, und rechnet bei einem neuen Kessel nur den zusätzlich nötigen Bio-Anteil mit dem Mehrpreis. Steht dort der Preis von reinem Erdgas, wird der Weiterbetrieb mit Gas zu günstig gerechnet und die Ersparnis der Wärmepumpe fällt zu niedrig aus. |
 | **CO₂-Preispfad** | Stützstellen im Format `Jahr:€/t`, z. B. `2026:55, 2030:110`. Dazwischen wird linear interpoliert. Der CO₂-Aufschlag wird aus Preis und Emissionsfaktor berechnet. |
+| **CO₂-Faktor Strommix** | Für die CO₂-Bilanz: CO₂ je kWh Netzstrom im Format `Jahr:g/kWh`, linear interpoliert. 2025 waren es laut Umweltbundesamt 344 g/kWh; der weitere Rückgang ist eine Annahme. Mit **Ökostromtarif** (Abschnitt Strom) zählt Netzstrom als CO₂-frei, eigener PV-Strom der Wärmepumpe ebenso. |
 | **Bio-Treppe für neuen fossilen Kessel** | Neu eingebaute Gas-/Ölheizungen müssen ab 2029 einen steigenden Bio-Anteil nutzen. Gilt nur für einen neuen Kessel, nicht für die Altanlage. |
 | **Bio-Anteil** | Stufen im Format `Jahr:%`. |
 | **Mehrpreis Biogas/-öl** | Aufpreis je kWh für den Bio-Anteil. |
@@ -131,7 +158,9 @@ Beschreibt das Szenario; beide Felder ändern die Rechnung nicht.
 | **Investition gesamt (brutto)** | Angebotspreis inkl. Installation und Umfeldmaßnahmen (Heizkörper, Elektrik, Rückbau Altanlage). |
 | **davon förderfähig** | Anteil, den die KfW anerkennt. Rückbau und Entsorgung der Altanlage inkl. Öl-/Gastank sind förderfähig. |
 | **Nicht förderfähige Nebenkosten** | Z. B. die Stilllegung des Gasanschlusses durch den Netzbetreiber. |
-| **Jahresarbeitszahl (JAZ)** | Wie viel Wärme die Wärmepumpe aus 1 kWh Strom erzeugt. Luft/Wasser im Bestand typisch 3,0–3,5. |
+| **Wärmequelle** | Luft (Luft/Wasser-Wärmepumpe, am häufigsten) oder Erdwärme (Sole/Wasser). Für die Schätzung der JAZ. |
+| **Heizflächen im Haus** | Normale Heizkörper, große (Niedertemperatur-)Heizkörper oder Fußbodenheizung. Bei gemischten Heizflächen die überwiegende Art wählen; oft bestimmen einzelne zu kleine Heizkörper die nötige Vorlauftemperatur. |
+| **Jahresarbeitszahl (JAZ)** | Wie viel Wärme die Wärmepumpe aus 1 kWh Strom erzeugt – der wichtigste Wert für die Stromkosten. Unter dem Feld steht eine **Schätzung für Ihr Haus** mit Spanne und Erklärung („Wie wird geschätzt?“); mit **„… übernehmen“** setzen Sie die Mitte der Spanne ein. Ein Wert aus dem Angebot oder der Auslegung des Fachbetriebs ist besser. |
 | **Wartung** | Jährliche Wartungskosten der Wärmepumpe. |
 | **Lebensdauer** | Für den Restwert am Ende des Betrachtungszeitraums. Ist der Betrachtungszeitraum länger, rechnet der Rechner danach eine Ersatz-Wärmepumpe ohne Förderung ein. |
 | **Wärmepumpe mit Ursprung in der EU** | Ab dem 1. Quartal 2027 gibt es den vollen Fördersatz (15 % Grundförderung + 15 % Wertschöpfungs-Bonus) nur für Wärmepumpen aus der EU. |
@@ -150,8 +179,16 @@ Beschreibt das Szenario; beide Felder ändern die Rechnung nicht.
 | **Steigerung Strompreis** | Jährliche Steigerung der Strompreise. |
 | **Netzentgeltreduzierung § 14a EnWG** | Pauschale für steuerbare Verbrauchseinrichtungen (Modul 1) laut Preisblatt des Netzbetreibers. Gibt es einmal je Zähler. |
 | **Haushaltszähler hat schon § 14a (z. B. Wallbox)** | Ankreuzen, wenn am Haushaltszähler bereits eine Wallbox o. Ä. die Pauschale erhält. Dann bringt die Wärmepumpe ohne eigenen Zähler keine zusätzliche Reduzierung. |
-| **Anteil PV-Eigenverbrauch** | Anteil des Wärmepumpenstroms aus der eigenen PV-Anlage. |
+| **Ökostromtarif** | Für die CO₂-Bilanz: Netzstrom für Wärmepumpe und ggf. Induktionsherd zählt mit 0 g CO₂/kWh statt mit dem Strommix (so, wie Versorger Ökostrom ausweisen). Wer strenger rechnen möchte – Ökostrom ändert den deutschen Strommix nicht –, lässt das Häkchen weg. Die Kosten ändert das nicht; der Strompreis wird oben eingetragen. |
+| **PV-Anlage: Leistung** | Leistung der eigenen PV-Anlage in kWp; 0 = keine PV. Wie viel PV-Strom die Wärmepumpe nutzen kann, rechnet der Rechner Monat für Monat (siehe unten). |
+| **PV: Jahresertrag je kWp** | Erzeugter Strom je kWp und Jahr, in Deutschland meist 800–1.100 kWh (Süddach eher mehr, Ost/West weniger). Steht im Anlagenmonitor. |
+| **Batteriespeicher (nutzbar)** | Nutzbare Kapazität in kWh; 0 = kein Speicher. |
+| **Haushaltsstrom ohne Wärmepumpe** | Jahresverbrauch des übrigen Haushalts. Er nutzt den PV-Strom schon heute; die Wärmepumpe bekommt nur, was übrig bleibt. |
 | **Einspeisevergütung (entgangen)** | Wert des selbst genutzten PV-Stroms (er wird nicht mehr eingespeist). |
+
+**So rechnet der Rechner mit PV:** Der Jahresertrag wird typisch auf die Monate verteilt – im Dezember kommt nur etwa ein Sechstel dessen, was im Juni kommt. In jedem Monat nutzt zuerst der Haushalt den PV-Strom. Von der Überschneidung aus Erzeugung und Verbrauch wird ohne Speicher nur etwa die Hälfte gleichzeitig verbraucht (die Sonne scheint mittags, geheizt wird auch morgens, abends und nachts). Ein Speicher verschiebt Überschuss in Abend und Nacht – höchstens eine Ladung je Tag, mit 10 % Verlust. Unter den Feldern zeigt der Rechner, welchen Anteil des Wärmepumpenstroms PV im Jahr, im Winter und im Sommer deckt, mit Monatswerten zum Aufklappen. Typisch: Im Winter, wenn die Wärmepumpe am meisten Strom braucht, deckt PV nur wenige Prozent.
+
+Ältere Links und Exporte mit dem früheren festen „Anteil PV-Eigenverbrauch“ werden ohne PV gerechnet; ein Hinweis bittet darum, die Leistung der PV-Anlage einzutragen.
 
 ### Haushalt & Gebäude
 
@@ -213,6 +250,16 @@ Es gelten die Kreditbedingungen: Beim KfW-Kredit sind Teil-Sondertilgungen nur i
 | **Zeitpunktvergleich: Abstand** | Abstand der verglichenen Umrüstzeitpunkte in Monaten. |
 | **Zeitpunktvergleich: Anzahl** | Wie viele Zeitpunkte verglichen werden. |
 
+### Schätzung der Jahresarbeitszahl
+
+Kaum jemand kennt die JAZ seiner künftigen Wärmepumpe. Der Rechner schätzt sie in drei Schritten:
+
+1. **Vorlauftemperatur aus den Heizflächen:** An kalten Tagen braucht eine Fußbodenheizung etwa 35 °C, große Heizkörper etwa 42 °C, normale Heizkörper etwa 50 °C.
+2. **Anpassung an den Wärmebedarf** (Raumwärme je m² aus der Einordnung des Hauses): bis 70 kWh/m² etwa 5 K weniger, 120–170 kWh/m² etwa 5 K mehr, darüber etwa 8 K mehr. Bei Fußbodenheizung nur die Hälfte.
+3. **JAZ aus der Vorlauftemperatur:** Im Feldtest des Fraunhofer ISE erreichten Luft/Wasser-Wärmepumpen im Bestand im Mittel 3,4, Erdwärmepumpen 4,3. Je 10 K weniger Vorlauf steigt die JAZ um etwa 0,45. Die Spanne reicht 0,3 um die Mitte.
+
+Liegt die eingetragene JAZ über der Spanne, erscheint unter „Wichtige Ereignisse & Hinweise“ eine Warnung: Ersparnis und CO₂-Einsparung werden dann wahrscheinlich überschätzt. Die Schätzung ist eine grobe Orientierung und ersetzt nicht die Auslegung durch den Fachbetrieb. Ein einfacher Selbsttest: an einem kalten Tag den Kessel auf 55 °C Vorlauf stellen – wird es in allen Räumen warm, reichen die Heizkörper für eine Wärmepumpe.
+
 ### Experten-Abschnitte
 
 Diese Abschnitte enthalten die geltenden Förder-, Kredit- und Steuerregeln mit Quellenangaben. Ändern Sie sie nur, wenn sich die Regeln ändern oder Sie eine Annahme bewusst variieren möchten.
@@ -234,6 +281,7 @@ Diese Abschnitte enthalten die geltenden Förder-, Kredit- und Steuerregeln mit 
 | **WP + Steuerbonus** | Gesamtkosten mit Wärmepumpe, Steuerbonus nach § 35c EStG und ggf. Bankkredit. Zuschuss und Steuerbonus sind für dieselbe Maßnahme nicht kombinierbar. |
 | **Ersparnis mit WP** | Differenz zwischen „Ohne Wärmepumpe“ und dem besten Weg. |
 | **Amortisation** | Ab wann die aufsummierten Kosten mit Wärmepumpe dauerhaft unter denen ohne Wärmepumpe liegen. |
+| **CO₂-Einsparung** | Tonnen CO₂, die die Wärmepumpe im Betrachtungszeitraum gegenüber der alten Heizung einspart – für Heizung, Warmwasser und Kochen. Gas und Öl mit ihren Emissionsfaktoren; der Bio-Anteil (heutiger Tarif bzw. Bio-Treppe eines neuen Kessels) gilt als klimaneutral. Die Wärmepumpe mit dem CO₂-Faktor des Strommix für den Netzstrom – mit Ökostromtarif mit 0 g/kWh –, eigener PV-Strom zählt als CO₂-frei. Gerechnet werden die direkten Emissionen bei Verbrennung bzw. Stromerzeugung, ohne Vorketten und ohne Herstellung der Geräte. |
 
 Alle Beträge sind brutto, inklusive Opportunitätszins. Positive Werte in Tabellen sind Ausgaben, negative Einnahmen (Zuschuss, Steuerbonus, Kreditauszahlung, Restwert).
 
@@ -254,7 +302,7 @@ Förderbedingungen, Preise und Zinsen werden regelmäßig geprüft. Liegt die le
 
 ### Wichtige Ereignisse & Hinweise
 
-- **Hinweise** (Kästen oben) erklären Förder- und Steuerbedingungen für Ihren Fall – z. B. ob der Klimageschwindigkeitsbonus erreichbar ist, ob ein Einkommensbonus greift oder bis wann der Steuerbonus möglich ist. Orange markierte Hinweise sind Nachteile, die leicht übersehen werden.
+- **Hinweise** (Kästen oben) erklären Förder- und Steuerbedingungen für Ihren Fall – z. B. ob der Klimageschwindigkeitsbonus erreichbar ist, ob ein Einkommensbonus greift oder bis wann der Steuerbonus möglich ist. Bei einem Bio-Anteil im heutigen Tarif erinnert ein Hinweis daran, den Preis genau dieses Tarifs einzutragen. Orange markierte Hinweise sind Nachteile, die leicht übersehen werden.
 - Die **Zeitleiste** zeigt datierte Ereignisse je Szenario: Förderantrag, Inbetriebnahme, Auszahlung des Zuschusses, Steuererstattungen (die letzte ist hervorgehoben), Kauf eines Ersatzkessels, Bio-Treppe, Ende der Zinsbindung, Sondertilgungen und Tilgungsende.
 
 ### Diagramme
@@ -263,6 +311,22 @@ Förderbedingungen, Preise und Zinsen werden regelmäßig geprüft. Liegt die le
 - **Jährliche Kosten:** Kosten pro Jahr; Spitzen zeigen Investitionen.
 - **Preisentwicklung:** Kosten je kWh Wärme aus Altanlage und Wärmepumpe sowie der CO₂-Preis.
 - **Zeitpunkt der Umrüstung:** Gesamtkosten je Umrüstzeitpunkt im Vergleich zu „ohne Wärmepumpe“.
+- **Energie je Monat:** stellt für ein typisches Jahr den Bedarf dem Verbrauch gegenüber, jeweils in kWh. Je Monat drei Balken: **Bedarf** (Nutzenergie für Heizen, Warmwasser und – wenn heute mit Gas gekocht wird – Kochen), **Gas bzw. Heizöl der Altanlage** und **Strom der Wärmepumpe** (bleibt das Kochen beim Gas, kommt dieses Gas als heller Teil dazu). Der Tooltip teilt jeden Balken in Heizen, Warmwasser und Kochen auf. Der Satz über dem Diagramm nennt die Jahressummen und wie viele kWh Gas/Öl bzw. Strom je kWh Bedarf nötig sind – das ist die Effizienz. Als Nutzenergie beim Kochen gilt die Hälfte des Gases (ein Gasherd bringt etwa 40–55 % der Energie in den Topf). Die Jahresarbeitszahl ist im Rechner ein Jahresmittel; tatsächlich arbeitet die Wärmepumpe an kalten Tagen etwas weniger effizient als im Jahresmittel.
+- **Einflussgrößen:** beantwortet „Was beeinflusst mein Ergebnis am stärksten?“. Jede wichtige Annahme wird einzeln etwas niedriger und höher gerechnet, alle anderen bleiben gleich. Die Balken zeigen, wie sich die **Ersparnis mit Wärmepumpe** dadurch ändert; der längste Balken steht oben. Blau = Annahme niedriger, orange = Annahme höher. Darüber steht in einem Satz, welche Annahme am stärksten wirkt. Durchgerechnet werden:
+
+  | Annahme | Variation |
+  |---|---|
+  | Gas- bzw. Ölpreis heute | ±20 % |
+  | Steigerung Gas-/Ölpreis | ±2 Prozentpunkte |
+  | Strompreis heute | ±20 % |
+  | Steigerung Strompreis | ±2 Prozentpunkte |
+  | Jahresarbeitszahl | ±0,5 |
+  | Investition Wärmepumpe | ±20 % |
+  | CO₂-Preis | ±30 % |
+  | Kreditzinsen (nur mit Kredit) | ±1 Prozentpunkt |
+  | Opportunitätszins | ±1 Prozentpunkt |
+
+  Je Variante wird der jeweils bessere Weg (KfW-Zuschuss oder Steuerbonus) neu bestimmt. Die Annahmen mit den längsten Balken lohnt es sich am ehesten genauer zu prüfen, z. B. durch ein Angebot oder die eigene Rechnung.
 
 Unter jedem Diagramm zeigt **Werte als Tabelle** dieselben Zahlen zum Nachlesen (auch für Screenreader). Die Reiter wechseln Sie mit der Maus oder per Tastatur: Tab auf die Reiterleiste, dann Pfeiltasten links/rechts, Pos1 und Ende.
 

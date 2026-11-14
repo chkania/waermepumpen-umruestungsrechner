@@ -1,6 +1,7 @@
 import { formatMonthDe, halfYearSteps, parseMonth, tryParseMonth, yearOf } from './dates';
 import { cap1At, incomeBonusRate, kfwLoanVariant, kgbRateAt } from './funding';
 import { annualHeatDemand, createPriceModel, energySplit, parsePath } from './prices';
+import { estimateJaz } from './jaz';
 import { runAll, type RunResult } from './simulation';
 import type { Inputs, ScenarioResult } from './types';
 
@@ -63,14 +64,19 @@ export function keyEvents(inp: Inputs, run: RunResult): KeyEvents {
     for (const step of relevant) {
       const month = Math.max(step.year * 12, firstBoiler.month);
       if (month >= end) continue;
+      const surcharge = (fuelNew * pm.bioSurchargeCt(yearOf(month))) / 100;
+      const zero = Math.round(surcharge) === 0;
+      const covered = zero && inp.prices.currentBioShare > 0;
       timeline.push({
         month,
         scenario: 'ref',
         level: 'info',
         title: `Bio-Treppe: ${step.value} % Bio-Anteil für den neuen Kessel`,
-        detail: 'Gebäudemodernisierungsgesetz – Mehrkosten für Biogas/Bioöl gegenüber fossilem Brennstoff.',
-        amount: (fuelNew * pm.bioSurchargeCt(yearOf(month))) / 100,
-        perYear: true,
+        detail: covered
+          ? `Gebäudemodernisierungsgesetz – kein Aufpreis: Der Bio-Anteil im heutigen Tarif (${pct(inp.prices.currentBioShare)}) deckt die Pflicht bereits.`
+          : 'Gebäudemodernisierungsgesetz – Mehrkosten für Biogas/Bioöl gegenüber fossilem Brennstoff.',
+        // F25.4: a bio share bought today covers the obligation – no "−0 €" amount
+        ...(zero ? {} : { amount: surcharge, perYear: true }),
       });
     }
   }
@@ -174,9 +180,54 @@ export function keyEvents(inp: Inputs, run: RunResult): KeyEvents {
     if (cook) hints.push(cook);
     hints.push(...fundingHints(inp, run, start));
   }
+  const jazHint = jazAboveEstimateHint(inp);
+  if (install !== null && jazHint) hints.push(jazHint);
+  const bio = bioTariffHint(inp);
+  if (bio) hints.push(bio);
 
   timeline.sort((a, b) => a.month! - b.month! || order(a) - order(b));
   return { hints, timeline };
+}
+
+/** Entered SPF (JAZ) above the estimate for the house (F26): savings are probably overestimated. */
+function jazAboveEstimateHint(inp: Inputs): KeyEvent | null {
+  const e = estimateJaz(inp);
+  const jaz = inp.heatPump.jaz;
+  if (!(jaz > e.high + 1e-9)) return null;
+  const d1 = (x: number) => x.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  return {
+    month: null,
+    scenario: 'all',
+    level: 'warning',
+    title: `JAZ ${d1(jaz)} liegt über der Schätzung für Ihr Haus (${d1(e.low)}–${d1(e.high)})`,
+    detail:
+      `Mit den angegebenen Heizflächen und dem Wärmebedarf ist an kalten Tagen ein Vorlauf von ca. ${e.supplyTemp} °C zu erwarten. ` +
+      `Eine zu hohe JAZ unterschätzt die Stromkosten und überschätzt Ersparnis und CO₂-Einsparung. ` +
+      `Den Wert nur so ansetzen, wenn der Fachbetrieb ihn für Ihr Haus bestätigt.`,
+  };
+}
+
+/**
+ * Bio share (Bio-Anteil) bought today (F25.4): the entered fuel price must be the price of that tariff,
+ * because the bio premium (Bio-Mehrpreis) is not charged again for a replacement boiler (Ersatzkessel).
+ */
+function bioTariffHint(inp: Inputs): KeyEvent | null {
+  const share = inp.prices.currentBioShare;
+  if (!(share > 0)) return null;
+  const gas = inp.oldHeating.fuel === 'gas';
+  const fuel = gas ? 'Biogas' : 'Bioöl';
+  const price = gas ? 'Gaspreis' : 'Heizölpreis';
+  return {
+    month: null,
+    scenario: 'ref',
+    level: 'warning',
+    title: `${pct(share)} ${fuel} im heutigen Tarif: ${price} dieses Tarifs eintragen`,
+    detail:
+      `Der Rechner nimmt an, dass der Bio-Aufpreis im eingetragenen ${price} steckt, und rechnet ihn bei einem neuen Kessel ` +
+      `(Bio-Treppe) nicht noch einmal. Steht dort der Preis von reinem ${gas ? 'Erdgas' : 'Heizöl'}, wird der Weiterbetrieb ` +
+      `ohne Wärmepumpe zu günstig gerechnet und die Ersparnis der Wärmepumpe fällt zu niedrig aus. ` +
+      `In der CO₂-Bilanz zählt der Bio-Anteil als klimaneutral.`,
+  };
 }
 
 function order(e: KeyEvent): number {

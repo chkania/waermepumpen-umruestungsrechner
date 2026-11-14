@@ -1,6 +1,6 @@
 /**
  * Recommending the calculator to others (F21): prepared messages and share links.
- * Only the address of the calculator is shared – never the user's inputs (no "#s=…" hash, no query).
+ * Only the address of the calculator is shared – never the user's inputs (no "#z=…"/"#s=…" hash, no query).
  */
 
 export const RECOMMEND_SUBJECT = 'Tipp: Wärmepumpen-Umrüstungsrechner';

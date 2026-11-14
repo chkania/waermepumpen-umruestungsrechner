@@ -8,14 +8,21 @@ import { DEFAULT_SOURCES, OFFICIAL_REFS, SOURCE_KIND_LABEL } from '../core/sourc
 import { priceRows, runAll, type RunResult } from '../core/simulation';
 import { tariffComparison } from '../core/tariff';
 import { EFFICIENCY_CLASSES, rateHouse } from '../core/house';
+import { estimateJaz } from '../core/jaz';
+import { energyYear, type EnergyYear } from '../core/energy';
+import { pvSummary } from '../core/pv';
+import { reportHtml } from './report';
+import { MAX_VARIANTS, variantName, variantResult, type Variant } from '../core/variants';
+import { VARIANTS_LIMIT_TEXT, variantCurves, variantCurvesTableHtml, variantDiffsHtml, variantsTableHtml } from './variants';
+import { sensitivity, type Sensitivity } from '../core/sensitivity';
 import { energySplit } from '../core/prices';
 import { decodeHash, encodeHash, exportFileName, exportJson, importJson, mergeInputs } from '../core/serialize';
 import type { Inputs, ScenarioKind, ScenarioResult } from '../core/types';
 import { NUMBER_LIMITS, numberRange, TEXT_LIMITS, validMonth, type InputIssue } from '../core/validate';
-import { Charts, chartTables, type ChartId } from './charts';
+import { Charts, chartTables, variantsChart, type ChartId } from './charts';
 import { SECTIONS, getPath, setPath, type Field } from './fields';
 import { escapeHtml, fmtDuration, fmtEur, fmtMonth, fmtNum, fmtPct } from './format';
-import { RECOMMEND_SUBJECT, RECOMMEND_TEXT, recommendLinks } from './share';
+import { RECOMMEND_SUBJECT, RECOMMEND_TEXT, calculatorUrl, recommendLinks } from './share';
 import { logoSvg } from '../logo';
 import { BUG_REPORT_URL, CONTRIBUTING_URL, FEATURE_REQUEST_URL, REPO_URL } from '../project';
 
@@ -39,11 +46,15 @@ export interface AppController {
   getInputs(): Inputs;
   setInputs(i: Inputs): void;
   recalc(): void;
-  lastResult(): { run: RunResult; cmp: InstallComparison; events: KeyEvents } | null;
+  lastResult(): { run: RunResult; cmp: InstallComparison; events: KeyEvents; sens: Sensitivity } | null;
   getTheme(): ThemeChoice;
   setTheme(t: ThemeChoice): void;
   /** Opens the introduction dialog (F20). */
   showIntro(): void;
+  /** Builds the printable report (F30) and returns its element (null without result). */
+  buildReport(): HTMLElement | null;
+  /** Names of the variants in the comparison (F31). */
+  getVariants(): string[];
 }
 
 const CHART_TABS: [ChartId, string][] = [
@@ -51,6 +62,8 @@ const CHART_TABS: [ChartId, string][] = [
   ['annual', 'Jährliche Kosten'],
   ['prices', 'Preisentwicklung'],
   ['install', 'Zeitpunkt der Umrüstung'],
+  ['energy', 'Energie je Monat'],
+  ['sensitivity', 'Einflussgrößen'],
 ];
 
 export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
@@ -63,7 +76,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   let loadIssues: { origin: string; issues: InputIssue[] } | null = initial.issues.length
     ? { origin: initial.source === 'hash' ? 'dem Link' : 'den gespeicherten Eingaben', issues: initial.issues }
     : null;
-  let last: { run: RunResult; cmp: InstallComparison; events: KeyEvents } | null = null;
+  let last: { run: RunResult; cmp: InstallComparison; events: KeyEvents; sens: Sensitivity } | null = null;
   let tableKind: ScenarioKind = 'kfw';
   let activeChart: ChartId = 'cumulative';
 
@@ -195,7 +208,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   /** Leave the link view: remove the hash, allow saving again. */
   function leaveShared(): void {
     sharedView = false;
-    if (location.hash.startsWith('#s=')) history.replaceState(null, '', location.pathname + location.search);
+    if (/^#[sz]=/.test(location.hash)) history.replaceState(null, '', location.pathname + location.search);
   }
   notice.addEventListener('click', (e) => {
     const action = (e.target as HTMLElement).closest<HTMLElement>('[data-notice]')?.dataset.notice;
@@ -249,6 +262,15 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closePopovers();
+  });
+
+  // Apply the SPF (JAZ) estimate (F26): sets the field like a user input
+  form.addEventListener('click', (e) => {
+    if (!(e.target as HTMLElement).closest('[data-jaz-apply]')) return;
+    inputs.heatPump.jaz = estimateJaz(inputs).mid;
+    writeForm();
+    persist();
+    recalc();
   });
 
   form.addEventListener('input', (e) => {
@@ -348,7 +370,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
 
   const redrawCharts = () => {
     charts.reset();
-    if (last) charts.update(last.run, priceRows(inputs), last.cmp, last.events);
+    if (last) charts.update(last.run, priceRows(inputs), last.cmp, last.events, last.sens, energyYear(inputs));
   };
   // ---------- Light/dark ----------
   const media = typeof matchMedia === 'function' ? matchMedia('(prefers-color-scheme: dark)') : null;
@@ -394,37 +416,54 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     } catch {
       /* Speicher nicht verfügbar */
     }
-    if (location.hash.startsWith('#s=')) history.replaceState(null, '', encodeHash(defaults, inputs));
+    if (/^#[sz]=/.test(location.hash)) history.replaceState(null, '', encodeHash(defaults, inputs));
   }
 
   function recalc(): void {
     let run: RunResult;
     let cmp: InstallComparison;
     let events: KeyEvents;
+    let sens: Sensitivity;
     try {
       run = runAll(inputs);
       cmp = compareInstallTimes(inputs);
       events = keyEvents(inputs, run);
+      sens = sensitivity(inputs);
     } catch (err) {
       $<HTMLElement>('#warnings').innerHTML = `<div class="alert error">${escapeHtml((err as Error).message)}</div>`;
       return;
     }
-    last = { run, cmp, events };
+    last = { run, cmp, events, sens };
     renderKpis(run);
     renderWarnings(run);
     renderEvents(events);
     renderHouse();
+    renderJazEstimate();
+    renderPvEstimate();
     renderDetails(run);
     renderTariff();
     renderInstallTable(cmp);
     renderYearTable(run, events);
     const prices = priceRows(inputs);
-    charts.update(run, prices, cmp, events);
-    renderChartTables(run, prices, cmp);
+    const energy = energyYear(inputs);
+    charts.update(run, prices, cmp, events, sens, energy);
+    renderChartTables(run, prices, cmp, sens, energy);
   }
 
-  function renderChartTables(run: RunResult, prices: ReturnType<typeof priceRows>, cmp: InstallComparison): void {
-    const tables = chartTables(run, prices, cmp);
+  function renderChartTables(run: RunResult, prices: ReturnType<typeof priceRows>, cmp: InstallComparison, sens: Sensitivity, energy: EnergyYear): void {
+    const tables = chartTables(run, prices, cmp, sens, energy);
+    renderEnergyNote(energy);
+    // Summary of the sensitivity analysis (F27) above the chart
+    const note = root.querySelector<HTMLElement>('[data-chart-note="sensitivity"]');
+    const top = sens.items[0];
+    if (note && top) {
+      const lo = Math.min(top.low, top.high);
+      const hi = Math.max(top.low, top.high);
+      note.innerHTML =
+        `Jede Annahme wird einzeln etwas niedriger und höher gerechnet, alle anderen bleiben gleich. ` +
+        `Am stärksten wirkt <strong>${escapeHtml(top.label)}</strong>: Die Ersparnis liegt dann zwischen ${fmtEur(lo)} und ${fmtEur(hi)} (heute ${fmtEur(sens.base)}).` +
+        (lo < 0 ? ' Schon diese eine Annahme kann die Wärmepumpe unwirtschaftlich machen.' : '');
+    }
     for (const [id, t] of Object.entries(tables)) {
       const el = root.querySelector<HTMLElement>(`[data-chart-table="${id}"]`);
       if (!el) continue;
@@ -432,6 +471,22 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
         <thead><tr>${t.head.map((h, i) => `<th scope="col"${i ? ' class="num"' : ''}>${escapeHtml(h)}</th>`).join('')}</tr></thead>
         <tbody>${t.rows.map((r) => `<tr>${r.map((c, i) => (i ? `<td class="num">${escapeHtml(c)}</td>` : `<th scope="row">${escapeHtml(c)}</th>`)).join('')}</tr>`).join('')}</tbody></table>`;
     }
+  }
+
+  /** Annual summary of the energy chart (F29): how much gas/oil and electricity per kWh of useful energy. */
+  function renderEnergyNote(e: EnergyYear): void {
+    const note = root.querySelector<HTMLElement>('[data-chart-note="energy"]');
+    if (!note) return;
+    const n0 = (x: number) => fmtNum(x, 0);
+    const d2 = (x: number) => fmtNum(x, 2);
+    const t = e.totals;
+    const fuel = e.fuel === 'gas' ? 'Gas' : 'Heizöl';
+    note.innerHTML =
+      `Typisches Jahr: Bedarf <strong>${n0(t.need)} kWh</strong> für ${e.months.some((m) => m.need.cooking > 0) ? 'Heizen, Warmwasser und Kochen' : 'Heizen und Warmwasser'}. ` +
+      `Die Altanlage braucht dafür <strong>${n0(t.old)} kWh ${fuel}</strong> (${d2(t.old / t.need)} kWh je kWh Bedarf), ` +
+      `mit Wärmepumpe sind es <strong>${n0(t.hp)} kWh Strom</strong>${t.hpCookingGas > 0 ? ` und ${n0(t.hpCookingGas)} kWh Gas zum Kochen` : ''} ` +
+      `(${d2((t.hp + t.hpCookingGas) / t.need)} kWh je kWh Bedarf). ` +
+      `Die Jahresarbeitszahl ist ein Jahresmittel – tatsächlich arbeitet die Wärmepumpe an kalten Tagen etwas weniger effizient.`;
   }
 
   function renderKpis(run: RunResult): void {
@@ -445,12 +500,15 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
         : install !== null && be > install
           ? `${fmtMonth(be)} <small>(${fmtDuration(be - install)} nach Inbetriebnahme)</small>`
           : fmtMonth(be);
+    // CO2 balance (F25): heating and cooking, heat pump with the electricity mix (Strommix)
+    const co2Saved = run.ref.co2Tons - best.co2Tons;
     $<HTMLElement>('#kpis').innerHTML = `
       ${kpi('Ohne Wärmepumpe', fmtEur(run.ref.totalCost), 'ref', 'Gesamtkosten im Zeitraum')}
       ${kpi('WP + KfW-Zuschuss', fmtEur(run.kfw.totalCost), 'kfw', `Zuschuss ${fmtEur(run.kfw.kfw?.subsidy ?? 0)}`, run.best === 'kfw')}
       ${kpi('WP + Steuerbonus', run.tax.feasible ? fmtEur(run.tax.totalCost) : 'nicht möglich', 'tax', run.tax.feasible ? `Steuerbonus ${fmtEur(run.tax.tax?.total ?? 0)}` : (run.tax.tax?.notes[0] ?? ''), run.best === 'tax')}
       ${kpi(saving >= 0 ? 'Ersparnis mit WP' : 'Mehrkosten mit WP', fmtEur(Math.abs(saving)), saving >= 0 ? 'good' : 'bad', `bester Weg: ${run.best === 'tax' ? 'Steuerbonus' : 'KfW'}`)}
       ${kpi('Amortisation', beText, 'neutral', 'kumulierte Kosten dauerhaft unter Referenz')}
+      ${kpi(co2Saved >= 0 ? 'CO₂-Einsparung' : 'CO₂-Mehrausstoß', `${fmtTons(Math.abs(co2Saved))} t`, co2Saved >= 0 ? 'good' : 'bad', `im Zeitraum: ohne WP ${fmtTons(run.ref.co2Tons)} t, mit WP ${fmtTons(best.co2Tons)} t`)}
     `;
     $<HTMLElement>('#horizon-note').textContent =
       `Betrachtung ${fmtMonth(run.ref.months[0].month)} – ${fmtMonth(run.ref.months[run.ref.months.length - 1].month)}, ` +
@@ -496,6 +554,52 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       <h2>Wichtige Ereignisse &amp; Hinweise</h2>
       ${hints ? `<div class="hints">${hints}</div>` : ''}
       ${items ? `<ol class="timeline">${items}</ol>` : ''}`;
+  }
+
+  /** SPF (JAZ) estimate below the SPF field with explanation and "apply" button (F26). */
+  function renderJazEstimate(): void {
+    const box = root.querySelector<HTMLElement>('#jaz-estimate');
+    if (!box) return;
+    const e = estimateJaz(inputs);
+    const d1 = (x: number) => fmtNum(x, 1);
+    const jaz = inputs.heatPump.jaz;
+    const fit =
+      jaz > e.high + 1e-9
+        ? `<p class="jaz-fit is-high">Achtung: Ihr Wert ${d1(jaz)} liegt über der Schätzung – nur übernehmen, wenn der Fachbetrieb ihn bestätigt.</p>`
+        : jaz < e.low - 1e-9
+          ? `<p class="jaz-fit">Ihr Wert ${d1(jaz)} liegt unter der Schätzung (vorsichtig gerechnet).</p>`
+          : '';
+    box.innerHTML = `
+      <div class="jaz-head"><span>Schätzung für Ihr Haus: <strong>JAZ ${d1(e.low)}–${d1(e.high)}</strong> (Mitte ${d1(e.mid)}, Vorlauf ca. ${e.supplyTemp} °C)</span>
+        <button type="button" data-jaz-apply${Math.abs(jaz - e.mid) < 1e-9 ? ' aria-pressed="true"' : ''}>${Math.abs(jaz - e.mid) < 1e-9 ? 'Übernommen' : `${d1(e.mid)} übernehmen`}</button></div>
+      ${fit}
+      <details class="jaz-why"><summary>Wie wird geschätzt?</summary>
+        <ol>${e.steps.map((s) => `<li>${escapeHtml(s)}</li>`).join('')}</ol>
+        <p>Grobe Orientierung. Die tatsächliche JAZ hängt von Auslegung, Einstellung (Heizkurve), Warmwasseranteil und Witterung ab. Selbsttest: An einem kalten Tag den Kessel auf 55 °C Vorlauf stellen – wird es in allen Räumen warm, reichen die Heizkörper für eine Wärmepumpe.</p>
+      </details>`;
+  }
+
+  /** PV coverage of the heat pump over the year (F28), below the PV inputs. */
+  function renderPvEstimate(): void {
+    const box = root.querySelector<HTMLElement>('#pv-estimate');
+    if (!box) return;
+    box.hidden = !(inputs.heatPump.pvKwp > 0);
+    if (box.hidden) return;
+    const p = pvSummary(inputs);
+    const n0 = (x: number) => fmtNum(x, 0);
+    const pc = (x: number) => `${n0(x * 100)} %`;
+    const MONTHS = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+    box.innerHTML = `
+      <div class="jaz-head"><span>PV deckt rechnerisch <strong>${pc(p.share)}</strong> des Wärmepumpenstroms
+        (${n0(p.annualHpFromPv)} von ${n0(p.annualHp)} kWh im Jahr).</span></div>
+      <p class="jaz-fit">Winter (Dez–Feb): <strong>${pc(p.winterShare)}</strong> · Sommer (Jun–Aug): ${pc(p.summerShare)}. Den Rest bezieht die Wärmepumpe aus dem Netz.</p>
+      <details class="jaz-why"><summary>Monatswerte</summary>
+        <div class="table-wrap"><table class="compact"><caption class="visually-hidden">PV-Ertrag und Wärmepumpenstrom je Monat (typisches Jahr)</caption>
+          <thead><tr><th scope="col">Monat</th><th scope="col" class="num">PV-Ertrag</th><th scope="col" class="num">WP-Strom</th><th scope="col" class="num">davon PV</th></tr></thead>
+          <tbody>${p.months.map((m) => `<tr><th scope="row">${MONTHS[m.month - 1]}</th><td class="num">${n0(m.pvKWh)}</td><td class="num">${n0(m.hpKWh)}</td><td class="num">${n0(m.hpFromPv)}</td></tr>`).join('')}</tbody>
+        </table></div>
+        <p>kWh im typischen Jahr. Der Haushaltsstrom nutzt den PV-Strom zuerst; von der Überschneidung aus Erzeugung und Verbrauch wird nur ein Teil gleichzeitig genutzt, ein Speicher verschiebt Überschuss in Abend und Nacht. Den genutzten PV-Strom rechnet der Rechner mit der entgangenen Einspeisevergütung.</p>
+      </details>`;
   }
 
   /** Rating of the house (F18). */
@@ -832,7 +936,186 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       redrawCharts();
     },
     showIntro,
+    buildReport,
+    getVariants: () => getVariants(),
   };
+
+  // ---------- Compare variants (F31) ----------
+  const varDialog = $<HTMLDialogElement>('#variants');
+  const varList = $<HTMLElement>('#var-list');
+  const varResult = $<HTMLElement>('#var-result');
+  const varStatus = $<HTMLElement>('#var-status');
+  const varFiles = $<HTMLInputElement>('#var-file-input');
+  let variants: Variant[] = [];
+  let varChart: { destroy(): void } | null = null;
+  const setVarStatus = (text: string, isError = false) => {
+    varStatus.textContent = text;
+    varStatus.classList.toggle('is-error', isError);
+  };
+  const addVariant = (inp: Inputs, fallback: string): boolean => {
+    if (variants.length >= MAX_VARIANTS) {
+      setVarStatus(VARIANTS_LIMIT_TEXT, true);
+      return false;
+    }
+    variants.push({ name: variantName(inp, fallback, variants.map((v) => v.name)), inputs: structuredClone(inp) });
+    return true;
+  };
+  function renderVariants(): void {
+    varList.innerHTML = variants
+      .map(
+        (v, i) => `<li><span class="variants-name">${escapeHtml(v.name)}</span>
+          <button type="button" data-var-open="${i}" title="Diese Variante in den Rechner übernehmen">Im Rechner öffnen</button>
+          <button type="button" data-var-remove="${i}" aria-label="${escapeHtml(v.name)} entfernen">Entfernen</button></li>`,
+      )
+      .join('');
+    varChart?.destroy();
+    varChart = null;
+    if (variants.length === 0) {
+      varResult.innerHTML = '';
+      return;
+    }
+    const rs = variants.map(variantResult);
+    varResult.innerHTML = `
+      ${variants.length < 2 ? '<p class="muted">Fügen Sie mindestens eine weitere Variante hinzu, um zu vergleichen.</p>' : ''}
+      <h3>Kennzahlen</h3>${variantsTableHtml(rs)}
+      <h3>Kumulierte Kosten</h3>
+      <div class="chart-wrap"><canvas role="img" aria-label="Diagramm: kumulierte Kosten je Variante, mit und ohne Wärmepumpe. Die Werte stehen in der Tabelle darunter."></canvas></div>
+      <details class="chart-data"><summary>Werte als Tabelle</summary><div class="table-wrap">${variantCurvesTableHtml(rs)}</div></details>
+      ${variants.length > 1 ? `<h3>Unterschiede in den Eingaben</h3>${variantDiffsHtml(rs)}` : ''}`;
+    varChart = variantsChart(varResult.querySelector('canvas')!, variantCurves(rs));
+  }
+  $<HTMLButtonElement>('#btn-variants').addEventListener('click', () => {
+    setVarStatus('');
+    renderVariants();
+    varDialog.showModal?.();
+  });
+  varDialog.addEventListener('close', () => {
+    varChart?.destroy();
+    varChart = null;
+  });
+  $<HTMLButtonElement>('#var-current').addEventListener('click', () => {
+    if (addVariant(inputs, 'Aktuelle Eingaben')) setVarStatus('Aktuelle Eingaben hinzugefügt.');
+    renderVariants();
+  });
+  $<HTMLButtonElement>('#var-files').addEventListener('click', () => varFiles.click());
+  varFiles.addEventListener('change', async () => {
+    const messages: string[] = [];
+    for (const file of [...(varFiles.files ?? [])]) {
+      try {
+        const issues: InputIssue[] = [];
+        const imported = importJson(defaults, await file.text(), issues);
+        if (!addVariant(imported, file.name.replace(/\.json$/i, ''))) break;
+        messages.push(`„${file.name}“ geladen${issues.length ? ` (${issues.length} Wert(e) korrigiert)` : ''}.`);
+      } catch (err) {
+        messages.push(`„${file.name}“: ${(err as Error).message}`);
+      }
+    }
+    varFiles.value = '';
+    if (messages.length) setVarStatus(messages.join(' '), messages.some((m) => !m.endsWith('.') || m.includes(': ')));
+    renderVariants();
+  });
+  varList.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('button');
+    if (!btn) return;
+    if (btn.dataset.varRemove !== undefined) {
+      variants.splice(Number(btn.dataset.varRemove), 1);
+      setVarStatus('');
+      renderVariants();
+    } else if (btn.dataset.varOpen !== undefined) {
+      const v = variants[Number(btn.dataset.varOpen)];
+      if (!v || !confirm(`Die Eingaben im Rechner durch „${v.name}“ ersetzen? Sichern Sie die aktuellen Eingaben vorher bei Bedarf per Export.`)) return;
+      leaveShared();
+      loadIssues = null;
+      controller.setInputs(structuredClone(v.inputs));
+      renderNotice();
+      varDialog.close();
+      toast(`„${v.name}“ in den Rechner übernommen.`);
+    }
+  });
+  /** For tests: currently compared variants. */
+  const getVariants = () => variants.map((v) => v.name);
+
+  // ---------- Printable report (F30) ----------
+  /** Theme before printing; the report is always printed light. */
+  let themeBeforePrint: string | null = null;
+  let titleBeforePrint = '';
+  function buildReport(): HTMLElement | null {
+    if (!last) return null;
+    let report = document.getElementById('report');
+    if (!report) {
+      report = document.createElement('div');
+      report.id = 'report';
+      report.className = 'report';
+      document.body.appendChild(report);
+    }
+    if (themeBeforePrint === null) {
+      themeBeforePrint = document.documentElement.dataset.theme ?? null;
+      titleBeforePrint = document.title;
+    }
+    document.documentElement.dataset.theme = 'light';
+    // The browser suggests the document title as PDF file name
+    const reportDate = (env.today ?? new Date()).toLocaleDateString('sv-SE');
+    const reportName = inputs.scenario.name.trim();
+    document.title = `Wärmepumpen-Bericht${reportName ? ` – ${reportName}` : ''} – ${reportDate}`;
+    report.innerHTML = reportHtml({
+      inputs,
+      defaults,
+      run: last.run,
+      cmp: last.cmp,
+      events: last.events,
+      today: env.today ?? new Date(),
+      url: calculatorUrl(location.href),
+      detailsHtml: $<HTMLElement>('#details').innerHTML,
+    });
+    // Charts: render off screen in light colours at print width, then keep a static copy of each bitmap.
+    // A copy on a canvas is available immediately – an <img> with a data URL may not be decoded yet when
+    // the browser lays out the print (Ctrl+P / "beforeprint"), and the chart would be missing.
+    report.classList.add('is-rendering');
+    const canvases: Partial<Record<ChartId, HTMLCanvasElement>> = {};
+    for (const fig of report.querySelectorAll<HTMLElement>('[data-report-chart]')) {
+      const wrap = document.createElement('div');
+      wrap.className = 'report-chart-wrap';
+      const canvas = document.createElement('canvas');
+      wrap.appendChild(canvas);
+      fig.appendChild(wrap);
+      canvases[fig.dataset.reportChart as ChartId] = canvas;
+    }
+    const rc = new Charts(canvases, 2);
+    rc.update(last.run, priceRows(inputs), last.cmp, last.events, last.sens, energyYear(inputs));
+    for (const fig of report.querySelectorAll<HTMLElement>('[data-report-chart]')) {
+      const source = fig.querySelector('canvas');
+      const copy = document.createElement('canvas');
+      const ctx = copy.getContext?.('2d');
+      if (!source || !ctx || !source.width) continue;
+      copy.width = source.width;
+      copy.height = source.height;
+      ctx.drawImage(source, 0, 0);
+      copy.className = 'report-chart';
+      copy.setAttribute('role', 'img');
+      copy.setAttribute('aria-label', `Diagramm ${fig.querySelector('figcaption')?.textContent ?? ''}`);
+      fig.querySelector('.muted')?.remove();
+      fig.querySelector('.report-chart-wrap')?.replaceWith(copy);
+    }
+    rc.reset();
+    report.classList.remove('is-rendering');
+    return report;
+  }
+  const restoreTheme = () => {
+    if (themeBeforePrint !== null) {
+      document.documentElement.dataset.theme = themeBeforePrint;
+      document.title = titleBeforePrint;
+    }
+    themeBeforePrint = null;
+  };
+  // Ctrl+P / browser menu prints the report as well
+  window.addEventListener('beforeprint', () => {
+    if (themeBeforePrint === null) buildReport();
+  });
+  window.addEventListener('afterprint', restoreTheme);
+  $<HTMLButtonElement>('#btn-report').addEventListener('click', () => {
+    if (!buildReport()) return;
+    window.print();
+  });
 
   writeForm();
   renderNotice();
@@ -905,6 +1188,11 @@ const SCENARIO_LABEL = { all: 'beide WP-Wege', ref: 'ohne WP', kfw: 'KfW-Weg', t
 
 function scenarioChip(e: KeyEvent): string {
   return `<span class="chip chip-${e.scenario}">${SCENARIO_LABEL[e.scenario]}</span>`;
+}
+
+/** Tonnes with one decimal place, German format. */
+function fmtTons(t: number): string {
+  return t.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 }
 
 function kpi(label: string, value: string, tone: string, sub: string, best = false): string {
@@ -1040,10 +1328,17 @@ function sectionsToggleHtml(): string {
 }
 
 function sectionHtml(s: (typeof SECTIONS)[number], defaults: Inputs): string {
+  // SPF (JAZ) estimate (F26) directly below the SPF field
+  const after = (f: Field) =>
+    f.path === 'heatPump.jaz'
+      ? '<div id="jaz-estimate" class="jaz-estimate" aria-live="polite"></div>'
+      : f.path === 'heatPump.feedInCt'
+        ? '<div id="pv-estimate" class="jaz-estimate pv-estimate" aria-live="polite" hidden></div>'
+        : '';
   return `<details class="section${s.expert ? ' expert' : ''}" ${s.open ? 'open' : ''}>
     <summary>${escapeHtml(s.title)}</summary>
     ${s.note ? `<p class="note">${escapeHtml(s.note)}</p>` : ''}
-    <div class="fields">${s.fields.map((f) => fieldHtml(f, defaults)).join('')}</div>
+    <div class="fields">${s.fields.map((f) => fieldHtml(f, defaults) + after(f)).join('')}</div>
   </details>`;
 }
 
@@ -1054,7 +1349,7 @@ function layout(): string {
       ${logoSvg()}
       <h1>Wärmepumpen-Umrüstungsrechner</h1>
       <p>Umstieg von Gas oder Öl: Energiepreise, KfW-Förderung, Kredit und Steuerbonus im Vergleich
-        <a id="app-version" class="version-link" href="./changelog.html" target="_blank" rel="noopener" title="Änderungen dieser und früherer Versionen (Changelog)">Version ${APP_VERSION}</a></p>
+        <a id="app-version" class="version-link" href="./changelog.html" title="Änderungen dieser und früherer Versionen (Changelog)">Version ${APP_VERSION}</a></p>
     </div>
     <div class="toolbar">
       <div class="design-switch theme-switch" role="group" aria-label="Hell oder dunkel">
@@ -1066,6 +1361,8 @@ function layout(): string {
       <a id="btn-help" class="tool-link" href="./hilfe.html" target="_blank" rel="noopener" title="Benutzerhandbuch in neuem Tab öffnen">Hilfe</a>
       <button id="btn-recommend" type="button" aria-haspopup="dialog" title="Den Rechner per WhatsApp, Threema, E-Mail, Link oder einer anderen App (z. B. Signal) weiterempfehlen">Weiterempfehlen</button>
       <button id="btn-share" type="button" title="Link mit Ihren aktuellen Eingaben kopieren – zum Sichern oder Weitergeben Ihrer Berechnung">Link mit Werten teilen</button>
+      <button id="btn-variants" type="button" aria-haspopup="dialog" title="Zwei oder drei Varianten (Export-Dateien oder aktuelle Eingaben) nebeneinander vergleichen">Varianten vergleichen</button>
+      <button id="btn-report" type="button" title="Kompakte Zusammenfassung mit Eingaben, Ergebnissen, Diagrammen, Förderung und Finanzierung – drucken oder als PDF speichern">Bericht drucken</button>
       <button id="btn-export" type="button">Export</button>
       <button id="btn-import" type="button">Import</button>
       <button id="btn-reset" type="button" class="ghost">Zurücksetzen</button>
@@ -1089,6 +1386,7 @@ function layout(): string {
         </div>
         ${CHART_TABS.map(
           ([id, l], i) => `<div role="tabpanel" id="panel-${id}" aria-labelledby="tab-${id}" data-panel="${id}" ${i === 0 ? '' : 'hidden'}>
+            ${id === 'sensitivity' || id === 'energy' ? `<p class="chart-note muted small" data-chart-note="${id}"></p>` : ''}
             <div class="chart-wrap"><canvas data-chart="${id}" role="img" aria-label="Diagramm ${l}. Die Werte stehen in der Tabelle darunter."></canvas></div>
             <details class="chart-data"><summary>Werte als Tabelle</summary><div class="table-wrap" data-chart-table="${id}"></div></details>
           </div>`,
@@ -1123,12 +1421,33 @@ function layout(): string {
         <p class="muted small">Quellcode, Fragen und Vorschläge: <a href="${REPO_URL}" target="_blank" rel="noopener">github.com/chkania/waermepumpen-umruestungsrechner</a> – schön, wenn du dabei bist!</p>
       </aside>
       <p class="disclaimer">Keine Finanz-, Steuer- oder Förderberatung. Alle Angaben ohne Gewähr; Förderbedingungen Stand ${FUNDING_SOURCE_DATE.split('-').reverse().join('.')} – bitte vor Antragstellung bei KfW, Energieberatung und Steuerberatung prüfen.</p>
-      <p class="disclaimer license"><a href="./changelog.html" target="_blank" rel="noopener">Version ${APP_VERSION}</a> · © 2026 Christoph Kania · Lizenz: <a href="./lizenz.html" target="_blank" rel="noopener">PolyForm Noncommercial 1.0.0</a> – kostenfreie Nutzung für nicht-kommerzielle Zwecke; kommerzielle Nutzung nur nach Absprache · <a href="./lizenzen-drittanbieter.html" target="_blank" rel="noopener">Lizenzen von Drittanbietern</a> · <a href="./impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="./datenschutz.html" target="_blank" rel="noopener">Datenschutz</a> · <a href="${REPO_URL}" target="_blank" rel="noopener">Quellcode auf GitHub</a></p>
+      <p class="disclaimer license"><a href="./changelog.html">Version ${APP_VERSION}</a> · © 2026 Christoph Kania · Lizenz: <a href="./lizenz.html" target="_blank" rel="noopener">PolyForm Noncommercial 1.0.0</a> – kostenfreie Nutzung für nicht-kommerzielle Zwecke; kommerzielle Nutzung nur nach Absprache · <a href="./lizenzen-drittanbieter.html" target="_blank" rel="noopener">Lizenzen von Drittanbietern</a> · <a href="./impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="./datenschutz.html" target="_blank" rel="noopener">Datenschutz</a> · <a href="${REPO_URL}" target="_blank" rel="noopener">Quellcode auf GitHub</a></p>
     </section>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   ${introHtml()}
-  ${recommendHtml()}`;
+  ${recommendHtml()}
+  ${variantsHtml()}`;
+}
+
+/** Dialog for comparing variants (F31). */
+function variantsHtml(): string {
+  return `
+  <dialog id="variants" class="intro variants" aria-labelledby="variants-title">
+    <form method="dialog" class="intro-body">
+      <h2 id="variants-title">Varianten vergleichen</h2>
+      <p class="intro-lead">Laden Sie zwei oder drei Export-Dateien, etwa „Angebot A“ und „Angebot B“ oder „jetzt“ und „2028“, oder übernehmen Sie die aktuellen Eingaben. Die Varianten werden nur für diesen Vergleich gerechnet und nicht gespeichert.</p>
+      <div class="variants-actions">
+        <button type="button" id="var-current">Aktuelle Eingaben hinzufügen</button>
+        <button type="button" id="var-files">Export-Dateien laden …</button>
+        <input id="var-file-input" type="file" accept="application/json,.json" multiple hidden>
+      </div>
+      <ul id="var-list" class="variants-list" aria-label="Geladene Varianten"></ul>
+      <p id="var-status" class="rec-status" role="status" aria-live="polite"></p>
+      <div id="var-result"></div>
+      <div class="intro-actions"><span></span><button type="submit" value="close" class="primary">Schließen</button></div>
+    </form>
+  </dialog>`;
 }
 
 /** Dialog for recommending the calculator (F21); hrefs are set when it opens. */

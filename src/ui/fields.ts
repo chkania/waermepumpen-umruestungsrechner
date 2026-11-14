@@ -32,6 +32,7 @@ export interface Section {
   fields: Field[];
 }
 
+const hasPv = (i: Inputs) => i.heatPump.pvKwp > 0;
 const isGas = (i: Inputs) => i.oldHeating.fuel === 'gas';
 const isOil = (i: Inputs) => i.oldHeating.fuel === 'oil';
 
@@ -131,10 +132,12 @@ export const SECTIONS: Section[] = [
       { path: 'prices.gasIncrease', label: 'Steigerung Gaspreis (ohne CO₂)', type: 'percent', unit: '% p. a.', step: 0.5, show: isGas },
       { path: 'prices.oilPriceEur', label: 'Heizölpreis heute (inkl. CO₂)', type: 'number', unit: '€/Liter', step: 0.01, min: 0, show: isOil },
       { path: 'prices.oilIncrease', label: 'Steigerung Ölpreis (ohne CO₂)', type: 'percent', unit: '% p. a.', step: 0.5, show: isOil },
+      { path: 'prices.currentBioShare', label: 'Bio-Anteil im heutigen Tarif', type: 'percent', unit: '%', step: 5, min: 0, max: 100, help: 'Anteil Biogas bzw. Bioöl, den Sie heute schon beziehen (z. B. Tarif mit 10 % Biogas); gilt in der CO₂-Bilanz als klimaneutral. Wichtig: Oben muss der Preis genau dieses Tarifs stehen. Der Rechner nimmt an, dass der Bio-Aufpreis darin enthalten ist, und rechnet ihn bei einem neuen Kessel nicht noch einmal – mit dem Preis von reinem Erdgas fällt die Ersparnis der Wärmepumpe zu niedrig aus.' },
       { path: 'prices.co2Path', label: 'CO₂-Preispfad', type: 'text', unit: 'Jahr:€/t', help: 'Stützstellen, linear interpoliert. 2026/27: BEHG-Korridor 55–65 €/t, ab 2028 EU-ETS2 (Annahme).' },
       { path: 'prices.bioEnabled', label: 'Bio-Treppe für neuen fossilen Kessel', type: 'checkbox', help: 'Gebäudemodernisierungsgesetz: ab 2029 steigender Bio-Anteil für neu eingebaute Gas-/Ölheizungen.' },
       { path: 'prices.bioSteps', label: 'Bio-Anteil', type: 'text', unit: 'Jahr:%', show: (i) => i.prices.bioEnabled },
       { path: 'prices.bioPremiumCt', label: 'Mehrpreis Biogas/-öl', type: 'number', unit: 'ct/kWh', step: 0.5, show: (i) => i.prices.bioEnabled },
+      { path: 'prices.gridCo2Path', label: 'CO₂-Faktor Strommix', type: 'text', unit: 'Jahr:g/kWh', help: 'Für die CO₂-Bilanz. Stützstellen, linear interpoliert. 2025: 344 g/kWh (Umweltbundesamt), danach Annahme: sinkt mit dem Ausbau der Erneuerbaren.' },
     ],
   },
   {
@@ -146,7 +149,27 @@ export const SECTIONS: Section[] = [
       { path: 'heatPump.investment', label: 'Investition gesamt (brutto)', type: 'number', unit: '€', step: 500, min: 0, help: 'Gerät, Installation, Umfeldmaßnahmen (z. B. Heizkörper, Elektrik).' },
       { path: 'heatPump.eligibleShare', label: 'davon förderfähig', type: 'percent', unit: '%', step: 5, min: 0, max: 100 },
       { path: 'heatPump.extraCost', label: 'Nicht förderfähige Nebenkosten', type: 'number', unit: '€', step: 100, min: 0, help: 'z. B. Stilllegung des Gasanschlusses. Rückbau und Entsorgung der Altanlage inkl. Öl-/Gastank sind förderfähig.' },
-      { path: 'heatPump.jaz', label: 'Jahresarbeitszahl (JAZ)', type: 'number', step: 0.1, min: 1, help: 'Luft/Wasser typ. 3,0–4,0; Sole/Wasser 4,0–4,8.' },
+      {
+        path: 'heatPump.source',
+        label: 'Wärmequelle',
+        type: 'select',
+        options: [
+          ['air', 'Luft (Luft/Wasser-Wärmepumpe)'],
+          ['ground', 'Erdwärme (Sole/Wasser)'],
+        ],
+      },
+      {
+        path: 'heatPump.emitter',
+        label: 'Heizflächen im Haus',
+        type: 'select',
+        options: [
+          ['radiators', 'Normale Heizkörper'],
+          ['largeRadiators', 'Große Heizkörper (Niedertemperatur)'],
+          ['floor', 'Fußbodenheizung'],
+        ],
+        help: 'Für die Schätzung der Jahresarbeitszahl. Gemischt: die überwiegende Art wählen; einzelne zu kleine Heizkörper bestimmen oft die nötige Vorlauftemperatur.',
+      },
+      { path: 'heatPump.jaz', label: 'Jahresarbeitszahl (JAZ)', type: 'number', step: 0.1, min: 1, help: 'Wie viel Wärme die Wärmepumpe je kWh Strom liefert. Unten steht eine Schätzung für Ihr Haus; einen Wert aus dem Angebot oder der Auslegung des Fachbetriebs bevorzugen.' },
       { path: 'heatPump.maintenance', label: 'Wartung', type: 'number', unit: '€/Jahr', step: 10, min: 0 },
       { path: 'heatPump.lifeYears', label: 'Lebensdauer', type: 'number', unit: 'Jahre', step: 1, min: 1 },
       { path: 'heatPump.euOrigin', label: 'Wärmepumpe mit Ursprung in der EU', type: 'checkbox', help: 'Ab dem 1. Quartal 2027: 15 % Grundförderung + 15 % Wertschöpfungs-Bonus nur für Wärmepumpen aus der EU, sonst nur 15 %.' },
@@ -166,8 +189,12 @@ export const SECTIONS: Section[] = [
       { path: 'heatPump.elecIncrease', label: 'Steigerung Strompreis', type: 'percent', unit: '% p. a.', step: 0.5 },
       { path: 'heatPump.para14aReduction', label: 'Netzentgeltreduzierung § 14a EnWG', type: 'number', unit: '€/Jahr', step: 10, help: 'Modul 1: pauschale Reduzierung je Zähler, abhängig vom Netzbetreiber.' },
       { path: 'heatPump.existing14aOnHousehold', label: 'Haushaltszähler hat schon § 14a (z. B. Wallbox)', type: 'checkbox', help: 'Die Pauschale gibt es nur einmal je Zähler. Ohne eigenen WP-Zähler bringt die Wärmepumpe dann keine zusätzliche Reduzierung.' },
-      { path: 'heatPump.pvShare', label: 'Anteil PV-Eigenverbrauch', type: 'percent', unit: '%', step: 5, min: 0, max: 100, help: 'Anteil des WP-Stroms aus eigener PV-Anlage.' },
-      { path: 'heatPump.feedInCt', label: 'Einspeisevergütung (entgangen)', type: 'number', unit: 'ct/kWh', step: 0.1, min: 0, show: (i) => i.heatPump.pvShare > 0 },
+      { path: 'heatPump.greenElectricity', label: 'Ökostromtarif', type: 'checkbox', help: 'Für die CO₂-Bilanz: Netzstrom für Wärmepumpe (und ggf. Induktionsherd) zählt mit 0 g CO₂/kWh statt mit dem Strommix.' },
+      { path: 'heatPump.pvKwp', label: 'PV-Anlage: Leistung', type: 'number', unit: 'kWp', step: 0.5, min: 0, help: '0 = keine PV-Anlage. Wie viel PV-Strom die Wärmepumpe nutzen kann, wird Monat für Monat berechnet – im Winter ist es wenig.' },
+      { path: 'heatPump.pvYield', label: 'PV: Jahresertrag je kWp', type: 'number', unit: 'kWh/kWp', step: 25, min: 0, show: hasPv, help: 'Süddach typisch 900–1.100, Ost/West 750–900. Steht im Anlagenmonitor oder in der Abrechnung des Netzbetreibers.' },
+      { path: 'heatPump.batteryKwh', label: 'Batteriespeicher (nutzbar)', type: 'number', unit: 'kWh', step: 0.5, min: 0, show: hasPv, help: '0 = kein Speicher. Verschiebt Überschuss vom Tag in Abend und Nacht – vor allem im Sommerhalbjahr.' },
+      { path: 'heatPump.householdKwh', label: 'Haushaltsstrom ohne Wärmepumpe', type: 'number', unit: 'kWh/Jahr', step: 100, min: 0, show: hasPv, help: 'Der Haushalt nutzt den PV-Strom schon heute; die Wärmepumpe bekommt nur, was übrig bleibt.' },
+      { path: 'heatPump.feedInCt', label: 'Einspeisevergütung (entgangen)', type: 'number', unit: 'ct/kWh', step: 0.1, min: 0, show: hasPv },
     ],
   },
   {
