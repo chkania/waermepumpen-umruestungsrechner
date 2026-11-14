@@ -8,6 +8,11 @@ Alle wesentlichen Änderungen am Wärmepumpen-Investitionsrechner. Das Format or
 - **Minor** (1.x.0): neue Funktionen oder Eingaben sowie bewusst geänderte Rechenmodelle oder Standardwerte (Ergebnisse können sich ändern).
 - **Patch** (1.0.x): Fehlerkorrekturen, Texte, Darstellung – ohne neue Funktionen.
 
+## 1.6.0 – 2026-11-14
+
+### Neu
+- Neuer Name „Wärmepumpen-Umrüstungsrechner“, neues Logo, nur noch modernes Design und Abschnitte auf-/zuklappen (#13)
+
 ## 1.5.0 – 2026-11-14
 
 ### Neu
