@@ -17,7 +17,7 @@ Jedes Eingabefeld hat einen kleinen **„i“-Knopf**. Er zeigt den Standardwert
 
 ## Aufbau der Oberfläche
 
-- **Kopfbereich:** Titel und Werkzeugleiste (Hell/Dunkel, Hilfe, Teilen, Export, Import, Zurücksetzen).
+- **Kopfbereich:** Titel mit Version und dem Link **„Über diesen Rechner“** (Entstehung des Rechners) sowie die Werkzeugleiste (Hell/Dunkel, Hilfe, Teilen, Export, Import, Zurücksetzen).
 - **Links – Eingaben:** in aufklappbare Abschnitte gegliedert. Ein Klick auf die Überschrift klappt einen Abschnitt auf oder zu; **„Alle aufklappen“** und **„Alle zuklappen“** oberhalb der Abschnitte öffnen bzw. schließen alle auf einmal. Abschnitte mit „Experten“ enthalten die Förder- und Steuerregeln; sie müssen normalerweise nicht geändert werden.
 - **Rechts – Ergebnisse:** Kennzahlen, wichtige Ereignisse und Hinweise, Diagramme, Förderdetails, Stromtarifvergleich, Vergleich der Umrüstzeitpunkte und Jahresübersicht.
 
@@ -34,7 +34,7 @@ Die Wahl wird im Browser gespeichert.
 
 ### Einführung
 
-Öffnet die kurze Einführung: wozu der Rechner dient, wie Sie in drei Schritten zu einem Ergebnis kommen und wo es ausführlichere Hilfe gibt. Beim ersten Besuch erscheint sie automatisch; nach dem Schließen („Los geht’s“, Esc oder Klick neben das Fenster) nur noch über diesen Knopf. Wer schon Eingaben gespeichert hat, sieht sie nicht automatisch.
+Öffnet die kurze Einführung: wozu der Rechner dient, wie Sie in drei Schritten zu einem Ergebnis kommen, wie der Rechner entstanden ist (Link „Wie und warum er entstanden ist“ führt zum Kasten „Über diesen Rechner“) und wo es ausführlichere Hilfe gibt. Beim ersten Besuch erscheint sie automatisch; nach dem Schließen („Los geht’s“, Esc oder Klick neben das Fenster) nur noch über diesen Knopf. Wer schon Eingaben gespeichert hat, sieht sie nicht automatisch.
 
 ### Hilfe
 
@@ -373,6 +373,14 @@ Ein Test mit Screenreadern steht noch aus.
 ## Version und Änderungen
 
 Die aktuelle Version steht im Kopf des Rechners neben der Beschreibung (z. B. „Version 1.0.0“) und in der Fußzeile. Ein Klick öffnet die Seite **Änderungen** (changelog.html) mit allen Versionen. Die Nummer folgt dem Schema Major.Minor.Patch: Eine neue **Minor**-Version bringt neue Funktionen oder geänderte Annahmen – die Ergebnisse können sich dann ändern. Eine neue **Major**-Version wird es nur geben, wenn ältere Export-Dateien oder Links nicht mehr übernommen werden können. Exportierte Dateien enthalten die Version, mit der sie erstellt wurden (`appVersion`).
+
+## Über diesen Rechner
+
+Am Anfang stand eine ganz persönliche Frage: Lohnt sich der Umstieg auf eine Wärmepumpe auch finanziell? Die Antworten, die ich fand, waren oft sehr allgemein – oder beruhten auf Annahmen, die nicht zum eigenen Haus passten. Also habe ich angefangen, selbst nachzurechnen: Förderrichtlinien gelesen, Energie- und CO₂-Preise recherchiert, Steuerbonus und Kredite verglichen. Aus dieser Recherche ist Schritt für Schritt dieser Rechner entstanden.
+
+Er ist ein rein privates Hobbyprojekt – ohne Auftraggeber, ohne Werbung und ohne kommerzielles Interesse. Ich bin selbst kein Fachmann für Heizungstechnik oder Energieberatung, sondern jemand, der sich gründlich eingelesen hat. Deshalb sind alle Annahmen offengelegt: Der „i“-Knopf an jedem Feld zeigt, woher ein Standardwert stammt, die Quellen stehen im Rechner und in den Anforderungen. Der Rechner soll helfen, die eigene Situation zu durchdenken und mit guten Fragen ins Gespräch mit Energieberatung und Fachbetrieb zu gehen – ersetzen kann er dieses Gespräch nicht.
+
+Wenn Ihnen ein Fehler oder eine veraltete Annahme auffällt, freue ich mich über jeden Hinweis (siehe „Mitmachen“). – Christoph Kania
 
 ## Mitmachen
 
