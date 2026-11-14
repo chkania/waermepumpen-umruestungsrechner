@@ -204,7 +204,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   /** Leave the link view: remove the hash, allow saving again. */
   function leaveShared(): void {
     sharedView = false;
-    if (location.hash.startsWith('#s=')) history.replaceState(null, '', location.pathname + location.search);
+    if (/^#[sz]=/.test(location.hash)) history.replaceState(null, '', location.pathname + location.search);
   }
   notice.addEventListener('click', (e) => {
     const action = (e.target as HTMLElement).closest<HTMLElement>('[data-notice]')?.dataset.notice;
@@ -412,7 +412,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     } catch {
       /* Speicher nicht verfügbar */
     }
-    if (location.hash.startsWith('#s=')) history.replaceState(null, '', encodeHash(defaults, inputs));
+    if (/^#[sz]=/.test(location.hash)) history.replaceState(null, '', encodeHash(defaults, inputs));
   }
 
   function recalc(): void {

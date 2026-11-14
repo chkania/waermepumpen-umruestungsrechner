@@ -7,10 +7,12 @@ import { estimateJaz } from '../core/jaz';
 import { pvSummary } from '../core/pv';
 import type { RunResult } from '../core/simulation';
 import type { Inputs } from '../core/types';
+import { encodeHash } from '../core/serialize';
 import { logoSvg } from '../logo';
 import { APP_VERSION } from '../version';
 import { getPath, SECTIONS, type Field } from './fields';
 import { escapeHtml, fmtEur, fmtMonth, fmtNum, fmtPct } from './format';
+import { qrSvg } from './qr';
 
 /**
  * Printable report (F30): compact summary with inputs, key figures, charts, funding and financing for the
@@ -141,6 +143,23 @@ function bestMonthHtml(cmp: InstallComparison): string {
   return `<p class="muted">Günstigster der verglichenen Umrüstzeitpunkte: <strong>${fmtMonth(best.installMonth)}</strong> (siehe „Wann umrüsten?“ im Rechner).</p>`;
 }
 
+/**
+ * Link that opens the calculator with the inputs of the report (F30.3). Without the notes: they can be very long
+ * (QR code too large) and are printed in the report anyway.
+ */
+export function reportLink(d: Pick<ReportData, 'inputs' | 'defaults' | 'url'>): string {
+  const inputs = structuredClone(d.inputs);
+  inputs.scenario.notes = d.defaults.scenario.notes;
+  return d.url + encodeHash(d.defaults, inputs);
+}
+
+function qrHtml(d: ReportData): string {
+  const svg = qrSvg(reportLink(d), 'QR-Code: Berechnung mit diesen Eingaben im Rechner öffnen');
+  return svg
+    ? `<figure class="report-qr">${svg}<figcaption>Berechnung mit diesen Eingaben öffnen</figcaption></figure>`
+    : '<p class="report-qr muted">Zu viele Eingaben für einen QR-Code – „Link mit Werten teilen“ im Rechner verwenden.</p>';
+}
+
 export function reportHtml(d: ReportData): string {
   const { inputs, run } = d;
   const name = inputs.scenario.name.trim();
@@ -155,6 +174,7 @@ export function reportHtml(d: ReportData): string {
       <h1>Wärmepumpen-Umrüstungsrechner – Bericht</h1>
       <p>${name ? `<strong>${escapeHtml(name)}</strong> · ` : ''}Stand ${date} · Version ${APP_VERSION} · Betrachtung ${fmtMonth(start)} – ${fmtMonth(end)}, Inbetriebnahme WP ${fmtMonth(run.kfw.installMonth)}</p>
     </div>
+    ${qrHtml(d)}
   </header>
   ${notes ? `<section class="report-block"><h2>Bemerkungen</h2><p class="report-notes">${escapeHtml(notes)}</p></section>` : ''}
   <section class="report-block"><h2>Ergebnis</h2>${keyFiguresHtml(run)}

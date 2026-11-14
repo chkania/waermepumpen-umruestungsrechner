@@ -54,7 +54,7 @@ Die Wahl wird im Browser gespeichert.
 
 Erzeugt einen Link, der alle **vom Standard abweichenden Eingaben** enthält, und kopiert ihn in die Zwischenablage (sonst steht er in der Adresszeile). Wer den Link öffnet, sieht den Rechner mit genau Ihren Eingaben.
 
-- Der Link enthält die Eingaben selbst (im Teil nach `#s=`). Es wird **nichts auf einem Server gespeichert**.
+- Der Link enthält die Eingaben selbst, komprimiert im Teil nach `#z=`. Es wird **nichts auf einem Server gespeichert**. Ältere Links (mit `#s=`) funktionieren weiterhin.
 - **Achtung:** Auch persönliche Angaben wie das Haushaltseinkommen stehen im Link. Teilen Sie ihn nur mit Personen, die diese Angaben sehen dürfen.
 - Solange ein geteilter Link in der Adresszeile steht, wird er bei jeder Änderung mit aktualisiert.
 - Ein geöffneter Link hat Vorrang vor den im Browser gespeicherten Eingaben – er **überschreibt sie aber nicht**. Haben Sie eigene Eingaben gespeichert, erscheint über den Ergebnissen der Hinweis „Geteiltes Szenario geöffnet“. Änderungen wirken dann nur auf den Link. Mit **Als meine Eingaben übernehmen** speichern Sie das Szenario als Ihre eigenen Eingaben, mit **Eigene Eingaben laden** kehren Sie zu Ihrem gespeicherten Stand zurück. Import und Zurücksetzen beenden die Link-Ansicht ebenfalls.
@@ -65,6 +65,7 @@ Erzeugt einen Link, der alle **vom Standard abweichenden Eingaben** enthält, un
 Erstellt eine **kompakte Zusammenfassung** für das Gespräch mit Energieberatung, Handwerksbetrieb oder Bank und öffnet den Druckdialog des Browsers. Dort wählen Sie einen Drucker oder **„Als PDF speichern“**. Der Bericht enthält:
 
 - Bezeichnung und Bemerkungen des Szenarios, Datum, Version und Betrachtungszeitraum,
+- oben rechts einen **QR-Code**: Mit dem Handy gescannt, öffnet er den Rechner mit genau diesen Eingaben – so kann z. B. die Energieberatung direkt weiterrechnen. Die Bemerkungen sind darin nicht enthalten (sie stehen im Bericht),
 - die Kennzahlen (Gesamtkosten, Ersparnis, Amortisation, CO₂-Einsparung) und den günstigsten Umrüstzeitpunkt,
 - Eckdaten zu Haus und Wärmepumpe (Kennwert, Effizienzklasse, Heizlast, JAZ-Schätzung, ggf. PV-Deckung),
 - die Diagramme „Kumulierte Kosten“, „Energie je Monat“ und „Einflussgrößen“,

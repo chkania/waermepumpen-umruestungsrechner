@@ -328,7 +328,7 @@ describe('UI (Smoke-Test)', () => {
     expect(notice.textContent).toContain('Geteiltes Szenario');
     setValue(root, 'heatPump.jaz', '4');
     expect(JSON.parse(store.getItem(STORAGE_KEY)!).heatPump.investment).toBe(25000); // own data unchanged
-    expect(location.hash).toMatch(/^#s=/); // change affects the link
+    expect(location.hash).toMatch(/^#z=/); // change affects the link
     // load own inputs
     notice.querySelector<HTMLButtonElement>('[data-notice="own"]')!.click();
     expect(app.getInputs().heatPump.investment).toBe(25000);

@@ -1,4 +1,5 @@
 import type { Inputs } from './types';
+import { deflateSync, Inflate } from 'fflate';
 import { APP_VERSION } from '../version';
 import { checkValue, type InputIssue } from './validate';
 
@@ -84,31 +85,57 @@ function diffObj(base: Obj, cur: Obj): Obj {
   return out;
 }
 
-function toBase64Url(text: string): string {
-  const bytes = new TextEncoder().encode(text);
+function bytesToBase64Url(bytes: Uint8Array): string {
   let bin = '';
   for (const b of bytes) bin += String.fromCharCode(b);
   return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-function fromBase64Url(s: string): string {
+function base64UrlToBytes(s: string): Uint8Array {
   const b64 = s.replace(/-/g, '+').replace(/_/g, '/');
   const bin = atob(b64 + '='.repeat((4 - (b64.length % 4)) % 4));
-  const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
-  return new TextDecoder().decode(bytes);
+  return Uint8Array.from(bin, (c) => c.charCodeAt(0));
 }
 
-/** Creates the URL hash "#s=…" (F9.2). */
+/** Upper limit for the unpacked link content – protects against "zip bombs" in manipulated links. */
+export const MAX_LINK_JSON_BYTES = 256 * 1024;
+
+/** Inflates raw DEFLATE data, aborting as soon as the output exceeds the limit. */
+function inflateLimited(data: Uint8Array): Uint8Array {
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  const inflater = new Inflate((chunk) => {
+    total += chunk.length;
+    if (total > MAX_LINK_JSON_BYTES) throw new Error('Link-Inhalt zu groß');
+    chunks.push(chunk);
+  });
+  inflater.push(data, true);
+  const out = new Uint8Array(total);
+  let pos = 0;
+  for (const c of chunks) {
+    out.set(c, pos);
+    pos += c.length;
+  }
+  return out;
+}
+
+/**
+ * Creates the URL hash "#z=…" (F9.2): differences from the defaults as JSON, compressed (raw DEFLATE) and
+ * Base64URL-encoded – about half as long as the former uncompressed "#s=…" (short enough for a QR code, F30.3).
+ */
 export function encodeHash(defaults: Inputs, inputs: Inputs): string {
-  return '#s=' + toBase64Url(JSON.stringify(diffInputs(defaults, inputs)));
+  const json = new TextEncoder().encode(JSON.stringify(diffInputs(defaults, inputs)));
+  return '#z=' + bytesToBase64Url(deflateSync(json, { level: 9 }));
 }
 
-/** Reads a URL hash; null for missing/invalid content. */
+/** Reads a URL hash ("#z=…" compressed or older "#s=…" uncompressed); null for missing/invalid content. */
 export function decodeHash(defaults: Inputs, hash: string, issues: InputIssue[] = []): Inputs | null {
-  const m = /[#&]s=([A-Za-z0-9_-]+)/.exec(hash);
+  const m = /[#&]([sz])=([A-Za-z0-9_-]+)/.exec(hash);
   if (!m) return null;
   try {
-    const data = JSON.parse(fromBase64Url(m[1]));
+    const raw = base64UrlToBytes(m[2]);
+    if (m[1] === 's' && raw.length > MAX_LINK_JSON_BYTES) return null;
+    const data = JSON.parse(new TextDecoder().decode(m[1] === 'z' ? inflateLimited(raw) : raw));
     if (!isObj(data)) return null;
     return mergeInputs(defaults, data, issues);
   } catch {

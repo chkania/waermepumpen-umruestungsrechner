@@ -1,3 +1,4 @@
+import { deflateSync } from 'fflate';
 import { describe, expect, it } from 'vitest';
 import { decodeHash, diffInputs, encodeHash, exportFileName, exportJson, fileSlug, importJson, mergeInputs } from '../src/core/serialize';
 import { defaults } from './helpers';
@@ -15,8 +16,28 @@ describe('F9 Persistenz', () => {
       heatPump: { jaz: 3.8 },
     });
     const hash = encodeHash(d, i);
-    expect(hash).toMatch(/^#s=[A-Za-z0-9_-]+$/);
+    expect(hash).toMatch(/^#z=[A-Za-z0-9_-]+$/);
     expect(decodeHash(d, hash)).toEqual(i);
+  });
+
+  it('F9.2 komprimierter Link („#z=“) ist deutlich kürzer; ältere Links („#s=“) bleiben lesbar', () => {
+    const d = defaults();
+    const i = defaults();
+    i.scenario.name = 'Angebot A';
+    i.oldHeating.consumption = 15000;
+    i.heatPump.investment = 38000;
+    i.heatPump.pvKwp = 8;
+    i.financing.kfwEquity = 5000;
+    i.prices.co2Path = '2026:55, 2027:65, 2028:90, 2030:130, 2035:180';
+    const json = JSON.stringify(diffInputs(d, i));
+    const old = '#s=' + Buffer.from(json).toString('base64url');
+    expect(decodeHash(d, old)).toEqual(i);
+    expect(encodeHash(d, i).length).toBeLessThan(old.length * 0.85);
+  });
+
+  it('F9.2 manipulierter komprimierter Link mit riesigem Inhalt wird abgelehnt', () => {
+    const bomb = deflateSync(new Uint8Array(5 * 1024 * 1024).fill(32), { level: 9 });
+    expect(decodeHash(defaults(), '#z=' + Buffer.from(bomb).toString('base64url'))).toBeNull();
   });
 
   it('ungültiger Hash → null', () => {
@@ -24,6 +45,7 @@ describe('F9 Persistenz', () => {
     expect(decodeHash(d, '')).toBeNull();
     expect(decodeHash(d, '#s=%%%')).toBeNull();
     expect(decodeHash(d, '#s=bm9wZQ')).toBeNull(); // "nope"
+    expect(decodeHash(d, '#z=bm9wZQ')).toBeNull(); // no valid DEFLATE
   });
 
   it('Merge: unbekannte Felder ignoriert, falsche Typen → Default, fehlende → Default', () => {

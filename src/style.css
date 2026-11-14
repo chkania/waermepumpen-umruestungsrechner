@@ -637,6 +637,10 @@ td.ev-cell { white-space: normal; min-width: 220px; }
 .report-chart-wrap { position: relative; height: 70mm; }
 .report-head { display: flex; align-items: center; gap: 4mm; }
 .report-logo { flex: none; width: 14mm; height: 14mm; }
+.report-head > div { flex: 1; }
+.report-qr { flex: none; width: 30mm; margin: 0; text-align: center; font-size: 7pt; line-height: 1.2; }
+.report-qr svg { display: block; width: 30mm; height: 30mm; }
+.report-qr figcaption { margin-top: 0.5mm; }
 .report-chart { display: block; width: 100%; height: auto; }
 
 @media print {
