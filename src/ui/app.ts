@@ -70,7 +70,14 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   root.innerHTML = layout();
   const $ = <T extends HTMLElement>(sel: string) => root.querySelector(sel) as T;
   const form = $<HTMLElement>('#inputs');
-  form.innerHTML = SECTIONS.map((s) => sectionHtml(s, defaults)).join('');
+  form.innerHTML = sectionsToggleHtml() + SECTIONS.map((s) => sectionHtml(s, defaults)).join('');
+  // Expand/collapse all input sections at once (F24)
+  form.querySelectorAll<HTMLButtonElement>('[data-sections]').forEach((b) =>
+    b.addEventListener('click', () => {
+      const open = b.dataset.sections === 'open';
+      form.querySelectorAll<HTMLDetailsElement>('details.section').forEach((d) => (d.open = open));
+    }),
+  );
 
   const canvases = Object.fromEntries(
     CHART_TABS.map(([id]) => [id, $<HTMLCanvasElement>(`canvas[data-chart="${id}"]`)]),
@@ -1023,6 +1030,13 @@ function fieldHtml(f: Field, defaults: Inputs): string {
     <div class="label-row"><label for="${id}">${escapeHtml(f.label)}</label>${src.button}</div>${src.pop}
     <div class="control">${control}<span class="unit">${escapeHtml(unit)}</span></div>
     <small class="field-error" id="${id}-err" aria-live="polite" hidden></small>${help}</div>`;
+}
+
+function sectionsToggleHtml(): string {
+  return `<div class="sections-toggle" role="group" aria-label="Alle Eingabebereiche">
+    <button type="button" data-sections="open" aria-controls="inputs">Alle aufklappen</button>
+    <button type="button" data-sections="close" aria-controls="inputs">Alle zuklappen</button>
+  </div>`;
 }
 
 function sectionHtml(s: (typeof SECTIONS)[number], defaults: Inputs): string {

@@ -195,6 +195,16 @@ describe('UI (Smoke-Test)', () => {
     expect(root.querySelector('#tariff')!.textContent).toMatch(/§ 14a schon für andere Einrichtung genutzt/);
   });
 
+  it('F24 alle Eingabeabschnitte auf- und zuklappen', () => {
+    const { root } = mount();
+    const sections = [...root.querySelectorAll<HTMLDetailsElement>('#inputs details.section')];
+    expect(sections.length).toBeGreaterThan(3);
+    root.querySelector<HTMLButtonElement>('[data-sections="open"]')!.click();
+    expect(sections.every((d) => d.open)).toBe(true);
+    root.querySelector<HTMLButtonElement>('[data-sections="close"]')!.click();
+    expect(sections.some((d) => d.open)).toBe(false);
+  });
+
   it('F14 nur modernes Design: kein Umschalter, frühere Wahl „Klassisch“ wird gelöscht', () => {
     store.setItem(LEGACY_DESIGN_KEY, 'classic');
     const { root } = mount();

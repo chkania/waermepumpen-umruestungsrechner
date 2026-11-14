@@ -18,7 +18,7 @@ Jedes Eingabefeld hat einen kleinen **„i“-Knopf**. Er zeigt den Standardwert
 ## Aufbau der Oberfläche
 
 - **Kopfbereich:** Titel und Werkzeugleiste (Hell/Dunkel, Hilfe, Teilen, Export, Import, Zurücksetzen).
-- **Links – Eingaben:** in aufklappbare Abschnitte gegliedert. Ein Klick auf die Überschrift klappt einen Abschnitt auf oder zu. Abschnitte mit „Experten“ enthalten die Förder- und Steuerregeln; sie müssen normalerweise nicht geändert werden.
+- **Links – Eingaben:** in aufklappbare Abschnitte gegliedert. Ein Klick auf die Überschrift klappt einen Abschnitt auf oder zu; **„Alle aufklappen“** und **„Alle zuklappen“** oberhalb der Abschnitte öffnen bzw. schließen alle auf einmal. Abschnitte mit „Experten“ enthalten die Förder- und Steuerregeln; sie müssen normalerweise nicht geändert werden.
 - **Rechts – Ergebnisse:** Kennzahlen, wichtige Ereignisse und Hinweise, Diagramme, Förderdetails, Stromtarifvergleich, Vergleich der Umrüstzeitpunkte und Jahresübersicht.
 
 Auf dem Smartphone stehen die Eingaben oben und die Ergebnisse darunter.

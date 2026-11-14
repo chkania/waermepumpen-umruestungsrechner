@@ -22,6 +22,11 @@ describe('F15 Benutzerhandbuch – Vollständigkeit', () => {
     }
   });
 
+  it('F24 Alle auf-/zuklappen ist beschrieben', () => {
+    expect(handbook).toContain('„Alle aufklappen“');
+    expect(handbook).toContain('„Alle zuklappen“');
+  });
+
   it('alle Ergebnisbereiche sind beschrieben', () => {
     for (const t of ['Kennzahlen', 'Wichtige Ereignisse & Hinweise', 'Diagramme', 'Stromkosten: mit oder ohne Wärmepumpentarif', 'Wann umrüsten?', 'Jahresübersicht']) {
       expect(handbook, t).toContain(t);
