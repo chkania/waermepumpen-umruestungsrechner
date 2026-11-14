@@ -2,6 +2,7 @@ import { escapeHtml } from './ui/format';
 import { renderHelp } from './help';
 import { REPO_URL } from './project';
 import { APP_VERSION } from './version';
+import { logoSvg } from './logo';
 
 export interface DocPage {
   /** Markdown source (imported via `?raw`, stays as .md file in the repo). */
@@ -41,7 +42,7 @@ export function renderDocPage(page: DocPage): { html: string; title: string } {
   const body = `
   <header class="top help-top">
     <div class="brand">
-      <span class="mark" aria-hidden="true">~wp</span>
+      ${logoSvg()}
       <h1>${escapeHtml(title)}</h1>
       <p>${escapeHtml(page.subtitle)}</p>
     </div>

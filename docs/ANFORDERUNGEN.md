@@ -162,6 +162,10 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 - F22.1 Workflow „Annahmen prüfen“ (`.github/workflows/annahmen-pruefen.yml`) legt vierteljährlich (1. Januar, April, Juli, Oktober) und manuell ein Issue mit Label `annahmen-pruefen` an: Checkliste aller zeitkritischen Standardwerte (Herkunft „Offizielle Quelle“, „Gesetz / Regelung“, „Marktdaten“) mit Abrufdatum und Links, erzeugt aus `src/core/sources.ts` (`scripts/assumptions-checklist.ts`, reines Node ohne npm). Ist noch ein Prüf-Issue offen, wird dort nur erinnert. *(Test: freshness)*
 - F22.2 Liegt die letzte Prüfung (`FUNDING_SOURCE_DATE` in `defaults.ts`) mindestens 6 Monate zurück, zeigt der Rechner über den Ergebnissen den Hinweis „Annahmen möglicherweise veraltet“ mit Prüfdatum und Link zum Fehlerformular; ausblendbar bis zum nächsten Laden. *(Test: freshness, ui)*
 
+
+### F23 – Logo
+- F23.1 Logo „Haus mit Umstiegskurve“: Hausumriss, darin eine kurze warme Linie (Gas/Öl), die in einen steigenden blauen Pfeil (Wärmepumpe) übergeht. Beide Teile stoßen auf Gehrung aneinander, nichts ragt über. Farben = Tokens `--c-text`, `--accent`, `--c-ref`. *(Test: logo)*
+- F23.2 Verwendung: Kopfzeile aller Seiten (Inline-SVG aus `src/logo.ts`, dekorativ, folgt Hell/Dunkel), Favicon `public/favicon.svg` (helle Kachel) und `apple-touch-icon.png`, Dateien für Präsentationen in `docs/logo/` (SVG/PNG, hell/dunkel, mit Schriftzug, Nutzungsregeln). Eine gemeinsame Form; der Test prüft, dass alle Dateien übereinstimmen. *(Test: logo)*
 ### F9 – Persistenz
 - F9.1 Eingaben werden automatisch im localStorage gespeichert und beim Laden wiederhergestellt. *(Test: serialize)*
 - F9.2 „Link mit Werten teilen" (bis 1.4: „Link teilen"): Eingaben (nur Abweichungen von den Defaults) als Base64url-JSON im URL-Hash `#s=…`; ein Link hat Vorrang vor localStorage. *(Test: serialize)*
@@ -246,3 +250,4 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 | 2026-11-14 | F22 vierteljährliches Prüf-Issue für die Annahmen und Hinweis im Rechner, wenn die letzte Prüfung über 6 Monate zurückliegt. |
 | 2026-11-14 | Name geändert: „Wärmepumpen-Umrüstungsrechner“ (vorher Wärmepumpen-Investitionsrechner bzw. „Wärmepumpen-Rechner“ im Fenstertitel). Speicherschlüssel `wp-investitionsrechner:*` und Paketname bleiben, damit gespeicherte Eingaben erhalten bleiben. |
 | 2026-11-14 | F14 Design „Klassisch“ und Design-Umschalter entfernt; „Modern“ ist das einzige Design. Gespeicherte Design-Wahl wird gelöscht. Rechenergebnisse unverändert. |
+| 2026-11-14 | F23 Logo (Haus mit Umstiegskurve) in der Kopfzeile, als Favicon und als Dateien für Präsentationen; ersetzt die Marke „~wp“. |

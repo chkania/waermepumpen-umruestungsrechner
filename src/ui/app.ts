@@ -16,6 +16,7 @@ import { Charts, chartTables, type ChartId } from './charts';
 import { SECTIONS, getPath, setPath, type Field } from './fields';
 import { escapeHtml, fmtDuration, fmtEur, fmtMonth, fmtNum, fmtPct } from './format';
 import { RECOMMEND_SUBJECT, RECOMMEND_TEXT, recommendLinks } from './share';
+import { logoSvg } from '../logo';
 import { BUG_REPORT_URL, CONTRIBUTING_URL, FEATURE_REQUEST_URL, REPO_URL } from '../project';
 
 export const STORAGE_KEY = 'wp-investitionsrechner:v1';
@@ -1036,7 +1037,7 @@ function layout(): string {
   return `
   <header class="top">
     <div class="brand">
-      <span class="mark" aria-hidden="true">~wp</span>
+      ${logoSvg()}
       <h1>Wärmepumpen-Umrüstungsrechner</h1>
       <p>Umstieg von Gas oder Öl: Energiepreise, KfW-Förderung, Kredit und Steuerbonus im Vergleich
         <a id="app-version" class="version-link" href="./changelog.html" target="_blank" rel="noopener" title="Änderungen dieser und früherer Versionen (Changelog)">Version ${APP_VERSION}</a></p>
