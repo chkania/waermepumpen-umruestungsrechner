@@ -59,6 +59,10 @@ chore(deps): bump vite from 6.4.6 to 6.4.7
 
 Vorschau, was der nächste Release ergäbe: `npm run release:preview`. Einen Titel prüfen: `node scripts/release.ts --lint "feat: …"`.
 
+## Annahmen aktuell halten
+
+Jedes Quartal legt der Workflow „Annahmen prüfen“ ein Issue mit einer Checkliste aller Standardwerte an, die sich ändern können (Förderregeln, Gesetze, Preise) – mit Links zu den Quellen. Hilf gern beim Abhaken: Quelle öffnen, Wert vergleichen, Abweichungen im Issue notieren oder direkt per Pull Request korrigieren (`src/core/defaults.ts` und `src/core/sources.ts`, danach `FUNDING_SOURCE_DATE` auf das Prüfdatum setzen).
+
 ## Abhängigkeiten
 
 Dependabot öffnet wöchentlich PRs (`chore(deps): …`, `ci(deps): …`); Patch-/Minor-Updates werden nach grünen Tests automatisch gemergt und erzeugen keine neue Version. Soll ein Update im Changelog erscheinen (z. B. sichtbare Korrektur in Chart.js), den PR-Titel vor dem Merge auf `fix(deps): …` ändern.

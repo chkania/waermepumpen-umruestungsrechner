@@ -475,3 +475,28 @@ describe('F21 Weiterempfehlen-Dialog', () => {
     expect(root.querySelector('#rec-status')!.textContent).toContain('markiert');
   });
 });
+
+describe('F22 Hinweis auf veraltete Annahmen', () => {
+  beforeEach(() => {
+    store.clear();
+    store.setItem(INTRO_KEY, '1');
+    history.replaceState(null, '', '/');
+  });
+  const mountAt = (today: Date) => {
+    document.body.innerHTML = '<div id="app"></div>';
+    const root = document.getElementById('app')!;
+    mountApp(root, { storage: store, today, debounceMs: 0 });
+    return root;
+  };
+
+  it('erscheint erst ab 6 Monaten nach der letzten Prüfung und lässt sich ausblenden', () => {
+    expect(mountAt(TODAY).querySelector('.notice-stale')).toBeNull();
+    const root = mountAt(new Date(2027, 5, 1));
+    const stale = root.querySelector('.notice-stale')!;
+    expect(stale.textContent).toContain('Annahmen möglicherweise veraltet');
+    expect(stale.textContent).toContain('11.11.2026');
+    expect(stale.querySelector('a[href$="template=bug_report.yml"]')).not.toBeNull();
+    stale.querySelector<HTMLButtonElement>('[data-notice="stale"]')!.click();
+    expect(root.querySelector('.notice-stale')).toBeNull();
+  });
+});

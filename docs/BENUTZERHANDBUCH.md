@@ -252,6 +252,10 @@ Ordnet Ihr Haus anhand von Verbrauch, Fläche, Baujahr und Sanierung ein:
 - **Heizlast (grob):** Wärmebedarf geteilt durch 2.000 Volllaststunden – ein erster Anhaltspunkt für die Größe der Wärmepumpe, kein Ersatz für eine Heizlastberechnung durch den Fachbetrieb.
 - **Eignung für die Wärmepumpe** nach dem Raumwärmebedarf je m²: bis 100 kWh gute Voraussetzungen, bis 150 kWh geeignet (Vorlauftemperatur prüfen), darüber ist die Wärmepumpe weniger effizient – größere Heizkörper oder einzelne Dämmmaßnahmen helfen.
 
+### Hinweis „Annahmen möglicherweise veraltet“
+
+Förderbedingungen, Preise und Zinsen werden regelmäßig geprüft. Liegt die letzte Prüfung mehr als sechs Monate zurück, erscheint über den Ergebnissen ein Hinweis mit dem Datum der Prüfung. Die Rechnung funktioniert weiter – prüfen Sie aber wichtige Werte (z. B. Fördersätze, Gas- und Strompreis) vor einer Entscheidung selbst. Über den Link im Hinweis können Sie einen veralteten Wert melden; mit „Ausblenden“ verschwindet er bis zum nächsten Laden.
+
 ### Wichtige Ereignisse & Hinweise
 
 - **Hinweise** (Kästen oben) erklären Förder- und Steuerbedingungen für Ihren Fall – z. B. ob der Klimageschwindigkeitsbonus erreichbar ist, ob ein Einkommensbonus greift oder bis wann der Steuerbonus möglich ist. Orange markierte Hinweise sind Nachteile, die leicht übersehen werden.
