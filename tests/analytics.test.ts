@@ -29,7 +29,7 @@ describe('N10 Besucherstatistik (Matomo)', () => {
 
   it('ohne Cookies, mit Do Not Track, ohne URL-Hash und mit festem Seitentitel', () => {
     location.hash = '#s=geheime-eingaben';
-    document.title = 'Angebot Müller – Wärmepumpen-Rechner';
+    document.title = 'Angebot Müller – Wärmepumpen-Umrüstungsrechner';
     initAnalytics('Rechner', { enabled: true, storage: memoryStorage() });
     const q = window._paq!;
     expect(q).toContainEqual(['disableCookies']);

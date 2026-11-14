@@ -1,4 +1,4 @@
-# Wärmepumpen-Investitionsrechner
+# Wärmepumpen-Umrüstungsrechner
 
 SPA (Vite + TypeScript, ohne UI-Framework, Chart.js) zur Wirtschaftlichkeitsrechnung Gas/Öl → Wärmepumpe.
 

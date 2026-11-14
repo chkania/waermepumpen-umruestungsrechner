@@ -7,7 +7,7 @@ import privacy from '../../docs/DATENSCHUTZ.md?raw';
 import { initAnalytics, isOptedOut, setOptOut } from '../analytics';
 import { mountDocPage } from '../doc-page';
 
-mountDocPage(document.getElementById('doc')!, { markdown: privacy, subtitle: 'Wärmepumpen-Investitionsrechner' });
+mountDocPage(document.getElementById('doc')!, { markdown: privacy, subtitle: 'Wärmepumpen-Umrüstungsrechner' });
 mountOptOut(document.getElementById('analytics-opt-out'));
 initAnalytics('Datenschutz');
 

@@ -7,5 +7,5 @@ import notices from '../../THIRD-PARTY-NOTICES.md?raw';
 import { initAnalytics } from '../analytics';
 import { mountDocPage } from '../doc-page';
 
-mountDocPage(document.getElementById('doc')!, { markdown: notices, subtitle: 'Wärmepumpen-Investitionsrechner', codeLang: 'en' });
+mountDocPage(document.getElementById('doc')!, { markdown: notices, subtitle: 'Wärmepumpen-Umrüstungsrechner', codeLang: 'en' });
 initAnalytics('Lizenzen Drittanbieter');

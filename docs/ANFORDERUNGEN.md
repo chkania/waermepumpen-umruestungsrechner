@@ -1,4 +1,4 @@
-# Wärmepumpen-Investitionsrechner – Anforderungen
+# Wärmepumpen-Umrüstungsrechner – Anforderungen
 
 Dieses Dokument ist die verbindliche Sammlung der Anforderungen. Bei jeder Änderung
 an der Anwendung wird es mitgepflegt (neue Anforderung → neue ID, geänderte
@@ -244,3 +244,4 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 | 2026-11-14 | F21 Weiterempfehlen per WhatsApp, Threema, E-Mail, Link und Teilen-Menü des Geräts („Andere“, z. B. Signal) (ohne Facebook/X), nur mit der Adresse des Rechners. |
 | 2026-11-14 | Schaltfläche „Link teilen“ in „Link mit Werten teilen“ umbenannt, um sie vom Weiterempfehlen (nur Adresse des Rechners) zu unterscheiden. |
 | 2026-11-14 | F22 vierteljährliches Prüf-Issue für die Annahmen und Hinweis im Rechner, wenn die letzte Prüfung über 6 Monate zurückliegt. |
+| 2026-11-14 | Name geändert: „Wärmepumpen-Umrüstungsrechner“ (vorher Wärmepumpen-Investitionsrechner bzw. „Wärmepumpen-Rechner“ im Fenstertitel). Speicherschlüssel `wp-investitionsrechner:*` und Paketname bleiben, damit gespeicherte Eingaben erhalten bleiben. |

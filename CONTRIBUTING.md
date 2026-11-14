@@ -1,6 +1,6 @@
 # Mitarbeit
 
-Schön, dass du mithelfen möchtest! Der Wärmepumpen-Investitionsrechner soll Menschen eine ehrliche Grundlage für eine große Entscheidung geben – das gelingt nur, wenn Annahmen, Förderregeln und Preise aktuell bleiben. Dafür ist deine Hilfe willkommen:
+Schön, dass du mithelfen möchtest! Der Wärmepumpen-Umrüstungsrechner soll Menschen eine ehrliche Grundlage für eine große Entscheidung geben – das gelingt nur, wenn Annahmen, Förderregeln und Preise aktuell bleiben. Dafür ist deine Hilfe willkommen:
 
 - **Ohne Programmierkenntnisse:** Melde Fehler, unplausible Ergebnisse oder veraltete Werte über das Formular [Fehler oder veralteter Wert](https://github.com/chkania/waermepumpen-umruestungsrechner/issues/new?template=bug_report.yml) – am besten mit Quelle. Auch deine Rückmeldung zu unklaren Texten oder zur Bedienbarkeit hilft sehr.
 - **Mit Programmierkenntnissen:** Schick einen Pull Request nach dem Ablauf unten. Bei größeren Änderungen lohnt es sich, die Idee vorher kurz zu besprechen – am einfachsten über das Formular [Idee oder Frage](https://github.com/chkania/waermepumpen-umruestungsrechner/issues/new?template=feature_request.yml).
