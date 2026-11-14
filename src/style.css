@@ -128,6 +128,27 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 @media (min-width: 961px) {
   .inputs { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; padding-right: 4px; }
 }
+/* Expand/collapse all sections (F24); stays visible while the column scrolls */
+.sections-toggle {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 2px 0 4px;
+  background: var(--bg);
+}
+.sections-toggle button {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 4px);
+  color: var(--c-text-2);
+  font-size: 0.82rem;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+.sections-toggle button:hover { border-color: var(--accent); color: var(--accent); }
 .section {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -487,7 +508,7 @@ td.ev-cell { white-space: normal; min-width: 220px; }
 .tariff-years { margin-top: 8px; }
 .tariff-years summary { cursor: pointer; font-size: 0.85rem; color: var(--c-text-2); }
 
-/* ---------- Design switch (classic) ---------- */
+/* ---------- Segmented switch (light/dark) ---------- */
 .design-switch {
   display: inline-flex;
   border: 1px solid var(--border);
@@ -503,10 +524,10 @@ td.ev-cell { white-space: normal; min-width: 220px; }
 }
 .toolbar .design-switch button[aria-pressed='true'] { background: var(--accent); color: var(--on-accent); }
 
-/* Brand is only shown in the modern design */
+/* Brand mark: shown by the modern design layer (style-modern.css) */
 .brand .mark { display: none; }
 
-/* Card header may wrap on narrow screens (both designs) */
+/* Card header may wrap on narrow screens */
 .card-head { flex-wrap: wrap; }
 .card-head select { max-width: 100%; }
 
@@ -528,7 +549,7 @@ td.ev-cell { white-space: normal; min-width: 220px; }
 .contribute ul { margin: 6px 0 8px; padding-left: 20px; }
 .contribute li { margin-bottom: 4px; }
 
-/* Introduction dialog for first-time visitors (F20); uses the tokens of both designs */
+/* Introduction dialog for first-time visitors (F20); uses the design tokens */
 .intro {
   width: min(640px, calc(100vw - 32px));
   max-height: calc(100vh - 48px);

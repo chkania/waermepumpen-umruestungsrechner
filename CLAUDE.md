@@ -1,4 +1,4 @@
-# Wärmepumpen-Investitionsrechner
+# Wärmepumpen-Umrüstungsrechner
 
 SPA (Vite + TypeScript, ohne UI-Framework, Chart.js) zur Wirtschaftlichkeitsrechnung Gas/Öl → Wärmepumpe.
 
@@ -21,6 +21,7 @@ SPA (Vite + TypeScript, ohne UI-Framework, Chart.js) zur Wirtschaftlichkeitsrech
 - `impressum.html`, `datenschutz.html` + `docs/IMPRESSUM.md`, `docs/DATENSCHUTZ.md` (N11) – rechtliche Angaben; bei neuer Datenverarbeitung (z. B. weiterer externer Dienst) Datenschutzerklärung und CSP anpassen.
 - `hilfe.html` + `src/help.ts`/`help-main.ts`/`help.css` – Hilfeseite, rendert `docs/BENUTZERHANDBUCH.md`
 - `lizenz.html`, `lizenzen-drittanbieter.html` + `src/pages/*` – rendern `LICENSE.md` bzw. `THIRD-PARTY-NOTICES.md`; gemeinsamer Seitenaufbau in `src/doc-page.ts` (neue Dokumentseite: HTML-Datei, Eintrag in `vite.config.ts` und `DOC_LINKS`)
+- `src/logo.ts` – Logo (F23) für die Kopfzeile; Favicon in `public/`, Dateien für Präsentationen und Nutzungsregeln in `docs/logo/` (Form überall gleich halten, `tests/logo.test.ts`)
 - `src/ui/` – `fields.ts` (deklarative Formularfelder; neues Eingabefeld = Eintrag hier + in `types.ts`/`defaults.ts`), `app.ts`, `charts.ts`
 - `tests/` – Vitest; `ui.test.ts` läuft mit happy-dom; `helpers.ts` fixiert den Stichtag 2026-11-11 und feste Testpreise (`pinPrices`/`neutral`). Markt-Defaults aktualisieren → nur Regressions-Snapshots ändern sich (`npm test -- -u`, im Änderungsprotokoll begründen).
 
@@ -46,7 +47,7 @@ PolyForm Noncommercial 1.0.0 (`LICENSE.md`). Neue/aktualisierte Laufzeit-Abhäng
 
 ## Konventionen
 - Sprache im Code: Kommentare (auch JSDoc, YAML-/CSS-/HTML-Kommentare) sowie Namen von Klassen, Typen, Funktionen/Methoden, Variablen und Dateien immer auf **Englisch**. Deutsch bleiben alle für Nutzer sichtbaren Texte (UI, Meldungen, Handbuch, Changelog) und die Beschreibung in Commit-Nachrichten/PR-Titeln (erscheint im Changelog). Fachbegriffe im Kommentar mit dem deutschen Begriff in Klammern, beim ersten Vorkommen je Kommentar, z. B. „special repayment (Sondertilgung)“, „climate speed bonus (Klimageschwindigkeitsbonus)“, „SPF (JAZ)“.
-- Zwei Designs: `src/style.css` = Basis/„Klassisch“, `src/style-modern.css` = „Modern“ (nur Regeln unter `:root[data-design='modern']`). Neue UI-Elemente in beiden Designs und in Hell/Dunkel prüfen. Dunkle Farben nur über `:root[data-theme='dark']` (keine `prefers-color-scheme`-Media-Queries).
+- Design: nur „Modern“. `src/style.css` = Basisregeln, `src/style-modern.css` = moderne Schicht (nur Regeln unter `:root[data-design='modern']`, das alle HTML-Seiten fest setzen). Neue UI-Elemente in Hell und Dunkel prüfen. Dunkle Farben nur über `:root[data-theme='dark']` (keine `prefers-color-scheme`-Media-Queries).
 - Sicherheit: dynamische Texte in HTML immer mit `escapeHtml`; keine Inline-Skripte/-Event-Handler/`style="…"` im Markup (CSP aus `csp.ts` im Build). Gebauten Stand prüfen: `npm run build`, dann Vorschau „preview“ (Port 4173).
 - Barrierefreiheit (N7, WCAG 2.1 AA): Farben nur über Tokens; neue Text-/Flächenfarben müssen ≥ 4,5 : 1 erreichen (`tests/a11y.test.ts` prüft die Tokens), Text auf Akzentflächen mit `--on-accent`; kein `outline: none`; neue Diagramme brauchen `role="img"`-Beschreibung und eine Tabelle in `chartTables()`; Fehler als Text, nicht nur per Farbe.
 - Ansprache: Rechner, Handbuch und rechtliche Seiten siezen („Sie“); alles zum Mitmachen (Kasten „Mitmachen“, gleichnamige Abschnitte in Handbuch/README, CONTRIBUTING.md) duzt („du“, kleingeschrieben).

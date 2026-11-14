@@ -2,7 +2,8 @@
  * Modern design (F14), inspired by chkania.net (F14.4):
  * warm off-white, sand surfaces, fine lines, anthracite, muted grey, calm blue;
  * Inter for text, JetBrains Mono (upper case) for labels/metadata; nearly square corners, no gradients.
- * All rules apply only with <html data-design="modern">. The classic design (style.css) stays unchanged.
+ * Layer on top of the base styles (style.css); all rules apply under <html data-design="modern">,
+ * which every page sets statically (the former classic design was removed).
  */
 
 /* ---------- Tokens (colours from chkania.net) ---------- */
@@ -122,15 +123,14 @@
   grid-row: span 2;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border: 1.5px solid var(--c-text);
-  font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  color: var(--c-text);
+  width: 44px;
+  height: 44px;
 }
+/* Logo (F23): colours from the tokens, so light/dark follow automatically */
+:root[data-design='modern'] .logo-house { fill: none; stroke: var(--c-text); stroke-width: 5; stroke-linejoin: miter; }
+:root[data-design='modern'] .logo-warm { fill: var(--c-ref); }
+:root[data-design='modern'] .logo-rise { fill: var(--accent); }
+:root[data-design='modern'] .logo-arrow { fill: none; stroke: var(--accent); stroke-width: 5; stroke-linecap: square; stroke-linejoin: miter; }
 :root[data-design='modern'] .brand h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.015em; }
 :root[data-design='modern'] .brand p { color: var(--c-text-2); font-size: 0.9rem; margin-top: 2px; }
 
@@ -169,7 +169,7 @@
 @media (max-width: 960px) {
   :root[data-design='modern'] .top { padding: 14px 16px; }
   :root[data-design='modern'] .brand h1 { font-size: 1.1rem; }
-  :root[data-design='modern'] .brand .mark { width: 34px; height: 34px; }
+  :root[data-design='modern'] .brand .mark { width: 36px; height: 36px; }
   :root[data-design='modern'] .layout { padding-top: 16px; }
 }
 

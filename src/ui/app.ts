@@ -16,13 +16,12 @@ import { Charts, chartTables, type ChartId } from './charts';
 import { SECTIONS, getPath, setPath, type Field } from './fields';
 import { escapeHtml, fmtDuration, fmtEur, fmtMonth, fmtNum, fmtPct } from './format';
 import { RECOMMEND_SUBJECT, RECOMMEND_TEXT, recommendLinks } from './share';
+import { logoSvg } from '../logo';
 import { BUG_REPORT_URL, CONTRIBUTING_URL, FEATURE_REQUEST_URL, REPO_URL } from '../project';
 
 export const STORAGE_KEY = 'wp-investitionsrechner:v1';
-/** Selected design (view setting, not part of the inputs/links). */
-export const DESIGN_KEY = 'wp-investitionsrechner:design';
-export type Design = 'modern' | 'classic';
-export const DEFAULT_DESIGN: Design = 'modern';
+/** Former design choice (modern/classic, F14); only the modern design remains, the stored value is removed. */
+export const LEGACY_DESIGN_KEY = 'wp-investitionsrechner:design';
 /** Light/dark: 'auto' follows the browser/system setting, 'light'/'dark' override it (F14.5). */
 export const THEME_KEY = 'wp-investitionsrechner:theme';
 export type ThemeChoice = 'auto' | 'light' | 'dark';
@@ -41,8 +40,6 @@ export interface AppController {
   setInputs(i: Inputs): void;
   recalc(): void;
   lastResult(): { run: RunResult; cmp: InstallComparison; events: KeyEvents } | null;
-  getDesign(): Design;
-  setDesign(d: Design): void;
   getTheme(): ThemeChoice;
   setTheme(t: ThemeChoice): void;
   /** Opens the introduction dialog (F20). */
@@ -73,7 +70,14 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   root.innerHTML = layout();
   const $ = <T extends HTMLElement>(sel: string) => root.querySelector(sel) as T;
   const form = $<HTMLElement>('#inputs');
-  form.innerHTML = SECTIONS.map((s) => sectionHtml(s, defaults)).join('');
+  form.innerHTML = sectionsToggleHtml() + SECTIONS.map((s) => sectionHtml(s, defaults)).join('');
+  // Expand/collapse all input sections at once (F24)
+  form.querySelectorAll<HTMLButtonElement>('[data-sections]').forEach((b) =>
+    b.addEventListener('click', () => {
+      const open = b.dataset.sections === 'open';
+      form.querySelectorAll<HTMLDetailsElement>('details.section').forEach((d) => (d.open = open));
+    }),
+  );
 
   const canvases = Object.fromEntries(
     CHART_TABS.map(([id]) => [id, $<HTMLCanvasElement>(`canvas[data-chart="${id}"]`)]),
@@ -103,7 +107,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     const el = $<HTMLElement>('#scenario-name');
     el.textContent = name;
     el.hidden = name === '';
-    document.title = name ? `${name} – Wärmepumpen-Rechner` : 'Wärmepumpen-Rechner';
+    document.title = name ? `${name} – Wärmepumpen-Umrüstungsrechner` : 'Wärmepumpen-Umrüstungsrechner';
   }
 
   function refreshVisibility(): void {
@@ -366,19 +370,14 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     b.addEventListener('click', () => controller.setTheme(b.dataset.themeChoice as ThemeChoice)),
   );
 
-  // ---------- Design switch ----------
-  let design: Design = readDesign(storage);
-  const applyDesign = (d: Design) => {
-    design = d;
-    document.documentElement.dataset.design = d;
-    root.querySelectorAll<HTMLButtonElement>('[data-design-choice]').forEach((b) =>
-      b.setAttribute('aria-pressed', String(b.dataset.designChoice === d)),
-    );
-  };
-  applyDesign(design);
-  root.querySelectorAll<HTMLButtonElement>('[data-design-choice]').forEach((b) =>
-    b.addEventListener('click', () => controller.setDesign(b.dataset.designChoice as Design)),
-  );
+  // ---------- Design ----------
+  // Only the modern design (F14); the HTML pages set the attribute before the first paint as well.
+  document.documentElement.dataset.design = 'modern';
+  try {
+    storage?.removeItem(LEGACY_DESIGN_KEY);
+  } catch {
+    /* Speicher nicht verfügbar */
+  }
 
   // ---------- Calculation ----------
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -821,7 +820,6 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     },
     recalc,
     lastResult: () => last,
-    getDesign: () => design,
     getTheme: () => theme,
     setTheme(t) {
       if (t === theme) return;
@@ -834,16 +832,6 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       redrawCharts();
     },
     showIntro,
-    setDesign(d) {
-      if (d === design) return;
-      applyDesign(d);
-      try {
-        storage?.setItem(DESIGN_KEY, d);
-      } catch {
-        /* Speicher nicht verfügbar */
-      }
-      redrawCharts();
-    },
   };
 
   writeForm();
@@ -899,16 +887,6 @@ function readTheme(storage: Storage | null): ThemeChoice {
     /* ignorieren */
   }
   return 'auto';
-}
-
-function readDesign(storage: Storage | null): Design {
-  try {
-    const v = storage?.getItem(DESIGN_KEY);
-    if (v === 'modern' || v === 'classic') return v;
-  } catch {
-    /* ignorieren */
-  }
-  return DEFAULT_DESIGN;
 }
 
 function safeStorage(): Storage | null {
@@ -1054,6 +1032,13 @@ function fieldHtml(f: Field, defaults: Inputs): string {
     <small class="field-error" id="${id}-err" aria-live="polite" hidden></small>${help}</div>`;
 }
 
+function sectionsToggleHtml(): string {
+  return `<div class="sections-toggle" role="group" aria-label="Alle Eingabebereiche">
+    <button type="button" data-sections="open" aria-controls="inputs">Alle aufklappen</button>
+    <button type="button" data-sections="close" aria-controls="inputs">Alle zuklappen</button>
+  </div>`;
+}
+
 function sectionHtml(s: (typeof SECTIONS)[number], defaults: Inputs): string {
   return `<details class="section${s.expert ? ' expert' : ''}" ${s.open ? 'open' : ''}>
     <summary>${escapeHtml(s.title)}</summary>
@@ -1066,16 +1051,12 @@ function layout(): string {
   return `
   <header class="top">
     <div class="brand">
-      <span class="mark" aria-hidden="true">~wp</span>
-      <h1>Wärmepumpen-Investitionsrechner</h1>
+      ${logoSvg()}
+      <h1>Wärmepumpen-Umrüstungsrechner</h1>
       <p>Umstieg von Gas oder Öl: Energiepreise, KfW-Förderung, Kredit und Steuerbonus im Vergleich
         <a id="app-version" class="version-link" href="./changelog.html" target="_blank" rel="noopener" title="Änderungen dieser und früherer Versionen (Changelog)">Version ${APP_VERSION}</a></p>
     </div>
     <div class="toolbar">
-      <div class="design-switch" role="group" aria-label="Design">
-        <button type="button" data-design-choice="modern" aria-pressed="false">Modern</button>
-        <button type="button" data-design-choice="classic" aria-pressed="false">Klassisch</button>
-      </div>
       <div class="design-switch theme-switch" role="group" aria-label="Hell oder dunkel">
         <button type="button" data-theme-choice="light" aria-pressed="false" title="Helles Design">Hell</button>
         <button type="button" data-theme-choice="dark" aria-pressed="false" title="Dunkles Design">Dunkel</button>
@@ -1177,7 +1158,7 @@ function introHtml(): string {
   return `
   <dialog id="intro" class="intro" aria-labelledby="intro-title" aria-describedby="intro-purpose">
     <form method="dialog" class="intro-body">
-      <h2 id="intro-title">Willkommen beim Wärmepumpen-Investitionsrechner</h2>
+      <h2 id="intro-title">Willkommen beim Wärmepumpen-Umrüstungsrechner</h2>
       <p id="intro-purpose" class="intro-lead">Lohnt sich der Umstieg von Ihrer Gas- oder Ölheizung auf eine Wärmepumpe – und wann ist der beste Zeitpunkt? Der Rechner stellt die Gesamtkosten über viele Jahre gegenüber: <strong>bisherige Heizung weiterbetreiben</strong> oder <strong>auf eine Wärmepumpe umsteigen</strong> – mit KfW-Zuschuss oder Steuerbonus, Kredit, steigenden Energie- und CO₂-Preisen und den Kosten des Wartens.</p>
       <h3>So geht’s</h3>
       <ol class="intro-steps">

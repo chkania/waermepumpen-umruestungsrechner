@@ -2,6 +2,7 @@ import { escapeHtml } from './ui/format';
 import { renderHelp } from './help';
 import { REPO_URL } from './project';
 import { APP_VERSION } from './version';
+import { logoSvg } from './logo';
 
 export interface DocPage {
   /** Markdown source (imported via `?raw`, stays as .md file in the repo). */
@@ -41,7 +42,7 @@ export function renderDocPage(page: DocPage): { html: string; title: string } {
   const body = `
   <header class="top help-top">
     <div class="brand">
-      <span class="mark" aria-hidden="true">~wp</span>
+      ${logoSvg()}
       <h1>${escapeHtml(title)}</h1>
       <p>${escapeHtml(page.subtitle)}</p>
     </div>
@@ -70,7 +71,7 @@ export function renderDocPage(page: DocPage): { html: string; title: string } {
   return { html: body, title };
 }
 
-/** Mounts the page and keeps design/light-dark in sync with the calculator (also on changes in another tab). */
+/** Mounts the page and keeps light/dark in sync with the calculator (also on changes in another tab). */
 export function mountDocPage(root: HTMLElement, page: DocPage): void {
   root.innerHTML = renderDocPage(page).html;
 
@@ -88,9 +89,6 @@ export function mountDocPage(root: HTMLElement, page: DocPage): void {
   };
   media.addEventListener('change', applyTheme);
   window.addEventListener('storage', (e) => {
-    if (e.key === 'wp-investitionsrechner:design') {
-      document.documentElement.dataset.design = e.newValue === 'classic' ? 'classic' : 'modern';
-    }
     if (e.key === 'wp-investitionsrechner:theme') applyTheme();
   });
 

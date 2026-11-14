@@ -8,7 +8,7 @@ const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 const parts = [
   '# Lizenzen von Drittanbietern',
   '',
-  'Der Wärmepumpen-Investitionsrechner enthält im ausgelieferten Build die folgenden Bibliotheken und Schriften. Sie stehen unter ihren eigenen Lizenzen (nicht unter der PolyForm-Noncommercial-Lizenz des Rechners); die Lizenztexte folgen unverändert.',
+  'Der Wärmepumpen-Umrüstungsrechner enthält im ausgelieferten Build die folgenden Bibliotheken und Schriften. Sie stehen unter ihren eigenen Lizenzen (nicht unter der PolyForm-Noncommercial-Lizenz des Rechners); die Lizenztexte folgen unverändert.',
   '',
 ];
 for (const name of Object.keys(pkg.dependencies).sort()) {

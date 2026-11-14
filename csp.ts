@@ -2,7 +2,7 @@ import type { Plugin } from 'vite';
 
 /**
  * Content Security Policy for the static build (N6).
- * Allows only own scripts/styles/fonts plus the Matomo instance (N10); the small inline scripts in <head> (design/light-dark before the
+ * Allows only own scripts/styles/fonts plus the Matomo instance (N10); the small inline scripts in <head> (light/dark before the
  * first paint) are allowed via SHA-256 hash. Build only – the Vite dev server needs inline code.
  * frame-ancestors (protection against embedding) cannot be set via <meta>, only as an HTTP header when hosting.
  */

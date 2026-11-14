@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 72" role="img" aria-label="Wärmepumpen-Umrüstungsrechner">
+  <g transform="translate(4 4)">
+    <path d="M10 29 L32 10 L54 29 V54 H10 Z" fill="none" stroke="#ecebe7" stroke-width="5" stroke-linejoin="miter"/>
+    <path d="M15.5 42.5 H25.06 L26.94 47.5 H15.5 Z" fill="#e08a5f"/>
+    <path d="M26.94 47.5 L44.15 32.38 L40.85 28.62 L25.06 42.5 Z" fill="#6fa3dc"/>
+    <path d="M34 30 H43 V39" fill="none" stroke="#6fa3dc" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter"/>
+  </g>
+  <g font-family="Inter, 'Inter Variable', Helvetica, Arial, sans-serif" font-weight="700" font-size="23" letter-spacing="-0.3" fill="#ecebe7">
+    <text x="82" y="32">Wärmepumpen-</text>
+    <text x="82" y="60">Umrüstungsrechner</text>
+  </g>
+</svg>

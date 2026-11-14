@@ -12,7 +12,7 @@ E-Mail: blog [at] chkania [Punkt] net
 
 ### Das Wichtigste in Kürze
 
-- Der Wärmepumpen-Investitionsrechner rechnet **vollständig in Ihrem Browser**. Ihre Eingaben und Ergebnisse werden nicht an einen Server übertragen.
+- Der Wärmepumpen-Umrüstungsrechner rechnet **vollständig in Ihrem Browser**. Ihre Eingaben und Ergebnisse werden nicht an einen Server übertragen.
 - Für die Besucherstatistik nutze ich **Matomo auf meinem eigenen Server** – ohne Cookies, mit gekürzter IP-Adresse und ohne Ihre Eingaben. Sie können dem [unten](#4-plugins-und-tools) jederzeit widersprechen.
 - Schriften und Bibliotheken sind Teil des Rechners und werden nicht von fremden Servern (z. B. Google Fonts oder CDNs) geladen.
 
@@ -40,7 +40,7 @@ Der Rechner wird aus Sicherheitsgründen über eine verschlüsselte Verbindung (
 
 ### Ihre Eingaben bleiben in Ihrem Browser
 
-Alle Berechnungen laufen lokal in Ihrem Browser. Damit Ihre Eingaben beim nächsten Besuch wieder da sind, speichert der Rechner sie im lokalen Speicher Ihres Browsers (`localStorage`), ebenso die gewählte Darstellung (Design, Hell/Dunkel), ob Sie die Einführung bereits geschlossen haben, und ggf. Ihren Widerspruch gegen die Statistik. Diese Daten verlassen Ihr Gerät nicht und sind für mich nicht einsehbar. Die Speicherung ist für die von Ihnen gewünschte Funktion erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG). Sie können sie jederzeit löschen, indem Sie die Website-Daten in Ihrem Browser entfernen.
+Alle Berechnungen laufen lokal in Ihrem Browser. Damit Ihre Eingaben beim nächsten Besuch wieder da sind, speichert der Rechner sie im lokalen Speicher Ihres Browsers (`localStorage`), ebenso die gewählte Darstellung (Hell/Dunkel), ob Sie die Einführung bereits geschlossen haben, und ggf. Ihren Widerspruch gegen die Statistik. Diese Daten verlassen Ihr Gerät nicht und sind für mich nicht einsehbar. Die Speicherung ist für die von Ihnen gewünschte Funktion erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG). Sie können sie jederzeit löschen, indem Sie die Website-Daten in Ihrem Browser entfernen.
 
 **Links teilen:** Ein über „Link kopieren“ erzeugter Link enthält Ihre Eingaben im Teil der Adresse nach `#`. Dieser Teil wird von Browsern nicht an den Server gesendet und auch nicht an die Besucherstatistik übermittelt. Wem Sie den Link weitergeben, entscheiden allein Sie.
 

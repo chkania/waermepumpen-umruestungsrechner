@@ -1,6 +1,6 @@
 # Benutzerhandbuch
 
-Der **Wärmepumpen-Investitionsrechner** zeigt, was der Umstieg von einer Gas- oder Ölheizung auf eine Wärmepumpe über die nächsten Jahre kostet – im Vergleich dazu, die alte Heizung weiterzubetreiben. Er berücksichtigt steigende Energie- und CO₂-Preise, die KfW-Heizungsförderung, Kredite, den Steuerbonus und den richtigen Zeitpunkt für den Umstieg.
+Der **Wärmepumpen-Umrüstungsrechner** zeigt, was der Umstieg von einer Gas- oder Ölheizung auf eine Wärmepumpe über die nächsten Jahre kostet – im Vergleich dazu, die alte Heizung weiterzubetreiben. Er berücksichtigt steigende Energie- und CO₂-Preise, die KfW-Heizungsförderung, Kredite, den Steuerbonus und den richtigen Zeitpunkt für den Umstieg.
 
 > **Hinweis:** Der Rechner ist keine Finanz-, Steuer- oder Förderberatung. Förderbedingungen, Preise und Zinsen ändern sich. Prüfen Sie vor einer Entscheidung die aktuellen Bedingungen bei der KfW, einem Energieeffizienz-Experten und ggf. einer Steuerberatung.
 
@@ -17,17 +17,13 @@ Jedes Eingabefeld hat einen kleinen **„i“-Knopf**. Er zeigt den Standardwert
 
 ## Aufbau der Oberfläche
 
-- **Kopfbereich:** Titel und Werkzeugleiste (Design, Hell/Dunkel, Hilfe, Teilen, Export, Import, Zurücksetzen).
-- **Links – Eingaben:** in aufklappbare Abschnitte gegliedert. Ein Klick auf die Überschrift klappt einen Abschnitt auf oder zu. Abschnitte mit „Experten“ enthalten die Förder- und Steuerregeln; sie müssen normalerweise nicht geändert werden.
+- **Kopfbereich:** Titel und Werkzeugleiste (Hell/Dunkel, Hilfe, Teilen, Export, Import, Zurücksetzen).
+- **Links – Eingaben:** in aufklappbare Abschnitte gegliedert. Ein Klick auf die Überschrift klappt einen Abschnitt auf oder zu; **„Alle aufklappen“** und **„Alle zuklappen“** oberhalb der Abschnitte öffnen bzw. schließen alle auf einmal. Abschnitte mit „Experten“ enthalten die Förder- und Steuerregeln; sie müssen normalerweise nicht geändert werden.
 - **Rechts – Ergebnisse:** Kennzahlen, wichtige Ereignisse und Hinweise, Diagramme, Förderdetails, Stromtarifvergleich, Vergleich der Umrüstzeitpunkte und Jahresübersicht.
 
 Auf dem Smartphone stehen die Eingaben oben und die Ergebnisse darunter.
 
 ## Werkzeugleiste
-
-### Design: Modern | Klassisch
-
-Schaltet zwischen dem modernen und dem klassischen Erscheinungsbild um. Inhalt und Berechnung sind identisch. Die Wahl wird im Browser gespeichert.
 
 ### Hell | Dunkel | Auto
 
@@ -50,7 +46,7 @@ Die Wahl wird im Browser gespeichert.
 
 - **WhatsApp** öffnet die installierte WhatsApp-App (Smartphone oder Desktop) mit vorbereiteter Nachricht; Sie wählen dort nur noch den Kontakt. Ohne installierte App passiert nichts – nutzen Sie dann „Link kopieren“.
 - **Threema** öffnet die Threema-App mit vorbereiteter Nachricht.
-- **E-Mail** öffnet Ihr Standard-E-Mail-Programm mit vorbelegtem Betreff („Tipp: Wärmepumpen-Investitionsrechner“) und Text, den Sie vor dem Senden anpassen können.
+- **E-Mail** öffnet Ihr Standard-E-Mail-Programm mit vorbelegtem Betreff („Tipp: Wärmepumpen-Umrüstungsrechner“) und Text, den Sie vor dem Senden anpassen können.
 - **Link kopieren** legt die Adresse des Rechners in die Zwischenablage.
 - **Andere** öffnet auf Smartphones und in manchen Browsern das Teilen-Menü des Geräts – dort wählen Sie z. B. Signal oder Telegram (Signal bietet keinen eigenen Link zum Teilen). Wo es das Teilen-Menü nicht gibt, wird der Text in die Zwischenablage kopiert und Sie fügen ihn in die gewünschte App ein.
 
@@ -74,7 +70,7 @@ Lädt eine zuvor exportierte JSON-Datei. Felder, die in der Datei fehlen oder un
 
 ### Zurücksetzen
 
-Setzt nach Rückfrage **alle Eingaben auf die Standardwerte** zurück. Design und Hell/Dunkel bleiben erhalten. Tipp: Vorher exportieren, wenn Sie den Stand behalten möchten.
+Setzt nach Rückfrage **alle Eingaben auf die Standardwerte** zurück. Die Einstellung Hell/Dunkel bleibt erhalten. Tipp: Vorher exportieren, wenn Sie den Stand behalten möchten.
 
 ### Automatisches Speichern
 
@@ -302,8 +298,8 @@ Tabelle je Jahr mit allen Kostenarten (Energie, Grundkosten, Wartung, Investitio
 
 Der Rechner orientiert sich an WCAG 2.1 Stufe AA (Grundlage der EN 301 549):
 
-- vollständig per Tastatur bedienbar, sichtbarer Fokusrahmen in beiden Designs;
-- Textkontrast mindestens 4,5 : 1 in allen vier Kombinationen aus Design und Hell/Dunkel;
+- vollständig per Tastatur bedienbar, sichtbarer Fokusrahmen;
+- Textkontrast mindestens 4,5 : 1 in Hell und Dunkel;
 - ungültige Eingaben werden mit einem Text unter dem Feld erklärt und für Screenreader gekennzeichnet;
 - jedes Diagramm hat eine Textbeschreibung und eine Tabelle mit denselben Werten;
 - Hinweise (z. B. „Link kopiert“) werden von Screenreadern angesagt.

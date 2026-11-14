@@ -7,5 +7,5 @@ import handbook from '../docs/BENUTZERHANDBUCH.md?raw';
 import { initAnalytics } from './analytics';
 import { mountDocPage } from './doc-page';
 
-mountDocPage(document.getElementById('help')!, { markdown: handbook, subtitle: 'Wärmepumpen-Investitionsrechner' });
+mountDocPage(document.getElementById('help')!, { markdown: handbook, subtitle: 'Wärmepumpen-Umrüstungsrechner' });
 initAnalytics('Hilfe');
