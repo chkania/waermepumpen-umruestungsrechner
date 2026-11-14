@@ -24,11 +24,11 @@ jobs:
     outputs:
       notices-changed: ${{ steps.notices.outputs.changed }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v7
         with:
           node-version: lts/*
           cache: npm
@@ -42,7 +42,7 @@ jobs:
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: steps.notices.outputs.changed == 'true'
         with:
           name: third-party-notices
@@ -66,17 +66,17 @@ jobs:
       PR_URL: ${{ github.event.pull_request.html_url }}
     steps:
       - id: meta
-        uses: dependabot/fetch-metadata@v2
+        uses: dependabot/fetch-metadata@v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Aktualisierte Hinweise in den PR übernehmen
         if: needs.verify.outputs.notices-changed == 'true'
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.head.ref }}
       - if: needs.verify.outputs.notices-changed == 'true'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: third-party-notices
       - if: needs.verify.outputs.notices-changed == 'true'
