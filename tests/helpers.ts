@@ -1,14 +1,14 @@
 import { createDefaults } from '../src/core/defaults';
 import type { Inputs } from '../src/core/types';
 
-/** Fester Stichtag für reproduzierbare Tests: 11.11.2026 → Startmonat 2026-11. */
+/** Fixed reference date for reproducible tests: 2026-11-11 → start month 2026-11. */
 export const TODAY = new Date(2026, 10, 11);
 
 export function defaults(): Inputs {
   return createDefaults(TODAY);
 }
 
-/** Defaults mit „neutralen" Annahmen: keine Preissteigerung, konstanter CO2-Preis, kein Zins, kein Restwert. */
+/** Defaults with "neutral" assumptions: no price increase, constant CO2 price, no interest, no residual value (Restwert). */
 export function neutral(mut?: (i: Inputs) => void): Inputs {
   const i = defaults();
   i.general.opportunityRate = 0;
@@ -25,7 +25,7 @@ export function neutral(mut?: (i: Inputs) => void): Inputs {
   return i;
 }
 
-/** Feste Testpreise, unabhängig von den (recherchierten, sich ändernden) Markt-Defaults. */
+/** Fixed test prices, independent of the (researched, changing) market defaults. */
 export function pinPrices(i: Inputs): Inputs {
   i.prices.gasPriceCt = 11.5;
   i.prices.gasBaseFee = 180;
@@ -41,7 +41,7 @@ export function pinPrices(i: Inputs): Inputs {
   return i;
 }
 
-/** Defaults mit festen Testpreisen (Preissteigerungen und CO2-Pfad bleiben wie in den Defaults). */
+/** Defaults with fixed test prices (price increases and CO2 path stay as in the defaults). */
 export function pinned(): Inputs {
   return pinPrices(defaults());
 }

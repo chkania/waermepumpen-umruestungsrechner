@@ -1,14 +1,14 @@
 /**
- * Automatische Versionierung (N9): Ableitung der nächsten Version nach Semantic Versioning
- * (https://semver.org/) aus Commit-Nachrichten im Format Conventional Commits
- * (https://www.conventionalcommits.org/de/v1.0.0/).
+ * Automatic versioning (N9): derives the next version per Semantic Versioning
+ * (https://semver.org/) from commit messages in Conventional Commits format
+ * (https://www.conventionalcommits.org/en/v1.0.0/).
  *
- * - `feat`                                → MINOR (neue Funktion, abwärtskompatibel)
- * - `fix`, `perf`                         → PATCH (Fehlerkorrektur bzw. Verbesserung, abwärtskompatibel)
- * - `!` nach Typ/Scope oder Fußzeile `BREAKING CHANGE:` → MAJOR (inkompatibel, z. B. Export-/Link-Format)
- * - alle übrigen Typen (docs, test, refactor, build, ci, chore, style, revert) → keine neue Version
+ * - `feat`                                → MINOR (new feature, backwards compatible)
+ * - `fix`, `perf`                         → PATCH (bug fix or improvement, backwards compatible)
+ * - `!` after type/scope or footer `BREAKING CHANGE:` → MAJOR (incompatible, e.g. export/link format)
+ * - all other types (docs, test, refactor, build, ci, chore, style, revert) → no new version
  *
- * Nur Node-Bordmittel, damit der Release-Workflow keinen fremden Paketcode mit Schreibrechten ausführt.
+ * Node built-ins only, so the release workflow never runs third-party package code with write permissions.
  */
 
 export type Bump = 'major' | 'minor' | 'patch';
@@ -27,14 +27,14 @@ export interface ParsedCommit {
   scope: string | null;
   breaking: boolean;
   description: string;
-  /** Text der Fußzeile `BREAKING CHANGE:` (falls vorhanden). */
+  /** Text of the `BREAKING CHANGE:` footer (if present). */
   breakingNote: string | null;
 }
 
 const HEADER = /^([a-z]+)(?:\(([^()\r\n]+)\))?(!)?: (\S.*)$/;
 const BREAKING_FOOTER = /^BREAKING[ -]CHANGE: *(\S.*)$/m;
 
-/** Zerlegt eine Commit-Nachricht; null, wenn sie nicht dem Format entspricht. */
+/** Parses a commit message; null if it does not match the format. */
 export function parseCommit(c: RawCommit): ParsedCommit | null {
   const m = HEADER.exec(c.subject.trim());
   if (!m || !(COMMIT_TYPES as readonly string[]).includes(m[1])) return null;
@@ -58,7 +58,7 @@ export function bumpFor(c: ParsedCommit): Bump | null {
 
 const RANK: Record<Bump, number> = { patch: 1, minor: 2, major: 3 };
 
-/** Höchste Stufe aller Commits; null = keine neue Version. */
+/** Highest level across all commits; null = no new version. */
 export function maxBump(commits: ParsedCommit[]): Bump | null {
   let best: Bump | null = null;
   for (const c of commits) {
@@ -68,7 +68,7 @@ export function maxBump(commits: ParsedCommit[]): Bump | null {
   return best;
 }
 
-/** Nächste Version nach SemVer 2.0.0 (Nr. 6–8: niedrigere Stellen werden auf 0 gesetzt). */
+/** Next version per SemVer 2.0.0 (items 6–8: lower positions are reset to 0). */
 export function nextVersion(version: string, bump: Bump): string {
   const m = /^(\d+)\.(\d+)\.(\d+)$/.exec(version);
   if (!m) throw new Error(`Keine gültige Version: ${version}`);
@@ -80,7 +80,7 @@ export function nextVersion(version: string, bump: Bump): string {
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-/** Changelog-Abschnitt „## x.y.z – JJJJ-MM-TT“ mit deutschen Rubriken. */
+/** Changelog section "## x.y.z – YYYY-MM-DD" with German headings. */
 export function changelogSection(version: string, date: string, commits: ParsedCommit[]): string {
   const groups: [string, string[]][] = [
     ['Inkompatible Änderungen', []],
@@ -105,14 +105,14 @@ export function changelogSection(version: string, date: string, commits: ParsedC
   return `## ${version} – ${date}\n\n${body}`;
 }
 
-/** Fügt den Abschnitt vor der bisher neuesten Version ein (nach dem Einleitungstext). */
+/** Inserts the section before the previously newest version (after the introduction). */
 export function insertSection(changelog: string, section: string): string {
   const m = /^## /m.exec(changelog);
   if (!m) return `${changelog.trimEnd()}\n\n${section}`;
   return `${changelog.slice(0, m.index)}${section}\n${changelog.slice(m.index)}`;
 }
 
-/** Setzt die Version in package.json bzw. package-lock.json (Format wie npm: 2 Leerzeichen, Zeilenende). */
+/** Sets the version in package.json or package-lock.json (npm format: 2 spaces, trailing newline). */
 export function setPackageVersion(jsonText: string, version: string): string {
   const data = JSON.parse(jsonText);
   data.version = version;
@@ -120,7 +120,7 @@ export function setPackageVersion(jsonText: string, version: string): string {
   return JSON.stringify(data, null, 2) + '\n';
 }
 
-/** Datum JJJJ-MM-TT in deutscher Zeit. */
+/** Date YYYY-MM-DD in German time (Europe/Berlin). */
 export function berlinDate(d: Date = new Date()): string {
   return new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Berlin' }).format(d);
 }

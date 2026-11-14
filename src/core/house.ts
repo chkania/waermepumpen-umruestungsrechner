@@ -3,11 +3,11 @@ import { energySplit } from './prices';
 import type { Inputs } from './types';
 
 /**
- * Einordnung des Hauses (F18): Verbrauchskennwert, Effizienzklasse, Vergleich mit dem Baualter,
- * Sanierungsstand und grobe Eignung für eine Wärmepumpe.
+ * Rating of the house (F18): consumption index (Verbrauchskennwert), efficiency class (Effizienzklasse), comparison with the building age,
+ * renovation state (Sanierungsstand) and rough suitability for a heat pump.
  */
 
-/** Effizienzklassen nach GEG Anlage 10 (Endenergie, kWh/(m²·a)): Obergrenze (exklusiv). */
+/** Efficiency classes (Effizienzklasse) per GEG Annex 10 (final energy (Endenergie), kWh/(m²·a)): upper bound (exclusive). */
 export const EFFICIENCY_CLASSES: readonly { cls: string; below: number }[] = [
   { cls: 'A+', below: 30 },
   { cls: 'A', below: 50 },
@@ -21,8 +21,8 @@ export const EFFICIENCY_CLASSES: readonly { cls: string; below: number }[] = [
 ];
 
 /**
- * Typischer Endenergieverbrauch (Heizung + Warmwasser) unsanierter Einfamilienhäuser nach Baualter.
- * Grobe Orientierung (Schätzung nach den Anforderungen der jeweiligen Wärmeschutzverordnung/EnEV), keine Erhebung.
+ * Typical final energy (Endenergie) consumption (heating + hot water (Warmwasser)) of unrenovated single-family houses by building age.
+ * Rough orientation (estimate based on the requirements of the respective thermal insulation ordinance (Wärmeschutzverordnung)/EnEV), not survey data.
  */
 export const TYPICAL_BY_AGE: readonly { until: number; label: string; range: [number, number] }[] = [
   { until: 1948, label: 'bis 1948', range: [180, 250] },
@@ -33,32 +33,32 @@ export const TYPICAL_BY_AGE: readonly { until: number; label: string; range: [nu
   { until: Infinity, label: 'ab 2016 (EnEV 2016 / GEG)', range: [30, 70] },
 ];
 
-/** Typische Einsparung durch Sanierung gegenüber unsaniert (grob). */
+/** Typical saving from renovation compared with unrenovated (rough). */
 const RENOVATION_SAVING = { partial: [0.1, 0.25], full: [0.4, 0.6] } as const;
 
-/** Vollbenutzungsstunden für die grobe Heizlast (Einfamilienhaus, typisch 1.800–2.100 h). */
+/** Full-load hours (Vollbenutzungsstunden) for the rough heating load (Heizlast) (single-family house, typically 1,800–2,100 h). */
 export const FULL_LOAD_HOURS = 2000;
 
 export type Comparison = 'better' | 'typical' | 'worse';
 
 export interface HouseRating {
   area: number;
-  /** Endenergie Heizung + Warmwasser (ohne Kochen), kWh/Jahr. */
+  /** Final energy (Endenergie) for heating + hot water (Warmwasser) (without cooking), kWh/year. */
   heatingFuel: number;
-  /** Verbrauchskennwert Endenergie (Heizung + Warmwasser), kWh/(m²·a). */
+  /** Consumption index (Verbrauchskennwert), final energy (Endenergie) (heating + hot water (Warmwasser)), kWh/(m²·a). */
   kwhPerM2: number;
-  /** Nutzwärme nur Raumheizung je m² (für die WP-Eignung). */
+  /** Useful heat (Nutzwärme) for space heating (Raumwärme) only per m² (for heat pump suitability). */
   spaceHeatPerM2: number;
   efficiencyClass: string;
-  /** Warmwasser im Kennwert enthalten? (sonst wie im Energieausweis ohne Warmwasser) */
+  /** Hot water (Warmwasser) included in the index? (otherwise as in the energy certificate (Energieausweis) without hot water) */
   includesDhw: boolean;
   buildingAge: number;
   ageClass: (typeof TYPICAL_BY_AGE)[number];
-  /** Erwartungsbereich unter Berücksichtigung der Sanierung. */
+  /** Expected range taking the renovation into account. */
   expected: [number, number];
   comparison: Comparison;
   renovation: { state: 'unsaniert' | 'teilsaniert' | 'umfassend saniert'; year: number | null; text: string };
-  /** Grobe Heizlast (kW) für die Größe der Wärmepumpe. */
+  /** Rough heating load (Heizlast) (kW) for sizing the heat pump. */
   heatLoadKW: number;
   wpSuitability: { level: 'good' | 'ok' | 'check'; text: string };
   notes: string[];
@@ -77,14 +77,14 @@ export function rateHouse(inp: Inputs): HouseRating {
   const ageClass = TYPICAL_BY_AGE.find((c) => b.constructionYear <= c.until)!;
   const notes: string[] = [];
 
-  // Sanierungsstand
+  // Renovation state (Sanierungsstand)
   const renovated = b.renovationYear > 0 && b.renovationYear >= b.constructionYear;
   if (b.renovationYear > 0 && b.renovationYear < b.constructionYear) {
     notes.push('Das Sanierungsjahr liegt vor dem Baujahr und wird ignoriert.');
   }
   const state = !renovated ? 'unsaniert' : b.renovationScope === 'full' ? 'umfassend saniert' : 'teilsaniert';
   const saving = !renovated ? ([0, 0] as const) : RENOVATION_SAVING[b.renovationScope];
-  // Erwartung: unsaniert-Bereich, durch die Sanierung abgesenkt
+  // Expectation: unrenovated range, lowered by the renovation
   const expected: [number, number] = [
     Math.round(ageClass.range[0] * (1 - saving[1])),
     Math.round(ageClass.range[1] * (1 - saving[0])),
@@ -100,7 +100,7 @@ export function rateHouse(inp: Inputs): HouseRating {
   }
   notes.push('Kennwert ohne Witterungsbereinigung und bezogen auf die beheizte Wohnfläche (der Energieausweis nutzt die meist größere Gebäudenutzfläche).');
 
-  // Eignung WP: Raumwärme (Nutzwärme) je m²
+  // Heat pump suitability: space heating (Raumwärme) (useful heat (Nutzwärme)) per m²
   const spaceHeatPerM2 = s.spaceHeat / area;
   const wpSuitability =
     spaceHeatPerM2 <= 100

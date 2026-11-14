@@ -5,26 +5,26 @@ import { runAll, type RunResult } from './simulation';
 import type { Inputs, ScenarioResult } from './types';
 
 export type EventScenario = 'ref' | 'kfw' | 'tax' | 'all';
-/** info = Orientierung, important = großer Zahlungsfluss / Wendepunkt, warning = Nachteil, der leicht übersehen wird. */
+/** info = orientation, important = large cash flow / turning point, warning = drawback that is easily overlooked. */
 export type EventLevel = 'info' | 'important' | 'warning';
 
 export interface KeyEvent {
-  /** Absoluter Monat; null = zeitunabhängiger Hinweis. */
+  /** Absolute month; null = notice not tied to a date. */
   month: number | null;
   scenario: EventScenario;
   level: EventLevel;
   title: string;
   detail?: string;
-  /** Betrag in € (positiv = Ausgabe, negativ = Einnahme). */
+  /** Amount in € (positive = expense, negative = income). */
   amount?: number;
-  /** Optional: Betrag pro Jahr statt einmalig. */
+  /** Optional: amount per year instead of one-off. */
   perYear?: boolean;
 }
 
 export interface KeyEvents {
-  /** Zeitunabhängige Hinweise zu Förderung/Steuer/Kredit. */
+  /** Notices on funding/tax/loan that are not tied to a date. */
   hints: KeyEvent[];
-  /** Datierte Ereignisse, chronologisch. */
+  /** Dated events, in chronological order. */
   timeline: KeyEvent[];
 }
 
@@ -32,7 +32,7 @@ const eur = (x: number) => `${Math.round(x).toLocaleString('de-DE')} €`;
 const pct = (x: number) => `${Math.round(x * 100)} %`;
 const M = formatMonthDe;
 
-/** Ermittelt die wichtigen Ereignisse und Hinweise (F10). */
+/** Determines the key events and notices (F10). */
 export function keyEvents(inp: Inputs, run: RunResult): KeyEvents {
   const hints: KeyEvent[] = [];
   const timeline: KeyEvent[] = [];
@@ -40,7 +40,7 @@ export function keyEvents(inp: Inputs, run: RunResult): KeyEvents {
   const end = start + Math.round(inp.general.horizonYears * 12);
   const o = inp.oldHeating;
 
-  // ---------- Referenz: Ersatzkessel + Bio-Treppe ----------
+  // ---------- Reference: replacement boiler (Ersatzkessel) + bio step-up (Bio-Treppe) ----------
   for (const b of run.ref.boilerPurchases) {
     timeline.push({
       month: b.month,
@@ -56,7 +56,7 @@ export function keyEvents(inp: Inputs, run: RunResult): KeyEvents {
     const pm = createPriceModel(inp);
     const fuelNew = annualHeatDemand(inp) / o.replacementEfficiency;
     const steps = parsePath(inp.prices.bioSteps).filter((st) => st.value > 0);
-    // Stufen vor dem Kesselkauf zählen nur, wenn sie beim Kauf noch die gültige sind
+    // Steps before the boiler purchase only count if they are still the applicable ones at purchase time
     const relevant = steps.filter(
       (st, i) => st.year * 12 >= firstBoiler.month || !(steps[i + 1] && steps[i + 1].year * 12 <= firstBoiler.month),
     );
@@ -75,7 +75,7 @@ export function keyEvents(inp: Inputs, run: RunResult): KeyEvents {
     }
   }
 
-  // ---------- Wärmepumpe ----------
+  // ---------- Heat pump ----------
   const kfw = run.kfw;
   const tax = run.tax;
   const install = kfw.installMonth;
@@ -168,7 +168,7 @@ export function keyEvents(inp: Inputs, run: RunResult): KeyEvents {
     });
   }
 
-  // ---------- Hinweise ----------
+  // ---------- Notices ----------
   if (install !== null) {
     const cook = cookingSwitchHint(inp, run);
     if (cook) hints.push(cook);
@@ -184,7 +184,7 @@ function order(e: KeyEvent): number {
 }
 
 function addWindfallEvents(timeline: KeyEvent[], s: ScenarioResult, scenario: 'kfw' | 'tax'): void {
-  // Zuschuss als Sondertilgung abgelehnt (z. B. unter 5.000 €)
+  // Subsidy (Zuschuss) rejected as special repayment (Sondertilgung) (e.g. below 5,000 €)
   for (const l of s.loans) {
     for (const x of l.extras) {
       if (x.label === 'Zuschuss' && x.status === 'rejected') {
@@ -277,8 +277,8 @@ function addLoanEvents(timeline: KeyEvent[], s: ScenarioResult, scenario: 'kfw' 
 }
 
 /**
- * Bleibt der Gasherd, rechnet der Rechner die Alternative „Induktion“ durch (F17.4):
- * Ersparnis im Betrachtungszeitraum (wie die Kennzahlen inkl. Opportunitätszins), beste Variante je Fall.
+ * If the gas cooker (Gasherd) stays, the calculator evaluates the "induction" alternative (F17.4):
+ * saving over the period (like the key figures, incl. opportunity interest (Opportunitätszins)), best variant in each case.
  */
 export function cookingSwitchSaving(inp: Inputs, run: RunResult = runAll(inp)): number | null {
   const s = energySplit(inp);
@@ -315,7 +315,7 @@ function fundingHints(inp: Inputs, run: RunResult, start: number): KeyEvent[] {
   const kgbStart = tryParseMonth(p.kgbDegressionStart);
   const ownerShare = k.eligibleCosts / Math.max(1, Math.floor(b.units));
 
-  // Klimageschwindigkeitsbonus
+  // Climate speed bonus (Klimageschwindigkeitsbonus)
   if (!b.ownerOccupied) {
     out.push(hint('warning', 'Kein Klimageschwindigkeits- und Einkommensbonus', 'Beide Boni gibt es nur für selbstgenutztes Wohneigentum.'));
   } else if (k.kgbRate > 0) {
@@ -336,7 +336,7 @@ function fundingHints(inp: Inputs, run: RunResult, start: number): KeyEvent[] {
     if (reason) out.push(reason);
   }
 
-  // Grundförderung / Wertschöpfungs-Bonus (Richtlinie Nr. 8.4.1 c, 8.4.6)
+  // Base funding (Grundförderung) / value-added bonus (Wertschöpfungs-Bonus) (guideline (Richtlinie) no. 8.4.1 c, 8.4.6)
   if (k.grundRate < p.grundRate) {
     out.push(
       k.wsbRate > 0
@@ -345,7 +345,7 @@ function fundingHints(inp: Inputs, run: RunResult, start: number): KeyEvent[] {
     );
   }
 
-  // Einkommensbonus
+  // Income bonus (Einkommensbonus)
   if (b.ownerOccupied) {
     const shift = b.hasChild ? p.incomeChildShift : 0;
     const rate = incomeBonusRate(b.householdIncome, b.hasChild, p);
@@ -356,7 +356,7 @@ function fundingHints(inp: Inputs, run: RunResult, start: number): KeyEvent[] {
     }
   }
 
-  // Höchstbetrag förderfähiger Kosten
+  // Cap on eligible costs (Höchstbetrag förderfähiger Kosten)
   const capStart = tryParseMonth(p.capDegressionStart);
   if (k.eligibleCosts >= k.capTotal && p.capStep > 0 && capStart !== null) {
     const next = capStart + 6 * halfYearSteps(app, capStart);
@@ -369,7 +369,7 @@ function fundingHints(inp: Inputs, run: RunResult, start: number): KeyEvent[] {
     );
   }
 
-  // Kreditvariante
+  // Loan variant
   const kfwLoan = run.kfw.loans.find((l) => l.name.startsWith('KfW'));
   if (kfwLoan && kfwLoanVariant(b.ownerOccupied, b.units, b.householdIncome, p) === '359') {
     out.push(
@@ -383,7 +383,7 @@ function fundingHints(inp: Inputs, run: RunResult, start: number): KeyEvent[] {
     );
   }
 
-  // Steuerbonus
+  // Tax bonus (Steuerbonus)
   const t = run.tax.tax;
   if (t && t.eligible) {
     out.push(
@@ -399,7 +399,7 @@ function fundingHints(inp: Inputs, run: RunResult, start: number): KeyEvent[] {
   return out;
 }
 
-/** Begründung, warum kein Klimageschwindigkeitsbonus gewährt wird – inkl. Prüfung, ob er später erreichbar wäre. */
+/** Reason why no climate speed bonus (Klimageschwindigkeitsbonus) is granted – including a check whether it could be reached later. */
 function kgbReason(inp: Inputs, run: RunResult, start: number, app: number, kgbEnd: number | null): KeyEvent | null {
   const p = inp.funding;
   const o = inp.oldHeating;

@@ -70,7 +70,7 @@ export class Charts {
       callbacks: { label: (ctx: TooltipItem<ChartType>) => `${ctx.dataset.label}: ${fmtEur(ctx.parsed.y ?? 0)}` },
     };
 
-    // Ereignis-Markierungen (wichtige Ereignisse/Warnungen) je Szenario und Jahr
+    // Event markers (key events/warnings) per scenario and year
     const timeline = events?.timeline ?? [];
     const evFor = (kind: 'ref' | 'kfw' | 'tax', year: number) =>
       timeline.filter(
@@ -183,7 +183,7 @@ export class Charts {
 
   private render(id: ChartId, cfg: ChartConfiguration & { type: ChartType }): void {
     const canvas = this.canvases[id];
-    if (!canvas || !canvas.getContext?.('2d')) return; // z. B. Testumgebung ohne Canvas
+    if (!canvas || !canvas.getContext?.('2d')) return; // e.g. test environment without canvas
     cfg.options = { responsive: true, maintainAspectRatio: false, animation: false, ...cfg.options };
     const existing = this.charts.get(id);
     if (existing && (existing.config as { type?: string }).type === cfg.type) {
@@ -196,21 +196,21 @@ export class Charts {
     this.charts.set(id, new Chart(canvas, cfg));
   }
 
-  /** Nach Theme-Wechsel Farben neu setzen. */
+  /** Reapply colours after a theme change. */
   reset(): void {
     for (const ch of this.charts.values()) ch.destroy();
     this.charts.clear();
   }
 }
 
-/** Tabellarische Fassung eines Diagramms (Textalternative, WCAG 1.1.1). */
+/** Tabular version of a chart (text alternative, WCAG 1.1.1). */
 export interface ChartTable {
   caption: string;
   head: string[];
   rows: string[][];
 }
 
-/** Liefert für jedes Diagramm dieselben Werte als Tabelle – auch ohne Canvas (z. B. Screenreader, Tests). */
+/** Returns the same values as a table for every chart – also without canvas (e.g. screen readers, tests). */
 export function chartTables(run: RunResult, prices: PriceRow[], cmp: InstallComparison): Record<ChartId, ChartTable> {
   const scen = [
     ['Ohne WP', run.ref],

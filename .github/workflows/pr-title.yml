@@ -1,7 +1,7 @@
 name: PR-Titel
 
-# Der PR-Titel wird beim Squash-Merge zur Commit-Nachricht auf main und bestimmt damit die Version (N9).
-# Format nach Conventional Commits: <typ>[(bereich)][!]: <beschreibung>, z. B. „feat: Vergleich mit PV-Anlage“.
+# The PR title becomes the commit message on main when squash-merging and thereby determines the version (N9).
+# Format per Conventional Commits: <type>[(scope)][!]: <description>, e.g. "feat: Vergleich mit PV-Anlage".
 
 on:
   pull_request:

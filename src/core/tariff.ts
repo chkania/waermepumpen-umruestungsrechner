@@ -4,9 +4,9 @@ import type { Inputs, ScenarioResult } from './types';
 
 export interface TariffYear {
   year: number;
-  /** Strombezug der WP aus dem Netz (kWh, ohne PV-Anteil). */
+  /** Heat pump electricity drawn from the grid (kWh, without PV share). */
   gridKWh: number;
-  /** Stromkosten inkl. Grundpreis Zähler und § 14a-Reduzierung (€). */
+  /** Electricity costs incl. meter standing charge (Grundpreis) and § 14a reduction (€). */
   withTariff: number;
   withoutTariff: number;
 }
@@ -15,30 +15,30 @@ export interface TariffComparison {
   years: TariffYear[];
   totalWith: number;
   totalWithout: number;
-  /** Positiv = WP-Tarif günstiger. */
+  /** Positive = heat pump tariff (Wärmepumpentarif) is cheaper. */
   saving: number;
-  /** Erstes volles Betriebsjahr (oder erstes Jahr, falls keins voll ist). */
+  /** First full year of operation (or the first year if none is full). */
   firstFullYear: TariffYear | null;
   /**
-   * Netzbezug pro Jahr, ab dem sich der WP-Tarif bei den laufenden Kosten lohnt (Startpreise):
-   * (Zählergrundpreis − zusätzliche § 14a-Pauschale) ÷ Preisvorteil. 0 = bei jedem Verbrauch; null = nie.
+   * Annual grid consumption from which the heat pump tariff (Wärmepumpentarif) pays off in running costs (start prices):
+   * (meter standing charge (Grundpreis) − additional § 14a flat rate (Pauschale)) ÷ price advantage. 0 = at any consumption; null = never.
    */
   breakEvenKWh: number | null;
-  /** Einmalige Kosten zweiter Zähler (brutto, zum Kaufzeitpunkt). */
+  /** One-off cost of the second meter (gross, at purchase time). */
   setupCost: number;
-  /** Zusätzlicher Zuschuss darauf (falls als förderfähig angesetzt und Höchstbetrag nicht ausgeschöpft). */
+  /** Additional subsidy (Zuschuss) on it (if treated as eligible and the cap is not exhausted). */
   setupSubsidy: number;
-  /** Jahre, bis die laufende Ersparnis die Netto-Umbaukosten deckt; null = nie, 0 = keine Umbaukosten. */
+  /** Years until the running savings cover the net conversion cost; null = never, 0 = no conversion cost. */
   setupPaybackYears: number | null;
-  /** Aktuell in den Eingaben gewählte Variante. */
+  /** Variant currently selected in the inputs. */
   selected: 'with' | 'without';
   cheaper: 'with' | 'without';
 }
 
 /**
- * Vergleicht die Stromkosten der Wärmepumpe mit und ohne separaten Wärmepumpentarif (F13).
- * Gerechnet wird ab Inbetriebnahme bis zum Ende des Betrachtungszeitraums (nominal, ohne Opportunitätszins).
- * Einmalige Kosten für den zweiten Zähler (abzüglich eines etwaigen Zuschusses) gehen in die Summe „mit WP-Tarif“ ein.
+ * Compares the heat pump's electricity costs with and without a separate heat pump tariff (F13).
+ * Calculated from commissioning (Inbetriebnahme) until the end of the analysis period (Betrachtungszeitraum) (nominal, without opportunity interest (Opportunitätszins)).
+ * One-off costs for the second meter (less any subsidy (Zuschuss)) are included in the "with heat pump tariff (Wärmepumpentarif)" total.
  */
 export function tariffComparison(inp: Inputs): TariffComparison | null {
   const variant = (separateTariff: boolean): Inputs => ({ ...inp, heatPump: { ...inp.heatPump, separateTariff } });
@@ -57,7 +57,7 @@ export function tariffComparison(inp: Inputs): TariffComparison | null {
       if (r.system !== 'wp') continue;
       const y = yearOf(r.month);
       const e = m.get(y) ?? { cost: 0, kwh: 0, months: 0 };
-      // Kochen (Gas oder Induktion am Haushaltszähler) gehört nicht zum WP-Strom
+      // Cooking (gas or induction on the household meter (Haushaltszähler)) is not part of the heat pump electricity
       e.cost += r.energy + r.fixed - r.cookingCost;
       e.kwh += (r.heatKWh / inp.heatPump.jaz) * (1 - inp.heatPump.pvShare);
       e.months += 1;
@@ -79,8 +79,8 @@ export function tariffComparison(inp: Inputs): TariffComparison | null {
   const firstFullYear = years.find((y) => y.year === fullYear) ?? years[0] ?? null;
 
   const priceGap = hp.householdPriceCt - hp.elecPriceCt; // ct/kWh
-  // Feste Mehrkosten des eigenen Zählers: Grundpreis abzüglich einer zusätzlichen § 14a-Pauschale
-  // (nur, wenn die Pauschale am Haushaltszähler schon für z. B. eine Wallbox genutzt wird, F13.6)
+  // Fixed extra cost of the own meter: standing charge (Grundpreis) minus an additional § 14a flat rate (Pauschale)
+  // (only if the flat rate (Pauschale) on the household meter (Haushaltszähler) is already used for e.g. a wallbox, F13.6)
   const extra14a = para14aFor({ ...hp, separateTariff: true }) - para14aFor({ ...hp, separateTariff: false });
   const fixedGap = hp.meterFee - extra14a;
   const breakEvenKWh = priceGap > 0 ? (Math.max(0, fixedGap) * 100) / priceGap : fixedGap <= 0 && priceGap === 0 ? 0 : null;

@@ -1,10 +1,10 @@
 import type { Plugin } from 'vite';
 
 /**
- * Content-Security-Policy für den statischen Build (N6).
- * Erlaubt nur eigene Skripte/Styles/Schriften; die kleinen Inline-Skripte im <head> (Design/Hell-Dunkel vor dem
- * ersten Zeichnen) werden per SHA-256-Hash freigegeben. Nur im Build – der Vite-Entwicklungsserver braucht Inline-Code.
- * frame-ancestors (Schutz vor Einbetten) lässt sich nicht per <meta> setzen, sondern nur als HTTP-Header beim Hosting.
+ * Content Security Policy for the static build (N6).
+ * Allows only own scripts/styles/fonts; the small inline scripts in <head> (design/light-dark before the
+ * first paint) are allowed via SHA-256 hash. Build only – the Vite dev server needs inline code.
+ * frame-ancestors (protection against embedding) cannot be set via <meta>, only as an HTTP header when hosting.
  */
 export const CSP_DIRECTIVES = [
   "default-src 'self'",
@@ -25,7 +25,7 @@ async function sha256(text: string): Promise<string> {
   return `'sha256-${btoa(bin)}'`;
 }
 
-/** Fügt die CSP als <meta> direkt nach <meta charset> ein. */
+/** Inserts the CSP as <meta> directly after <meta charset>. */
 export async function addCsp(html: string): Promise<string> {
   const inline = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
   const hashes = (await Promise.all(inline.map(sha256))).join(' ');

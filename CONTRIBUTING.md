@@ -12,6 +12,11 @@
 
 Direkte Commits auf `main` sind möglich; dann zählt jede einzelne Commit-Nachricht.
 
+## Sprache
+
+- **Englisch:** Kommentare im Quellcode (auch JSDoc, YAML, CSS, HTML) sowie Namen von Klassen, Typen, Funktionen/Methoden, Variablen und Dateien. Fachbegriffe in Kommentaren bekommen beim ersten Vorkommen den deutschen Begriff in Klammern, z. B. `special repayment (Sondertilgung)`, `early repayment charge (Vorfälligkeitsentschädigung)`, `SPF (JAZ)`.
+- **Deutsch:** alle für Nutzer sichtbaren Texte (Oberfläche, Meldungen, Benutzerhandbuch, Changelog) und die Beschreibung in Commit-Nachrichten bzw. PR-Titeln, weil sie unverändert im Changelog erscheint.
+
 ## Commit-Nachrichten (Conventional Commits)
 
 Format nach [Conventional Commits 1.0.0](https://www.conventionalcommits.org/de/v1.0.0/), Version nach [Semantic Versioning 2.0.0](https://semver.org/lang/de/):

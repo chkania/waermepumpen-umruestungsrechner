@@ -1,12 +1,12 @@
 /**
- * Automatische Versionierung (N9) – läuft im Workflow .github/workflows/release.yml nach jedem Push auf main.
+ * Automatic versioning (N9) – runs in the workflow .github/workflows/release.yml after every push to main.
  *
- *   node scripts/release.ts             nächste Version berechnen, package.json, package-lock.json und CHANGELOG.md schreiben
- *   node scripts/release.ts --dry-run   nur anzeigen, was passieren würde
- *   node scripts/release.ts --lint "<PR-Titel>"   prüft einen PR-Titel (Squash-Merge-Nachricht) auf das Format
+ *   node scripts/release.ts             compute the next version, write package.json, package-lock.json and CHANGELOG.md
+ *   node scripts/release.ts --dry-run   only show what would happen
+ *   node scripts/release.ts --lint "<PR title>"   checks a PR title (squash-merge message) against the format
  *
- * Bezugspunkt ist der letzte Commit, der das Feld "version" in package.json geändert hat
- * (also der letzte Release-Commit). Version und Changelog nie von Hand ändern.
+ * The reference point is the last commit that changed the "version" field in package.json
+ * (i.e. the last release commit). Never change version or changelog by hand.
  */
 import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -62,7 +62,7 @@ for (const c of raw) {
   if (p) parsed.push(p);
   else console.warn(`Hinweis: ${c.hash.slice(0, 7)} „${c.subject}“ entspricht nicht Conventional Commits und wird ignoriert.`);
 }
-parsed.reverse(); // chronologisch
+parsed.reverse(); // chronological order
 
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
 const bump = maxBump(parsed);

@@ -1,10 +1,10 @@
 name: Dependabot
 
-# Prüft Dependabot-PRs und führt Patch-/Minor-Updates automatisch zusammen.
-# - verify: installiert und testet ohne Schreibrechte (fremder Paketcode läuft nie mit Schreib-Token),
-#   aktualisiert THIRD-PARTY-NOTICES.md (N8) und reicht sie als Artefakt weiter.
-# - merge: committet die aktualisierten Hinweise in den PR und merged Patch/Minor per Squash;
-#   Major-Updates bleiben offen und bekommen einen Kommentar.
+# Checks Dependabot PRs and merges patch/minor updates automatically.
+# - verify: installs and tests without write permissions (third-party package code never runs with a write token),
+#   regenerates THIRD-PARTY-NOTICES.md (N8) and passes it on as an artifact.
+# - merge: commits the updated notices to the PR and squash-merges patch/minor;
+#   major updates stay open and receive a comment.
 
 on:
   pull_request:

@@ -16,18 +16,18 @@ import { SECTIONS, getPath, setPath, type Field } from './fields';
 import { escapeHtml, fmtDuration, fmtEur, fmtMonth, fmtNum, fmtPct } from './format';
 
 export const STORAGE_KEY = 'wp-investitionsrechner:v1';
-/** Gewähltes Design (Ansichtseinstellung, nicht Teil der Eingaben/Links). */
+/** Selected design (view setting, not part of the inputs/links). */
 export const DESIGN_KEY = 'wp-investitionsrechner:design';
 export type Design = 'modern' | 'classic';
 export const DEFAULT_DESIGN: Design = 'modern';
-/** Hell/Dunkel: 'auto' folgt der Browser-/Systemeinstellung, 'light'/'dark' übersteuern sie (F14.5). */
+/** Light/dark: 'auto' follows the browser/system setting, 'light'/'dark' override it (F14.5). */
 export const THEME_KEY = 'wp-investitionsrechner:theme';
 export type ThemeChoice = 'auto' | 'light' | 'dark';
 
 export interface AppEnv {
   storage?: Storage | null;
   today?: Date;
-  /** Für Tests abschaltbar. */
+  /** Can be disabled for tests. */
   debounceMs?: number;
 }
 
@@ -54,7 +54,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   const defaults = createDefaults(env.today ?? new Date());
   const initial = loadInitial(defaults, storage);
   let inputs = initial.inputs;
-  // Geteilter Link bei vorhandenen eigenen Eingaben: diese nicht still überschreiben (F9.6)
+  // Shared link while own inputs exist: do not silently overwrite them (F9.6)
   let sharedView = initial.source === 'hash' && initial.storedRaw !== null;
   let loadIssues: { origin: string; issues: InputIssue[] } | null = initial.issues.length
     ? { origin: initial.source === 'hash' ? 'dem Link' : 'den gespeicherten Eingaben', issues: initial.issues }
@@ -73,7 +73,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   ) as Record<ChartId, HTMLCanvasElement>;
   const charts = new Charts(canvases);
 
-  // ---------- Formular ----------
+  // ---------- Form ----------
   const fieldByPath = new Map<string, Field>();
   for (const s of SECTIONS) for (const f of s.fields) fieldByPath.set(f.path, f);
 
@@ -90,7 +90,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     renderScenarioName();
   }
 
-  /** Bezeichnung über den Ergebnissen und im Fenstertitel (F16.1). */
+  /** Name above the results and in the window title (F16.1). */
   function renderScenarioName(): void {
     const name = inputs.scenario.name.trim();
     const el = $<HTMLElement>('#scenario-name');
@@ -110,7 +110,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     }
   }
 
-  /** Fehler als Text und für Screenreader kennzeichnen (WCAG 3.3.1, 1.4.1). */
+  /** Mark errors as text and for screen readers (WCAG 3.3.1, 1.4.1). */
   function setFieldError(el: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement, msg: string | null): void {
     el.classList.toggle('invalid', msg !== null);
     if (msg === null) el.removeAttribute('aria-invalid');
@@ -132,7 +132,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       const n = Number(String(el.value).replace(',', '.'));
       value = f.type === 'percent' ? n / 100 : n;
       const [min, max] = numberRange(f.path);
-      // Grenzen aus der Eingabeprüfung (F9.5), damit auch Tippfehler den Browser nicht einfrieren
+      // Limits from input validation (F9.5), so that typos cannot freeze the browser either
       valid = el.value.trim() !== '' && Number.isFinite(n) && (value as number) >= min && (value as number) <= max;
     } else if (f.type === 'month') {
       value = el.value.trim();
@@ -149,7 +149,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     else schedule();
   }
 
-  // ---------- Hinweise beim Laden: geteilter Link, ungültige Werte (F9.5, F9.6) ----------
+  // ---------- Notices on load: shared link, invalid values (F9.5, F9.6) ----------
   const notice = $<HTMLElement>('#notice');
   function renderNotice(): void {
     const parts: string[] = [];
@@ -173,7 +173,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     notice.innerHTML = parts.join('');
     notice.hidden = parts.length === 0;
   }
-  /** Link-Ansicht verlassen: Hash entfernen, Speichern wieder erlauben. */
+  /** Leave the link view: remove the hash, allow saving again. */
   function leaveShared(): void {
     sharedView = false;
     if (location.hash.startsWith('#s=')) history.replaceState(null, '', location.pathname + location.search);
@@ -202,7 +202,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     renderNotice();
   });
 
-  // ---------- Herkunft der Standardwerte (Popover) ----------
+  // ---------- Origin of default values (popover) ----------
   const closePopovers = (except?: Element) => {
     for (const b of form.querySelectorAll<HTMLButtonElement>('.info-btn[aria-expanded="true"]')) {
       if (b === except) continue;
@@ -291,7 +291,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   });
 
   // ---------- Tabs ----------
-  // Reiter nach ARIA-Muster: ein Tab-Stopp, Pfeiltasten/Pos1/Ende wechseln (WCAG 2.1.1, 4.1.2)
+  // Tabs per ARIA pattern: one tab stop, arrow keys/Home/End switch (WCAG 2.1.1, 4.1.2)
   const tabButtons = [...root.querySelectorAll<HTMLButtonElement>('[data-tab]')];
   const selectTab = (b: HTMLButtonElement, focus = false) => {
     activeChart = b.dataset.tab as ChartId;
@@ -326,7 +326,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     charts.reset();
     if (last) charts.update(last.run, priceRows(inputs), last.cmp, last.events);
   };
-  // ---------- Hell/Dunkel ----------
+  // ---------- Light/dark ----------
   const media = typeof matchMedia === 'function' ? matchMedia('(prefers-color-scheme: dark)') : null;
   let theme: ThemeChoice = readTheme(storage);
   const applyTheme = (t: ThemeChoice) => {
@@ -346,7 +346,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     b.addEventListener('click', () => controller.setTheme(b.dataset.themeChoice as ThemeChoice)),
   );
 
-  // ---------- Design-Umschalter ----------
+  // ---------- Design switch ----------
   let design: Design = readDesign(storage);
   const applyDesign = (d: Design) => {
     design = d;
@@ -360,7 +360,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     b.addEventListener('click', () => controller.setDesign(b.dataset.designChoice as Design)),
   );
 
-  // ---------- Berechnung ----------
+  // ---------- Calculation ----------
   let timer: ReturnType<typeof setTimeout> | undefined;
   function schedule(): void {
     const ms = env.debounceMs ?? 120;
@@ -440,7 +440,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   }
 
   function renderWarnings(run: RunResult): void {
-    // Förder-/Steuerhinweise, Ersatzkessel und Restschulden erscheinen ausführlicher unter „Wichtige Ereignisse“
+    // Funding/tax notices, replacement boilers (Ersatzkessel) and remaining debts (Restschuld) are shown in more detail under "Wichtige Ereignisse"
     const covered = new Set([...(run.kfw.kfw?.notes ?? []), ...(run.tax.tax?.notes ?? [])]);
     const ws = [...new Set([...run.kfw.warnings, ...run.tax.warnings, ...run.ref.warnings])].filter(
       (w) => !covered.has(w) && !/Ersatzkessel|Restschuld/.test(w),
@@ -479,7 +479,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       ${items ? `<ol class="timeline">${items}</ol>` : ''}`;
   }
 
-  /** Einordnung des Hauses (F18). */
+  /** Rating of the house (F18). */
   function renderHouse(): void {
     const h = rateHouse(inputs);
     const s = energySplit(inputs);
@@ -641,7 +641,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       ${bestWhyHtml(cmp)}`;
   }
 
-  /** Begründung des günstigsten Zeitpunkts (F7.3). */
+  /** Explanation of the cheapest point in time (F7.3). */
   function bestWhyHtml(cmp: InstallComparison): string {
     const ex = explainBest(cmp, inputs);
     if (!ex) return '';
@@ -755,7 +755,7 @@ interface InitialLoad {
   inputs: Inputs;
   source: 'hash' | 'storage' | 'default';
   issues: InputIssue[];
-  /** Eigene gespeicherte Eingaben (roh), falls vorhanden. */
+  /** Own stored inputs (raw), if any. */
   storedRaw: string | null;
 }
 
@@ -826,7 +826,7 @@ function kpi(label: string, value: string, tone: string, sub: string, best = fal
   </div>`;
 }
 
-/** Standardwert lesbar formatieren (für das Herkunfts-Popover). */
+/** Formats a default value for display (for the origin popover). */
 export function formatDefault(f: Field, defaults: Inputs): string {
   const v = getPath(defaults, f.path);
   const unit = typeof f.unit === 'function' ? f.unit(defaults) : (f.unit ?? '');
@@ -867,7 +867,7 @@ function refsHtml(refs: { label: string; url: string }[] | undefined): string {
     .join('')}</ul></div>`;
 }
 
-/** Sondertilgung aus Einmalzahlung je Weg (F12.6): Termin, Betrag, Entschädigung, Zinsersparnis. */
+/** Special repayment (Sondertilgung) from the one-off payment (Einmalzahlung) per path (F12.6): date, amount, charge, interest saved. */
 function windfallHtml(run: RunResult): string {
   const rows = (
     [
@@ -893,7 +893,7 @@ function windfallHtml(run: RunResult): string {
       .join('')}`;
 }
 
-/** Fehlertext für ungültige Eingaben (F9.5, WCAG 3.3.1). */
+/** Error text for invalid inputs (F9.5, WCAG 3.3.1). */
 export function fieldErrorText(f: Field): string {
   const keep = ' Der bisherige Wert wird weiter verwendet.';
   if (f.type === 'month') return `Bitte einen Monat zwischen 2000 und 2150 angeben (Jahr und Monat).${keep}`;
@@ -934,7 +934,7 @@ function fieldHtml(f: Field, defaults: Inputs): string {
     ].join(' ');
     control = `<input type="number" inputmode="decimal" id="${id}" data-path="${f.path}" ${attrs}>`;
   }
-  // Hilfetext und Fehlermeldung mit dem Feld verknüpfen (Screenreader)
+  // Link help text and error message to the field (screen readers)
   const describedBy = [f.help ? `${id}-help` : '', `${id}-err`].filter(Boolean).join(' ');
   control = control.replace(`data-path="${f.path}"`, `data-path="${f.path}" aria-describedby="${describedBy}"`);
   return `<div class="field" data-field="${f.path}">

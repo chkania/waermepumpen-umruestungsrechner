@@ -12,7 +12,7 @@ describe('F1/F3 Referenzszenario', () => {
     const r = simulate(i, 'ref');
     expect(r.months).toHaveLength(240);
     expect(r.nominalCost).toBeCloseTo(20 * (20000 * 0.115 + 180 + 300), 6);
-    // F6.4: ohne Opportunitätszins = einfache Summe
+    // F6.4: without opportunity interest (Opportunitätszins) = simple sum
     expect(r.totalCost).toBeCloseTo(r.nominalCost, 6);
   });
 
@@ -33,7 +33,7 @@ describe('F1/F3 Referenzszenario', () => {
     expect(repl.investment).toBe(12000);
     expect(repl.system).toBe('new');
     expect(r.months[23].system).toBe('old');
-    // gleicher Wärmebedarf, besserer Nutzungsgrad → weniger Brennstoffkosten
+    // same heat demand (Wärmebedarf), better efficiency → lower fuel costs
     const y = (yr: number) => r.years.find((x) => x.year === yr)!.energy;
     expect(y(2030)).toBeCloseTo((18000 / 0.95) * 0.115, 6);
   });
@@ -88,7 +88,7 @@ describe('F4 Wärmepumpe (KfW-Weg)', () => {
     expect(r.kfw!.subsidy).toBe(12880);
     expect(r.nominalCost).toBeCloseTo(20 * annual + 32000 - 12880, 6);
     expect(r.loans).toHaveLength(0);
-    expect(r.months[3].subsidy).toBe(-12880); // F5.1 Auszahlung nach 3 Monaten
+    expect(r.months[3].subsidy).toBe(-12880); // F5.1 payout (Auszahlung) after 3 months
   });
 
   it('F2.6 PV-Anteil zur Einspeisevergütung bewertet', () => {
@@ -110,12 +110,12 @@ describe('F4 Wärmepumpe (KfW-Weg)', () => {
     expect(r.months[idx - 1].system).toBe('old');
     expect(r.months[idx].system).toBe('wp');
     expect(r.months[idx].investment).toBe(32000);
-    expect(r.months[idx - 1].fixed).toBeCloseTo(15, 6); // Gas-Grundpreis 180/12
+    expect(r.months[idx - 1].fixed).toBeCloseTo(15, 6); // Gas standing charge (Grundpreis) 180/12
   });
 
   it('F1.4 Förderkonditionen nach Antragsmonat (Vorlauf)', () => {
     const r = simulate(wp((i) => (i.heatPump.installMonth = '2027-05')), 'kfw');
-    expect(r.kfw!.kgbRate).toBe(0.16); // Antrag 2027-01
+    expect(r.kfw!.kgbRate).toBe(0.16); // Application 2027-01
     const r2 = simulate(
       wp((i) => {
         i.heatPump.installMonth = '2027-05';
@@ -123,7 +123,7 @@ describe('F4 Wärmepumpe (KfW-Weg)', () => {
       }),
       'kfw',
     );
-    expect(r2.kfw!.kgbRate).toBe(0.12); // Antrag 2027-03
+    expect(r2.kfw!.kgbRate).toBe(0.12); // Application 2027-03
   });
 
   it('F4.4 Altanlage fällt vor Installation aus → Ersatzkessel + Warnung', () => {
@@ -136,7 +136,7 @@ describe('F4 Wärmepumpe (KfW-Weg)', () => {
     );
     expect(r.months[12].investment).toBe(12000);
     expect(r.warnings.join()).toMatch(/Ersatzkessel/);
-    // neuer Gaskessel ist jung → kein Klimageschwindigkeitsbonus
+    // new gas boiler is young → no climate speed bonus (Klimageschwindigkeitsbonus)
     expect(r.kfw!.kgbRate).toBe(0);
   });
 
@@ -172,7 +172,7 @@ describe('F4 Wärmepumpe (KfW-Weg)', () => {
       'kfw',
     );
     expect(r.boilerPurchases).toHaveLength(1);
-    // nur die WP: 60 Monate Restlebensdauer
+    // heat pump only: 60 months of remaining life
     expect(r.months[239].residual).toBeCloseTo(-32000 * (60 / 240), 6);
   });
 
@@ -187,7 +187,7 @@ describe('F4 Wärmepumpe (KfW-Weg)', () => {
     expect(r.hpReplacements).toEqual([{ month: parseMonth('2046-11'), cost: 32000 }]);
     expect(r.months[240].investment).toBe(32000);
     expect(r.warnings.join()).toMatch(/Ersatz-Wärmepumpe/);
-    // Restwert nur der Ersatz-WP: 120 von 240 Monaten
+    // residual value (Restwert) of the replacement heat pump (Ersatz-Wärmepumpe) only: 120 of 240 months
     expect(r.months[359].residual).toBeCloseTo(-32000 * 0.5, 6);
     expect(simulate(wp(), 'kfw').hpReplacements).toHaveLength(0);
   });
@@ -202,7 +202,7 @@ describe('F4 Wärmepumpe (KfW-Weg)', () => {
     expect(k.kfw!.subsidy).toBeGreaterThan(0);
     expect(k.months[239].subsidy).toBeCloseTo(-k.kfw!.subsidy, 6);
     expect(k.warnings.join()).toMatch(/Forderung/);
-    // Steuerbonus: Fristende angehoben, damit er möglich ist
+    // Tax bonus (Steuerbonus): deadline raised so that it is possible
     const t = simulate(late((i) => (i.tax.deadline = '2050-12')), 'tax');
     expect(t.tax!.total).toBeGreaterThan(0);
     expect(sum(t.months.map((m) => m.taxBonus))).toBeCloseTo(-t.tax!.total, 6);
@@ -242,7 +242,7 @@ describe('F6 Finanzierung im Szenario', () => {
     expect(b.kfw!.subsidy).toBe(a.kfw!.subsidy);
     expect(sum(b.months.map((m) => m.subsidy))).toBeCloseTo(-b.kfw!.subsidy, 6);
     expect(b.warnings.join()).toMatch(/Ohne KfW-Kredit/);
-    // mit ausreichend Eigenkapital gar kein Kredit
+    // with enough equity no loan at all
     const c = simulate(fin((i) => {
       i.financing.useKfwLoan = false;
       i.financing.kfwEquity = 1e6;

@@ -47,7 +47,7 @@ describe('F9.5 Eingabeprüfung beim Laden', () => {
     }), issues);
     expect(i.tax.deadline).toBe(d.tax.deadline);
     expect(i.general.startMonth).toBe(d.general.startMonth);
-    expect(i.funding.grundRateNewFrom).toBe(''); // leer erlaubt
+    expect(i.funding.grundRateNewFrom).toBe(''); // empty allowed
     expect(i.oldHeating.fuel).toBe('gas');
     expect(i.oldHeating.consumption).toBe(d.oldHeating.consumption);
     expect(i.scenario.name).toHaveLength(200);

@@ -1,6 +1,6 @@
-# Dependabot: wöchentliche Updates für npm-Pakete und GitHub Actions.
-# Der Workflow .github/workflows/dependabot.yml prüft jeden Dependabot-PR (Tests, Build,
-# THIRD-PARTY-NOTICES.md) und führt Patch-/Minor-Updates automatisch zusammen.
+# Dependabot: weekly updates for npm packages and GitHub Actions.
+# The workflow .github/workflows/dependabot.yml checks every Dependabot PR (tests, build,
+# THIRD-PARTY-NOTICES.md) and merges patch/minor updates automatically.
 version: 2
 updates:
   - package-ecosystem: npm
@@ -10,19 +10,19 @@ updates:
       day: monday
       time: "06:00"
       timezone: Europe/Berlin
-    # Neue Versionen erst nach einigen Tagen übernehmen (Schutz vor kompromittierten Releases)
+    # Adopt new versions only after a few days (protection against compromised releases)
     cooldown:
       default-days: 7
     open-pull-requests-limit: 5
     labels:
       - dependencies
-    # Conventional Commits (N9): „chore(deps): …“ bzw. „chore(deps-dev): …“ → keine neue App-Version
+    # Conventional Commits (N9): "chore(deps): …" or "chore(deps-dev): …" → no new app version
     commit-message:
       prefix: "chore"
       prefix-development: "chore"
       include: scope
     groups:
-      # Patch-/Minor-Updates gebündelt; Major-Updates kommen einzeln zur manuellen Prüfung
+      # Patch/minor updates grouped; major updates arrive individually for manual review
       laufzeit:
         dependency-type: production
         update-types: [minor, patch]

@@ -6,7 +6,7 @@ import '../help.css';
 import license from '../../LICENSE.md?raw';
 import { mountDocPage } from '../doc-page';
 
-/** Unverbindliche deutsche Kurzfassung; maßgeblich ist der englische Lizenztext darunter. */
+/** Non-binding German summary; the English license text below is authoritative. */
 const intro = `
 <section class="doc-intro" aria-labelledby="kurzfassung">
   <h2 id="kurzfassung">Kurzfassung (unverbindlich)</h2>

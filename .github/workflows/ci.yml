@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   test:
-    # Dependabot-PRs prüft .github/workflows/dependabot.yml
+    # Dependabot PRs are checked by .github/workflows/dependabot.yml
     if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     steps:

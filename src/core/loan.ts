@@ -1,23 +1,23 @@
 /**
- * Regeln für außerplanmäßige Tilgungen (Sondertilgungen).
- * - KfW 358/359 (Merkblatt S. 5): innerhalb der ersten Zinsbindung ab 5.000 € jederzeit kostenfrei;
- *   danach nur vollständig und gegen Vorfälligkeitsentschädigung.
- * - Bank-/Verbraucherkredit (§ 500 Abs. 2, § 502 BGB): jederzeit ganz oder teilweise; Vorfälligkeitsentschädigung
- *   höchstens 1 % (Restlaufzeit ≤ 1 Jahr: 0,5 %) des vorzeitig zurückgezahlten Betrags und nicht mehr als die
- *   Sollzinsen bis zum Laufzeitende.
+ * Rules for unscheduled repayments (special repayments (Sondertilgung)).
+ * - KfW 358/359 (fact sheet (Merkblatt) p. 5): free of charge at any time from 5,000 € within the first fixed-rate period (Zinsbindung);
+ *   afterwards only in full and against an early repayment charge (Vorfälligkeitsentschädigung).
+ * - Bank/consumer loan (§ 500 (2), § 502 BGB): in full or in part at any time; early repayment charge
+ *   at most 1 % (remaining term ≤ 1 year: 0.5 %) of the amount repaid early and no more than the
+ *   contractual interest (Sollzinsen) until the end of the term.
  */
 export interface PrepaymentRules {
-  /** Mindestbetrag einer Teil-Sondertilgung (0 = keiner). */
+  /** Minimum amount of a partial special repayment (Sondertilgung) (0 = none). */
   minAmount: number;
-  /** Innerhalb der Zinsbindung kostenfrei (KfW). */
+  /** Free of charge within the fixed-rate period (Zinsbindung) (KfW). */
   freeWithinFix: boolean;
-  /** Nach Ende der Zinsbindung nur vollständige Rückzahlung erlaubt (KfW). */
+  /** After the fixed-rate period (Zinsbindung) only full repayment is allowed (KfW). */
   fullOnlyAfterFix: boolean;
-  /** Entschädigung (Anteil des Betrags), wenn nicht kostenfrei. */
+  /** Charge (share of the amount) if not free of charge. */
   feeRate: number;
-  /** Entschädigung bei Restlaufzeit ≤ 12 Monate (§ 502 BGB: 0,5 %). */
+  /** Charge for a remaining term ≤ 12 months (§ 502 BGB: 0.5 %). */
   feeRateShortRemaining: number;
-  /** Entschädigung auf die entgangenen Sollzinsen begrenzen (§ 502 Abs. 3 BGB). */
+  /** Cap the charge at the interest forgone (entgangene Sollzinsen) (§ 502 (3) BGB). */
   capFeeAtInterest: boolean;
 }
 
@@ -33,23 +33,23 @@ export const NO_RULES: PrepaymentRules = {
 export interface ExtraRepayment {
   month: number;
   amount: number;
-  /** Bezeichnung für Ergebnisse/Hinweise, z. B. „Zuschuss“. */
+  /** Label for results/notices, e.g. "Zuschuss". */
   label?: string;
 }
 
 export interface LoanSpec {
   principal: number;
-  /** Auszahlungsmonat (absolut); erste Rate im Folgemonat. */
+  /** Payout month (Auszahlungsmonat, absolute); first instalment (Rate) in the following month. */
   startMonth: number;
-  /** Sollzins p. a. (nominal, monatliche Verzinsung rate/12). */
+  /** Nominal interest rate (Sollzins) p. a. (monthly compounding rate/12). */
   rate: number;
   termMonths: number;
-  /** Tilgungsfreie Anlaufmonate (nur Zinsen). */
+  /** Repayment-free initial months (tilgungsfreie Anlaufzeit) (interest only). */
   graceMonths: number;
-  /** Ende der Zinsbindung in Monaten ab Auszahlung; danach followUpRate. 0 = gesamte Laufzeit. */
+  /** End of the fixed-rate period (Zinsbindung) in months after payout (Auszahlung); followUpRate afterwards. 0 = entire term. */
   fixMonths: number;
   followUpRate: number;
-  /** Sondertilgungen (Rate bleibt, Laufzeit verkürzt sich). */
+  /** Special repayments (Sondertilgung) (instalment (Rate) stays, term gets shorter). */
   extraRepayments?: ExtraRepayment[];
   rules?: PrepaymentRules;
 }
@@ -58,9 +58,9 @@ export interface LoanPayment {
   month: number;
   interest: number;
   principal: number;
-  /** Davon Sondertilgung. */
+  /** Of which special repayment (Sondertilgung). */
   extra: number;
-  /** Vorfälligkeitsentschädigung in diesem Monat. */
+  /** Early repayment charge (Vorfälligkeitsentschädigung) in this month. */
   fee: number;
   balance: number;
 }
@@ -71,13 +71,13 @@ export interface ExtraResult {
   month: number;
   label?: string;
   requested: number;
-  /** Tatsächlich getilgter Betrag. */
+  /** Amount actually repaid. */
   applied: number;
   fee: number;
   status: ExtraStatus;
-  /** Begründung bei Ablehnung/Kürzung. */
+  /** Reason for rejection/reduction. */
   reason?: string;
-  /** Kredit war damit vollständig getilgt. */
+  /** The loan was fully repaid by this. */
   paidOff: boolean;
 }
 
@@ -92,7 +92,7 @@ export function annuity(balance: number, monthlyRate: number, months: number): n
   return (balance * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -months));
 }
 
-/** Anzahl Monate, bis die Restschuld bei gleicher Rate getilgt ist (aufgerundet). */
+/** Number of months until the remaining debt (Restschuld) is repaid at the same instalment (Rate) (rounded up). */
 export function remainingMonths(balance: number, monthlyRate: number, payment: number): number {
   if (payment <= 0) return Infinity;
   if (monthlyRate === 0) return Math.ceil(balance / payment - 1e-9);
@@ -103,7 +103,7 @@ export function remainingMonths(balance: number, monthlyRate: number, payment: n
 
 const eur = (x: number) => `${Math.round(x).toLocaleString('de-DE')} €`;
 
-/** Erzeugt den Tilgungsplan eines Annuitätendarlehens inkl. geprüfter Sondertilgungen. */
+/** Generates the repayment schedule of an annuity loan (Annuitätendarlehen) incl. validated special repayments (Sondertilgung). */
 export function loanScheduleDetailed(spec: LoanSpec): LoanResult {
   const payments: LoanPayment[] = [];
   const extraResults: ExtraResult[] = [];
@@ -120,8 +120,8 @@ export function loanScheduleDetailed(spec: LoanSpec): LoanResult {
   let balance = spec.principal;
   let payment = 0;
   let prevRate = spec.rate;
-  let k = 0; // Index der nächsten Sondertilgung
-  // Sondertilgungen vor der ersten Rate sind nicht möglich
+  let k = 0; // Index of the next special repayment (Sondertilgung)
+  // Special repayments (Sondertilgung) before the first instalment (Rate) are not possible
   while (k < extras.length && extras[k].month <= spec.startMonth) {
     extraResults.push(reject(extras[k], 'Vor der Kreditauszahlung bzw. im Auszahlungsmonat nicht möglich.'));
     k++;
@@ -132,8 +132,8 @@ export function loanScheduleDetailed(spec: LoanSpec): LoanResult {
     const withinFix = i <= fix;
     const annualRate = withinFix ? spec.rate : spec.followUpRate;
     const q = annualRate / 12;
-    // Annuität neu bestimmen bei Tilgungsbeginn und bei Zinswechsel.
-    // Beim Zinswechsel wird auf die tatsächlich verbleibende Laufzeit gerechnet (nach Sondertilgungen kürzer).
+    // Recalculate the annuity when repayment starts and when the interest rate changes.
+    // On an interest rate change, use the actual remaining term (shorter after special repayments (Sondertilgung)).
     if (i === grace + 1) {
       payment = annuity(balance, q, spec.termMonths - i + 1);
     } else if (i === fix + 1 && i > grace + 1) {
@@ -209,7 +209,7 @@ function applyRules(
   };
 }
 
-/** Tilgungsplan ohne Detailinformationen zu Sondertilgungen. */
+/** Repayment schedule without details on special repayments (Sondertilgung). */
 export function loanSchedule(spec: LoanSpec): LoanPayment[] {
   return loanScheduleDetailed(spec).payments;
 }

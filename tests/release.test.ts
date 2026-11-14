@@ -23,7 +23,7 @@ describe('N9 Versionierung aus Conventional Commits', () => {
     expect(p('feat!: neues Exportformat')?.breaking).toBe(true);
     expect(p('fix: Rundung', 'Details\n\nBREAKING CHANGE: alte Links ungültig')).toMatchObject({ breaking: true, breakingNote: 'alte Links ungültig' });
     expect(p('Neue Funktion')).toBeNull();
-    expect(p('feature: x')).toBeNull(); // unbekannter Typ
+    expect(p('feature: x')).toBeNull(); // unknown type
     expect(p('feat:ohne Leerzeichen')).toBeNull();
   });
 
@@ -86,7 +86,7 @@ describe('N9 Release-Skript im Git-Repository', () => {
     sh('git', 'add', '-A');
     sh('git', 'commit', '-q', '-m', 'chore(release): 1.1.0');
 
-    // zwei Personen, zwei PRs – keiner ändert Version oder Changelog
+    // two people, two PRs – neither changes version or changelog
     commit('fix: Rundung im Export');
     commit('docs: Handbuch ergänzt');
     commit('feat(vergleich): PV-Anlage berücksichtigen');
@@ -100,7 +100,7 @@ describe('N9 Release-Skript im Git-Repository', () => {
     expect(log).toMatch(/^# Changelog\n\n## 1\.2\.0 – \d{4}-\d{2}-\d{2}\n\n### Neu\n- PV-Anlage berücksichtigen\n\n### Fehlerkorrekturen\n- Rundung im Export\n\n## 1\.1\.0/);
     expect(log).not.toContain('Handbuch');
 
-    // Release-Commit wird neuer Bezugspunkt; danach nur Doku → keine neue Version
+    // The release commit becomes the new reference point; afterwards only docs → no new version
     sh('git', 'commit', '-q', '-am', 'chore(release): 1.2.0');
     commit('docs: Tippfehler');
     expect(sh('node', script)).toContain('Keine neue Version');

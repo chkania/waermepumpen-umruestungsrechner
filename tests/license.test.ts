@@ -53,7 +53,7 @@ describe('N8 Lizenzseiten (HTML aus den .md-Dateien)', () => {
       expect(page, file).toMatch(/<script type="module" src="\/src\/[\w/-]+\.ts"><\/script>/);
       expect(vite, file).toContain(`'${file}'`);
     }
-    // Fußzeile des Rechners verlinkt die HTML-Seiten
+    // The calculator footer links the HTML pages
     const app = read('src/ui/app.ts');
     expect(app).toContain('href="./lizenz.html"');
     expect(app).toContain('href="./lizenzen-drittanbieter.html"');

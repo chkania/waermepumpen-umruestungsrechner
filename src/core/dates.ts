@@ -1,4 +1,4 @@
-/** Hilfsfunktionen für absolute Monatsindizes (Jahr*12 + Monat-1). */
+/** Helpers for absolute month indices (year*12 + month-1). */
 
 export function parseMonth(s: string): number {
   const m = /^(\d{4})-(\d{1,2})$/.exec(String(s).trim());
@@ -34,7 +34,7 @@ export function yearOf(abs: number): number {
   return Math.floor(abs / 12);
 }
 
-/** Kalendermonat 1–12. */
+/** Calendar month 1–12. */
 export function monthOf(abs: number): number {
   return abs - Math.floor(abs / 12) * 12 + 1;
 }
@@ -44,8 +44,8 @@ export function monthFromDate(d: Date): string {
 }
 
 /**
- * Anzahl der halbjährlichen Degressionsschritte, die bis einschließlich `abs` wirksam sind,
- * wenn der erste Schritt im Monat `start` greift.
+ * Number of half-yearly degression steps in effect up to and including `abs`,
+ * when the first step applies in month `start`.
  */
 export function halfYearSteps(abs: number, start: number): number {
   if (abs < start) return 0;

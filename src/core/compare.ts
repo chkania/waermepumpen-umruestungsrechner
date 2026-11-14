@@ -3,7 +3,7 @@ import { SPACE_PROFILE } from './defaults';
 import { simulate } from './simulation';
 import type { Inputs, ScenarioResult } from './types';
 
-/** Kostenarten für die Begründung des günstigsten Zeitpunkts (F7.3). */
+/** Cost categories for explaining the cheapest point in time (F7.3). */
 export type CostPart = 'energy' | 'maintenance' | 'investment' | 'financing' | 'subsidy' | 'taxBonus' | 'residual';
 
 export const COST_PART_LABELS: Record<CostPart, string> = {
@@ -26,17 +26,17 @@ export interface InstallComparisonRow {
   taxBonus: number;
   best: 'kfw' | 'tax';
   bestTotal: number;
-  /** Ersparnis gegenüber Referenz (positiv = günstiger als ohne WP). */
+  /** Saving compared with the reference (positive = cheaper than without heat pump). */
   savingVsRef: number;
-  /** Mehrkosten gegenüber dem frühesten Zeitpunkt (positiv = Warten kostet). */
+  /** Extra cost compared with the earliest point in time (positive = waiting costs money). */
   extraVsFirst: number;
-  /** Gesamtkosten des besten Wegs nach Kostenarten (inkl. Opportunitätszins); Summe = bestTotal. */
+  /** Total cost of the best path by cost category (incl. opportunity interest (Opportunitätszins)); sum = bestTotal. */
   parts: Record<CostPart, number>;
-  /** KfW: Fördersatz der selbstgenutzten Einheit, Klimageschwindigkeitsbonus, Höchstbetrag förderfähiger Kosten. */
+  /** KfW: subsidy rate (Fördersatz) of the owner-occupied (selbstgenutzt) unit, climate speed bonus (Klimageschwindigkeitsbonus), cap on eligible costs (Höchstbetrag förderfähiger Kosten). */
   kfwRate: number;
   kgbRate: number;
   capTotal: number;
-  /** Kosten für Ersatzkessel vor der Wärmepumpe (bester Weg, nominal). */
+  /** Cost of replacement boilers (Ersatzkessel) before the heat pump (best path, nominal). */
   boilerCost: number;
   warnings: string[];
 }
@@ -47,7 +47,7 @@ export interface InstallComparison {
   bestIndex: number;
 }
 
-/** Zerlegt die aufgezinsten Gesamtkosten nach Kostenarten (die Aufzinsung ist linear, die Teile ergeben die Summe). */
+/** Splits the compounded total cost by cost category (compounding is linear, so the parts add up to the sum). */
 export function costParts(s: ScenarioResult, opportunityRate: number): Record<CostPart, number> {
   const q = Math.pow(1 + opportunityRate, 1 / 12) - 1;
   const out = Object.fromEntries(PARTS.map((p) => [p, 0])) as Record<CostPart, number>;
@@ -64,7 +64,7 @@ export function costParts(s: ScenarioResult, opportunityRate: number): Record<Co
   return out;
 }
 
-/** Vergleicht Installationszeitpunkte ab Startmonat in festen Schritten (F7). */
+/** Compares installation dates from the start month in fixed steps (F7). */
 export function compareInstallTimes(inp: Inputs): InstallComparison {
   const start = parseMonth(inp.general.startMonth);
   const end = start + Math.round(inp.general.horizonYears * 12);
@@ -107,17 +107,17 @@ export function compareInstallTimes(inp: Inputs): InstallComparison {
   return { refTotal: ref.totalCost, rows, bestIndex };
 }
 
-/** Vergleich des günstigsten Zeitpunkts mit einem Nachbarn (F7.3). */
+/** Comparison of the cheapest point in time with a neighbour (F7.3). */
 export interface BestComparison {
   other: number;
   direction: 'earlier' | 'later';
-  /** Mehrkosten des anderen Zeitpunkts (positiv = der günstigste spart so viel). */
+  /** Extra cost of the other point in time (positive = the cheapest one saves this much). */
   diff: number;
-  /** Je Kostenart: Mehrkosten des anderen Zeitpunkts (positiv = Vorteil des günstigsten). */
+  /** Per cost category: extra cost of the other point in time (positive = advantage of the cheapest). */
   parts: Record<CostPart, number>;
-  /** Kostenart mit dem größten Vorteil (Hauptgrund). */
+  /** Cost category with the largest advantage (main reason). */
   mainReason: CostPart | null;
-  /** Erläuternde Fakten (Heizwinter, Fördersatz, Steuerbonus, Ersatzkessel). */
+  /** Explanatory facts (heating season, subsidy rate (Fördersatz), tax bonus (Steuerbonus), replacement boiler (Ersatzkessel)). */
   facts: string[];
 }
 
@@ -127,7 +127,7 @@ export interface BestExplanation {
   comparisons: BestComparison[];
 }
 
-/** Anteil des jährlichen Raumwärmebedarfs in den Monaten [a, b). */
+/** Share of the annual space-heating demand in the months [a, b). */
 export function heatShareBetween(a: number, b: number): number {
   let s = 0;
   for (let m = a; m < b; m++) s += SPACE_PROFILE[monthOf(m) - 1];
@@ -188,8 +188,8 @@ function compareWith(best: InstallComparisonRow, other: InstallComparisonRow, in
 }
 
 /**
- * Begründet, warum der günstigste Zeitpunkt günstiger ist als der vorherige und der nächste (F7.3).
- * null, wenn es nur einen Zeitpunkt gibt.
+ * Explains why the cheapest point in time is cheaper than the previous and the next one (F7.3).
+ * null if there is only one point in time.
  */
 export function explainBest(cmp: InstallComparison, inp: Inputs): BestExplanation | null {
   if (cmp.rows.length < 2) return null;

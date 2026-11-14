@@ -69,14 +69,14 @@ describe('F7.3 Begründung des günstigsten Zeitpunkts', () => {
     inp.compare.stepMonths = 12;
     inp.compare.count = 5;
     const c = compareInstallTimes(inp);
-    c.bestIndex = 0; // Vergleich mit 11/2027 erzwingen
+    c.bestIndex = 0; // Force comparison with 11/2027
     const ex = explainBest(c, inp)!;
     expect(ex.comparisons).toHaveLength(1);
     expect(ex.comparisons[0].direction).toBe('later');
     expect(ex.comparisons[0].facts.some((f) => f.startsWith('KfW-Zuschuss dort'))).toBe(true);
-    c.bestIndex = 2; // 11/2028 vs. 11/2029 (Steuerbonus bis 12/2029 möglich) und 11/2027
+    c.bestIndex = 2; // 11/2028 vs. 11/2029 (tax bonus (Steuerbonus) possible until 12/2029) and 11/2027
     const ex2 = explainBest(c, inp)!;
-    c.bestIndex = 3; // 11/2029 vs. 11/2030: dort Steuerbonus nicht mehr möglich
+    c.bestIndex = 3; // 11/2029 vs. 11/2030: tax bonus (Steuerbonus) no longer possible there
     const ex3 = explainBest(c, inp)!;
     expect(ex2.comparisons).toHaveLength(2);
     expect(ex3.comparisons[1].facts.some((f) => f.includes('Steuerbonus nicht mehr möglich'))).toBe(true);

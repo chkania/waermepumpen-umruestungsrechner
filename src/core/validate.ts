@@ -1,18 +1,18 @@
 import { tryParseMonth } from './dates';
 
 /**
- * Prüfung von Eingaben aus Link, Datei und Browser-Speicher (F9.5).
- * Schützt vor Werten, die die Rechnung lahmlegen (ungültige Monate) oder den Browser einfrieren
- * (z. B. 1.000.000 Jahre Laufzeit). Ungültige Werte werden durch den Standardwert bzw. die Grenze ersetzt.
+ * Validation of inputs from link, file and browser storage (F9.5).
+ * Protects against values that break the calculation (invalid months) or freeze the browser
+ * (e.g. a term of 1,000,000 years). Invalid values are replaced by the default or the limit.
  */
 
 export interface InputIssue {
   path: string;
-  /** Kurzbeschreibung, z. B. „auf 50 begrenzt“. */
+  /** Short description, e.g. "auf 50 begrenzt". */
   reason: string;
 }
 
-/** Grenzen für Zahlen [min, max]. Alle übrigen Zahlen: ±GENERIC_LIMIT. */
+/** Limits for numbers [min, max]. All other numbers: ±GENERIC_LIMIT. */
 export const NUMBER_LIMITS: Record<string, [number, number]> = {
   'general.horizonYears': [1, 50],
   'general.opportunityRate': [-0.5, 1],
@@ -61,7 +61,7 @@ export const NUMBER_LIMITS: Record<string, [number, number]> = {
 };
 export const GENERIC_LIMIT = 1e9;
 
-/** Monatsfelder; true = darf leer sein. */
+/** Month fields; true = may be empty. */
 export const MONTH_FIELDS: Record<string, boolean> = {
   'general.startMonth': false,
   'heatPump.installMonth': false,
@@ -82,7 +82,7 @@ export const SELECT_VALUES: Record<string, readonly string[]> = {
   'financing.windfallTarget': ['auto', 'kfw', 'bank'],
 };
 
-/** Höchstlänge für Freitext; übrige Texte: 2.000 Zeichen. */
+/** Maximum length for free text; other texts: 2,000 characters. */
 export const TEXT_LIMITS: Record<string, number> = {
   'scenario.name': 200,
   'scenario.notes': 20000,
@@ -95,7 +95,7 @@ export function numberRange(path: string): [number, number] {
   return NUMBER_LIMITS[path] ?? [-GENERIC_LIMIT, GENERIC_LIMIT];
 }
 
-/** Prüft einen Monatswert (JJJJ-MM, Jahr 2000–2150). */
+/** Validates a month value (YYYY-MM, year 2000–2150). */
 export function validMonth(path: string, v: string): boolean {
   if (v === '') return MONTH_FIELDS[path] === true;
   const m = tryParseMonth(v);
@@ -105,8 +105,8 @@ export function validMonth(path: string, v: string): boolean {
 }
 
 /**
- * Prüft einen einzelnen Wert (Typ ist bereits passend). Liefert den bereinigten Wert und ggf. einen Befund.
- * `fallback` ist der Standardwert für nicht reparierbare Werte.
+ * Validates a single value (type already matches). Returns the cleaned value and a finding if any.
+ * `fallback` is the default for values that cannot be repaired.
  */
 export function checkValue(path: string, value: unknown, fallback: unknown): { value: unknown; issue?: InputIssue } {
   if (typeof value === 'number') {

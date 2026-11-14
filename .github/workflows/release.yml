@@ -1,9 +1,9 @@
 name: Release
 
-# Leitet nach jedem Push auf main die Version aus den Commit-Nachrichten ab (N9, Conventional Commits → SemVer):
-# feat → MINOR, fix/perf → PATCH, „!“ bzw. „BREAKING CHANGE:“ → MAJOR, sonst keine neue Version.
-# Schreibt package.json, package-lock.json und CHANGELOG.md und committet „chore(release): x.y.z“ auf main.
-# Läuft nur mit Node-Bordmitteln und Git – kein npm ci, also kein fremder Paketcode mit Schreibrechten.
+# After every push to main, derives the version from the commit messages (N9, Conventional Commits → SemVer):
+# feat → MINOR, fix/perf → PATCH, "!" or "BREAKING CHANGE:" → MAJOR, otherwise no new version.
+# Writes package.json, package-lock.json and CHANGELOG.md and commits "chore(release): x.y.z" to main.
+# Uses only Node built-ins and Git – no npm ci, so no third-party package code runs with write permissions.
 
 on:
   push:
@@ -13,7 +13,7 @@ on:
 permissions:
   contents: read
 
-# Releases nacheinander, nie abbrechen (sonst könnte eine Version verloren gehen)
+# Run releases one after another, never cancel (a version could get lost otherwise)
 concurrency:
   group: release
   cancel-in-progress: false
@@ -35,7 +35,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # Bei gleichzeitigen Pushes auf main: neu aufsetzen und erneut berechnen
+          # On concurrent pushes to main: reset to the new head and recalculate
           for attempt in 1 2 3; do
             git fetch origin main
             git reset --hard origin/main

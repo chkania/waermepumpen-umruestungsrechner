@@ -43,7 +43,7 @@ describe('F12 Sondertilgungsregeln KfW (Merkblatt 358/359 S. 5)', () => {
     expect(partial.extras[0].reason).toMatch(/vollständige Rückzahlung/);
     const full = loanScheduleDetailed(spec({ extraRepayments: [{ month: 130, amount: 50000 }] }));
     const x = full.extras[0];
-    expect(x.status).toBe('partial'); // mehr Geld als Restschuld
+    expect(x.status).toBe('partial'); // more money than the remaining debt (Restschuld)
     expect(x.paidOff).toBe(true);
     expect(x.fee).toBeCloseTo(x.applied * 0.01, 6);
     expect(full.payments).toHaveLength(130);
@@ -74,20 +74,20 @@ describe('F12 Sondertilgungsregeln Bankkredit (§ 500 Abs. 2, § 502 BGB)', () =
   it('Restlaufzeit ≤ 1 Jahr: 0,5 %, höchstens entgangene Zinsen', () => {
     const r = loanScheduleDetailed(bank({ extraRepayments: [{ month: 110, amount: 2000 }] }));
     const x = r.extras[0];
-    // Restlaufzeit 10 Monate: 0,5 % = 10 €, Zinsdeckel 2000 × 3 % × 10/12 = 50 € → 10 €
+    // Remaining term 10 months: 0.5 % = 10 €, interest cap 2000 × 3 % × 10/12 = 50 € → 10 €
     expect(x.fee).toBeCloseTo(Math.min(x.applied * 0.005, (x.applied * 0.03 * 10) / 12), 6);
     const tiny = loanScheduleDetailed(bank({ rate: 0.001, followUpRate: 0.001, extraRepayments: [{ month: 118, amount: 2000 }] }));
     const t = tiny.extras[0];
-    expect(t.fee).toBeCloseTo((t.applied * 0.001 * 2) / 12, 6); // Zinsdeckel greift
+    expect(t.fee).toBeCloseTo((t.applied * 0.001 * 2) / 12, 6); // interest cap applies
   });
 });
 
-/** WP-Szenario mit KfW-Kredit (1,5 %) und Bankkredit (5 %), Inbetriebnahme sofort. */
+/** Heat pump scenario with KfW loan (1.5 %) and bank loan (5 %), commissioning (Inbetriebnahme) immediately. */
 function wfCase(mut?: (i: Inputs) => void): Inputs {
   return neutral((i) => {
     i.oldHeating.remainingLifeYears = 100;
     i.heatPump.installMonth = '2026-11';
-    i.heatPump.extraCost = 6000; // nicht förderfähig → Bankkredit
+    i.heatPump.extraCost = 6000; // not eligible → bank loan
     i.financing.kfwEquity = 0;
     i.financing.taxEquity = 0;
     i.financing.windfallAmount = 10000;
@@ -110,7 +110,7 @@ describe('F12 Einmalzahlung als Sondertilgung in der Simulation', () => {
   });
 
   it('Rest unter 5.000 € kann nicht auf den KfW-Kredit', () => {
-    const r = simulate(wfCase(), 'kfw'); // 10.000 €: Bank ≈ 5.130 €, Rest ≈ 4.870 €
+    const r = simulate(wfCase(), 'kfw'); // 10,000 €: bank ≈ 5,130 €, rest ≈ 4,870 €
     expect(r.windfall!.attempts[1]).toMatchObject({ loan: 'KfW-Kredit 358', status: 'rejected' });
     expect(r.windfall!.attempts[1].reason).toMatch(/Mindestbetrag/);
     expect(r.windfall!.unused).toBeCloseTo(10000 - r.windfall!.attempts[0].applied, 6);
@@ -131,7 +131,7 @@ describe('F12 Einmalzahlung als Sondertilgung in der Simulation', () => {
     const fees = sum(withWf.months.map((m) => m.fees));
     expect(fees).toBeCloseTo(withWf.windfall!.attempts[0].fee, 6);
     expect(fees).toBeGreaterThan(0);
-    // ohne Opportunitätszins: Gesamtkosten sinken um die gesparten Zinsen abzüglich Entschädigung
+    // without opportunity interest (Opportunitätszins): total costs fall by the interest saved minus the charge
     expect(withWf.nominalCost).toBeCloseTo(without.nominalCost - (interest(without) - interest(withWf)) + fees, 4);
   });
 
@@ -164,7 +164,7 @@ describe('F12 Einmalzahlung als Sondertilgung in der Simulation', () => {
   });
 
   it('Zuschuss unter 5.000 € nicht als Sondertilgung möglich', () => {
-    const r = simulate(wfCase((i) => (i.heatPump.investment = 10000)), 'kfw'); // Zuschuss 4.600 €
+    const r = simulate(wfCase((i) => (i.heatPump.investment = 10000)), 'kfw'); // Subsidy (Zuschuss) 4,600 €
     expect(r.kfw!.subsidy).toBe(4600);
     expect(r.warnings.join()).toMatch(/Zuschuss nicht als Sondertilgung möglich – Mindestbetrag/);
   });
@@ -204,7 +204,7 @@ describe('F12.6 Tilgungstermin der Sondertilgung', () => {
     const row = (s: typeof now, m: string) => s.months.find((r) => r.month === parseMonth(m))!;
     expect(row(later, '2031-05').principal).toBeGreaterThan(10000);
     expect(row(later, '2029-11').principal).toBeLessThan(1000);
-    // später tilgen spart weniger Zinsen
+    // repaying later saves less interest
     expect(later.windfall!.interestSaved).toBeGreaterThan(0);
     expect(later.windfall!.interestSaved).toBeLessThan(now.windfall!.interestSaved);
     const interest = (s: typeof now) => sum(s.loans.map((l) => l.totalInterest));
