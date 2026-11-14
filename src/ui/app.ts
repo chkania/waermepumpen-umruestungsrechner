@@ -14,6 +14,7 @@ import { NUMBER_LIMITS, numberRange, TEXT_LIMITS, validMonth, type InputIssue } 
 import { Charts, chartTables, type ChartId } from './charts';
 import { SECTIONS, getPath, setPath, type Field } from './fields';
 import { escapeHtml, fmtDuration, fmtEur, fmtMonth, fmtNum, fmtPct } from './format';
+import { RECOMMEND_SUBJECT, RECOMMEND_TEXT, recommendLinks } from './share';
 import { BUG_REPORT_URL, CONTRIBUTING_URL, FEATURE_REQUEST_URL, REPO_URL } from '../project';
 
 export const STORAGE_KEY = 'wp-investitionsrechner:v1';
@@ -743,6 +744,59 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   });
   introOpener.addEventListener('click', showIntro);
 
+  // ---------- Recommend (F21) ----------
+  const recommend = $<HTMLDialogElement>('#recommend');
+  const recStatus = $<HTMLElement>('#rec-status');
+  const recFallback = $<HTMLTextAreaElement>('#rec-fallback');
+  const setRecStatus = (text: string, isError = false) => {
+    recStatus.textContent = text;
+    recStatus.classList.toggle('is-error', isError);
+  };
+  const copyText = async (text: string, ok: string) => {
+    recFallback.hidden = true;
+    try {
+      await navigator.clipboard.writeText(text);
+      setRecStatus(ok);
+    } catch {
+      // clipboard blocked (permissions, insecure context): show the text selected for manual copying
+      recFallback.value = text;
+      recFallback.hidden = false;
+      recFallback.focus();
+      recFallback.select();
+      setRecStatus('Automatisches Kopieren ist hier nicht möglich – der Text ist markiert, bitte mit Strg+C bzw. ⌘+C kopieren.', true);
+    }
+  };
+  $<HTMLButtonElement>('#btn-recommend').addEventListener('click', () => {
+    const links = recommendLinks(location.href);
+    $<HTMLAnchorElement>('#rec-whatsapp').href = links.whatsapp;
+    $<HTMLAnchorElement>('#rec-threema').href = links.threema;
+    $<HTMLAnchorElement>('#rec-email').href = links.email;
+    setRecStatus('');
+    recFallback.hidden = true;
+    if (typeof recommend.showModal === 'function') recommend.showModal();
+    else recommend.setAttribute('open', '');
+  });
+  $<HTMLButtonElement>('#rec-other').addEventListener('click', async () => {
+    const links = recommendLinks(location.href);
+    if (typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ title: RECOMMEND_SUBJECT, text: RECOMMEND_TEXT, url: links.url });
+        setRecStatus('');
+      } catch (err) {
+        // AbortError: the user closed the share menu
+        if ((err as Error).name !== 'AbortError') await copyText(links.message, 'Text kopiert – jetzt in die gewünschte App einfügen, z. B. Signal.');
+      }
+      return;
+    }
+    await copyText(links.message, 'Text kopiert – jetzt in die gewünschte App einfügen, z. B. Signal.');
+  });
+  $<HTMLButtonElement>('#rec-copy').addEventListener('click', () =>
+    copyText(recommendLinks(location.href).url, 'Link zum Rechner kopiert.'),
+  );
+  recommend.addEventListener('click', (e) => {
+    if (e.target === recommend) recommend.close();
+  });
+
   const controller: AppController = {
     getInputs: () => inputs,
     setInputs(i) {
@@ -1015,7 +1069,8 @@ function layout(): string {
       </div>
       <button id="btn-intro" type="button" aria-haspopup="dialog" title="Kurze Einführung: Wozu dient der Rechner, wie bedient man ihn?">Einführung</button>
       <a id="btn-help" class="tool-link" href="./hilfe.html" target="_blank" rel="noopener" title="Benutzerhandbuch in neuem Tab öffnen">Hilfe</a>
-      <button id="btn-share" type="button">Link teilen</button>
+      <button id="btn-recommend" type="button" aria-haspopup="dialog" title="Den Rechner per WhatsApp, Threema, E-Mail, Link oder einer anderen App (z. B. Signal) weiterempfehlen">Weiterempfehlen</button>
+      <button id="btn-share" type="button" title="Link mit Ihren aktuellen Eingaben kopieren – zum Sichern oder Weitergeben Ihrer Berechnung">Link mit Werten teilen</button>
       <button id="btn-export" type="button">Export</button>
       <button id="btn-import" type="button">Import</button>
       <button id="btn-reset" type="button" class="ghost">Zurücksetzen</button>
@@ -1077,7 +1132,30 @@ function layout(): string {
     </section>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  ${introHtml()}`;
+  ${introHtml()}
+  ${recommendHtml()}`;
+}
+
+/** Dialog for recommending the calculator (F21); hrefs are set when it opens. */
+function recommendHtml(): string {
+  return `
+  <dialog id="recommend" class="intro recommend" aria-labelledby="recommend-title" aria-describedby="recommend-lead">
+    <form method="dialog" class="intro-body">
+      <h2 id="recommend-title">Rechner weiterempfehlen</h2>
+      <p id="recommend-lead">Kennen Sie jemanden, der über eine Wärmepumpe nachdenkt? Empfehlen Sie den Rechner weiter. Geteilt wird nur die Adresse des Rechners – nicht Ihre Eingaben.</p>
+      <ul class="share-list">
+        <li><a id="rec-whatsapp" class="share-btn">WhatsApp</a></li>
+        <li><a id="rec-threema" class="share-btn" target="_blank" rel="noopener">Threema</a></li>
+        <li><a id="rec-email" class="share-btn">E-Mail</a></li>
+        <li><button id="rec-copy" class="share-btn" type="button">Link kopieren</button></li>
+        <li><button id="rec-other" class="share-btn" type="button">Andere</button></li>
+      </ul>
+      <p id="rec-status" class="rec-status" role="status" aria-live="polite"></p>
+      <textarea id="rec-fallback" class="rec-fallback" rows="3" readonly aria-label="Text zum Kopieren" hidden></textarea>
+      <p class="muted small">„Andere“ öffnet das Teilen-Menü Ihres Geräts, z. B. für Signal oder Telegram. Wo es das nicht gibt, wird der Text kopiert – fügen Sie ihn in die gewünschte App ein. „E-Mail“ öffnet Ihr E-Mail-Programm mit vorbereitetem Betreff und Text. Ihre eigene Berechnung teilen Sie dagegen über „Link mit Werten teilen“.</p>
+      <div class="intro-actions"><span></span><button type="submit" value="close" class="primary">Schließen</button></div>
+    </form>
+  </dialog>`;
 }
 
 /** Introduction for first-time visitors (F20): purpose, short usage, pointer to the manual. */
@@ -1091,7 +1169,7 @@ function introHtml(): string {
       <ol class="intro-steps">
         <li><strong>Ihre Daten eintragen</strong> (links, auf dem Smartphone oben). Am wichtigsten sind Energieträger und Verbrauch Ihrer Heizung, die Kosten der Wärmepumpe und Ihr Haushaltseinkommen. Für alles andere sind realistische Standardwerte hinterlegt – das „i“ neben einem Feld zeigt, woher sie stammen.</li>
         <li><strong>Die Ergebnisse ansehen</strong> (rechts bzw. darunter). Sie aktualisieren sich sofort: Ersparnis und Amortisation, wichtige Termine und Hinweise, Diagramme und „Wann umrüsten?“.</li>
-        <li><strong>Varianten sichern und vergleichen:</strong> Ihre Eingaben bleiben in diesem Browser gespeichert; über Export oder „Link teilen“ heben Sie Varianten auf oder geben sie weiter.</li>
+        <li><strong>Varianten sichern und vergleichen:</strong> Ihre Eingaben bleiben in diesem Browser gespeichert; über Export oder „Link mit Werten teilen“ heben Sie Varianten auf oder geben sie weiter.</li>
       </ol>
       <p class="muted small">Gerechnet wird nur in Ihrem Browser. Die Ergebnisse sind eine Modellrechnung und ersetzen keine Energie-, Förder- oder Steuerberatung.</p>
       <div class="intro-actions">

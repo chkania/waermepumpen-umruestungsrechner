@@ -128,8 +128,8 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 - F14.5 Schalter „Hell | Dunkel | Auto“ im Kopfbereich (Default: Auto = Browser-/Systemeinstellung). Hell/Dunkel übersteuern die Browser-Einstellung – nötig z. B. für Brave, das bei dunklem Browser-Design „dunkel bevorzugt“ meldet, auch wenn das System hell ist. Umsetzung: `data-theme='light|dark'` am `<html>` (Auto wird per JS aufgelöst und folgt Änderungen), CSS beider Designs nur noch über `:root[data-theme='dark']`, keine `prefers-color-scheme`-Media-Queries mehr. Gespeichert unter `wp-investitionsrechner:theme`, nicht Teil der Eingaben; Inline-Skript setzt das Theme vor dem ersten Zeichnen. *(Test: ui)*
 
 ### F15 – Benutzerhandbuch
-- F15.1 Benutzerhandbuch in `docs/BENUTZERHANDBUCH.md`: Schnellstart, Aufbau der Oberfläche, Werkzeugleiste (Design, Hell/Dunkel, Hilfe, Link teilen inkl. Datenschutzhinweis, Export, Import, Zurücksetzen, automatisches Speichern), alle Eingabe-Abschnitte und Felder, Ergebnisbereiche, Tipps, Datenschutz. *(Test: help)*
-- F15.2 Im Browser aufrufbar als eigene Seite `hilfe.html` (Vite-Mehrseiten-Build): gerendert aus dem Markdown, Inhaltsverzeichnis mit Sprungmarken (`hilfe.html#link-teilen`), gleiches Design und Hell/Dunkel wie der Rechner (folgt Änderungen im anderen Tab), mobil ohne Überlauf. Im Rechner öffnet „Hilfe“ in der Werkzeugleiste die Seite in einem neuen Tab. *(Test: help, ui)*
+- F15.1 Benutzerhandbuch in `docs/BENUTZERHANDBUCH.md`: Schnellstart, Aufbau der Oberfläche, Werkzeugleiste (Design, Hell/Dunkel, Hilfe, Link mit Werten teilen inkl. Datenschutzhinweis, Export, Import, Zurücksetzen, automatisches Speichern), alle Eingabe-Abschnitte und Felder, Ergebnisbereiche, Tipps, Datenschutz. *(Test: help)*
+- F15.2 Im Browser aufrufbar als eigene Seite `hilfe.html` (Vite-Mehrseiten-Build): gerendert aus dem Markdown, Inhaltsverzeichnis mit Sprungmarken (`hilfe.html#link-mit-werten-teilen`), gleiches Design und Hell/Dunkel wie der Rechner (folgt Änderungen im anderen Tab), mobil ohne Überlauf. Im Rechner öffnet „Hilfe“ in der Werkzeugleiste die Seite in einem neuen Tab. *(Test: help, ui)*
 - F15.3 Das Handbuch muss jeden Eingabe-Abschnitt, jedes Feld (Beschriftung wie in `fields.ts`), jede Werkzeugleisten-Funktion und jeden Ergebnisbereich nennen – neue Felder/Funktionen erfordern eine Ergänzung (Test schlägt sonst fehl). *(Test: help)*
 
 ### F16 – Szenario-Beschreibung
@@ -154,9 +154,13 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 - F20.1 Beim ersten Besuch (keine gespeicherten Eingaben, Einführung noch nie geschlossen) öffnet sich ein modaler Dialog: Zweck des Rechners, Bedienung in drei Schritten (Eingaben links bzw. oben, Ergebnisse rechts bzw. darunter, Varianten sichern), Hinweis auf Berechnung im Browser und fehlende Beratung, Link zur Hilfe. *(Test: ui)*
 - F20.2 Schließen per „Los geht’s“, Esc oder Klick neben den Dialog merkt sich der Browser (`localStorage`); danach ist die Einführung über „Einführung“ in der Werkzeugleiste erreichbar. Barrierefrei als natives `<dialog>` mit Titel, Fokus auf der Hauptschaltfläche. *(Test: ui, help)*
 
+### F21 – Weiterempfehlen
+- F21.1 Schaltfläche „Weiterempfehlen“ in der Werkzeugleiste öffnet einen Dialog mit WhatsApp (`whatsapp://send?text=`, öffnet die App direkt – über `wa.me` ging der Text in WhatsApp Desktop für macOS verloren), „Andere“ (Teilen-Menü des Geräts per Web Share API, z. B. für Signal, das keinen Teilen-Link anbietet; sonst Text in die Zwischenablage), Threema (`threema.id/compose?text=`), E-Mail (`mailto:` mit Betreff und Text) und „Link kopieren“; bewusst ohne Facebook und X. *(Test: share, ui, help)*
+- F21.2 Geteilt wird nur die Adresse des Rechners (ohne `#s=…` und Query-Parameter), nie die Eingaben; Empfehlungstext in `src/ui/share.ts`. *(Test: share)*
+
 ### F9 – Persistenz
 - F9.1 Eingaben werden automatisch im localStorage gespeichert und beim Laden wiederhergestellt. *(Test: serialize)*
-- F9.2 „Link teilen": Eingaben (nur Abweichungen von den Defaults) als Base64url-JSON im URL-Hash `#s=…`; ein Link hat Vorrang vor localStorage. *(Test: serialize)*
+- F9.2 „Link mit Werten teilen" (bis 1.4: „Link teilen"): Eingaben (nur Abweichungen von den Defaults) als Base64url-JSON im URL-Hash `#s=…`; ein Link hat Vorrang vor localStorage. *(Test: serialize)*
 - F9.3 JSON-Export als Datei und Import; unbekannte/fehlende Felder werden mit Defaults gemischt, ungültige Dateien abgelehnt. *(Test: serialize)*
 - F9.5 Eingabeprüfung (`src/core/validate.ts`) für Link, Import und gespeicherte Eingaben: Zahlen auf Grenzen geklemmt (z. B. Betrachtung ≤ 50 J., Kreditlaufzeit ≤ 50 J., Zeitpunktvergleich ≤ 40, JAZ 0,5–10, sonst ±10⁹), ungültige Monate (Format, Jahr 2000–2150) und unbekannte Auswahlwerte → Standardwert, Texte gekürzt (Bezeichnung 200, Bemerkungen 20.000, sonst 2.000 Zeichen). Ersetzte Werte werden über den Ergebnissen gemeldet. Das Formular markiert Werte außerhalb der Grenzen als ungültig. Anlass: Ein präparierter Link/Import konnte den Browser einfrieren (beim Import dauerhaft) oder die Rechnung lahmlegen. *(Test: validate, ui)*
 - F9.6 Geteilter Link bei vorhandenen eigenen Eingaben: Hinweis „Geteiltes Szenario geöffnet“; Änderungen aktualisieren nur den Link, nicht den Browser-Speicher, bis „Als meine Eingaben übernehmen“. „Eigene Eingaben laden“ verwirft den Link. Import und Zurücksetzen beenden die Link-Ansicht. Ohne eigene gespeicherte Eingaben verhält sich der Link wie bisher. *(Test: ui)*
@@ -233,3 +237,5 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 | 2026-11-14 | F19 Link zum GitHub-Repository und Hinweis zur Mitarbeit (Rechner, Dokumentseiten, Handbuch, README, CONTRIBUTING). |
 | 2026-11-14 | N12 Deployment-Workflow per SSH/rsync auf einen Webspace mit Anleitung `docs/DEPLOYMENT.md`. |
 | 2026-11-14 | F20 Einführung beim ersten Besuch (Dialog mit Zweck, Bedienung, Link zur Hilfe; Knopf „Einführung“). |
+| 2026-11-14 | F21 Weiterempfehlen per WhatsApp, Threema, E-Mail, Link und Teilen-Menü des Geräts („Andere“, z. B. Signal) (ohne Facebook/X), nur mit der Adresse des Rechners. |
+| 2026-11-14 | Schaltfläche „Link teilen“ in „Link mit Werten teilen“ umbenannt, um sie vom Weiterempfehlen (nur Adresse des Rechners) zu unterscheiden. |

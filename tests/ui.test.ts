@@ -440,3 +440,38 @@ describe('F20 Einführung beim ersten Besuch', () => {
     expect(intro.open).toBe(false);
   });
 });
+
+describe('F21 Weiterempfehlen-Dialog', () => {
+  beforeEach(() => {
+    store.clear();
+    store.setItem(INTRO_KEY, '1');
+    history.replaceState(null, '', '/');
+  });
+
+  it('öffnet sich mit WhatsApp, Threema, E-Mail, Link und Andere – ohne eigene Eingaben in den Links', () => {
+    const { root } = mount();
+    history.replaceState(null, '', encodeHash(defaults(), { ...defaults(), scenario: { name: 'Geheim', notes: '' } }));
+    root.querySelector<HTMLButtonElement>('#btn-recommend')!.click();
+    const dlg = root.querySelector<HTMLDialogElement>('#recommend')!;
+    expect(dlg.open).toBe(true);
+    expect([...dlg.querySelectorAll('.share-btn')].map((b) => b.textContent)).toEqual(['WhatsApp', 'Threema', 'E-Mail', 'Link kopieren', 'Andere']);
+    const hrefs = [...dlg.querySelectorAll<HTMLAnchorElement>('a.share-btn')].map((a) => a.getAttribute('href')!);
+    expect(hrefs[0]).toMatch(/^whatsapp:\/\/send\?text=/);
+    expect(hrefs[1]).toMatch(/^https:\/\/threema\.id\/compose\?text=/);
+    expect(hrefs[2]).toMatch(/^mailto:\?subject=/);
+    for (const h of hrefs) expect(h).not.toContain('s%3D');
+    expect(dlg.textContent).not.toMatch(/Facebook|Twitter/);
+  });
+
+  it('Kopieren blockiert: Text erscheint markiert zum manuellen Kopieren', async () => {
+    const { root } = mount();
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: () => Promise.reject(new Error('denied')) } });
+    root.querySelector<HTMLButtonElement>('#btn-recommend')!.click();
+    root.querySelector<HTMLButtonElement>('#rec-copy')!.click();
+    await new Promise((r) => setTimeout(r, 0));
+    const fallback = root.querySelector<HTMLTextAreaElement>('#rec-fallback')!;
+    expect(fallback.hidden).toBe(false);
+    expect(fallback.value).toMatch(/^http:\/\/localhost:3000\/$/);
+    expect(root.querySelector('#rec-status')!.textContent).toContain('markiert');
+  });
+});

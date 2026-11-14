@@ -407,3 +407,7 @@
 :root[data-design='modern'] .scenario-name::before { content: 'Szenario · '; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 400; color: var(--c-text-2); }
 :root[data-design='modern'] .notice > div { border-radius: var(--radius); }
 :root[data-design='modern'] .notice-shared { border-left: 3px solid var(--accent) !important; }
+
+/* Recommend dialog (F21): links and buttons look the same */
+:root[data-design='modern'] .share-btn { color: var(--c-text); border-radius: var(--radius-sm); }
+:root[data-design='modern'] .share-btn:hover { border-color: var(--accent); color: var(--accent); }

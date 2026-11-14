@@ -44,7 +44,17 @@ Die Wahl wird im Browser gespeichert.
 
 Öffnet dieses Handbuch in einem neuen Tab. Es ist auch direkt unter der Adresse **hilfe.html** neben dem Rechner erreichbar.
 
-### Link teilen
+### Weiterempfehlen
+
+Öffnet ein Fenster, mit dem Sie den Rechner an andere empfehlen können. Geteilt wird nur die **Adresse des Rechners** mit einem kurzen Empfehlungstext – **nicht** Ihre Eingaben (dafür gibt es „Link mit Werten teilen“).
+
+- **WhatsApp** öffnet die installierte WhatsApp-App (Smartphone oder Desktop) mit vorbereiteter Nachricht; Sie wählen dort nur noch den Kontakt. Ohne installierte App passiert nichts – nutzen Sie dann „Link kopieren“.
+- **Threema** öffnet die Threema-App mit vorbereiteter Nachricht.
+- **E-Mail** öffnet Ihr Standard-E-Mail-Programm mit vorbelegtem Betreff („Tipp: Wärmepumpen-Investitionsrechner“) und Text, den Sie vor dem Senden anpassen können.
+- **Link kopieren** legt die Adresse des Rechners in die Zwischenablage.
+- **Andere** öffnet auf Smartphones und in manchen Browsern das Teilen-Menü des Geräts – dort wählen Sie z. B. Signal oder Telegram (Signal bietet keinen eigenen Link zum Teilen). Wo es das Teilen-Menü nicht gibt, wird der Text in die Zwischenablage kopiert und Sie fügen ihn in die gewünschte App ein.
+
+### Link mit Werten teilen
 
 Erzeugt einen Link, der alle **vom Standard abweichenden Eingaben** enthält, und kopiert ihn in die Zwischenablage (sonst steht er in der Adresszeile). Wer den Link öffnet, sieht den Rechner mit genau Ihren Eingaben.
 

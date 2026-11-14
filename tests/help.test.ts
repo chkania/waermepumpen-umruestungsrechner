@@ -17,7 +17,7 @@ describe('F15 Benutzerhandbuch – Vollständigkeit', () => {
   });
 
   it('alle Funktionen der Werkzeugleiste sind beschrieben', () => {
-    for (const t of ['Einführung', 'Link teilen', 'Export', 'Import', 'Zurücksetzen', 'Hilfe', 'Modern | Klassisch', 'Hell | Dunkel | Auto']) {
+    for (const t of ['Einführung', 'Weiterempfehlen', 'Link mit Werten teilen', 'Export', 'Import', 'Zurücksetzen', 'Hilfe', 'Modern | Klassisch', 'Hell | Dunkel | Auto']) {
       expect(handbook, t).toContain(`### ${t.startsWith('Modern') ? 'Design: ' + t : t}`);
     }
   });
@@ -37,8 +37,8 @@ describe('F15 Hilfeseite – Darstellung', () => {
     expect(title).toBe('Benutzerhandbuch');
     expect(toc.length).toBeGreaterThan(20);
     expect(new Set(toc.map((t) => t.id)).size).toBe(toc.length);
-    expect(toc.find((t) => t.text === 'Link teilen')).toMatchObject({ id: 'link-teilen', level: 3 });
-    expect(html).toContain('<h3 id="link-teilen">');
+    expect(toc.find((t) => t.text === 'Link mit Werten teilen')).toMatchObject({ id: 'link-mit-werten-teilen', level: 3 });
+    expect(html).toContain('<h3 id="link-mit-werten-teilen">');
     expect(html).toContain('<div class="table-wrap"><table>');
   });
 

@@ -44,6 +44,8 @@ Alle Berechnungen laufen lokal in Ihrem Browser. Damit Ihre Eingaben beim nächs
 
 **Links teilen:** Ein über „Link kopieren“ erzeugter Link enthält Ihre Eingaben im Teil der Adresse nach `#`. Dieser Teil wird von Browsern nicht an den Server gesendet und auch nicht an die Besucherstatistik übermittelt. Wem Sie den Link weitergeben, entscheiden allein Sie.
 
+**Weiterempfehlen:** Die Schaltflächen öffnen die WhatsApp- oder Threema-App, das Teilen-Menü Ihres Geräts oder Ihr E-Mail-Programm mit einem vorbereiteten Text, der nur die Adresse des Rechners enthält. Der Rechner selbst überträgt dabei nichts; was Sie anschließend senden und an wen, entscheiden Sie im jeweiligen Programm, für das dessen Datenschutzbestimmungen gelten.
+
 **Export und Import:** Exportierte JSON-Dateien werden direkt auf Ihrem Gerät gespeichert; beim Import liest der Browser die Datei lokal ein. Es findet keine Übertragung an mich statt.
 
 ### Server-Log-Dateien

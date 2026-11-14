@@ -559,3 +559,25 @@ td.ev-cell { white-space: normal; min-width: 220px; }
 }
 .intro .primary:hover { filter: brightness(1.08); }
 .intro-again { margin: 12px 0 0; }
+
+/* Recommend dialog (F21) */
+.share-list { list-style: none; margin: 14px 0 6px; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+.share-btn {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--c-text);
+  font: inherit;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+.share-btn:hover { border-color: var(--accent); }
+.rec-status { min-height: 1.4em; margin: 4px 0; font-size: 0.9rem; color: var(--good); }
+.rec-status.is-error { color: var(--c-text-2); }
+.rec-fallback { width: 100%; box-sizing: border-box; margin: 4px 0 8px; padding: 8px; border: 1px solid var(--accent); border-radius: var(--radius); background: var(--surface); color: var(--c-text); font: inherit; font-size: 0.85rem; resize: vertical; }
