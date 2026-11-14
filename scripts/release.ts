@@ -15,6 +15,7 @@ import {
   berlinDate,
   bumpFor,
   changelogSection,
+  expandSquash,
   insertSection,
   maxBump,
   nextVersion,
@@ -57,12 +58,12 @@ const raw: RawCommit[] = git('log', `${base}..HEAD`, '--no-merges', '--format=%H
   });
 
 const parsed: ParsedCommit[] = [];
-for (const c of raw) {
+// chronological order: git log is newest first; entries within a squash commit keep their listed order
+for (const c of [...raw].reverse().flatMap(expandSquash)) {
   const p = parseCommit(c);
   if (p) parsed.push(p);
   else console.warn(`Hinweis: ${c.hash.slice(0, 7)} „${c.subject}“ entspricht nicht Conventional Commits und wird ignoriert.`);
 }
-parsed.reverse(); // chronological order
 
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
 const bump = maxBump(parsed);

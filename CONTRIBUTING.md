@@ -11,6 +11,7 @@ Schön, dass du mithelfen möchtest! Der Wärmepumpen-Umrüstungsrechner soll Me
 2. Änderung umsetzen; `npm test` und `npm run build` müssen grün sein (siehe `CLAUDE.md` und `docs/ANFORDERUNGEN.md`).
 3. Pull Request auf `main` öffnen. Der **PR-Titel** muss dem Format unten entsprechen (Workflow „PR-Titel“ prüft das).
 4. Nach grüner CI per **Squash-Merge** zusammenführen – der PR-Titel wird zur Commit-Nachricht auf `main`.
+   Enthält der PR mehrere Änderungen, bekommt jede einen eigenen Eintrag im Changelog. Dafür jede Änderung in der PR-Beschreibung als Zeile im Commit-Format aufführen, z. B. `- feat: Neues Logo` und `- fix: Favicon im Dunkelmodus`. Der PR-Titel selbst erscheint dann nicht im Changelog. Ohne solche Zeilen wird der PR-Titel zum einzigen Eintrag.
 5. Der Workflow „Release“ leitet daraus automatisch die neue Version ab, schreibt `package.json`, `package-lock.json` und `CHANGELOG.md` und committet `chore(release): x.y.z` auf `main`.
 
 **Version und Changelog nie von Hand ändern.** Dadurch gibt es bei paralleler Arbeit keine Konflikte um Versionsnummern: Die Nummer entsteht erst auf `main`, nacheinander für jeden Merge.
