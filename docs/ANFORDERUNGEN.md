@@ -146,6 +146,10 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 ### F18 – Einordnung des Hauses
 - F18.1 Karte „Einordnung des Hauses“: Verbrauchskennwert Endenergie Heizung + Warmwasser (ohne Kochen) je m² beheizter Wohnfläche, Effizienzklasse A+…H nach GEG Anlage 10, Baualtersklasse mit typischem Verbrauch unsaniert (Schätzung), erwarteter Bereich nach Sanierung (Einzelmaßnahmen −10…25 %, umfassend −40…60 %), Vergleich besser/typisch/höher, Aufteilung des Verbrauchs, grobe Heizlast (Wärmebedarf ÷ 2.000 h), Eignung für die WP nach Raumwärme je m² (≤ 100 gut, ≤ 150 geeignet, darüber prüfen). Hinweise: keine Witterungsbereinigung, Bezug Wohnfläche statt Nutzfläche. *(Test: house, ui)*
 
+### F19 – Projektlinks und Mitmachen
+- F19.1 Link zum GitHub-Repository im Seitenfuß des Rechners und aller Dokumentseiten (`src/project.ts` als einzige Quelle der Adressen). *(Test: ui, legal)*
+- F19.2 Kasten „Mitmachen“ unter den Ergebnissen, der zur Mitarbeit ermutigt: Fehler/veraltete Werte melden (Issue-Formular „Fehler oder veralteter Wert“, `.github/ISSUE_TEMPLATE/bug_report.yml`), Ideen vorschlagen (Issue-Formular „Idee oder Frage“, `.github/ISSUE_TEMPLATE/feature_request.yml`), mitentwickeln (Link auf `CONTRIBUTING.md`); dazu Abschnitte in Handbuch, README und CONTRIBUTING. *(Test: ui, help)*
+
 ### F9 – Persistenz
 - F9.1 Eingaben werden automatisch im localStorage gespeichert und beim Laden wiederhergestellt. *(Test: serialize)*
 - F9.2 „Link teilen": Eingaben (nur Abweichungen von den Defaults) als Base64url-JSON im URL-Hash `#s=…`; ein Link hat Vorrang vor localStorage. *(Test: serialize)*
@@ -221,3 +225,4 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 | 2026-11-14 | N9 Version und Changelog automatisch aus Conventional Commits (Release-Workflow, PR-Titel-Prüfung, `CONTRIBUTING.md`); keine manuellen Versionssprünge mehr. |
 | 2026-11-14 | N10 Besucherstatistik mit Matomo (ohne Cookies, ohne URL-Hash und Szenario-Bezeichnung); CSP um `analytics.chkania.net` erweitert; Handbuch-Abschnitt Datenschutz angepasst. |
 | 2026-11-14 | N11 Impressum und Datenschutzerklärung; N10 um Widerspruch (Opt-out) ergänzt, noscript-Pixel entfernt. |
+| 2026-11-14 | F19 Link zum GitHub-Repository und Hinweis zur Mitarbeit (Rechner, Dokumentseiten, Handbuch, README, CONTRIBUTING). |

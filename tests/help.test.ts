@@ -3,7 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { renderHelp, slugify } from '../src/help';
 import { SECTIONS } from '../src/ui/fields';
 
-const handbook = readFileSync(new URL('../docs/BENUTZERHANDBUCH.md', import.meta.url), 'utf8');
+const read = (f: string) => readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
+const handbook = read('docs/BENUTZERHANDBUCH.md');
 
 describe('F15 Benutzerhandbuch – Vollständigkeit', () => {
   it('jeder Eingabe-Abschnitt und jedes Feld ist beschrieben', () => {
@@ -44,5 +45,28 @@ describe('F15 Hilfeseite – Darstellung', () => {
   it('doppelte Überschriften erhalten eindeutige IDs', () => {
     const { toc } = renderHelp('## A\n\n## A\n');
     expect(toc.map((t) => t.id)).toEqual(['a', 'a-2']);
+  });
+});
+
+describe('F19 Projektlinks und Mitmachen', () => {
+  it('Handbuch, README und CONTRIBUTING laden zur Mitarbeit ein und verlinken das Repository', async () => {
+    const { REPO_URL, BUG_REPORT_URL, CONTRIBUTING_URL, FEATURE_REQUEST_URL } = await import('../src/project');
+    expect(REPO_URL).toBe('https://github.com/chkania/waermepumpen-umruestungsrechner');
+    const handbook = read('docs/BENUTZERHANDBUCH.md');
+    expect(handbook).toMatch(/^## Mitmachen$/m);
+    for (const url of [REPO_URL, BUG_REPORT_URL, CONTRIBUTING_URL, FEATURE_REQUEST_URL]) expect(handbook).toContain(url);
+    // the linked issue forms exist
+    expect(read('.github/ISSUE_TEMPLATE/feature_request.yml')).toContain('labels: [enhancement]');
+    expect(read('.github/ISSUE_TEMPLATE/bug_report.yml')).toContain('labels: [bug]');
+    expect(read('README.md')).toMatch(/^## Mitmachen$/m);
+    expect(read('README.md')).toContain(BUG_REPORT_URL);
+    expect(read('CONTRIBUTING.md')).toContain(BUG_REPORT_URL);
+    expect(read('CONTRIBUTING.md')).toContain(FEATURE_REQUEST_URL);
+  });
+
+  it('Dokumentseiten verlinken das Repository im Seitenfuß', async () => {
+    const { renderDocPage } = await import('../src/doc-page');
+    const { REPO_URL } = await import('../src/project');
+    expect(renderDocPage({ markdown: '# T\n\nx', subtitle: 's' }).html).toContain(`<a href="${REPO_URL}">`);
   });
 });

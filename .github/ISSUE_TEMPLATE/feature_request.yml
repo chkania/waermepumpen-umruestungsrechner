@@ -1,0 +1,29 @@
+# Issue form for feature requests (F19), linked from the "Mitmachen" box in the calculator
+name: Idee oder Frage
+description: Schlag eine neue Funktion vor oder stell eine Frage, die der Rechner noch nicht beantwortet.
+title: "Idee: "
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Danke, dass du den Rechner besser machen möchtest! Beschreib kurz, was dir fehlt – Programmierkenntnisse sind nicht nötig.
+        Bitte keine persönlichen Daten (Name, Adresse, Einkommen) eintragen.
+  - type: textarea
+    id: idea
+    attributes:
+      label: Was möchtest du wissen oder berechnen?
+      description: Welche Frage beantwortet der Rechner noch nicht, oder was sollte er anders machen?
+      placeholder: z. B. „Ich möchte sehen, wie sich eine PV-Anlage mit Speicher auf die Stromkosten der Wärmepumpe auswirkt.“
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Warum ist das hilfreich?
+      description: In welcher Situation würde dir das bei der Entscheidung helfen?
+  - type: textarea
+    id: sources
+    attributes:
+      label: Quellen oder Beispiele (optional)
+      description: Links zu Förderrichtlinien, Studien, Preisen oder anderen Rechnern, die zeigen, wie es gemeint ist.
