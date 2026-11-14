@@ -36,6 +36,7 @@ PolyForm Noncommercial 1.0.0 (`LICENSE.md`). Neue/aktualisierte Laufzeit-Abhäng
 - `.github/workflows/ci.yml` – Tests, Build und `npm audit` (Laufzeit, ab „high“) für Push auf `main` und PRs.
 - `.github/dependabot.yml` – wöchentliche Updates (npm mit 7 Tagen Cooldown, GitHub Actions); Patch/Minor gruppiert.
 - `.github/workflows/release.yml` – leitet nach Push auf `main` die Version ab und committet `chore(release): x.y.z` (nur Node/Git, kein `npm ci`). `.github/workflows/pr-title.yml` – prüft PR-Titel auf Conventional Commits.
+- `.github/workflows/deploy.yml` – nach erfolgreichem Release auf `main` (oder manuell) bauen und per SSH/rsync auf den Webspace laden (N12); Build-Job ohne Secrets, Deploy-Job ohne npm. Einrichtung: `docs/DEPLOYMENT.md`.
 - `.github/workflows/dependabot.yml` – prüft Dependabot-PRs ohne Schreibrechte, committet aktualisierte `THIRD-PARTY-NOTICES.md` und merged Patch/Minor automatisch (Squash); Major bleibt zur manuellen Prüfung offen. Abhängigkeits-Updates erhöhen die App-Version nicht.
 
 ## Befehle

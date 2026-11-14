@@ -1,0 +1,124 @@
+name: Deploy
+
+# Deploys the static build (dist/) to the webspace via SSH/rsync (N12).
+# - Runs after the "Release" workflow on main, so the deployed build already carries the new version
+#   (the release commit is pushed with GITHUB_TOKEN and therefore triggers no push workflows itself).
+# - build: installs, tests and builds WITHOUT access to the SSH key (third-party package code never sees it).
+# - deploy: only downloads the finished build and uploads it – no npm, no repository code.
+#
+# Setup (Settings → Environments → "production"):
+#   secrets:   SSH_PRIVATE_KEY  – private key of a deploy key without passphrase (only for this webspace)
+#              SSH_KNOWN_HOSTS  – host key line(s) of the server, e.g. from `ssh-keyscan -p <port> <host>`
+#   variables: DEPLOY_HOST, DEPLOY_USER, DEPLOY_PATH (dedicated target directory, its content is replaced),
+#              DEPLOY_PORT (optional, default 22), DEPLOY_URL (optional, shown in the run)
+
+on:
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deployment at a time; never cancel a running upload (half-uploaded site)
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # latest main incl. the release commit (version and changelog)
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+          cache: npm
+      - run: npm ci
+      - name: Tests
+        run: npm test
+      - name: Typecheck und Build
+        run: npm run build
+      - name: Version für die Zusammenfassung
+        id: meta
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ vars.DEPLOY_URL }}
+    env:
+      SSH_HOST: ${{ vars.DEPLOY_HOST }}
+      SSH_USER: ${{ vars.DEPLOY_USER }}
+      SSH_PORT: ${{ vars.DEPLOY_PORT || '22' }}
+      TARGET: ${{ vars.DEPLOY_PATH }}
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist
+
+      - name: Konfiguration prüfen
+        env:
+          HAS_KEY: ${{ secrets.SSH_PRIVATE_KEY != '' }}
+          HAS_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS != '' }}
+        run: |
+          fail() { echo "::error::$1"; exit 1; }
+          [ -n "$SSH_HOST" ] && [ -n "$SSH_USER" ] || fail "DEPLOY_HOST und DEPLOY_USER müssen als Variablen der Umgebung 'production' gesetzt sein."
+          [ "$HAS_KEY" = "true" ] || fail "Secret SSH_PRIVATE_KEY fehlt."
+          [ "$HAS_KNOWN_HOSTS" = "true" ] || fail "Secret SSH_KNOWN_HOSTS fehlt (Host-Key des Servers, kein ssh-keyscan im Workflow)."
+          # rsync --delete replaces the whole target directory: refuse obviously wrong targets
+          case "$TARGET" in
+            ""|"/"|"~"|"~/"|"."|"./"|*..*) fail "DEPLOY_PATH '$TARGET' ist leer oder zu allgemein – bitte ein eigenes Zielverzeichnis angeben." ;;
+          esac
+          [ -f dist/index.html ] || fail "Build enthält keine index.html."
+
+      - name: SSH einrichten
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Hochladen (rsync über SSH)
+        run: |
+          ssh_cmd="ssh -i ~/.ssh/deploy_key -p ${SSH_PORT} -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts"
+          # --delay-updates/--delete-after: new files are switched in at the end, old ones removed last
+          rsync -rlz --checksum --delete-after --delay-updates \
+            --chmod=D755,F644 \
+            --exclude='.well-known/' --exclude='.htaccess' \
+            -e "$ssh_cmd" \
+            dist/ "${SSH_USER}@${SSH_HOST}:${TARGET%/}/"
+
+      - name: Zusammenfassung
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+          URL: ${{ vars.DEPLOY_URL }}
+        run: |
+          echo "### Version ${VERSION} veröffentlicht" >> "$GITHUB_STEP_SUMMARY"
+          [ -n "$URL" ] && echo "${URL}" >> "$GITHUB_STEP_SUMMARY" || true
+
+      - name: SSH-Schlüssel entfernen
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
