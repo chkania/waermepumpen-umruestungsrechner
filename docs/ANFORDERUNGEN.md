@@ -82,6 +82,7 @@ inklusive steigender Energiepreise, Bundesförderung (KfW 458), Kreditfinanzieru
 ### F7 – Vergleich der Installationszeitpunkte
 - F7.1 Automatische Berechnung für Installationszeitpunkte ab dem gewählten Startmonat in Schritten von `x` Monaten (Default 6) für `n` Zeitpunkte (Default 9 → 0–4 Jahre). *(Test: compare)*
 - F7.2 Je Zeitpunkt: Gesamtkosten KfW-Weg, Steuer-Weg, bester Weg, Differenz zur Referenz und zum sofortigen Umstieg; Darstellung als Diagramm + Tabelle. *(Test: compare)*
+- F7.3 Begründung des günstigsten Zeitpunkts: Vergleich mit dem vorherigen und dem nächsten Zeitpunkt, Differenz zerlegt nach Kostenarten (Energie/Grundkosten, Wartung, Investition, Finanzierung, Zuschuss, Steuerbonus, Restwert; aufgezinst, Summe = Differenz), Hauptgrund sowie Fakten: Anteil des Jahresheizbedarfs zwischen den Zeitpunkten, geänderter Zuschuss (Fördersatz, Klimageschwindigkeitsbonus, Höchstbetrag), Wechsel des besten Wegs, Wegfall des Steuerbonus, Ersatzkessel. *(Test: compare, ui)*
 
 ### F8 – Ergebnisse
 - F8.1 Kennzahlen: Gesamtkosten Referenz / WP-KfW / WP-Steuer über den Betrachtungszeitraum, Ersparnis, bester Förderweg, Förderbetrag/Steuerbonus, Amortisationszeitpunkt (erster Monat, ab dem die kumulierten WP-Kosten dauerhaft ≤ Referenz sind). *(Test: simulation)*
@@ -213,3 +214,4 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 | 2026-11-12 | F17/F18 Baujahr, Wohnfläche, Sanierung, Warmwasser- und Kochanteil; Rechnung trennt Raumwärme, Warmwasser und Kochen; Karte „Einordnung des Hauses“. Regressions-Snapshots bewusst aktualisiert: Profil aus Raumwärme- und Warmwasseranteil (gerundet) sowie Gebäudealter aus dem Baujahr – nur Rundungsabweichungen. |
 | 2026-11-12 | F17.3/F17.4 Investition neues Kochfeld beim Umstieg auf Strom; Hinweis zur Ersparnis, wenn weiter mit Gas gekocht wird. Default ohne Gasherd – Ergebnisse unverändert. |
 | 2026-11-12 | N9 Semantic Versioning, Version 1.0.0, CHANGELOG.md und Seite `changelog.html`; Version im Rechner und im Export. |
+| 2026-11-12 | F7.3 Begründung des günstigsten Umrüstzeitpunkts unter der Tabelle „Wann umrüsten?“. Ergebnisse unverändert. |

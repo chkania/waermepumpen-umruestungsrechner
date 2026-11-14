@@ -264,6 +264,11 @@ Vergleicht die Stromkosten der Wärmepumpe mit eigenem Zähler und WP-Tarif gege
 
 Vergleicht mehrere Umrüstzeitpunkte (Abstand und Anzahl unter „Betrachtung“). Die Spalte **Kosten des Wartens** zeigt, was ein späterer Umstieg gegenüber dem frühesten Zeitpunkt mehr kostet – z. B. wegen sinkender Boni, steigender Energie- und CO₂-Preise oder des Ablaufs des Steuerbonus. Der günstigste Zeitpunkt ist markiert.
 
+Unter der Tabelle erklärt **„Warum ist … am günstigsten?“**, wodurch der markierte Zeitpunkt gewinnt. Er wird mit dem vorherigen und dem nächsten Zeitpunkt verglichen:
+
+- Ein Satz je Vergleich nennt den Kostenvorteil und dessen größten Posten. Darunter stehen die Ursachen: wie viel eines Jahresheizbedarfs zwischen den beiden Zeitpunkten anfällt (so lange heizt beim späteren Zeitpunkt noch die alte Heizung), ein anderer KfW-Zuschuss (Fördersatz, Klimageschwindigkeitsbonus, Höchstbetrag), ein Wechsel zwischen KfW und Steuerbonus, der Wegfall des Steuerbonus oder ein nötiger Ersatzkessel.
+- Die Tabelle zerlegt den Unterschied nach Kostenarten. Positive Beträge (grün) zeigen, wo der günstigste Zeitpunkt spart, negative (rot), wo er mehr kostet. Die Beträge enthalten den Opportunitätszins bis zum Ende des Betrachtungszeitraums und ergeben zusammen die Zeile „Gesamt“.
+
 ### Jahresübersicht
 
 Tabelle je Jahr mit allen Kostenarten (Energie, Grundkosten, Wartung, Investition, Kredit, Zinsen, Tilgung, Vorfälligkeitsentschädigung, Zuschuss, Steuerbonus, Restwert), Summe und kumulierter Summe. Über die Auswahl oben rechts wechseln Sie das Szenario. Die Spalte **Ereignisse** nennt wichtige Ereignisse des Jahres.

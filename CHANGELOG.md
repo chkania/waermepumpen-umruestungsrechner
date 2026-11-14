@@ -10,7 +10,8 @@ Alle wesentlichen Änderungen am Wärmepumpen-Investitionsrechner. Das Format or
 
 ## Unveröffentlicht
 
-Noch keine Änderungen seit 1.0.0.
+### Neu
+- „Wann umrüsten?“ erklärt, warum der günstigste Zeitpunkt am günstigsten ist: Vergleich mit dem vorherigen und nächsten Zeitpunkt nach Kostenarten, Hauptgrund und Ursachen (Heizwinter, Zuschuss, Steuerbonus, Ersatzkessel).
 
 ## 1.0.0 – 2026-11-12
 

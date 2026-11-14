@@ -1,6 +1,21 @@
-import { parseMonth } from './dates';
+import { formatMonthDe, monthOf, parseMonth } from './dates';
+import { SPACE_PROFILE } from './defaults';
 import { simulate } from './simulation';
-import type { Inputs } from './types';
+import type { Inputs, ScenarioResult } from './types';
+
+/** Kostenarten für die Begründung des günstigsten Zeitpunkts (F7.3). */
+export type CostPart = 'energy' | 'maintenance' | 'investment' | 'financing' | 'subsidy' | 'taxBonus' | 'residual';
+
+export const COST_PART_LABELS: Record<CostPart, string> = {
+  energy: 'Energie- und Grundkosten',
+  maintenance: 'Wartung',
+  investment: 'Investition (Wärmepumpe, ggf. Ersatzkessel)',
+  financing: 'Finanzierung (Kredit, Zinsen, Tilgung)',
+  subsidy: 'KfW-Zuschuss',
+  taxBonus: 'Steuerbonus',
+  residual: 'Restwert am Ende',
+};
+const PARTS = Object.keys(COST_PART_LABELS) as CostPart[];
 
 export interface InstallComparisonRow {
   installMonth: number;
@@ -15,6 +30,14 @@ export interface InstallComparisonRow {
   savingVsRef: number;
   /** Mehrkosten gegenüber dem frühesten Zeitpunkt (positiv = Warten kostet). */
   extraVsFirst: number;
+  /** Gesamtkosten des besten Wegs nach Kostenarten (inkl. Opportunitätszins); Summe = bestTotal. */
+  parts: Record<CostPart, number>;
+  /** KfW: Fördersatz der selbstgenutzten Einheit, Klimageschwindigkeitsbonus, Höchstbetrag förderfähiger Kosten. */
+  kfwRate: number;
+  kgbRate: number;
+  capTotal: number;
+  /** Kosten für Ersatzkessel vor der Wärmepumpe (bester Weg, nominal). */
+  boilerCost: number;
   warnings: string[];
 }
 
@@ -22,6 +45,23 @@ export interface InstallComparison {
   refTotal: number;
   rows: InstallComparisonRow[];
   bestIndex: number;
+}
+
+/** Zerlegt die aufgezinsten Gesamtkosten nach Kostenarten (die Aufzinsung ist linear, die Teile ergeben die Summe). */
+export function costParts(s: ScenarioResult, opportunityRate: number): Record<CostPart, number> {
+  const q = Math.pow(1 + opportunityRate, 1 / 12) - 1;
+  const out = Object.fromEntries(PARTS.map((p) => [p, 0])) as Record<CostPart, number>;
+  for (const r of s.months) {
+    for (const p of PARTS) out[p] *= 1 + q;
+    out.energy += r.energy + r.fixed;
+    out.maintenance += r.maintenance;
+    out.investment += r.investment;
+    out.financing += r.loanPayout + r.interest + r.principal + r.fees;
+    out.subsidy += r.subsidy;
+    out.taxBonus += r.taxBonus;
+    out.residual += r.residual;
+  }
+  return out;
 }
 
 /** Vergleicht Installationszeitpunkte ab Startmonat in festen Schritten (F7). */
@@ -38,7 +78,7 @@ export function compareInstallTimes(inp: Inputs): InstallComparison {
     const kfw = simulate(inp, 'kfw', month);
     const tax = simulate(inp, 'tax', month);
     const best = tax.feasible && tax.totalCost < kfw.totalCost ? 'tax' : 'kfw';
-    const bestTotal = best === 'tax' ? tax.totalCost : kfw.totalCost;
+    const bestRun = best === 'tax' ? tax : kfw;
     rows.push({
       installMonth: month,
       kfwTotal: kfw.totalCost,
@@ -47,9 +87,14 @@ export function compareInstallTimes(inp: Inputs): InstallComparison {
       taxFeasible: tax.feasible,
       taxBonus: tax.tax?.total ?? 0,
       best,
-      bestTotal,
-      savingVsRef: ref.totalCost - bestTotal,
+      bestTotal: bestRun.totalCost,
+      savingVsRef: ref.totalCost - bestRun.totalCost,
       extraVsFirst: 0,
+      parts: costParts(bestRun, inp.general.opportunityRate),
+      kfwRate: kfw.kfw?.ownerUnitRate ?? 0,
+      kgbRate: kfw.kfw?.kgbRate ?? 0,
+      capTotal: kfw.kfw?.capTotal ?? 0,
+      boilerCost: bestRun.boilerPurchases.reduce((s, b) => s + b.cost, 0),
       warnings: [...new Set([...kfw.warnings, ...(best === 'tax' ? tax.warnings : [])])],
     });
   }
@@ -60,4 +105,98 @@ export function compareInstallTimes(inp: Inputs): InstallComparison {
     if (r.bestTotal < rows[bestIndex].bestTotal) bestIndex = i;
   });
   return { refTotal: ref.totalCost, rows, bestIndex };
+}
+
+/** Vergleich des günstigsten Zeitpunkts mit einem Nachbarn (F7.3). */
+export interface BestComparison {
+  other: number;
+  direction: 'earlier' | 'later';
+  /** Mehrkosten des anderen Zeitpunkts (positiv = der günstigste spart so viel). */
+  diff: number;
+  /** Je Kostenart: Mehrkosten des anderen Zeitpunkts (positiv = Vorteil des günstigsten). */
+  parts: Record<CostPart, number>;
+  /** Kostenart mit dem größten Vorteil (Hauptgrund). */
+  mainReason: CostPart | null;
+  /** Erläuternde Fakten (Heizwinter, Fördersatz, Steuerbonus, Ersatzkessel). */
+  facts: string[];
+}
+
+export interface BestExplanation {
+  month: number;
+  best: 'kfw' | 'tax';
+  comparisons: BestComparison[];
+}
+
+/** Anteil des jährlichen Raumwärmebedarfs in den Monaten [a, b). */
+export function heatShareBetween(a: number, b: number): number {
+  let s = 0;
+  for (let m = a; m < b; m++) s += SPACE_PROFILE[monthOf(m) - 1];
+  return s;
+}
+
+const pct = (x: number) => `${Math.round(x * 100)} %`;
+const eur = (x: number) => `${Math.round(x).toLocaleString('de-DE')} €`;
+const pathLabel = (p: 'kfw' | 'tax') => (p === 'tax' ? 'Steuerbonus' : 'KfW-Zuschuss');
+
+function compareWith(best: InstallComparisonRow, other: InstallComparisonRow, inp: Inputs): BestComparison {
+  const direction = other.installMonth < best.installMonth ? 'earlier' : 'later';
+  const parts = Object.fromEntries(PARTS.map((p) => [p, other.parts[p] - best.parts[p]])) as Record<CostPart, number>;
+  const top = PARTS.filter((p) => parts[p] > 0.5).sort((a, b) => parts[b] - parts[a])[0] ?? null;
+  const facts: string[] = [];
+  const [a, b] = direction === 'earlier' ? [other.installMonth, best.installMonth] : [best.installMonth, other.installMonth];
+  const months = b - a;
+  const share = heatShareBetween(a, b);
+  facts.push(
+    `Zwischen ${formatMonthDe(a)} und ${formatMonthDe(b)} (${months} Monate) fallen ca. ${pct(share)} eines Jahresheizbedarfs an – ` +
+      `so lange heizt beim späteren Zeitpunkt noch die alte Heizung.`,
+  );
+  if (other.best !== best.best) facts.push(`Bester Weg dort: ${pathLabel(other.best)} statt ${pathLabel(best.best)}.`);
+  if (Math.abs(other.kfwSubsidy - best.kfwSubsidy) >= 1) {
+    const reasons: string[] = [];
+    if (Math.abs(other.kfwRate - best.kfwRate) > 1e-9) reasons.push(`Fördersatz ${pct(other.kfwRate)} statt ${pct(best.kfwRate)}`);
+    if (Math.abs(other.kgbRate - best.kgbRate) > 1e-9)
+      reasons.push(`Klimageschwindigkeitsbonus ${pct(other.kgbRate)} statt ${pct(best.kgbRate)}`);
+    if (Math.abs(other.capTotal - best.capTotal) >= 1)
+      reasons.push(`förderfähige Kosten höchstens ${eur(other.capTotal)} statt ${eur(best.capTotal)}`);
+    facts.push(
+      `KfW-Zuschuss dort ${eur(other.kfwSubsidy)} statt ${eur(best.kfwSubsidy)}` + (reasons.length ? ` (${reasons.join(', ')}).` : '.'),
+    );
+  }
+  if (other.taxFeasible !== best.taxFeasible) {
+    facts.push(
+      other.taxFeasible
+        ? 'Dort ist der Steuerbonus noch möglich.'
+        : `Dort ist der Steuerbonus nicht mehr möglich (Abschluss nach ${formatMonthDe(parseMonth(inp.tax.deadline))}).`,
+    );
+  }
+  if (Math.abs(other.boilerCost - best.boilerCost) >= 1) {
+    facts.push(
+      other.boilerCost > best.boilerCost
+        ? `Dort ist vor der Wärmepumpe noch ein Ersatzkessel nötig (${eur(other.boilerCost - best.boilerCost)}).`
+        : `Beim günstigsten Zeitpunkt ist vorher ein Ersatzkessel nötig (${eur(best.boilerCost - other.boilerCost)}), der sich dennoch rechnet.`,
+    );
+  }
+  if (Math.abs(parts.investment) >= 1 && inp.general.investIncrease !== 0) {
+    facts.push(`Investitionskosten steigen bis zum Kauf um ${pct(inp.general.investIncrease)} pro Jahr (Annahme „Steigerung Investitionskosten“).`);
+  }
+  if (Math.abs(parts.residual) >= 1) {
+    facts.push(
+      `Restwert am Ende: Beim späteren Einbau ist die Wärmepumpe am Ende des Betrachtungszeitraums jünger und noch mehr wert (Unterschied ca. ${eur(Math.abs(parts.residual))}).`,
+    );
+  }
+  return { other: other.installMonth, direction, diff: other.bestTotal - best.bestTotal, parts, mainReason: top, facts };
+}
+
+/**
+ * Begründet, warum der günstigste Zeitpunkt günstiger ist als der vorherige und der nächste (F7.3).
+ * null, wenn es nur einen Zeitpunkt gibt.
+ */
+export function explainBest(cmp: InstallComparison, inp: Inputs): BestExplanation | null {
+  if (cmp.rows.length < 2) return null;
+  const i = cmp.bestIndex;
+  const best = cmp.rows[i];
+  const comparisons: BestComparison[] = [];
+  if (i > 0) comparisons.push(compareWith(best, cmp.rows[i - 1], inp));
+  if (i < cmp.rows.length - 1) comparisons.push(compareWith(best, cmp.rows[i + 1], inp));
+  return { month: best.installMonth, best: best.best, comparisons };
 }

@@ -48,7 +48,13 @@ describe('UI (Smoke-Test)', () => {
     expect(kpis).toContain('Ohne Wärmepumpe');
     expect(kpis).toMatch(/12\.880/);
     expect(root.querySelector('#details')!.textContent).toContain('Klimageschwindigkeitsbonus');
-    expect(root.querySelectorAll('#install-table tbody tr')).toHaveLength(9);
+    expect(root.querySelectorAll('#install-table > table > tbody > tr')).toHaveLength(9);
+    // F7.3 Begründung des günstigsten Zeitpunkts
+    const why = root.querySelector('#install-table .best-why')!;
+    const bestMonth = root.querySelector('#install-table tr.best td')!.textContent!.replace('günstigster', '').trim();
+    expect(why.querySelector('h3')!.textContent).toBe(`Warum ist ${bestMonth} am günstigsten?`);
+    expect(why.textContent).toContain('Jahresheizbedarfs');
+    expect(why.querySelector('tr.sum')).not.toBeNull();
     expect(root.querySelectorAll('#year-table tbody tr').length).toBe(21); // 2026 … 2046
   });
 

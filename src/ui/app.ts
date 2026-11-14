@@ -1,4 +1,4 @@
-import { compareInstallTimes, type InstallComparison } from '../core/compare';
+import { COST_PART_LABELS, compareInstallTimes, explainBest, type CostPart, type InstallComparison } from '../core/compare';
 import { keyEvents, type KeyEvent, type KeyEvents } from '../core/events';
 import { tryParseMonth } from '../core/dates';
 import { APP_VERSION } from '../version';
@@ -637,7 +637,37 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
           )
           .join('')}</tbody>
       </table>
-      <p class="muted small">Referenz ohne Wärmepumpe: ${fmtEur(cmp.refTotal)}. Förderantrag jeweils ${inputs.heatPump.leadMonths} Monate vor Inbetriebnahme.</p>`;
+      <p class="muted small">Referenz ohne Wärmepumpe: ${fmtEur(cmp.refTotal)}. Förderantrag jeweils ${inputs.heatPump.leadMonths} Monate vor Inbetriebnahme.</p>
+      ${bestWhyHtml(cmp)}`;
+  }
+
+  /** Begründung des günstigsten Zeitpunkts (F7.3). */
+  function bestWhyHtml(cmp: InstallComparison): string {
+    const ex = explainBest(cmp, inputs);
+    if (!ex) return '';
+    const parts = (Object.keys(COST_PART_LABELS) as CostPart[]).filter((p) => ex.comparisons.some((c) => Math.abs(c.parts[p]) >= 0.5));
+    const cell = (x: number) => `<td class="num ${x >= 0.5 ? 'pos' : x <= -0.5 ? 'neg' : ''}">${x >= 0.5 ? '+' : ''}${fmtEur(x)}</td>`;
+    const head = (c: (typeof ex.comparisons)[number]) => `ggü. ${fmtMonth(c.other)} (${c.direction === 'earlier' ? 'früher' : 'später'})`;
+    const summary = ex.comparisons
+      .map((c) => {
+        const verdict = `${c.direction === 'earlier' ? 'Gegenüber dem früheren' : 'Gegenüber dem späteren'} Zeitpunkt ${fmtMonth(c.other)} ist ${fmtMonth(ex.month)} um ${fmtEur(c.diff)} günstiger`;
+        const main = c.mainReason ? ` – größter Vorteil: ${escapeHtml(COST_PART_LABELS[c.mainReason])} (${fmtEur(c.parts[c.mainReason])})` : '';
+        return `<li><strong>${verdict}${main}.</strong><ul>${c.facts.map((f) => `<li>${escapeHtml(f)}</li>`).join('')}</ul></li>`;
+      })
+      .join('');
+    return `<div class="best-why">
+        <h3>Warum ist ${fmtMonth(ex.month)} am günstigsten?</h3>
+        <ul class="best-why-list">${summary}</ul>
+        <div class="table-wrap"><table class="compact">
+          <caption class="visually-hidden">Vorteil des günstigsten Zeitpunkts nach Kostenart</caption>
+          <thead><tr><th>Kostenart</th>${ex.comparisons.map((c) => `<th class="num">${head(c)}</th>`).join('')}</tr></thead>
+          <tbody>${parts
+            .map((p) => `<tr><td>${escapeHtml(COST_PART_LABELS[p])}</td>${ex.comparisons.map((c) => cell(c.parts[p])).join('')}</tr>`)
+            .join('')}
+            <tr class="sum"><td>Gesamt</td>${ex.comparisons.map((c) => cell(c.diff)).join('')}</tr></tbody>
+        </table></div>
+        <p class="muted small">Positive Beträge (grün) = so viel spart der günstigste Zeitpunkt in dieser Kostenart, negative (rot) = dort kostet er mehr. Beträge einschließlich Opportunitätszins bis zum Ende des Betrachtungszeitraums.</p>
+      </div>`;
   }
 
   function renderYearTable(run: RunResult, ev: KeyEvents): void {

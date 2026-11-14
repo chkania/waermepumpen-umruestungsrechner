@@ -309,6 +309,15 @@ td.neg { color: var(--bad); }
 tr.best td { background: var(--accent-soft); }
 table.compact th, table.compact td { padding: 4px 6px; }
 
+/* Begründung des günstigsten Umrüstzeitpunkts (F7.3) */
+.best-why { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border); }
+.best-why h3 { font-size: 0.95rem; margin: 0 0 6px; }
+.best-why-list { margin: 0 0 10px; padding-left: 18px; font-size: 0.86rem; }
+.best-why-list > li { margin-bottom: 6px; }
+.best-why-list ul { margin: 2px 0 0; padding-left: 18px; color: var(--c-text-2); }
+.best-why table { width: auto; min-width: 60%; }
+tr.sum td { font-weight: 600; border-top: 2px solid var(--border); }
+
 .disclaimer { font-size: 0.78rem; color: var(--c-muted); margin: 0 0 24px; }
 .disclaimer.license { margin-top: -16px; }
 .version-link {
