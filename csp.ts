@@ -2,17 +2,20 @@ import type { Plugin } from 'vite';
 
 /**
  * Content Security Policy for the static build (N6).
- * Allows only own scripts/styles/fonts; the small inline scripts in <head> (design/light-dark before the
+ * Allows only own scripts/styles/fonts plus the Matomo instance (N10); the small inline scripts in <head> (design/light-dark before the
  * first paint) are allowed via SHA-256 hash. Build only – the Vite dev server needs inline code.
  * frame-ancestors (protection against embedding) cannot be set via <meta>, only as an HTTP header when hosting.
  */
+/** Matomo visitor statistics (N10, src/analytics.ts): script and tracking requests (image fallback). */
+export const ANALYTICS_ORIGIN = 'https://analytics.chkania.net';
+
 export const CSP_DIRECTIVES = [
   "default-src 'self'",
-  "script-src 'self' {hashes}",
+  `script-src 'self' ${ANALYTICS_ORIGIN} {hashes}`,
   "style-src 'self'",
-  "img-src 'self' data:",
+  `img-src 'self' data: ${ANALYTICS_ORIGIN}`,
   "font-src 'self' data:",
-  "connect-src 'self'",
+  `connect-src 'self' ${ANALYTICS_ORIGIN}`,
   "object-src 'none'",
   "base-uri 'none'",
   "form-action 'none'",

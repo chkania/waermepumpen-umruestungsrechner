@@ -4,6 +4,7 @@ import '../style.css';
 import '../style-modern.css';
 import '../help.css';
 import license from '../../LICENSE.md?raw';
+import { initAnalytics } from '../analytics';
 import { mountDocPage } from '../doc-page';
 
 /** Non-binding German summary; the English license text below is authoritative. */
@@ -21,3 +22,4 @@ const intro = `
 </section>`;
 
 mountDocPage(document.getElementById('doc')!, { markdown: license, subtitle: 'Lizenz des Wärmepumpen-Investitionsrechners', intro, toc: false, contentLang: 'en' });
+initAnalytics('Lizenz');
