@@ -1,0 +1,97 @@
+name: Dependabot
+
+# Prüft Dependabot-PRs und führt Patch-/Minor-Updates automatisch zusammen.
+# - verify: installiert und testet ohne Schreibrechte (fremder Paketcode läuft nie mit Schreib-Token),
+#   aktualisiert THIRD-PARTY-NOTICES.md (N8) und reicht sie als Artefakt weiter.
+# - merge: committet die aktualisierten Hinweise in den PR und merged Patch/Minor per Squash;
+#   Major-Updates bleiben offen und bekommen einen Kommentar.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dependabot-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    if: github.actor == 'dependabot[bot]' && github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    outputs:
+      notices-changed: ${{ steps.notices.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: lts/*
+          cache: npm
+      - run: npm ci
+      - name: Drittanbieter-Hinweise aktualisieren
+        id: notices
+        run: |
+          npm run notices
+          if git diff --quiet -- THIRD-PARTY-NOTICES.md; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: steps.notices.outputs.changed == 'true'
+        with:
+          name: third-party-notices
+          path: THIRD-PARTY-NOTICES.md
+          retention-days: 1
+      - name: Tests (inkl. Lizenzprüfung)
+        run: npm test
+      - name: Typecheck und Build
+        run: npm run build
+      - name: Sicherheitslücken in Laufzeit-Abhängigkeiten
+        run: npm audit --omit=dev --audit-level=high
+
+  merge:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PR_URL: ${{ github.event.pull_request.html_url }}
+    steps:
+      - id: meta
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Aktualisierte Hinweise in den PR übernehmen
+        if: needs.verify.outputs.notices-changed == 'true'
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+      - if: needs.verify.outputs.notices-changed == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: third-party-notices
+      - if: needs.verify.outputs.notices-changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add THIRD-PARTY-NOTICES.md
+          git commit -m "chore(deps): THIRD-PARTY-NOTICES.md aktualisieren"
+          git push
+
+      - name: Patch/Minor zusammenführen
+        if: steps.meta.outputs.update-type != 'version-update:semver-major'
+        run: gh pr merge --squash --delete-branch "$PR_URL"
+
+      - name: Major-Update zur manuellen Prüfung markieren
+        if: steps.meta.outputs.update-type == 'version-update:semver-major'
+        run: |
+          gh pr comment "$PR_URL" --body "Major-Update: Tests und Build sind grün, wird aber nicht automatisch zusammengeführt. Bitte Changelog der Abhängigkeit prüfen und manuell mergen."
