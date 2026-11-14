@@ -1054,7 +1054,7 @@ function layout(): string {
       ${logoSvg()}
       <h1>Wärmepumpen-Umrüstungsrechner</h1>
       <p>Umstieg von Gas oder Öl: Energiepreise, KfW-Förderung, Kredit und Steuerbonus im Vergleich
-        <a id="app-version" class="version-link" href="./changelog.html" target="_blank" rel="noopener" title="Änderungen dieser und früherer Versionen (Changelog)">Version ${APP_VERSION}</a></p>
+        <a id="app-version" class="version-link" href="./changelog.html" title="Änderungen dieser und früherer Versionen (Changelog)">Version ${APP_VERSION}</a></p>
     </div>
     <div class="toolbar">
       <div class="design-switch theme-switch" role="group" aria-label="Hell oder dunkel">
@@ -1123,7 +1123,7 @@ function layout(): string {
         <p class="muted small">Quellcode, Fragen und Vorschläge: <a href="${REPO_URL}" target="_blank" rel="noopener">github.com/chkania/waermepumpen-umruestungsrechner</a> – schön, wenn du dabei bist!</p>
       </aside>
       <p class="disclaimer">Keine Finanz-, Steuer- oder Förderberatung. Alle Angaben ohne Gewähr; Förderbedingungen Stand ${FUNDING_SOURCE_DATE.split('-').reverse().join('.')} – bitte vor Antragstellung bei KfW, Energieberatung und Steuerberatung prüfen.</p>
-      <p class="disclaimer license"><a href="./changelog.html" target="_blank" rel="noopener">Version ${APP_VERSION}</a> · © 2026 Christoph Kania · Lizenz: <a href="./lizenz.html" target="_blank" rel="noopener">PolyForm Noncommercial 1.0.0</a> – kostenfreie Nutzung für nicht-kommerzielle Zwecke; kommerzielle Nutzung nur nach Absprache · <a href="./lizenzen-drittanbieter.html" target="_blank" rel="noopener">Lizenzen von Drittanbietern</a> · <a href="./impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="./datenschutz.html" target="_blank" rel="noopener">Datenschutz</a> · <a href="${REPO_URL}" target="_blank" rel="noopener">Quellcode auf GitHub</a></p>
+      <p class="disclaimer license"><a href="./changelog.html">Version ${APP_VERSION}</a> · © 2026 Christoph Kania · Lizenz: <a href="./lizenz.html" target="_blank" rel="noopener">PolyForm Noncommercial 1.0.0</a> – kostenfreie Nutzung für nicht-kommerzielle Zwecke; kommerzielle Nutzung nur nach Absprache · <a href="./lizenzen-drittanbieter.html" target="_blank" rel="noopener">Lizenzen von Drittanbietern</a> · <a href="./impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="./datenschutz.html" target="_blank" rel="noopener">Datenschutz</a> · <a href="${REPO_URL}" target="_blank" rel="noopener">Quellcode auf GitHub</a></p>
     </section>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>

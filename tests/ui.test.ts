@@ -394,6 +394,8 @@ describe('UI (Smoke-Test)', () => {
     const v = root.querySelector<HTMLAnchorElement>('#app-version')!;
     expect(v.textContent).toBe(`Version ${APP_VERSION}`);
     expect(v.getAttribute('href')).toBe('./changelog.html');
+    // same tab: the changelog page leads back to the calculator, inputs are saved
+    expect(root.querySelectorAll('a[href="./changelog.html"][target]')).toHaveLength(0);
   });
 
   it('F15 Hilfe-Link öffnet das Benutzerhandbuch in neuem Tab', () => {
