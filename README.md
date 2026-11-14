@@ -19,6 +19,16 @@ Die aktuelle Version und alle Änderungen stehen in [CHANGELOG.md](CHANGELOG.md)
 
 Keine Finanz-, Steuer- oder Förderberatung; alle Angaben ohne Gewähr.
 
+## Mitmachen
+
+Förderprogramme, Energiepreise und Steuerregeln ändern sich laufend – der Rechner lebt davon, dass Menschen mit Erfahrung, Fachwissen oder einfach einem wachen Blick ihn aktuell halten. Mach mit, jeder Beitrag zählt:
+
+- **Melde Fehler oder veraltete Annahmen** – über das Formular [Fehler oder veralteter Wert](https://github.com/chkania/waermepumpen-umruestungsrechner/issues/new?template=bug_report.yml), am besten mit Quelle.
+- **Bring deine Ideen ein** – fehlende Szenarien, unklare Erklärungen, bessere Darstellungen.
+- **Entwickle mit** – Rechenlogik, Texte, Tests, Barrierefreiheit. Ablauf, Commit-Format und Konventionen findest du in [CONTRIBUTING.md](CONTRIBUTING.md); `CLAUDE.md` und `docs/ANFORDERUNGEN.md` beschreiben Struktur und Anforderungen.
+
+Auch kleine Beiträge wie ein korrigierter Tippfehler oder eine geprüfte Quelle helfen – schön, wenn du dabei bist!
+
 ## Lizenz
 
 Copyright © 2026 Christoph Kania. Veröffentlicht unter der [PolyForm Noncommercial License 1.0.0](LICENSE.md) (im Browser: `lizenz.html`):

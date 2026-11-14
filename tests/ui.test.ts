@@ -56,6 +56,15 @@ describe('UI (Smoke-Test)', () => {
     expect(why.textContent).toContain('Jahresheizbedarfs');
     expect(why.querySelector('tr.sum')).not.toBeNull();
     expect(root.querySelectorAll('#year-table tbody tr').length).toBe(21); // 2026 … 2046
+    // F19 invitation to contribute and repository link
+    const contribute = root.querySelector('.contribute')!;
+    expect(contribute.querySelector('h2')!.textContent).toBe('Mitmachen');
+    expect(contribute.querySelector('a[href$="/issues/new?template=bug_report.yml"]')!.textContent).toBe('Melde ihn');
+    expect(contribute.querySelector('a[href$="/issues/new?template=feature_request.yml"]')!.textContent).toBe('Schlag sie vor');
+    expect(contribute.querySelector('a[href$="/CONTRIBUTING.md"]')).not.toBeNull();
+    const repo = root.querySelector<HTMLAnchorElement>('.disclaimer.license a[href^="https://github.com/chkania/"]')!;
+    expect(repo.textContent).toBe('Quellcode auf GitHub');
+    expect(repo.rel).toBe('noopener');
   });
 
   it('Eingabe ändert Ergebnis und wird gespeichert (F9.1)', () => {

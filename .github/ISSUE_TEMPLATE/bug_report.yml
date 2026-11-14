@@ -1,0 +1,54 @@
+# Issue form for errors and outdated values (F19), linked from the "Mitmachen" box in the calculator
+name: Fehler oder veralteter Wert
+description: Melde einen Rechenfehler, eine veraltete Förderregel, einen überholten Preis oder ein Problem bei der Bedienung.
+title: "Fehler: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Danke, dass du hilfst, den Rechner verlässlich zu halten! Eine kurze Beschreibung reicht – Programmierkenntnisse sind nicht nötig.
+        Bitte keine persönlichen Daten (Name, Adresse, Einkommen) eintragen.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Worum geht es?
+      options:
+        - Rechenergebnis wirkt falsch oder unplausibel
+        - Förderung, Kredit oder Steuer (Regel veraltet oder falsch angewendet)
+        - Standardwert oder Preis veraltet
+        - Darstellung oder Bedienung
+        - Text, Hilfe oder Erklärung
+        - Sonstiges
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Was ist dir aufgefallen?
+      description: Was zeigt der Rechner, und was hättest du stattdessen erwartet?
+      placeholder: z. B. „Der Klimageschwindigkeitsbonus wird noch mit 20 % angesetzt, laut KfW sind es seit … nur noch 16 %.“
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Quelle (falls vorhanden)
+      description: Link oder Fundstelle, die den richtigen Wert belegt – z. B. KfW-Merkblatt, Gesetz, Preisvergleich.
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: So lässt es sich nachvollziehen (optional)
+      description: |
+        Welche Eingaben hast du verwendet? Ein geteilter Link („Link kopieren“) oder eine exportierte Datei hilft sehr.
+        Prüf vorher, ob darin persönliche Angaben stehen (z. B. Bezeichnung, Bemerkungen, Einkommen) und entferne sie.
+  - type: input
+    id: version
+    attributes:
+      label: Version des Rechners
+      description: Steht im Seitenfuß, z. B. „Version 1.2.0“.
+  - type: input
+    id: browser
+    attributes:
+      label: Browser und Gerät (bei Darstellungsproblemen)
+      placeholder: z. B. Firefox 140 auf Windows, Safari auf iPhone
