@@ -122,6 +122,41 @@ for d in waermepumpen-umruestungsrechner.de www.waermepumpen-umruestungsrechner.
 
 Erwartet wird jeweils `HTTP/… 301` und `location: https://waermepumpen-investitionsrechner.de/hilfe.html?x=1`.
 
+### Zwischenspeichern im Browser (Cache)
+
+Ohne eigene Angaben raten Browser, wie lange sie Dateien zwischenspeichern. Nach einem Deployment sieht man dann unter Umständen noch eine Weile die alte Version. Der Build legt JavaScript, CSS und Schriften unter `assets/` mit einem Inhalts-Hash im Dateinamen ab (z. B. `main-Cj4rdn9b.js`). Ändert sich eine Datei, ändert sich also auch ihr Name. Daraus ergeben sich diese Regeln (eingerichtet am 15.11.2026, in der `.htaccess` im Ordner des Rechners unter der Weiterleitung):
+
+```apache
+<IfModule mod_headers.c>
+  # HTML: always revalidate, so a new release shows up immediately (cheap 304 via ETag)
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+  # Build files with a content hash in their name never change: cache for one year
+  <If "%{REQUEST_URI} =~ m#^/assets/#">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </If>
+  # Favicon and touch icon: one week
+  <FilesMatch "^(favicon\.svg|apple-touch-icon\.png)$">
+    Header set Cache-Control "public, max-age=604800"
+  </FilesMatch>
+</IfModule>
+```
+
+| Dateien | Cache-Control | Wirkung |
+|---|---|---|
+| HTML-Seiten | `no-cache` | Vor jeder Nutzung kurz beim Server nachfragen. Ist nichts neu, antwortet er mit 304. Neue Versionen sind sofort sichtbar. |
+| `assets/…` | `public, max-age=31536000, immutable` | Ein Jahr ohne Nachfrage nutzen. Unproblematisch, weil eine geänderte Datei einen neuen Namen bekommt. |
+| Favicon, Touch-Icon | `public, max-age=604800` | Eine Woche |
+
+Prüfen:
+
+```bash
+curl -sI https://waermepumpen-investitionsrechner.de/ | grep -i cache-control
+```
+
+Erwartet: `cache-control: no-cache`. Für eine Datei unter `assets/` erwartet: `public, max-age=31536000, immutable`.
+
 ### Empfohlene HTTP-Header
 
 Die Content-Security-Policy steht bereits im HTML. Zusätzlich empfehlenswert, z. B. in `.htaccess` (Apache):
