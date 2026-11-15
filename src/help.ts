@@ -34,6 +34,16 @@ function stripHeadingHtml(input: string): string {
   return current.trim();
 }
 
+function stripHeadingHtml(input: string): string {
+  let current = input;
+  let previous: string;
+  do {
+    previous = current;
+    current = current.replace(/[<>]/g, '').replace(/&[a-z]+;/g, '').replace(/&amp;/g, '&');
+  } while (current !== previous);
+  return current.trim();
+}
+
 /** Renders the manual (Markdown) to HTML with anchor IDs and table of contents (F15). */
 export function renderHelp(markdown: string): { html: string; toc: TocEntry[]; title: string } {
   let html = marked.parse(markdown, { async: false, gfm: true }) as string;
