@@ -10,7 +10,7 @@ Deutschland
 ## Kontakt
 
 Telefon: +49 1579 3508773<br>
-E-Mail: blog [at] chkania [Punkt] net
+E-Mail: info [at] wpir [Punkt] de
 
 ## Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV
 
