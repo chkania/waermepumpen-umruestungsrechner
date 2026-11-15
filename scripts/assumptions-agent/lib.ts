@@ -237,7 +237,7 @@ export function checkFindings(group: SourceGroup, findings: ItemFinding[], sourc
   });
 }
 
-const cell = (s: string) => s.replace(/\|/g, '\\|').replace(/\s+/g, ' ').trim() || '–';
+const cell = (s: string) => s.replace(/\\/g, '\\\\').replace(/\|/g, '\\|').replace(/\s+/g, ' ').trim() || '–';
 
 /** Markdown report: deviations first, then unclear, failed sources and confirmed values. */
 export function buildReport(input: {
