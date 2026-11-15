@@ -302,3 +302,4 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 | 2026-11-14 | F31 Varianten vergleichen: zwei oder drei Exporte bzw. die aktuellen Eingaben mit Kennzahlen, Kostenkurven und Unterschieden nebeneinander. |
 | 2026-11-14 | F19.3 Kasten „Über diesen Rechner“ mit der Entstehungsgeschichte als privates Hobbyprojekt. |
 | 2026-11-15 | Name wieder „Wärmepumpen-Investitionsrechner“ (statt „Wärmepumpen-Umrüstungsrechner“): Kopf, Seitentitel, Einführung, Weiterempfehlen, Bericht, Logo-Dateien, Handbuch und rechtliche Seiten. Repository-Name, Domain und Speicherschlüssel unverändert. |
+| 2026-11-15 | Handbuch, Abschnitt „Mitmachen“: Liste der geplanten Ideen (Förderprogramme der Länder und Kommunen; Wohnungseigentümergemeinschaften, Vermieter). |

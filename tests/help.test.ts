@@ -27,6 +27,13 @@ describe('F15 Benutzerhandbuch – Vollständigkeit', () => {
     expect(handbook).toContain('„Alle zuklappen“');
   });
 
+  it('Mitmachen: Ideenliste ist im Handbuch', () => {
+    expect(handbook).toContain('### Ideen für die Weiterentwicklung');
+    for (const t of ['Förderprogramme der Länder', 'Förderprogramme der Kommunen', 'Wohnungseigentümergemeinschaften', 'Vermieter']) {
+      expect(handbook).toContain(`- ${t}`);
+    }
+  });
+
   it('F19.3 Entstehung des Rechners ist beschrieben', () => {
     expect(handbook).toContain('## Über diesen Rechner');
     expect(handbook).toContain('rein privates Hobbyprojekt');
