@@ -242,7 +242,7 @@ Es gelten die Kreditbedingungen: Beim KfW-Kredit sind Teil-Sondertilgungen nur i
 
 | Feld | Bedeutung |
 |---|---|
-| **Start der Betrachtung** | Ab diesem Monat wird gerechnet (Standard: aktueller Monat). |
+| **Start der Betrachtung** | Ab diesem Monat wird gerechnet (Standard: aktueller Monat). Alle Preise und Kosten gelten als Werte dieses Monats. Liegt der Start in der Zukunft, erscheint ein Hinweis: Für einen späteren Umstieg besser den Start auf dem aktuellen Monat lassen und nur die **Geplante Inbetriebnahme** verschieben. |
 | **Betrachtungszeitraum** | Anzahl der Jahre (Standard: 20, etwa die Lebensdauer einer Wärmepumpe). |
 | **Opportunitätszins** | Was eingesetztes Geld anderswo bringen würde (z. B. Tagesgeld). Alle Zahlungen werden damit bis zum Ende aufgezinst. Bei 0 % ist die Summe einfach addiert. |
 | **Steigerung Wartungskosten** | Jährliche Steigerung der Wartungskosten. |
