@@ -8,7 +8,7 @@ import { DEFAULT_SOURCES, OFFICIAL_REFS, SOURCE_KIND_LABEL } from '../core/sourc
 import { priceRows, runAll, type RunResult } from '../core/simulation';
 import { tariffComparison } from '../core/tariff';
 import { EFFICIENCY_CLASSES, rateHouse } from '../core/house';
-import { estimateJaz } from '../core/jaz';
+import { estimateJaz, type JazEstimate } from '../core/jaz';
 import { energyYear, type EnergyYear } from '../core/energy';
 import { pvSummary } from '../core/pv';
 import { reportHtml } from './report';
@@ -189,8 +189,42 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
         const u = wrap.querySelector('.unit');
         if (u) u.textContent = f.unit(inputs);
       }
+      const note = wrap.querySelector<HTMLElement>('.field-note');
+      if (note && f.note && !wrap.hidden) note.textContent = f.note(inputs);
     }
+    renderJazCheck();
   }
+
+  // ---------- SPF (JAZ) check after changes that affect the estimate (F26.4) ----------
+  /** Field whose change shifted the SPF (JAZ) estimate, with the estimate before the first such change. */
+  let jazCheck: { path: string; before: JazEstimate } | null = null;
+  const sameEstimate = (a: JazEstimate, b: JazEstimate) => a.low === b.low && a.mid === b.mid && a.high === b.high;
+  function renderJazCheck(): void {
+    for (const el of form.querySelectorAll('.jaz-check')) el.remove();
+    if (!jazCheck) return;
+    const now = estimateJaz(inputs);
+    if (sameEstimate(now, jazCheck.before)) {
+      jazCheck = null;
+      return;
+    }
+    const wrap = form.querySelector<HTMLElement>(`[data-field="${jazCheck.path}"]`);
+    if (!wrap || wrap.hidden) return;
+    const d1 = (x: number) => fmtNum(x, 1);
+    const p = document.createElement('p');
+    p.className = 'jaz-check';
+    p.setAttribute('role', 'status');
+    p.innerHTML = `Die JAZ-Schätzung hat sich geändert: jetzt ${d1(now.low)}–${d1(now.high)} (vorher ${d1(jazCheck.before.low)}–${d1(jazCheck.before.high)}). Ihr eingetragener Wert ist ${d1(inputs.heatPump.jaz)} – bitte die JAZ prüfen. <button type="button" class="link-btn" data-jaz-goto>Zur JAZ</button>`;
+    wrap.after(p);
+  }
+  form.addEventListener('click', (e) => {
+    if (!(e.target as HTMLElement).closest('[data-jaz-goto]')) return;
+    const jaz = form.querySelector<HTMLInputElement>('[data-path="heatPump.jaz"]');
+    if (!jaz) return;
+    const section = jaz.closest('details');
+    if (section) section.open = true;
+    jaz.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    jaz.focus({ preventScroll: true });
+  });
 
   /** Mark errors as text and for screen readers (WCAG 3.3.1, 1.4.1). */
   function setFieldError(el: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement, msg: string | null): void {
@@ -222,7 +256,10 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     } else value = el.value;
     setFieldError(el, valid ? null : fieldErrorText(f));
     if (!valid) return;
+    const jazBefore = f.path === 'heatPump.jaz' ? null : estimateJaz(inputs);
     setPath(inputs, f.path, value);
+    if (f.path === 'heatPump.jaz') jazCheck = null;
+    else if (jazBefore && !sameEstimate(jazBefore, estimateJaz(inputs))) jazCheck = { path: f.path, before: jazCheck?.before ?? jazBefore };
     f.onChange?.(inputs, prev);
     if (f.onChange) writeForm();
     refreshVisibility();
@@ -327,6 +364,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   form.addEventListener('click', (e) => {
     if (!(e.target as HTMLElement).closest('[data-jaz-apply]')) return;
     inputs.heatPump.jaz = estimateJaz(inputs).mid;
+    jazCheck = null;
     writeForm();
     persist();
     recalc();
@@ -684,10 +722,14 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
         : jaz < e.low - 1e-9
           ? `<p class="jaz-fit">Ihr Wert ${d1(jaz)} liegt unter der Schätzung (vorsichtig gerechnet).</p>`
           : '';
+    const changedBy = jazCheck ? fieldByPath.get(jazCheck.path)?.label : undefined;
+    const changed = changedBy
+      ? `<p class="jaz-fit is-high">Die Schätzung hat sich durch Ihre Änderung bei „${escapeHtml(changedBy)}“ geändert – bitte prüfen, ob Ihr Wert noch passt.</p>`
+      : '';
     box.innerHTML = `
       <div class="jaz-head"><span>Schätzung für Ihr Haus: <strong>JAZ ${d1(e.low)}–${d1(e.high)}</strong> (Mitte ${d1(e.mid)}, Vorlauf ca. ${e.supplyTemp} °C)</span>
         <button type="button" data-jaz-apply${Math.abs(jaz - e.mid) < 1e-9 ? ' aria-pressed="true"' : ''}>${Math.abs(jaz - e.mid) < 1e-9 ? 'Übernommen' : `${d1(e.mid)} übernehmen`}</button></div>
-      ${fit}
+      ${changed}${fit}
       <details class="jaz-why"><summary>Wie wird geschätzt?</summary>
         <ol>${e.steps.map((s) => `<li>${escapeHtml(s)}</li>`).join('')}</ol>
         <p>Grobe Orientierung. Die tatsächliche JAZ hängt von Auslegung, Einstellung (Heizkurve), Warmwasseranteil und Witterung ab. Selbsttest: An einem kalten Tag den Kessel auf 55 °C Vorlauf stellen – wird es in allen Räumen warm, reichen die Heizkörper für eine Wärmepumpe.</p>
@@ -1082,6 +1124,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     getInputs: () => inputs,
     setInputs(i) {
       inputs = mergeInputs(defaults, i);
+      jazCheck = null;
       writeForm();
       recalc();
       persist();
@@ -1476,6 +1519,8 @@ function fieldHtml(f: Field): string {
   const id = `f-${f.path.replace(/\./g, '-')}`;
   const unit = typeof f.unit === 'string' ? f.unit : '';
   const help = f.help ? `<small class="help" id="${id}-help">${escapeHtml(f.help)}</small>` : '';
+  // calculated note (F17.3), filled by refreshVisibility()
+  const note = f.note ? `<small class="field-note" id="${id}-note" aria-live="polite"></small>` : '';
   const src = f.noSource ? { button: '', pop: '' } : sourceHtml(f, id);
   const ph = f.placeholder ? ` placeholder="${escapeHtml(f.placeholder)}"` : '';
   if (f.type === 'checkbox') {
@@ -1500,12 +1545,12 @@ function fieldHtml(f: Field): string {
     control = `<input type="number" inputmode="decimal" id="${id}" data-path="${f.path}" ${attrs}>`;
   }
   // Link help text and error message to the field (screen readers)
-  const describedBy = [f.help ? `${id}-help` : '', `${id}-err`].filter(Boolean).join(' ');
+  const describedBy = [f.help ? `${id}-help` : '', f.note ? `${id}-note` : '', `${id}-err`].filter(Boolean).join(' ');
   control = control.replace(`data-path="${f.path}"`, `data-path="${f.path}" aria-describedby="${describedBy}"`);
   return `<div class="field" data-field="${f.path}">
     <div class="label-row"><label for="${id}">${escapeHtml(f.label)}</label>${src.button}</div>${src.pop}
     <div class="control">${control}<span class="unit">${escapeHtml(unit)}</span></div>
-    <small class="field-error" id="${id}-err" aria-live="polite" hidden></small>${help}</div>`;
+    <small class="field-error" id="${id}-err" aria-live="polite" hidden></small>${note}${help}</div>`;
 }
 
 function sectionsToggleHtml(): string {

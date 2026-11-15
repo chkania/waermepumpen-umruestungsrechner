@@ -19,6 +19,8 @@ export interface Field {
   /** Does not change the calculation (save only, no recalculation). */
   noRecalc?: boolean;
   show?: (i: Inputs) => boolean;
+  /** Calculated note below the field, updated with every change (e.g. absolute value of a share). */
+  note?: (i: Inputs) => string;
   /** Reaction to a change (e.g. unit conversion). */
   onChange?: (i: Inputs, prev: unknown) => void;
 }
@@ -32,6 +34,23 @@ export interface Section {
   fields: Field[];
 }
 
+const kwhDe = (x: number) => `${(Math.round(x / 10) * 10).toLocaleString('de-DE')} kWh`;
+/**
+ * Final energy for hot water and cooking (kWh) – same split as energySplit() in core/prices.ts (tested against it).
+ * Calculated here because this file runs with plain Node (scripts/assumptions-checklist.ts) and may only import types.
+ */
+export function shareFuel(i: Inputs): { dhw: number; cooking: number } {
+  const o = i.oldHeating;
+  const total = o.fuel === 'gas' ? o.consumption : o.consumption * i.prices.oilKwhPerLiter;
+  const cook = o.fuel === 'gas' && o.cookingWithGas ? Math.max(0, o.cookingShare) : 0;
+  const dhw = o.dhwViaHeating ? Math.max(0, o.dhwShare) : 0;
+  return { dhw: total * Math.min(dhw, 1 - cook), cooking: total * cook };
+}
+/** Absolute amount of fuel per year, in the unit of the consumption (F17.5): kWh gas or litres of oil (+ kWh). */
+const fuelAmount = (i: Inputs, kWh: number) =>
+  i.oldHeating.fuel === 'oil'
+    ? `${(Math.round(kWh / i.prices.oilKwhPerLiter / 10) * 10).toLocaleString('de-DE')} l Heizöl (${kwhDe(kWh)})`
+    : `${kwhDe(kWh)} Gas`;
 const hasPv = (i: Inputs) => i.heatPump.pvKwp > 0;
 const isGas = (i: Inputs) => i.oldHeating.fuel === 'gas';
 const isOil = (i: Inputs) => i.oldHeating.fuel === 'oil';
@@ -89,9 +108,9 @@ export const SECTIONS: Section[] = [
         help: 'Gesamter Verbrauch laut Abrechnung (inkl. Warmwasser und ggf. Kochen), am besten der Durchschnitt mehrerer Jahre.',
       },
       { path: 'oldHeating.dhwViaHeating', label: 'Warmwasser über die Heizung', type: 'checkbox', help: 'Nicht ankreuzen bei Durchlauferhitzer oder elektrischem Speicher.' },
-      { path: 'oldHeating.dhwShare', label: 'Anteil Warmwasser am Verbrauch', type: 'percent', unit: '%', step: 1, min: 0, max: 60, show: (i) => i.oldHeating.dhwViaHeating, help: 'Typisch 10–20 % im Einfamilienhaus, in gut gedämmten Häusern mehr.' },
+      { path: 'oldHeating.dhwShare', label: 'Anteil Warmwasser am Verbrauch', type: 'percent', unit: '%', step: 1, min: 0, max: 60, show: (i) => i.oldHeating.dhwViaHeating, help: 'Typisch 10–20 % im Einfamilienhaus, in gut gedämmten Häusern mehr.', note: (i) => `Aus Ihrem Verbrauch: ≈ ${fuelAmount(i, shareFuel(i).dhw)} im Jahr für Warmwasser.` },
       { path: 'oldHeating.cookingWithGas', label: 'Kochen mit Gas', type: 'checkbox', show: isGas, help: 'Gasherd am selben Anschluss.' },
-      { path: 'oldHeating.cookingShare', label: 'Anteil Kochen am Verbrauch', type: 'percent', unit: '%', step: 0.5, min: 0, max: 30, show: (i) => isGas(i) && i.oldHeating.cookingWithGas, help: 'Typisch 1–3 % (ein Gasherd braucht etwa 300–600 kWh im Jahr).' },
+      { path: 'oldHeating.cookingShare', label: 'Anteil Kochen am Verbrauch', type: 'percent', unit: '%', step: 0.5, min: 0, max: 30, show: (i) => isGas(i) && i.oldHeating.cookingWithGas, help: 'Typisch 1–3 % (ein Gasherd braucht etwa 300–600 kWh im Jahr).', note: (i) => `Aus Ihrem Verbrauch: ≈ ${fuelAmount(i, shareFuel(i).cooking)} im Jahr fürs Kochen.` },
       {
         path: 'oldHeating.cookingAfter',
         label: 'Kochen nach dem Umstieg',
