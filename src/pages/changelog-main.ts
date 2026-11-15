@@ -8,5 +8,5 @@ import { initAnalytics } from '../analytics';
 import { mountDocPage } from '../doc-page';
 import { APP_VERSION } from '../version';
 
-mountDocPage(document.getElementById('doc')!, { markdown: changelog, subtitle: `Wärmepumpen-Umrüstungsrechner · aktuelle Version ${APP_VERSION}` });
+mountDocPage(document.getElementById('doc')!, { markdown: changelog, subtitle: `Wärmepumpen-Investitionsrechner · aktuelle Version ${APP_VERSION}` });
 initAnalytics('Änderungen');

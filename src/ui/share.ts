@@ -3,9 +3,9 @@
  * Only the address of the calculator is shared – never the user's inputs (no "#z=…"/"#s=…" hash, no query).
  */
 
-export const RECOMMEND_SUBJECT = 'Tipp: Wärmepumpen-Umrüstungsrechner';
+export const RECOMMEND_SUBJECT = 'Tipp: Wärmepumpen-Investitionsrechner';
 export const RECOMMEND_TEXT =
-  'Kennst du schon den Wärmepumpen-Umrüstungsrechner? Er zeigt kostenlos, ob und wann sich der Umstieg ' +
+  'Kennst du schon den Wärmepumpen-Investitionsrechner? Er zeigt kostenlos, ob und wann sich der Umstieg ' +
   'von Gas oder Öl auf eine Wärmepumpe lohnt – mit KfW-Förderung, Steuerbonus und steigenden Energiepreisen.';
 const PRIVACY_NOTE = 'Gerechnet wird im Browser, die eigenen Eingaben bleiben auf dem eigenen Gerät.';
 

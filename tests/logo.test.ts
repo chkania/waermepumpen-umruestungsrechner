@@ -13,7 +13,7 @@ describe('F23 Logo', () => {
     for (const f of files) {
       const svg = read(f);
       for (const d of Object.values(LOGO_PATHS)) expect(svg, f).toContain(`d="${d}"`);
-      expect(svg, f).toContain('aria-label="Wärmepumpen-Umrüstungsrechner"');
+      expect(svg, f).toContain('aria-label="Wärmepumpen-Investitionsrechner"');
     }
   });
 

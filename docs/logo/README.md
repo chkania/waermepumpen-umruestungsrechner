@@ -1,4 +1,4 @@
-# Logo – Wärmepumpen-Umrüstungsrechner
+# Logo – Wärmepumpen-Investitionsrechner
 
 Ein Haus mit einer „Umstiegskurve“: Die kurze warme Linie steht für Gas oder Öl. Sie knickt in einen steigenden blauen Pfeil für die Wärmepumpe, die sich rechnet.
 

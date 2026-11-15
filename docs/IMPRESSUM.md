@@ -23,7 +23,7 @@ Deutschland
 
 ### Haftung für Inhalte und Berechnungen
 
-Der Wärmepumpen-Umrüstungsrechner und seine Inhalte wurden mit großer Sorgfalt erstellt. Für Richtigkeit, Vollständigkeit und Aktualität – insbesondere der Förderkonditionen, Preise, Zinsen und steuerlichen Regeln – übernehme ich keine Gewähr. Die Ergebnisse sind Modellrechnungen auf Grundlage Ihrer Eingaben und der hinterlegten Annahmen; sie ersetzen **keine Finanz-, Steuer-, Förder- oder Energieberatung**. Maßgeblich sind allein die jeweils gültigen Bedingungen der KfW, der Finanzverwaltung und Ihrer Vertragspartner.
+Der Wärmepumpen-Investitionsrechner und seine Inhalte wurden mit großer Sorgfalt erstellt. Für Richtigkeit, Vollständigkeit und Aktualität – insbesondere der Förderkonditionen, Preise, Zinsen und steuerlichen Regeln – übernehme ich keine Gewähr. Die Ergebnisse sind Modellrechnungen auf Grundlage Ihrer Eingaben und der hinterlegten Annahmen; sie ersetzen **keine Finanz-, Steuer-, Förder- oder Energieberatung**. Maßgeblich sind allein die jeweils gültigen Bedingungen der KfW, der Finanzverwaltung und Ihrer Vertragspartner.
 
 Als Diensteanbieter bin ich nach § 7 Abs. 1 DDG für eigene Inhalte nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 DDG bin ich nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen. Pflichten zur Entfernung oder Sperrung von Informationen nach den allgemeinen Gesetzen bleiben unberührt; eine Haftung ist jedoch erst ab Kenntnis einer konkreten Rechtsverletzung möglich. Sobald mir solche Rechtsverletzungen bekannt werden, entferne ich die betreffenden Inhalte umgehend.
 

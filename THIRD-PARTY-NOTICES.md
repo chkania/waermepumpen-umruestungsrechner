@@ -1,6 +1,6 @@
 # Lizenzen von Drittanbietern
 
-Der Wärmepumpen-Umrüstungsrechner enthält im ausgelieferten Build die folgenden Bibliotheken und Schriften. Sie stehen unter ihren eigenen Lizenzen (nicht unter der PolyForm-Noncommercial-Lizenz des Rechners); die Lizenztexte folgen unverändert.
+Der Wärmepumpen-Investitionsrechner enthält im ausgelieferten Build die folgenden Bibliotheken und Schriften. Sie stehen unter ihren eigenen Lizenzen (nicht unter der PolyForm-Noncommercial-Lizenz des Rechners); die Lizenztexte folgen unverändert.
 
 ## @fontsource-variable/inter 5.3.0
 
