@@ -8,7 +8,7 @@ Schön, dass du mithelfen möchtest! Der Wärmepumpen-Investitionsrechner soll M
 ## Ablauf
 
 1. Kurzlebigen Branch von `main` anlegen, z. B. `feat/pv-vergleich` oder `fix/export-dateiname`.
-2. Änderung umsetzen; `npm test` und `npm run build` müssen grün sein (siehe `CLAUDE.md` und `docs/ANFORDERUNGEN.md`).
+2. Änderung umsetzen; `npm test` und `npm run build` müssen grün sein (siehe `CLAUDE.md` und `docs/ANFORDERUNGEN.md`). Die CI misst außerdem die Testabdeckung (`npm run test:coverage`): Neue Rechenlogik braucht Tests, sonst kann die Mindestabdeckung des Rechenkerns (95 % der Zeilen, 85 % der Verzweigungen) unterschritten werden.
 3. Pull Request auf `main` öffnen. Der **PR-Titel** muss dem Format unten entsprechen (Workflow „PR-Titel“ prüft das).
 4. Nach grüner CI per **Squash-Merge** zusammenführen – der PR-Titel wird zur Commit-Nachricht auf `main`.
    GitHub übernimmt dabei die Nachrichten aller Commits des PRs in den Squash-Commit (`* feat: …`). Enthält der PR mehrere Commits im Commit-Format, bekommt jeder einen eigenen Eintrag im Changelog, und der PR-Titel selbst erscheint dort nicht. Bei nur einem Commit oder ohne solche Commits wird der PR-Titel zum einzigen Eintrag.

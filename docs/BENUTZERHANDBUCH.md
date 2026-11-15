@@ -392,6 +392,20 @@ Der Rechner ist ein offenes Projekt auf GitHub: [github.com/chkania/waermepumpen
 
 Im Rechner findest du dazu den Kasten **Mitmachen** unter den Ergebnissen und den Link **Quellcode auf GitHub** im Seitenfuß.
 
+### Ideen für die Weiterentwicklung
+
+Diese Themen stehen schon auf der Ideenliste. Wenn du dich in einem davon auskennst oder mithelfen möchtest, melde dich gern über das Formular [Idee oder Frage](https://github.com/chkania/waermepumpen-umruestungsrechner/issues/new?template=feature_request.yml):
+
+**Weitere Förderprogramme**
+
+- Förderprogramme der Länder
+- Förderprogramme der Kommunen
+
+**Weitere Zielgruppen**
+
+- Wohnungseigentümergemeinschaften
+- Vermieter
+
 ## Lizenz
 
 Der Rechner steht unter der **PolyForm Noncommercial License 1.0.0** (Copyright © 2026 Christoph Kania). Sie dürfen ihn für nicht-kommerzielle Zwecke kostenfrei nutzen, verändern und weitergeben – z. B. privat, in Forschung und Lehre, in gemeinnützigen Organisationen oder Behörden. Kommerzielle Nutzung, etwa als Teil eines Beratungs- oder Verkaufsangebots, erfordert eine gesonderte Vereinbarung. Bei der Weitergabe müssen der Lizenztext (oder seine Adresse) und der Copyright-Hinweis mitgegeben werden.
