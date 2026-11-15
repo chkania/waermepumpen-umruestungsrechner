@@ -394,11 +394,11 @@ Wenn Ihnen ein Fehler oder eine veraltete Annahme auffällt, freue ich mich übe
 
 ## Mitmachen
 
-Der Rechner ist ein offenes Projekt auf GitHub: [github.com/chkania/waermepumpen-umruestungsrechner](https://github.com/chkania/waermepumpen-umruestungsrechner). Förderprogramme, Energiepreise und Steuerregeln ändern sich laufend – damit die Ergebnisse verlässlich bleiben, ist deine Hilfe willkommen, auch ohne Programmierkenntnisse:
+Der Rechner ist ein offenes Projekt auf GitHub: [github.com/chkania/wpir](https://github.com/chkania/wpir). Förderprogramme, Energiepreise und Steuerregeln ändern sich laufend – damit die Ergebnisse verlässlich bleiben, ist deine Hilfe willkommen, auch ohne Programmierkenntnisse:
 
-- **Fehler oder veraltete Werte melden:** Nutze auf GitHub das Formular [Fehler oder veralteter Wert](https://github.com/chkania/waermepumpen-umruestungsrechner/issues/new?template=bug_report.yml) – am besten mit Quelle, z. B. eine geänderte KfW-Regel, ein neuer Preis oder ein Rechenergebnis, das dir unplausibel vorkommt. Ein exportierter Datensatz oder ein Link hilft beim Nachvollziehen (prüf vorher, ob er persönliche Angaben enthält).
-- **Ideen vorschlagen:** Welche Frage beantwortet der Rechner noch nicht? Welche Erklärung war für dich unklar? Nutze dafür das Formular [Idee oder Frage](https://github.com/chkania/waermepumpen-umruestungsrechner/issues/new?template=feature_request.yml).
-- **Selbst mitentwickeln:** Rechenlogik, Texte, Tests oder Barrierefreiheit – wie Änderungen ablaufen, beschreibt [CONTRIBUTING.md](https://github.com/chkania/waermepumpen-umruestungsrechner/blob/main/CONTRIBUTING.md).
+- **Fehler oder veraltete Werte melden:** Nutze auf GitHub das Formular [Fehler oder veralteter Wert](https://github.com/chkania/wpir/issues/new?template=bug_report.yml) – am besten mit Quelle, z. B. eine geänderte KfW-Regel, ein neuer Preis oder ein Rechenergebnis, das dir unplausibel vorkommt. Ein exportierter Datensatz oder ein Link hilft beim Nachvollziehen (prüf vorher, ob er persönliche Angaben enthält).
+- **Ideen vorschlagen:** Welche Frage beantwortet der Rechner noch nicht? Welche Erklärung war für dich unklar? Nutze dafür das Formular [Idee oder Frage](https://github.com/chkania/wpir/issues/new?template=feature_request.yml).
+- **Selbst mitentwickeln:** Rechenlogik, Texte, Tests oder Barrierefreiheit – wie Änderungen ablaufen, beschreibt [CONTRIBUTING.md](https://github.com/chkania/wpir/blob/main/CONTRIBUTING.md).
 
 - **Unterstützen:** Der Rechner ist ein Hobbyprojekt, kostenlos und ohne Werbung. Wenn er dir geholfen hat, freue ich mich über einen Kaffee: [Buy me a coffee](https://buymeacoffee.com/chkania) oder [PayPal](https://paypal.me/ChristophKania). Das ist freiwillig.
 
@@ -406,7 +406,7 @@ Im Rechner findest du dazu den Kasten **Mitmachen** unter den Ergebnissen und de
 
 ### Ideen für die Weiterentwicklung
 
-Diese Themen stehen schon auf der Ideenliste. Wenn du dich in einem davon auskennst oder mithelfen möchtest, melde dich gern über das Formular [Idee oder Frage](https://github.com/chkania/waermepumpen-umruestungsrechner/issues/new?template=feature_request.yml):
+Diese Themen stehen schon auf der Ideenliste. Wenn du dich in einem davon auskennst oder mithelfen möchtest, melde dich gern über das Formular [Idee oder Frage](https://github.com/chkania/wpir/issues/new?template=feature_request.yml):
 
 **Weitere Förderprogramme**
 

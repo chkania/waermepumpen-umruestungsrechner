@@ -14,7 +14,7 @@ export interface FetchSourceOptions {
   timeoutMs?: number;
 }
 
-const USER_AGENT = 'Waermepumpen-Investitionsrechner-Annahmenpruefung (+https://github.com/chkania/waermepumpen-umruestungsrechner)';
+const USER_AGENT = 'Waermepumpen-Investitionsrechner-Annahmenpruefung (+https://github.com/chkania/wpir)';
 
 export async function fetchSource(url: string, opts: FetchSourceOptions = {}): Promise<Source> {
   const { fetchImpl = fetch, sleep = (ms) => new Promise((r) => setTimeout(r, ms)), attempts = 3, timeoutMs = 30_000 } = opts;

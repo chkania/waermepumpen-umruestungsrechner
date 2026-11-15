@@ -1,8 +1,8 @@
 # Wärmepumpen-Investitionsrechner
 
-[![CI](https://github.com/chkania/waermepumpen-umruestungsrechner/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/chkania/waermepumpen-umruestungsrechner/actions/workflows/ci.yml)
-[![Deploy](https://github.com/chkania/waermepumpen-umruestungsrechner/actions/workflows/deploy.yml/badge.svg?branch=main)](https://github.com/chkania/waermepumpen-umruestungsrechner/actions/workflows/deploy.yml)
-[![Version](https://img.shields.io/github/package-json/v/chkania/waermepumpen-umruestungsrechner?label=Version)](CHANGELOG.md)
+[![CI](https://github.com/chkania/wpir/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/chkania/wpir/actions/workflows/ci.yml)
+[![Deploy](https://github.com/chkania/wpir/actions/workflows/deploy.yml/badge.svg?branch=main)](https://github.com/chkania/wpir/actions/workflows/deploy.yml)
+[![Version](https://img.shields.io/github/package-json/v/chkania/wpir?label=Version)](CHANGELOG.md)
 [![Lizenz: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/Lizenz-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE.md)
 [![Rechner öffnen](https://img.shields.io/badge/Rechner-waermepumpen--investitionsrechner.de-2ea44f)](https://waermepumpen-investitionsrechner.de/)
 [![Buy me a coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/chkania)
@@ -40,7 +40,7 @@ Er ist ein rein privates Hobbyprojekt, ohne Auftraggeber, Werbung oder kommerzie
 
 Förderprogramme, Energiepreise und Steuerregeln ändern sich laufend – der Rechner lebt davon, dass Menschen mit Erfahrung, Fachwissen oder einfach einem wachen Blick ihn aktuell halten. Mach mit, jeder Beitrag zählt:
 
-- **Melde Fehler oder veraltete Annahmen** – über das Formular [Fehler oder veralteter Wert](https://github.com/chkania/waermepumpen-umruestungsrechner/issues/new?template=bug_report.yml), am besten mit Quelle.
+- **Melde Fehler oder veraltete Annahmen** – über das Formular [Fehler oder veralteter Wert](https://github.com/chkania/wpir/issues/new?template=bug_report.yml), am besten mit Quelle.
 - **Bring deine Ideen ein** – fehlende Szenarien, unklare Erklärungen, bessere Darstellungen.
 - **Entwickle mit** – Rechenlogik, Texte, Tests, Barrierefreiheit. Ablauf, Commit-Format und Konventionen findest du in [CONTRIBUTING.md](CONTRIBUTING.md); `CLAUDE.md` und `docs/ANFORDERUNGEN.md` beschreiben Struktur und Anforderungen.
 
