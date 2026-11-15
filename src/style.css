@@ -641,6 +641,8 @@ td.ev-cell { white-space: normal; min-width: 220px; }
 .share-btn:hover { border-color: var(--accent); }
 /* support dialog (F19.4): two wider buttons, labels on one line */
 .support .share-list { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+/* notice on personal data before sharing/exporting (F9.7) */
+.privacy-skip { display: flex; gap: 8px; align-items: center; margin: 4px 0 0; }
 .support h3 { margin: 18px 0 8px; font-size: 1rem; }
 .support-transfer { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
 .support-qr { margin: 0; width: 148px; text-align: center; }

@@ -65,7 +65,7 @@ Erzeugt einen Link, der alle **vom Standard abweichenden Eingaben** enthält, un
 
 - Der Link beginnt mit der kurzen Adresse **wpir.de** und führt von dort zum Rechner.
 - Der Link enthält die Eingaben selbst, komprimiert im Teil nach `#z=`. Es wird **nichts auf einem Server gespeichert**. Ältere Links (mit `#s=`) funktionieren weiterhin.
-- **Achtung:** Auch persönliche Angaben wie das Haushaltseinkommen stehen im Link. Teilen Sie ihn nur mit Personen, die diese Angaben sehen dürfen.
+- **Achtung:** Auch persönliche Angaben wie das Haushaltseinkommen stehen im Link. Teilen Sie ihn nur mit Personen, die diese Angaben sehen dürfen. Darauf weist vor dem Kopieren ein Hinweisfenster hin; erst mit **Link kopieren** wird der Link erzeugt. Mit „Diesen Hinweis nicht mehr anzeigen“ schalten Sie den Hinweis für Teilen und Export in diesem Browser ab.
 - Solange ein geteilter Link in der Adresszeile steht, wird er bei jeder Änderung mit aktualisiert.
 - Ein geöffneter Link hat Vorrang vor den im Browser gespeicherten Eingaben – er **überschreibt sie aber nicht**. Haben Sie eigene Eingaben gespeichert, erscheint über den Ergebnissen der Hinweis „Geteiltes Szenario geöffnet“. Änderungen wirken dann nur auf den Link. Mit **Als meine Eingaben übernehmen** speichern Sie das Szenario als Ihre eigenen Eingaben, mit **Eigene Eingaben laden** kehren Sie zu Ihrem gespeicherten Stand zurück. Import und Zurücksetzen beenden die Link-Ansicht ebenfalls.
 - Werte im Link werden geprüft: Ungültige Monate oder Auswahlwerte werden durch den Standardwert ersetzt, extreme Zahlen (z. B. 1.000.000 Jahre Laufzeit) auf sinnvolle Grenzen begrenzt. Was ersetzt wurde, steht im Hinweis über den Ergebnissen.
@@ -97,15 +97,15 @@ Der Bericht wird immer hell gedruckt, auch wenn Sie das dunkle Design nutzen. Al
 
 ### Export
 
-Speichert alle Eingaben als **JSON-Datei**, einschließlich Bezeichnung und Bemerkungen des Szenarios. Ist eine **Bezeichnung des Szenarios** eingetragen, steht sie im Dateinamen, z. B. `waermepumpe-rechner-Angebot-Firma-A-2026-11.json` (Umlaute werden umschrieben, Sonderzeichen durch `-` ersetzt); sonst heißt die Datei `waermepumpe-rechner-2026-11.json`. Geeignet zur Sicherung, zur Übertragung auf ein anderes Gerät oder um mehrere Varianten (z. B. „Angebot A“, „Angebot B“) aufzubewahren.
+Speichert alle Eingaben als **JSON-Datei**, einschließlich Bezeichnung und Bemerkungen des Szenarios. Ist eine **Bezeichnung des Szenarios** eingetragen, steht sie im Dateinamen, z. B. `waermepumpe-rechner-Angebot-Firma-A-2026-11.json` (Umlaute werden umschrieben, Sonderzeichen durch `-` ersetzt); sonst heißt die Datei `waermepumpe-rechner-2026-11.json`. Geeignet zur Sicherung, zur Übertragung auf ein anderes Gerät oder um mehrere Varianten (z. B. „Angebot A“, „Angebot B“) aufzubewahren. Vorher erscheint ein Hinweis, dass die Datei auch persönliche Angaben wie das Haushaltseinkommen enthält; erst mit **Datei speichern** wird sie heruntergeladen.
 
 ### Import
 
-Lädt eine zuvor exportierte JSON-Datei. Felder, die in der Datei fehlen oder ungültig sind, erhalten den Standardwert; Zahlen außerhalb sinnvoller Grenzen werden begrenzt, unbekannte Felder ignoriert. Ersetzte Werte werden über den Ergebnissen aufgelistet. Dateien, die nicht von diesem Rechner stammen, werden mit einer Meldung abgelehnt.
+Lädt eine zuvor exportierte JSON-Datei. Felder, die in der Datei fehlen oder ungültig sind, erhalten den Standardwert; Zahlen außerhalb sinnvoller Grenzen werden begrenzt, unbekannte Felder ignoriert. Ersetzte Werte werden über den Ergebnissen aufgelistet. Dateien, die nicht von diesem Rechner stammen, werden mit einer Meldung abgelehnt. Vorher weist ein Fenster darauf hin, dass der Import Ihre aktuellen Eingaben ersetzt; erst mit **Datei wählen** öffnet sich die Dateiauswahl.
 
 ### Zurücksetzen
 
-Setzt nach Rückfrage **alle Eingaben auf die Standardwerte** zurück. Die Einstellung Hell/Dunkel bleibt erhalten. Tipp: Vorher exportieren, wenn Sie den Stand behalten möchten.
+Setzt **alle Eingaben auf die Standardwerte** zurück. Vorher weist ein Fenster darauf hin, dass Ihre bisherigen Eingaben verloren gehen; erst mit **Zurücksetzen** werden sie ersetzt. Tipp: Vorher exportieren, wenn Sie den Stand behalten möchten. Die Einstellung Hell/Dunkel bleibt erhalten.
 
 ### Automatisches Speichern
 

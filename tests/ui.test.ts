@@ -1,8 +1,8 @@
 // @vitest-environment happy-dom
 import { readdirSync, readFileSync } from 'node:fs';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SECTIONS, getPath } from '../src/ui/fields';
-import { INTRO_KEY, LEGACY_DESIGN_KEY, mountApp, STORAGE_KEY, THEME_KEY } from '../src/ui/app';
+import { INTRO_KEY, LEGACY_DESIGN_KEY, mountApp, PRIVACY_ACK_KEY, STORAGE_KEY, THEME_KEY } from '../src/ui/app';
 import { encodeHash } from '../src/core/serialize';
 import { APP_VERSION } from '../src/version';
 import { defaults, TODAY } from './helpers';
@@ -141,8 +141,11 @@ describe('UI (Smoke-Test)', () => {
   it('Zurücksetzen (F9.4) stellt Defaults her', () => {
     const { root, app } = mount();
     setValue(root, 'heatPump.jaz', '4.5');
-    window.confirm = () => true;
     root.querySelector<HTMLButtonElement>('#btn-reset')!.click();
+    // F9.8 first a warning, only the confirmation resets
+    expect(app.getInputs().heatPump.jaz).toBe(4.5);
+    expect(root.querySelector('#privacy-title')!.textContent).toBe('Alle Eingaben zurücksetzen?');
+    root.querySelector<HTMLButtonElement>('#privacy-ok')!.click();
     expect(app.getInputs()).toEqual(defaults());
   });
 
@@ -504,6 +507,19 @@ describe('UI (Smoke-Test)', () => {
     // remove
     root.querySelector<HTMLButtonElement>('[data-var-remove="0"]')!.click();
     expect(app.getVariants()).toEqual(['jetzt', '2028']);
+    // F9.8 taking over a variant: warning in the app's own dialog, only the confirmation replaces the inputs
+    const before = app.getInputs().heatPump.installMonth;
+    root.querySelector<HTMLButtonElement>('[data-var-open="1"]')!.click();
+    const confirmDlg = root.querySelector<HTMLDialogElement>('#privacy-confirm')!;
+    expect(confirmDlg.open).toBe(true);
+    expect(root.querySelector('#privacy-text')!.textContent).toContain('durch „2028“ ersetzt');
+    root.querySelector<HTMLButtonElement>('#privacy-cancel')!.click();
+    expect(app.getInputs().heatPump.installMonth).toBe(before);
+    root.querySelector<HTMLButtonElement>('[data-var-open="1"]')!.click();
+    expect(root.querySelector('#privacy-ok')!.textContent).toBe('Übernehmen');
+    root.querySelector<HTMLButtonElement>('#privacy-ok')!.click();
+    expect(app.getInputs().heatPump.installMonth).toBe('2028-05');
+    expect(root.querySelector<HTMLDialogElement>('#variants')?.open ?? false).toBe(false);
   });
 
   it('F30 Bericht: wird aufgebaut, druckt hell und stellt das Design danach wieder her', () => {
@@ -714,6 +730,98 @@ describe('F21 Weiterempfehlen-Dialog', () => {
     root.querySelector<HTMLButtonElement>('#support-copy-iban')!.click();
     await new Promise((r) => setTimeout(r, 0));
     expect(root.querySelector('#support-status')!.textContent).toContain('markiert');
+  });
+});
+
+describe('F9.7 Hinweis auf persönliche Daten vor Teilen und Export', () => {
+  let copied: string[];
+  let downloads: string[];
+  beforeEach(() => {
+    store.clear();
+    store.setItem(INTRO_KEY, '1');
+    history.replaceState(null, '', '/');
+    copied = [];
+    downloads = [];
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async (t: string) => void copied.push(t) } });
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) {
+      if (this.download) downloads.push(this.download);
+    });
+  });
+  afterEach(() => vi.restoreAllMocks());
+  const flush = () => new Promise((r) => setTimeout(r, 0));
+  const dlg = (root: HTMLElement) => root.querySelector<HTMLDialogElement>('#privacy-confirm')!;
+
+  it('„Link mit Werten teilen“ fragt erst nach und kopiert erst nach Bestätigung', async () => {
+    const { root } = mount();
+    root.querySelector<HTMLButtonElement>('#btn-share')!.click();
+    expect(dlg(root).open).toBe(true);
+    expect(root.querySelector('#privacy-title')!.textContent).toBe('Link mit Ihren Eingaben teilen?');
+    expect(root.querySelector('#privacy-text')!.textContent).toContain('Haushaltseinkommen');
+    expect(root.querySelector('#privacy-ok')!.textContent).toBe('Link kopieren');
+    await flush();
+    expect(copied).toEqual([]);
+    root.querySelector<HTMLButtonElement>('#privacy-ok')!.click();
+    await flush();
+    expect(dlg(root).open).toBe(false);
+    expect(copied).toHaveLength(1);
+    expect(copied[0]).toMatch(/#z=/);
+  });
+
+  it('Abbrechen: nichts wird kopiert oder gespeichert', async () => {
+    const { root } = mount();
+    root.querySelector<HTMLButtonElement>('#btn-share')!.click();
+    root.querySelector<HTMLButtonElement>('#privacy-cancel')!.click();
+    root.querySelector<HTMLButtonElement>('#btn-export')!.click();
+    root.querySelector<HTMLButtonElement>('#privacy-cancel')!.click();
+    await flush();
+    expect(dlg(root).open).toBe(false);
+    expect(copied).toEqual([]);
+    expect(downloads).toEqual([]);
+    expect(location.hash).toBe('');
+  });
+
+  it('Export fragt erst nach und speichert nach Bestätigung die Datei', () => {
+    const { root } = mount();
+    root.querySelector<HTMLButtonElement>('#btn-export')!.click();
+    expect(root.querySelector('#privacy-title')!.textContent).toBe('Eingaben als Datei speichern?');
+    expect(root.querySelector('#privacy-ok')!.textContent).toBe('Datei speichern');
+    expect(downloads).toEqual([]);
+    root.querySelector<HTMLButtonElement>('#privacy-ok')!.click();
+    expect(downloads).toHaveLength(1);
+    expect(downloads[0]).toMatch(/\.json$/);
+  });
+
+  it('F9.8 Import und Zurücksetzen warnen vor dem Überschreiben; die Warnung lässt sich nicht abschalten', () => {
+    store.setItem(PRIVACY_ACK_KEY, '1'); // switched-off personal data notice does not affect the overwrite warning
+    const { root, app } = mount();
+    const picker = vi.spyOn(root.querySelector<HTMLInputElement>('#file-import')!, 'click').mockImplementation(() => undefined);
+    root.querySelector<HTMLButtonElement>('#btn-import')!.click();
+    expect(dlg(root).open).toBe(true);
+    expect(root.querySelector('#privacy-title')!.textContent).toBe('Eingaben aus einer Datei laden?');
+    expect(root.querySelector('#privacy-text')!.textContent).toContain('ersetzt alle aktuellen Eingaben');
+    expect(root.querySelector<HTMLElement>('.privacy-skip')!.hidden).toBe(true);
+    expect(picker).not.toHaveBeenCalled();
+    root.querySelector<HTMLButtonElement>('#privacy-ok')!.click();
+    expect(picker).toHaveBeenCalledTimes(1);
+
+    setValue(root, 'heatPump.jaz', '4.5');
+    root.querySelector<HTMLButtonElement>('#btn-reset')!.click();
+    expect(root.querySelector('#privacy-ok')!.textContent).toBe('Zurücksetzen');
+    root.querySelector<HTMLButtonElement>('#privacy-cancel')!.click();
+    expect(app.getInputs().heatPump.jaz).toBe(4.5);
+    expect(dlg(root).open).toBe(false);
+  });
+
+  it('„Diesen Hinweis nicht mehr anzeigen“ wird gemerkt', async () => {
+    const { root } = mount();
+    root.querySelector<HTMLButtonElement>('#btn-export')!.click();
+    root.querySelector<HTMLInputElement>('#privacy-skip')!.checked = true;
+    root.querySelector<HTMLButtonElement>('#privacy-ok')!.click();
+    expect(store.getItem(PRIVACY_ACK_KEY)).toBe('1');
+    root.querySelector<HTMLButtonElement>('#btn-share')!.click();
+    expect(dlg(root).open).toBe(false);
+    await flush();
+    expect(copied).toHaveLength(1);
   });
 });
 
