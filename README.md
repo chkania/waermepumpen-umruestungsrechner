@@ -8,6 +8,7 @@ verschiedener Umrüstzeitpunkte.
 npm install
 npm run dev      # http://localhost:5173
 npm test         # Regressionstests
+npm run test:coverage  # Tests mit Testabdeckung (Bericht: coverage/index.html)
 npm run build    # statische Dateien in dist/ (z. B. für GitHub Pages)
 ```
 

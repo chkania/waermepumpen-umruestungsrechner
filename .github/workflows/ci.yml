@@ -26,8 +26,17 @@ jobs:
           node-version: lts/*
           cache: npm
       - run: npm ci
-      - name: Tests
-        run: npm test
+      - name: Tests mit Testabdeckung
+        run: npm run test:coverage
+      - name: Testabdeckung in die Zusammenfassung
+        run: |
+          node -e '
+            const t = require("./coverage/coverage-summary.json").total;
+            const row = (n, k) => `| ${n} | ${t[k].pct} % | ${t[k].covered} von ${t[k].total} |`;
+            console.log(["## Testabdeckung", "", "| Art | Abdeckung | Anzahl |", "|---|---|---|",
+              row("Anweisungen", "statements"), row("Verzweigungen", "branches"),
+              row("Funktionen", "functions"), row("Zeilen", "lines")].join("\n"));
+          ' >> "$GITHUB_STEP_SUMMARY"
       - name: Typecheck und Build
         run: npm run build
       - name: Sicherheitslücken in Laufzeit-Abhängigkeiten

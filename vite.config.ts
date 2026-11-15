@@ -29,5 +29,22 @@ export default defineConfig({
     environment: 'node',
     globals: true,
     include: ['tests/**/*.test.ts'],
+    // Test coverage (`npm run test:coverage`): calculation core and UI; page entry points only mount pages
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.ts'],
+      exclude: ['src/main.ts', 'src/help-main.ts', 'src/pages/**', 'src/**/*.d.ts'],
+      reporter: ['text', 'text-summary', 'html', 'json-summary'],
+      reportsDirectory: 'coverage',
+      // Minimum coverage, slightly below the current level: the run fails if coverage drops.
+      // Stricter for the calculation core (amounts users decide on) than for the UI (charts cannot be drawn in tests).
+      // Raise when coverage has grown – never lower.
+      thresholds: {
+        lines: 90,
+        branches: 78,
+        'src/core/**': { lines: 95, branches: 85 },
+        'src/ui/**': { lines: 80, branches: 65 },
+      },
+    },
   },
 });

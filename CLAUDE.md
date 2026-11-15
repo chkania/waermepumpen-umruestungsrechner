@@ -43,7 +43,7 @@ PolyForm Noncommercial 1.0.0 (`LICENSE.md`). Neue/aktualisierte Laufzeit-Abhäng
 
 ## Befehle
 - `npm run dev` – Entwicklungsserver (Port 5173, siehe `.claude/launch.json`)
-- `npm test` – alle Tests · `npm run build` – Typecheck + statischer Build nach `dist/`
+- `npm test` – alle Tests · `npm run test:coverage` – Tests mit Testabdeckung (Bericht in `coverage/`, HTML unter `coverage/index.html`; in der CI als Zusammenfassung). Mindestwerte in `vite.config.ts`: gesamt 90 % Zeilen / 78 % Verzweigungen, `src/core` 95 / 85, `src/ui` 80 / 65 – Unterschreiten lässt die CI fehlschlagen; nach oben nachziehen, nie senken · `npm run build` – Typecheck + statischer Build nach `dist/`
 
 ## Konventionen
 - Sprache im Code: Kommentare (auch JSDoc, YAML-/CSS-/HTML-Kommentare) sowie Namen von Klassen, Typen, Funktionen/Methoden, Variablen und Dateien immer auf **Englisch**. Deutsch bleiben alle für Nutzer sichtbaren Texte (UI, Meldungen, Handbuch, Changelog) und die Beschreibung in Commit-Nachrichten/PR-Titeln (erscheint im Changelog). Fachbegriffe im Kommentar mit dem deutschen Begriff in Klammern, beim ersten Vorkommen je Kommentar, z. B. „special repayment (Sondertilgung)“, „climate speed bonus (Klimageschwindigkeitsbonus)“, „SPF (JAZ)“.
