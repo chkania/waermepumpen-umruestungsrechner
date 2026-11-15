@@ -51,7 +51,8 @@ export const INTRO_KEY = 'wp-investitionsrechner:intro-seen';
 export const PRIVACY_ACK_KEY = 'wp-investitionsrechner:personal-data-notice-off';
 
 /**
- * Confirmation notices: before passing on the inputs (personal data, F9.7) and before overwriting them (F9.8).
+ * Confirmation notices: before passing on the inputs (personal data, F9.7) and before overwriting them (F9.8:
+ * import, reset, taking over a variant).
  * Only the personal data notice can be switched off; the overwrite warning always appears.
  */
 const CONFIRM_NOTICE = {
@@ -69,6 +70,11 @@ const CONFIRM_NOTICE = {
     title: 'Eingaben aus einer Datei laden?',
     text: 'Der Import ersetzt alle aktuellen Eingaben im Rechner durch die Werte aus der Datei. Ihre bisherigen Eingaben gehen dabei verloren. Sichern Sie sie vorher bei Bedarf per „Export“.',
     ok: 'Datei wählen',
+  },
+  variant: {
+    title: 'Variante in den Rechner übernehmen?',
+    text: 'Die Eingaben im Rechner werden durch „{name}“ ersetzt. Ihre bisherigen Eingaben gehen dabei verloren. Sichern Sie sie vorher bei Bedarf per „Export“.',
+    ok: 'Übernehmen',
   },
   reset: {
     title: 'Alle Eingaben zurücksetzen?',
@@ -356,13 +362,14 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     }
   };
   /** Runs `action` after the user confirmed the notice (or right away if a skippable notice was switched off). */
-  const confirmAction = (kind: ConfirmKind, action: () => void) => {
+  const confirmAction = (kind: ConfirmKind, action: () => void, name = '') => {
     privacySkippable = SKIPPABLE.includes(kind);
     if (privacySkippable && noticeOff()) return action();
     const t = CONFIRM_NOTICE[kind];
     $<HTMLElement>('.privacy-skip').hidden = !privacySkippable;
     $<HTMLElement>('#privacy-title').textContent = t.title;
-    $<HTMLElement>('#privacy-text').textContent = t.text;
+    // textContent: the variant name (file name or scenario name) is never interpreted as HTML
+    $<HTMLElement>('#privacy-text').textContent = t.text.replace('{name}', name);
     $<HTMLButtonElement>('#privacy-ok').textContent = t.ok;
     privacySkip.checked = false;
     privacyAction = action;
@@ -1186,13 +1193,19 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       renderVariants();
     } else if (btn.dataset.varOpen !== undefined) {
       const v = variants[Number(btn.dataset.varOpen)];
-      if (!v || !confirm(`Die Eingaben im Rechner durch „${v.name}“ ersetzen? Sichern Sie die aktuellen Eingaben vorher bei Bedarf per Export.`)) return;
-      leaveShared();
-      loadIssues = null;
-      controller.setInputs(structuredClone(v.inputs));
-      renderNotice();
-      varDialog.close();
-      toast(`„${v.name}“ in den Rechner übernommen.`);
+      if (!v) return;
+      confirmAction(
+        'variant',
+        () => {
+          leaveShared();
+          loadIssues = null;
+          controller.setInputs(structuredClone(v.inputs));
+          renderNotice();
+          varDialog.close();
+          toast(`„${v.name}“ in den Rechner übernommen.`);
+        },
+        v.name,
+      );
     }
   });
   /** For tests: currently compared variants. */

@@ -507,6 +507,19 @@ describe('UI (Smoke-Test)', () => {
     // remove
     root.querySelector<HTMLButtonElement>('[data-var-remove="0"]')!.click();
     expect(app.getVariants()).toEqual(['jetzt', '2028']);
+    // F9.8 taking over a variant: warning in the app's own dialog, only the confirmation replaces the inputs
+    const before = app.getInputs().heatPump.installMonth;
+    root.querySelector<HTMLButtonElement>('[data-var-open="1"]')!.click();
+    const confirmDlg = root.querySelector<HTMLDialogElement>('#privacy-confirm')!;
+    expect(confirmDlg.open).toBe(true);
+    expect(root.querySelector('#privacy-text')!.textContent).toContain('durch „2028“ ersetzt');
+    root.querySelector<HTMLButtonElement>('#privacy-cancel')!.click();
+    expect(app.getInputs().heatPump.installMonth).toBe(before);
+    root.querySelector<HTMLButtonElement>('[data-var-open="1"]')!.click();
+    expect(root.querySelector('#privacy-ok')!.textContent).toBe('Übernehmen');
+    root.querySelector<HTMLButtonElement>('#privacy-ok')!.click();
+    expect(app.getInputs().heatPump.installMonth).toBe('2028-05');
+    expect(root.querySelector<HTMLDialogElement>('#variants')?.open ?? false).toBe(false);
   });
 
   it('F30 Bericht: wird aufgebaut, druckt hell und stellt das Design danach wieder her', () => {
