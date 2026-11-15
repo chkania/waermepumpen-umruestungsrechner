@@ -46,7 +46,7 @@ inklusive steigender Energiepreise, Bundesförderung (KfW 458), Kreditfinanzieru
 - F2.4 Heizöl: aktueller Gesamtpreis in €/Liter (inkl. CO₂), Heizwert 10 kWh/l. *(Test: prices)*
 - F2.5 Strom (WP-Tarif): Arbeitspreis ct/kWh brutto mit Steigerung p. a., Grundpreis Zähler €/Jahr, § 14a-EnWG-Netzentgeltreduzierung €/Jahr (Abzug). Option „kein separater WP-Tarif" → Haushaltsstrompreis, kein Zusatz-Grundpreis/-Zähler. *(Test: simulation)*
 - F2.6 PV-Eigenverbrauch: WP-Strom aus eigener PV, bewertet mit der entgangenen Einspeisevergütung (ct/kWh, konstant). Seit F28 je Monat aus der PV-Anlage berechnet statt fester Anteil. *(Test: simulation)*
-- F2.7 Bio-Treppe (Gebäudemodernisierungsgesetz): Für einen **neu eingebauten** fossilen Kessel (Ersatzkessel im Referenzszenario) muss ab 2029 ein steigender Bio-Anteil bezogen werden. Mehrkosten = Bio-Anteil(Jahr) × Bio-Aufpreis (ct/kWh). Default-Stufen: 2029: 10 %, 2030: 15 %, 2035: 30 %, 2040: 60 %; Aufpreis 4 ct/kWh. Abschaltbar. *(Test: prices, simulation)*
+- F2.7 Bio-Treppe (Gebäudemodernisierungsgesetz): Für einen **neu eingebauten** fossilen Kessel (Ersatzkessel im Referenzszenario) muss ab 2029 ein steigender Bio-Anteil bezogen werden. Mehrkosten = Bio-Anteil(Jahr) × Bio-Aufpreis (ct/kWh). Default-Stufen: 2029: 10 %, 2030: 15 %, 2035: 30 %, 2040: 60 %; Aufpreis 3 ct/kWh (Markt-Update 2026-11-11, vorher 4 ct – siehe Änderungsprotokoll). Abschaltbar. *(Test: prices, simulation)*
 
 ### F3 – Referenzszenario (ohne WP)
 - F3.1 Jährlicher Brennstoffverbrauch (Gas kWh bzw. Öl Liter), Kesselnutzungsgrad, Grundpreis Gas (€/Jahr, steigt mit Gaspreisrate), Wartung + Schornsteinfeger (€/Jahr, steigt mit allgemeiner Kostensteigerung). *(Test: simulation)*
