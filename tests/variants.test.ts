@@ -40,6 +40,22 @@ describe('F31 Varianten vergleichen', () => {
     expect(diffs[0].values[1]).toBe('05/2028');
   });
 
+  it('Unterschiede: Felder, die für keine Variante gelten, entfallen (Heizölpreis bei Gas)', () => {
+    const a = v('A');
+    const b = v('B', (i) => (i.prices.oilPriceEur = 1.4));
+    expect(variantDiffs([a, b])).toEqual([]);
+    // gas against oil: fuel-specific prices appear, with a dash where they do not apply
+    const oil = v('Öl', (i) => {
+      i.oldHeating.fuel = 'oil';
+      i.prices.oilPriceEur = 1.4;
+    });
+    const diffs = variantDiffs([a, oil]);
+    const price = diffs.find((d) => d.label.startsWith('Heizölpreis'))!;
+    expect(price.values[0]).toBe('–');
+    expect(price.values[1]).toContain('1,4');
+    expect(diffs.find((d) => d.label.startsWith('Gaspreis'))!.values[1]).toBe('–');
+  });
+
   it('Tabelle: höchste Ersparnis markiert, Namen maskiert', () => {
     const html = variantsTableHtml([v('A <1>'), v('B', (i) => (i.heatPump.investment = 45000))]);
     expect(html).toContain('A &lt;1&gt;');

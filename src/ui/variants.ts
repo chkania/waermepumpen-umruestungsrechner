@@ -38,15 +38,21 @@ export interface VariantDiff {
   values: string[];
 }
 
-/** Inputs whose values differ between the variants (all sections incl. expert sections; without name and notes). */
+/**
+ * Inputs whose values differ between the variants (all sections incl. expert sections; without name and notes).
+ * Fields hidden in the form of every variant are skipped; where only some variants show a field, the others get "–".
+ */
 export function variantDiffs(rs: VariantResult[]): VariantDiff[] {
   const out: VariantDiff[] = [];
   for (const s of SECTIONS) {
     for (const f of s.fields) {
       if (f.path === 'scenario.name' || f.type === 'textarea') continue;
-      const raw = rs.map((r) => JSON.stringify(getPath(r.inputs, f.path)));
+      // Fields that do not apply to a variant (e.g. the heating oil price with a gas boiler) are left out there
+      const shown = rs.map((r) => (f.show ? f.show(r.inputs) : true));
+      if (!shown.some(Boolean)) continue;
+      const raw = rs.map((r, i) => (shown[i] ? JSON.stringify(getPath(r.inputs, f.path)) : null));
       if (raw.every((v) => v === raw[0])) continue;
-      out.push({ section: s.title, label: f.label, values: rs.map((r) => fieldText(f, r.inputs)) });
+      out.push({ section: s.title, label: f.label, values: rs.map((r, i) => (shown[i] ? fieldText(f, r.inputs) : '–')) });
     }
   }
   return out;

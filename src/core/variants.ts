@@ -11,6 +11,8 @@ export const MAX_VARIANTS = 3;
 export interface Variant {
   name: string;
   inputs: Inputs;
+  /** Follows the inputs in the calculator (at most one variant); all others are fixed snapshots. */
+  live?: boolean;
 }
 
 export interface VariantResult {
