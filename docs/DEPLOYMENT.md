@@ -9,6 +9,7 @@ Der Workflow `.github/workflows/deploy.yml` veröffentlicht den Rechner per SSH 
 3. Danach startet **Deploy** automatisch:
    - **build** – `npm ci`, Tests, `npm run build` auf dem neuesten `main` (inkl. Release-Commit), ohne Zugriff auf den SSH-Schlüssel.
    - **deploy** – lädt nur das fertige `dist/` herunter und überträgt es mit `rsync` über SSH. Neue Dateien werden erst am Ende umgeschaltet, alte zuletzt gelöscht.
+   - **verify** – prüft danach die ausgelieferte Seite, ohne Zugriff auf Secrets (siehe [Prüfung nach dem Deployment](#prüfung-nach-dem-deployment)). Schlägt sie fehl, ist der Lauf rot.
 4. Manuell auslösen: GitHub → Actions → **Deploy** → „Run workflow“.
 
 Nicht automatisch veröffentlicht werden Merges durch den Dependabot-Workflow (sie lösen keinen Release aus); sie gehen mit dem nächsten regulären Merge oder einem manuellen Lauf online.
@@ -89,6 +90,36 @@ Weitere Empfehlungen:
 - **Schlüssel auf dem Server einschränken** (wirksamster Schutz bei einem gestohlenen Schlüssel): in `~/.ssh/authorized_keys` die Zeile des Deploy-Schlüssels auf rsync in das Zielverzeichnis begrenzen, z. B. `command="rrsync -wo /pfad/zum/ziel",restrict ssh-ed25519 AAAA… github-deploy` (`rrsync` liegt rsync bei; Pfad je nach System, ggf. `/usr/share/doc/rsync/support/rrsync`).
 - **Wenige Personen mit Schreibrecht:** Wer schreiben darf, kann Workflows ändern und so an Secrets gelangen. Stand 14.11.2026 hat nur chkania (Admin) Zugriff. Mitwirkende arbeiten über Forks und Pull Requests; wer beim Sortieren von Issues und PRs hilft, bekommt höchstens die Rolle **Triage** (kein Push), **Write** nur bei echtem Vertrauen, **Admin** bleibt beim Inhaber. Prüfen unter Settings → Collaborators.
 - **„Nur per PR“ und Pflicht-Checks für `main`** sind derzeit nicht aktiv: Bei persönlichen Repositorys kann GitHub Actions nicht als Ausnahme eingetragen werden, und der Release-Workflow muss seinen Commit `chore(release): x.y.z` direkt auf `main` pushen.
+
+### Prüfung nach dem Deployment
+
+Der Job **verify** startet `scripts/smoke-test.ts` gegen die veröffentlichte Adresse (`DEPLOY_URL`, sonst `https://waermepumpen-investitionsrechner.de/`). Er prüft:
+
+| Prüfung | Was genau |
+|---|---|
+| Version | `version.json` (vom Build geschrieben) enthält die gebaute Version und den Commit. Abgerufen ohne Cache, bis zu sechs Versuche im Abstand von 10 Sekunden. |
+| Versionsanzeige | Der Rechner zeigt „Version x.y.z“ in der Kopfzeile. |
+| Rechnen | Die Kennzahlen erscheinen; nach einer geänderten Eingabe (Verbrauch) ändern sie sich. |
+| Diagramme | Chart.js wird nachgeladen, mindestens ein Diagramm ist gezeichnet. |
+| Quellenhinweis | Ein „i“-Popover öffnet sich mit Inhalt. |
+| Weitere Seiten | Alle Seiten aus `sitemap.xml` laden mit Überschrift; im Changelog steht die neue Version. |
+| Fehler | Keine Skriptfehler, keine Fehler in der Konsole, keine fehlgeschlagenen Anfragen (z. B. fehlende Dateien, CSP-Verstöße). |
+
+Als Browser dient das auf den GitHub-Runnern vorinstallierte Google Chrome über `playwright-core` (kein eigener Browser-Download). Die Besucherstatistik wird blockiert und zusätzlich per Widerspruch abgeschaltet, die Prüfung zählt also nie als Besuch. Ergebnis: Log des Jobs und Zusammenfassung des Laufs.
+
+Lokal (Chrome oder ein anderer Chromium-Browser über `CHROME_PATH`):
+
+```bash
+npm run smoke
+```
+
+```bash
+npm run build && npm run preview
+```
+
+```bash
+npm run smoke -- http://localhost:4173/
+```
 
 ### Fehler „No ED25519 host key is known …“
 
