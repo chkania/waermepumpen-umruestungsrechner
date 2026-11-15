@@ -8,6 +8,11 @@ Alle wesentlichen Änderungen am Wärmepumpen-Investitionsrechner. Das Format or
 - **Minor** (1.x.0): neue Funktionen oder Eingaben sowie bewusst geänderte Rechenmodelle oder Standardwerte (Ergebnisse können sich ändern).
 - **Patch** (1.0.x): Fehlerkorrekturen, Texte, Darstellung – ohne neue Funktionen.
 
+## 1.13.1 – 2026-11-15
+
+### Fehlerkorrekturen
+- Links zum Quellcode zeigen auf github.com/chkania/wpir (#36)
+
 ## 1.13.0 – 2026-11-15
 
 ### Neu
