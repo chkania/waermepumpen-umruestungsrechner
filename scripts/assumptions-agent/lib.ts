@@ -119,7 +119,7 @@ export function groupBySource(items: readonly CheckItem[]): SourceGroup[] {
   return [...groups].map(([url, list]) => ({ url, items: list }));
 }
 
-const ENTITIES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', shy: '' };
+const ENTITIES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', shy: '', zwj: '', zwnj: '' };
 
 /** Readable text of an HTML page: without scripts, styles and tags; entities decoded, whitespace collapsed. */
 export function htmlToText(html: string): string {
@@ -131,6 +131,7 @@ export function htmlToText(html: string): string {
     .replace(/&#(\d+);/g, (_m, n: string) => String.fromCodePoint(Number(n)))
     .replace(/&#x([0-9a-f]+);/gi, (_m, n: string) => String.fromCodePoint(parseInt(n, 16)))
     .replace(/&([a-z]+);/gi, (m, name: string) => ENTITIES[name.toLowerCase()] ?? m)
+    .replace(/[­​-‍⁠﻿]/g, '') // soft hyphens and zero-width characters
     .replace(/[ \t\r\f\v  ]+/g, ' ')
     .replace(/ ?\n[ \n]*/g, '\n')
     .trim();

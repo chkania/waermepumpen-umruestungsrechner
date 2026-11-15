@@ -62,6 +62,8 @@ describe('F22.3 Vorprüfung der Annahmen – Auswahl und Darstellung', () => {
   it('macht aus HTML lesbaren Text ohne Skripte und Tags', () => {
     const html = '<html><head><style>p{}</style><script>var x="<b>";</script></head><body><h1>KfW&nbsp;458</h1><p>Grundförderung &amp; Bonus: 30&#160;%</p><!-- x --></body></html>';
     expect(htmlToText(html)).toBe('KfW 458\nGrundförderung & Bonus: 30 %');
+    // soft hyphens and zero-width joiners (as on the KfW pages) disappear, so quotes match
+    expect(htmlToText('<p>Kredit&shy;betrag \u00adbis&zwj; &zwnj;90.000 Euro</p>')).toBe('Kreditbetrag bis 90.000 Euro');
   });
 });
 
