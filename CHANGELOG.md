@@ -8,6 +8,13 @@ Alle wesentlichen Änderungen am Wärmepumpen-Investitionsrechner. Das Format or
 - **Minor** (1.x.0): neue Funktionen oder Eingaben sowie bewusst geänderte Rechenmodelle oder Standardwerte (Ergebnisse können sich ändern).
 - **Patch** (1.0.x): Fehlerkorrekturen, Texte, Darstellung – ohne neue Funktionen.
 
+## 1.10.7 – 2026-11-15
+
+### Fehlerkorrekturen
+- Potential fix for code scanning alert no. 4: Incomplete multi-character sanitization
+- Potential fix for pull request finding 'CodeQL / Incomplete multi-character sanitization'
+- Inhaltsverzeichnis der Hilfe zeigt „&“ und Code in Überschriften wieder richtig
+
 ## 1.10.6 – 2026-11-15
 
 ### Fehlerkorrekturen
