@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { calculatorUrl, RECOMMEND_SUBJECT, RECOMMEND_TEXT, recommendLinks } from '../src/ui/share';
+import { calculatorUrl, RECOMMEND_SUBJECT, RECOMMEND_TEXT, recommendLinks, SHARE_BASE, shareBaseUrl } from '../src/ui/share';
 
 const shared = 'https://rechner.example.de/index.html?probe=1#s=eyJidWlsZGluZyI6eyJob3VzZWhvbGRJbmNvbWUiOjk5OTk5fX0';
 
@@ -38,5 +38,18 @@ describe('F21 Weiterempfehlen', () => {
 
   it('keine Links zu Facebook oder X', () => {
     expect(JSON.stringify(recommendLinks(shared))).not.toMatch(/facebook|twitter|x\.com/);
+  });
+});
+
+describe('F9.2 Link mit Werten: kurze Domain', () => {
+  it('Links mit Eingaben zeigen auf wpir.de, lokal auf die eigene Adresse', () => {
+    expect(SHARE_BASE).toBe('https://wpir.de/');
+    expect(shareBaseUrl('https://waermepumpen-investitionsrechner.de/index.html?x=1#z=abc')).toBe(SHARE_BASE);
+    expect(shareBaseUrl('https://www.waermepumpen-umruestungsrechner.de/')).toBe(SHARE_BASE);
+    expect(shareBaseUrl('http://localhost:5173/#z=abc')).toBe('http://localhost:5173/');
+    expect(shareBaseUrl('http://127.0.0.1:4173/index.html')).toBe('http://127.0.0.1:4173/');
+    expect(shareBaseUrl('http://[::1]:4173/')).toBe('http://[::1]:4173/');
+    expect(shareBaseUrl('http://rechner.localhost/')).toBe('http://rechner.localhost/');
+    expect(shareBaseUrl('http://localhost.example.de/')).toBe(SHARE_BASE);
   });
 });

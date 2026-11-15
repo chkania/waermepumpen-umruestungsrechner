@@ -29,6 +29,18 @@ export function calculatorUrl(href: string): string {
   return u.toString();
 }
 
+/**
+ * Short domain for links with inputs (F9.2) and the QR code in the report (F30.3): shorter links, smaller QR code.
+ * It redirects permanently (301) to the main domain; the browser keeps the hash with the inputs.
+ */
+export const SHARE_BASE = 'https://wpir.de/';
+const LOCAL_HOST = /^(localhost|127\.0\.0\.1|\[::1\])$|\.(localhost|test)$/;
+
+/** Base address for links with inputs: the short domain, except on a local development host (links stay testable). */
+export function shareBaseUrl(href: string): string {
+  return LOCAL_HOST.test(new URL(href).hostname) ? calculatorUrl(href) : SHARE_BASE;
+}
+
 export function recommendLinks(href: string): RecommendLinks {
   const url = calculatorUrl(href);
   // one line: some WhatsApp clients (e.g. the desktop app) drop everything before a line break
