@@ -1,6 +1,20 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { baseUrl, checkVersionInfo, isIgnoredUrl, MAIN_URL, parseArgs, sitemapPages } from '../scripts/smoke-lib';
+import {
+  baseUrl,
+  checkVersionInfo,
+  isIgnoredUrl,
+  MAIN_URL,
+  parseArgs,
+  REQUIRED_SECURITY_HEADERS,
+  securityHeaderErrors,
+  sitemapPages,
+} from '../scripts/smoke-lib';
+
+/** Delivered headers of the live site (docs/DEPLOYMENT.md). */
+const delivered = (values: Record<string, string>): Headers =>
+  new Headers(Object.fromEntries(Object.entries(values).map(([k, v]) => [k.toLowerCase(), v])));
+const allHeaders = () => delivered(Object.fromEntries(REQUIRED_SECURITY_HEADERS.map((h) => [h.name, h.value])));
 
 describe('N15 Prüfung nach dem Deployment', () => {
   it('Kommandozeile: Standard ist die Hauptadresse mit der Version aus package.json', () => {
@@ -32,6 +46,45 @@ describe('N15 Prüfung nach dem Deployment', () => {
     expect(pages).toContain('http://localhost:4173/changelog.html');
     expect(pages).not.toContain('http://localhost:4173/');
     expect(pages.every((p) => p.startsWith('http://localhost:4173/'))).toBe(true);
+  });
+
+  it('Sicherheits-Header: alle gesetzt → keine Abweichung, auch mit Zusatzangaben', () => {
+    expect(securityHeaderErrors(allHeaders())).toEqual([]);
+    expect(
+      securityHeaderErrors(
+        delivered({
+          'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+          'Cross-Origin-Opener-Policy': 'same-origin',
+          'X-Frame-Options': 'DENY',
+          'X-Content-Type-Options': 'nosniff',
+          'Referrer-Policy': 'strict-origin-when-cross-origin',
+        }),
+      ),
+    ).toEqual([]);
+  });
+
+  it('Sicherheits-Header: fehlende und falsche Werte werden benannt', () => {
+    const missing = allHeaders();
+    missing.delete('cross-origin-opener-policy');
+    missing.delete('referrer-policy');
+    expect(securityHeaderErrors(missing)).toEqual(['cross-origin-opener-policy fehlt', 'referrer-policy fehlt']);
+
+    const wrong = allHeaders();
+    wrong.set('x-frame-options', 'SAMEORIGIN');
+    wrong.set('strict-transport-security', 'max-age=600');
+    expect(securityHeaderErrors(wrong)).toEqual([
+      'strict-transport-security: „max-age=600“, erwartet „max-age=31536000“',
+      'x-frame-options: „SAMEORIGIN“, erwartet „deny“',
+    ]);
+  });
+
+  it('Sicherheits-Header in Code und Dokumentation stimmen überein', () => {
+    const doc = readFileSync('docs/DEPLOYMENT.md', 'utf8');
+    const documented = [...doc.matchAll(/Header always set ([\w-]+) "([^"]+)"/g)].map((m) => ({
+      name: m[1].toLowerCase(),
+      value: m[2].toLowerCase(),
+    }));
+    expect(documented).toEqual(REQUIRED_SECURITY_HEADERS.map((h) => ({ name: h.name, value: h.value })));
   });
 
   it('nur die Besucherstatistik wird ignoriert (blockiert)', () => {

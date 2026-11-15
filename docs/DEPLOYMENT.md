@@ -221,7 +221,7 @@ Prüfen:
 curl -sI https://waermepumpen-investitionsrechner.de/ | grep -i -E 'strict-transport|cross-origin|x-frame|x-content|referrer'
 ```
 
-Erwartet werden die fünf Header mit den Werten oben. Lighthouse (Best Practices, „Trust and Safety“) meldet danach nur noch, dass die CSP im `<meta>`-Tag statt im Header steht und keine Trusted Types nutzt – beides ist bewusst so.
+Erwartet werden die fünf Header mit den Werten oben. Der Smoke-Test nach jedem Deployment (`scripts/smoke-test.ts`, Job „verify“) prüft sie automatisch mit; bei einer Adresse ohne HTTPS (z. B. lokale Vorschau) entfällt diese Prüfung. Lighthouse (Best Practices, „Trust and Safety“) meldet danach nur noch, dass die CSP im `<meta>`-Tag statt im Header steht und keine Trusted Types nutzt – beides ist bewusst so.
 
 ### Datenschutzerklärung prüfen
 

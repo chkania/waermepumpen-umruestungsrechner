@@ -67,6 +67,30 @@ export function sitemapPages(xml: string, base: string): string[] {
     .filter((u) => u !== base);
 }
 
+/**
+ * Security headers that only work as HTTP headers (docs/DEPLOYMENT.md). The Content-Security-Policy is not among
+ * them: it sits in the HTML as a `<meta>` tag. Values are compared case-insensitively as substrings, so additional
+ * directives such as `includeSubDomains` are allowed.
+ */
+export const REQUIRED_SECURITY_HEADERS: readonly { name: string; value: string }[] = [
+  { name: 'strict-transport-security', value: 'max-age=31536000' },
+  { name: 'cross-origin-opener-policy', value: 'same-origin' },
+  { name: 'x-frame-options', value: 'deny' },
+  { name: 'x-content-type-options', value: 'nosniff' },
+  { name: 'referrer-policy', value: 'strict-origin-when-cross-origin' },
+];
+
+/** Compares the delivered HTTP headers with REQUIRED_SECURITY_HEADERS; returns the deviations. */
+export function securityHeaderErrors(headers: Headers): string[] {
+  const errors: string[] = [];
+  for (const { name, value } of REQUIRED_SECURITY_HEADERS) {
+    const actual = headers.get(name);
+    if (actual === null) errors.push(`${name} fehlt`);
+    else if (!actual.toLowerCase().includes(value)) errors.push(`${name}: „${actual}“, erwartet „${value}“`);
+  }
+  return errors;
+}
+
 /** Requests that do not count as an error: the blocked visitor statistics. */
 export function isIgnoredUrl(url: string): boolean {
   try {
