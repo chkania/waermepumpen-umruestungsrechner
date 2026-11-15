@@ -4,6 +4,7 @@ name: Deploy
 # - Runs after the "Release" workflow on main, so the deployed build already carries the new version
 #   (the release commit is pushed with GITHUB_TOKEN and therefore triggers no push workflows itself).
 # - build: installs, tests and builds WITHOUT access to the SSH key (third-party package code never sees it).
+#   Its job summary lists the changelog entries that go live compared with the deployed version (N12.1).
 # - deploy: only downloads the finished build and uploads it – no npm, no repository code.
 # - verify: checks the live site afterwards WITHOUT secrets (N15, scripts/smoke-test.ts): version.json carries the built
 #   version and commit, the calculator calculates and draws its charts, all pages load without errors.
@@ -52,6 +53,12 @@ jobs:
         run: |
           echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
           echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      # Shown on the run page while the deployment waits for approval: what goes live compared with the live version
+      - name: Änderungen gegenüber der Live-Seite
+        env:
+          URL: ${{ vars.DEPLOY_URL || 'https://waermepumpen-investitionsrechner.de/' }}
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: node scripts/deploy-changelog.ts "$URL" "$VERSION" | tee -a "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v7
         with:
           name: dist

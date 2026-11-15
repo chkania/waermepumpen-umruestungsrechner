@@ -7,7 +7,7 @@ Der Workflow `.github/workflows/deploy.yml` veröffentlicht den Rechner per SSH 
 1. Ein Pull Request wird per Squash-Merge in `main` übernommen.
 2. Der Workflow **Release** leitet die Version ab und committet ggf. `chore(release): x.y.z`.
 3. Danach startet **Deploy** automatisch:
-   - **build** – `npm ci`, Tests, `npm run build` auf dem neuesten `main` (inkl. Release-Commit), ohne Zugriff auf den SSH-Schlüssel.
+   - **build** – `npm ci`, Tests, `npm run build` auf dem neuesten `main` (inkl. Release-Commit), ohne Zugriff auf den SSH-Schlüssel. Die Zusammenfassung des Laufs zeigt danach unter **„Änderungen … → …“** die Changelog-Einträge, die online gehen: alle Versionen nach der Live-Version (aus `version.json` der Seite) bis zur neuen. So siehst du vor der Freigabe in „Review deployments“, was deployt wird. Lokal: `node scripts/deploy-changelog.ts [url] [version]`.
    - **deploy** – lädt nur das fertige `dist/` herunter und überträgt es mit `rsync` über SSH. Neue Dateien werden erst am Ende umgeschaltet, alte zuletzt gelöscht.
    - **verify** – prüft danach die ausgelieferte Seite, ohne Zugriff auf Secrets (siehe [Prüfung nach dem Deployment](#prüfung-nach-dem-deployment)). Schlägt sie fehl, ist der Lauf rot.
 4. Manuell auslösen: GitHub → Actions → **Deploy** → „Run workflow“.
