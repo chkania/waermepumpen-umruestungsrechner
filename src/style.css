@@ -224,6 +224,11 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .field .unit { min-width: 64px; font-size: 0.8rem; color: var(--c-muted); }
 .field .unit:empty { display: none; }
 .field .help { display: block; margin-top: 3px; font-size: 0.77rem; color: var(--c-muted); }
+/* calculated note below a field, e.g. absolute amount of a share (F17.3) */
+.field .field-note { display: block; margin-top: 3px; font-size: 0.8rem; color: var(--c-text-2); }
+/* SPF (JAZ) check after a change that shifts the estimate (F26.4) */
+.jaz-check { margin: -4px 0 10px; padding: 8px 10px; font-size: 0.8rem; color: var(--c-text); border: 1px solid var(--warn-border); background: var(--warn-bg); border-radius: 4px; }
+.link-btn { background: none; border: 0; padding: 0; color: var(--accent); text-decoration: underline; cursor: pointer; font: inherit; }
 .field.check label { display: flex; gap: 8px; align-items: center; color: var(--c-text); font-size: 0.9rem; cursor: pointer; }
 .field.check input { width: 16px; height: 16px; accent-color: var(--accent); }
 .field[hidden] { display: none; }

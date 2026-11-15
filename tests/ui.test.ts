@@ -733,6 +733,61 @@ describe('F21 Weiterempfehlen-Dialog', () => {
   });
 });
 
+describe('F17.3 / F26.4 Hinweise in den Eingaben', () => {
+  beforeEach(() => {
+    store.clear();
+    store.setItem(INTRO_KEY, '1');
+  });
+  const note = (root: HTMLElement, path: string) => root.querySelector(`[data-field="${path}"] .field-note`)!.textContent;
+
+  it('zeigt den absoluten Verbrauch für Warmwasser und Kochen unter dem Anteil', () => {
+    const { root } = mount();
+    setValue(root, 'oldHeating.consumption', '20000');
+    setValue(root, 'oldHeating.dhwShare', '15');
+    expect(note(root, 'oldHeating.dhwShare')).toBe('Aus Ihrem Verbrauch: ≈ 3.000 kWh Gas im Jahr für Warmwasser.');
+    const cooking = root.querySelector<HTMLInputElement>('[data-path="oldHeating.cookingWithGas"]')!;
+    cooking.checked = true;
+    cooking.dispatchEvent(new Event('change', { bubbles: true }));
+    setValue(root, 'oldHeating.cookingShare', '2');
+    expect(note(root, 'oldHeating.cookingShare')).toBe('Aus Ihrem Verbrauch: ≈ 400 kWh Gas im Jahr fürs Kochen.');
+    // the hot-water amount follows the consumption
+    setValue(root, 'oldHeating.consumption', '10000');
+    expect(note(root, 'oldHeating.dhwShare')).toBe('Aus Ihrem Verbrauch: ≈ 1.500 kWh Gas im Jahr für Warmwasser.');
+    // oil: litres and kWh
+    const fuel = root.querySelector<HTMLSelectElement>('[data-path="oldHeating.fuel"]')!;
+    fuel.value = 'oil';
+    fuel.dispatchEvent(new Event('change', { bubbles: true }));
+    setValue(root, 'oldHeating.consumption', '2000');
+    expect(note(root, 'oldHeating.dhwShare')).toBe('Aus Ihrem Verbrauch: ≈ 300 l Heizöl (3.000 kWh) im Jahr für Warmwasser.');
+  });
+
+  it('weist auf die JAZ hin, wenn eine Eingabe die Schätzung verschiebt; Übernehmen oder JAZ-Eingabe beendet den Hinweis', () => {
+    const { root } = mount();
+    const check = () => root.querySelector('.jaz-check');
+    // a change without effect on the estimate: no notice
+    setValue(root, 'heatPump.maintenance', '250');
+    expect(check()).toBeNull();
+    setValue(root, 'heatPump.emitter', 'floor');
+    const c = check()!;
+    expect(c.previousElementSibling!.getAttribute('data-field')).toBe('heatPump.emitter');
+    expect(c.textContent).toMatch(/JAZ-Schätzung hat sich geändert: jetzt .* \(vorher .*\)/);
+    expect(c.querySelector('[data-jaz-goto]')).not.toBeNull();
+    expect(root.querySelector('#jaz-estimate')!.textContent).toContain('durch Ihre Änderung bei „');
+    // back to the original value: estimate as before, notice disappears
+    setValue(root, 'heatPump.emitter', 'radiators');
+    expect(check()).toBeNull();
+    setValue(root, 'oldHeating.consumption', '35000');
+    expect(check()!.previousElementSibling!.getAttribute('data-field')).toBe('oldHeating.consumption');
+    // entering the SPF ends the notice
+    setValue(root, 'heatPump.jaz', '3');
+    expect(check()).toBeNull();
+    setValue(root, 'heatPump.source', 'ground');
+    expect(check()).not.toBeNull();
+    root.querySelector<HTMLButtonElement>('[data-jaz-apply]')!.click();
+    expect(check()).toBeNull();
+  });
+});
+
 describe('F9.7 Hinweis auf persönliche Daten vor Teilen und Export', () => {
   let copied: string[];
   let downloads: string[];

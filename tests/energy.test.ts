@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { energyTotal, energyYear, GAS_COOKING_EFFICIENCY } from '../src/core/energy';
 import { energySplit } from '../src/core/prices';
+import { shareFuel } from '../src/ui/fields';
 import type { Inputs } from '../src/core/types';
 import { defaults } from './helpers';
 
@@ -20,6 +21,15 @@ describe('F29 Energie je Monat', () => {
     expect(e.totals.old).toBeCloseTo((s.spaceHeat + s.dhwHeat) / i.oldHeating.efficiency, 6);
     expect(e.totals.hp).toBeCloseTo((s.spaceHeat + s.dhwHeat) / i.heatPump.jaz, 6);
     expect(e.cookingStaysGas).toBe(false);
+    // F17.5 hot-water final energy: useful heat ÷ efficiency
+    expect(s.dhwFuel).toBeCloseTo(s.dhwHeat / i.oldHeating.efficiency, 6);
+    // the field notes use the same split
+    for (const mut of [(x: typeof i) => x, (x: typeof i) => ((x.oldHeating.cookingWithGas = true), (x.oldHeating.cookingShare = 0.03), x), (x: typeof i) => ((x.oldHeating.fuel = 'oil'), (x.oldHeating.consumption = 2000), x)]) {
+      const j = mut(structuredClone(i));
+      const sp = energySplit(j);
+      expect(shareFuel(j).dhw).toBeCloseTo(sp.dhwFuel, 6);
+      expect(shareFuel(j).cooking).toBeCloseTo(sp.cookingFuel, 6);
+    }
   });
 
   it('Winter braucht ein Vielfaches des Sommers', () => {

@@ -151,6 +151,8 @@ export interface EnergySplit {
   spaceHeat: number;
   /** Useful heat (Nutzwärme) for hot water (Warmwasser) (kWh). */
   dhwHeat: number;
+  /** Final energy (Endenergie) for hot water (Warmwasser) (kWh), part of heatingFuel. */
+  dhwFuel: number;
 }
 
 export function energySplit(inp: Inputs): EnergySplit {
@@ -167,6 +169,7 @@ export function energySplit(inp: Inputs): EnergySplit {
     heatingFuel,
     spaceHeat: (heatingFuel - dhwFuel) * o.efficiency,
     dhwHeat: dhwFuel * o.efficiency,
+    dhwFuel,
   };
 }
 
