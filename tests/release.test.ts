@@ -97,7 +97,9 @@ describe('N9 Release-Skript im Git-Repository', () => {
     sh('git', 'commit', '-q', '-m', msg);
   };
 
-  it('parallele Entwicklung: Version entsteht erst auf main aus allen Commits seit dem letzten Release', () => {
+  // Creates its own repository and starts about a dozen git processes plus the release script. Alone it takes
+  // just under 2 s; under load (many test files in parallel) it would otherwise exceed the default limit of 5 s.
+  it('parallele Entwicklung: Version entsteht erst auf main aus allen Commits seit dem letzten Release', { timeout: 30_000 }, () => {
     dir = mkdtempSync(join(tmpdir(), 'release-test-'));
     sh('git', 'init', '-q', '-b', 'main');
     sh('git', 'config', 'user.email', 'test@example.invalid');
