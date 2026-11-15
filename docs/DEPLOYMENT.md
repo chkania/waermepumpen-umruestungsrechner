@@ -67,7 +67,7 @@ Danach `deploy_key`, `deploy_key.pub` und `host_key.txt` lokal löschen. Geht de
 ### 4. Zielverzeichnis
 
 - `DEPLOY_PATH` muss ein **eigenes Verzeichnis** nur für den Rechner sein: Sein Inhalt wird bei jedem Deployment durch `dist/` ersetzt (`rsync --delete`). Leere oder zu allgemeine Pfade (`/`, `~`, `.`, Pfade mit `..`) lehnt der Workflow ab.
-- Ausgenommen sind `.htaccess` und `.well-known/` – sie werden weder überschrieben noch gelöscht und können auf dem Server gepflegt werden (z. B. Weiterleitung auf HTTPS, Zertifikatsprüfung).
+- Ausgenommen sind `.htaccess` und `.well-known/`. Sie werden weder überschrieben noch gelöscht und können auf dem Server gepflegt werden, z. B. für die Weiterleitung auf die Hauptdomain (siehe unten) oder die Zertifikatsprüfung.
 - Der Build nutzt relative Pfade (`base: './'`), funktioniert also auch in einem Unterverzeichnis.
 - Auf dem Webspace muss `rsync` verfügbar sein (bei den meisten Hostern mit SSH-Zugang der Fall).
 
@@ -93,6 +93,34 @@ Weitere Empfehlungen:
 ### Fehler „No ED25519 host key is known …“
 
 Das Secret `SSH_KNOWN_HOSTS` enthält keinen passenden Eintrag. Häufige Ursachen: Statt der Zeile aus `ssh-keyscan` wurde nur der Fingerabdruck (`SHA256:…`) eingetragen, der Hostname in der Zeile weicht von `DEPLOY_HOST` ab, oder die Zeile ist gehasht (`|1|…`, entsteht mit `ssh-keyscan -H`). Richtig ist eine Zeile der Form `host.example.de ssh-ed25519 AAAA…`.
+
+### Weiterleitung auf die Hauptdomain
+
+Der Rechner ist unter mehreren Domains erreichbar: `waermepumpen-investitionsrechner.de`, `www.waermepumpen-investitionsrechner.de`, `waermepumpen-umruestungsrechner.de`, `www.waermepumpen-umruestungsrechner.de`. Alle Aufrufe sollen dauerhaft (301) auf **`https://waermepumpen-investitionsrechner.de`** gehen.
+
+- Pfad und Parameter bleiben erhalten, z. B. `…/hilfe.html#link-mit-werten-teilen`.
+- Geteilte Links mit Eingaben (`#z=…`) funktionieren weiter: Der Teil nach `#` wird nie an den Server geschickt, und der Browser hängt ihn nach der Weiterleitung wieder an.
+
+Diese Regeln in die `.htaccess` jedes Ordners schreiben, der eine dieser Domains ausliefert (bei Uberspace unter `~/www/`; `ls ~/www` zeigt die Ordner):
+
+```apache
+# Redirect every other host name to the main domain – permanent (301), path and query are kept
+RewriteEngine On
+RewriteCond %{HTTP_HOST} !^waermepumpen-investitionsrechner\.de$ [NC]
+RewriteRule ^ https://waermepumpen-investitionsrechner.de%{REQUEST_URI} [R=301,L,NE]
+```
+
+- **Ordner des Rechners** (`DEPLOY_PATH`): Hier leitet die Regel nur die Aufrufe über `www.…` weiter; die Hauptdomain wird normal ausgeliefert. Gibt es dort schon eine `.htaccess`, die Zeilen an den Anfang setzen. Das Deployment lässt `.htaccess` unverändert.
+- **Ordner der übrigen Domains** (z. B. `~/www/waermepumpen-umruestungsrechner.de`): Hier leitet die Regel jeden Aufruf weiter. Weitere Dateien braucht der Ordner nicht.
+- **HTTPS** ist nicht Teil der Regel: Uberspace leitet `http://` selbst auf `https://` um. Eine Prüfung von `%{HTTPS}` würde hinter dem TLS-Proxy des Hosters sogar zu einer Endlosschleife führen.
+
+Prüfen, z. B.:
+
+```bash
+for d in waermepumpen-umruestungsrechner.de www.waermepumpen-umruestungsrechner.de www.waermepumpen-investitionsrechner.de; do curl -sI "https://$d/hilfe.html?x=1" | grep -i -E '^(HTTP|location)'; done
+```
+
+Erwartet wird jeweils `HTTP/… 301` und `location: https://waermepumpen-investitionsrechner.de/hilfe.html?x=1`.
 
 ### Empfohlene HTTP-Header
 
