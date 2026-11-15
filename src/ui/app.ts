@@ -35,7 +35,7 @@ import { SECTIONS, getPath, setPath, type Field } from './fields';
 import { escapeHtml, fmtDuration, fmtEur, fmtMonth, fmtNum, fmtPct, safeHref } from './format';
 import { RECOMMEND_SUBJECT, RECOMMEND_TEXT, calculatorUrl, recommendLinks, shareBaseUrl } from './share';
 import { logoSvg } from '../logo';
-import { BUG_REPORT_URL, CONTRIBUTING_URL, FEATURE_REQUEST_URL, REPO_URL } from '../project';
+import { BUG_REPORT_URL, BUY_ME_A_COFFEE_URL, CONTRIBUTING_URL, FEATURE_REQUEST_URL, PAYPAL_URL, REPO_URL } from '../project';
 
 export const STORAGE_KEY = 'wp-investitionsrechner:v1';
 /** Former design choice (modern/classic, F14); only the modern design remains, the stored value is removed. */
@@ -958,6 +958,16 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     if (e.target === recommend) recommend.close();
   });
 
+  // ---------- Support (F19.4) ----------
+  const support = $<HTMLDialogElement>('#support');
+  $<HTMLButtonElement>('#btn-support').addEventListener('click', () => {
+    if (typeof support.showModal === 'function') support.showModal();
+    else support.setAttribute('open', '');
+  });
+  support.addEventListener('click', (e) => {
+    if (e.target === support) support.close();
+  });
+
   const controller: AppController = {
     getInputs: () => inputs,
     setInputs(i) {
@@ -1423,6 +1433,7 @@ function layout(): string {
       <button id="btn-intro" type="button" aria-haspopup="dialog" title="Kurze Einführung: Wozu dient der Rechner, wie bedient man ihn?">Einführung</button>
       <a id="btn-help" class="tool-link" href="./hilfe.html" title="Benutzerhandbuch öffnen">Hilfe</a>
       <button id="btn-recommend" type="button" aria-haspopup="dialog" title="Den Rechner per WhatsApp, Threema, E-Mail, Link oder einer anderen App (z. B. Signal) weiterempfehlen">Weiterempfehlen</button>
+      <button id="btn-support" type="button" aria-haspopup="dialog" title="Das Hobbyprojekt freiwillig unterstützen – per Buy Me a Coffee oder PayPal">Unterstützen</button>
       <button id="btn-share" type="button" title="Link mit Ihren aktuellen Eingaben kopieren – zum Sichern oder Weitergeben Ihrer Berechnung">Link mit Werten teilen</button>
       <button id="btn-variants" type="button" aria-haspopup="dialog" title="Zwei oder drei Varianten (Export-Dateien oder aktuelle Eingaben) nebeneinander vergleichen">Varianten vergleichen</button>
       <button id="btn-report" type="button" title="Kompakte Zusammenfassung mit Eingaben, Ergebnissen, Diagrammen, Förderung und Finanzierung – drucken oder als PDF speichern">Bericht drucken</button>
@@ -1486,6 +1497,7 @@ function layout(): string {
           <li>Dir ist ein Fehler oder ein veralteter Wert aufgefallen? <a href="${safeHref(BUG_REPORT_URL)}" target="_blank" rel="noopener">Melde ihn</a> – am besten mit Quelle, z. B. eine geänderte KfW-Regel oder ein neuer Preis.</li>
           <li>Du hast eine Idee oder eine Frage, die der Rechner noch nicht beantwortet? <a href="${safeHref(FEATURE_REQUEST_URL)}" target="_blank" rel="noopener">Schlag sie vor</a>.</li>
           <li>Du möchtest selbst mitentwickeln – an Rechenlogik, Texten, Tests oder Barrierefreiheit? <a href="${safeHref(CONTRIBUTING_URL)}" target="_blank" rel="noopener">So funktioniert die Mitarbeit</a>.</li>
+          <li>Der Rechner hat dir geholfen und du möchtest das Hobbyprojekt unterstützen? Über einen Kaffee freue ich mich: <a href="${safeHref(BUY_ME_A_COFFEE_URL)}" target="_blank" rel="noopener">Buy me a coffee</a> oder <a href="${safeHref(PAYPAL_URL)}" target="_blank" rel="noopener">PayPal</a>. Freiwillig – der Rechner bleibt kostenlos und werbefrei.</li>
         </ul>
         <p class="muted small">Quellcode, Fragen und Vorschläge: <a href="${safeHref(REPO_URL)}" target="_blank" rel="noopener">github.com/chkania/waermepumpen-umruestungsrechner</a> – schön, wenn du dabei bist!</p>
       </aside>
@@ -1496,6 +1508,7 @@ function layout(): string {
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   ${introHtml()}
   ${recommendHtml()}
+  ${supportHtml()}
   ${variantsHtml()}`;
 }
 
@@ -1536,6 +1549,23 @@ function recommendHtml(): string {
       <p id="rec-status" class="rec-status" role="status" aria-live="polite"></p>
       <textarea id="rec-fallback" class="rec-fallback" rows="3" readonly aria-label="Text zum Kopieren" hidden></textarea>
       <p class="muted small">„Andere“ öffnet das Teilen-Menü Ihres Geräts, z. B. für Signal oder Telegram. Wo es das nicht gibt, wird der Text kopiert – fügen Sie ihn in die gewünschte App ein. „E-Mail“ öffnet Ihr E-Mail-Programm mit vorbereitetem Betreff und Text. Ihre eigene Berechnung teilen Sie dagegen über „Link mit Werten teilen“.</p>
+      <div class="intro-actions"><span></span><button type="submit" value="close" class="primary">Schließen</button></div>
+    </form>
+  </dialog>`;
+}
+
+/** Voluntary support of the hobby project (F19.4): plain links to Buy Me a Coffee and PayPal, no embedded widgets. */
+function supportHtml(): string {
+  return `
+  <dialog id="support" class="intro recommend support" aria-labelledby="support-title" aria-describedby="support-lead">
+    <form method="dialog" class="intro-body">
+      <h2 id="support-title">Projekt unterstützen</h2>
+      <p id="support-lead">Der Rechner ist ein privates Hobbyprojekt – kostenlos und ohne Werbung. Wenn er Ihnen geholfen hat, freue ich mich über einen Kaffee. Das ist natürlich freiwillig.</p>
+      <ul class="share-list">
+        <li><a class="share-btn" href="${safeHref(BUY_ME_A_COFFEE_URL)}" target="_blank" rel="noopener">Buy me a coffee</a></li>
+        <li><a class="share-btn" href="${safeHref(PAYPAL_URL)}" target="_blank" rel="noopener">PayPal</a></li>
+      </ul>
+      <p class="muted small">Beide Links öffnen die Seite des Anbieters in einem neuen Tab; dort gelten dessen Datenschutzbestimmungen. Der Rechner überträgt dabei nichts. Ebenso hilfreich: Fehler melden oder den Rechner weiterempfehlen.</p>
       <div class="intro-actions"><span></span><button type="submit" value="close" class="primary">Schließen</button></div>
     </form>
   </dialog>`;

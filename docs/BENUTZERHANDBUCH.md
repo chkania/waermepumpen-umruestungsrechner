@@ -50,6 +50,10 @@ Die Wahl wird im Browser gespeichert.
 - **Link kopieren** legt die Adresse des Rechners in die Zwischenablage.
 - **Andere** öffnet auf Smartphones und in manchen Browsern das Teilen-Menü des Geräts – dort wählen Sie z. B. Signal oder Telegram (Signal bietet keinen eigenen Link zum Teilen). Wo es das Teilen-Menü nicht gibt, wird der Text in die Zwischenablage kopiert und Sie fügen ihn in die gewünschte App ein.
 
+### Unterstützen
+
+Öffnet ein Fenster mit zwei Links, über die Sie das Hobbyprojekt freiwillig unterstützen können: **Buy me a coffee** und **PayPal**. Beide öffnen die Seite des Anbieters in einem neuen Tab. Der Rechner bleibt kostenlos und ohne Werbung, eine Unterstützung ist keine Voraussetzung für irgendeine Funktion.
+
 ### Link mit Werten teilen
 
 Erzeugt einen Link, der alle **vom Standard abweichenden Eingaben** enthält, und kopiert ihn in die Zwischenablage (sonst steht er in der Adresszeile). Wer den Link öffnet, sieht den Rechner mit genau Ihren Eingaben.
@@ -390,6 +394,8 @@ Der Rechner ist ein offenes Projekt auf GitHub: [github.com/chkania/waermepumpen
 - **Fehler oder veraltete Werte melden:** Nutze auf GitHub das Formular [Fehler oder veralteter Wert](https://github.com/chkania/waermepumpen-umruestungsrechner/issues/new?template=bug_report.yml) – am besten mit Quelle, z. B. eine geänderte KfW-Regel, ein neuer Preis oder ein Rechenergebnis, das dir unplausibel vorkommt. Ein exportierter Datensatz oder ein Link hilft beim Nachvollziehen (prüf vorher, ob er persönliche Angaben enthält).
 - **Ideen vorschlagen:** Welche Frage beantwortet der Rechner noch nicht? Welche Erklärung war für dich unklar? Nutze dafür das Formular [Idee oder Frage](https://github.com/chkania/waermepumpen-umruestungsrechner/issues/new?template=feature_request.yml).
 - **Selbst mitentwickeln:** Rechenlogik, Texte, Tests oder Barrierefreiheit – wie Änderungen ablaufen, beschreibt [CONTRIBUTING.md](https://github.com/chkania/waermepumpen-umruestungsrechner/blob/main/CONTRIBUTING.md).
+
+- **Unterstützen:** Der Rechner ist ein Hobbyprojekt, kostenlos und ohne Werbung. Wenn er dir geholfen hat, freue ich mich über einen Kaffee: [Buy me a coffee](https://buymeacoffee.com/chkania) oder [PayPal](https://paypal.me/ChristophKania). Das ist freiwillig.
 
 Im Rechner findest du dazu den Kasten **Mitmachen** unter den Ergebnissen und den Link **Quellcode auf GitHub** im Seitenfuß.
 
