@@ -575,11 +575,27 @@ describe('UI (Smoke-Test)', () => {
     expect(root.querySelectorAll('a[href="./changelog.html"][target]')).toHaveLength(0);
   });
 
-  it('F15 Hilfe-Link öffnet das Benutzerhandbuch in neuem Tab', () => {
+  it('F15 Hilfe-Link öffnet das Benutzerhandbuch im selben Tab', () => {
     const { root } = mount();
     const a = root.querySelector<HTMLAnchorElement>('#btn-help')!;
     expect(a.getAttribute('href')).toBe('./hilfe.html');
-    expect(a.target).toBe('_blank');
+    expect(a.hasAttribute('target')).toBe(false);
+  });
+
+  it('F15.4 eigene Seiten (Hilfe, Impressum, Datenschutz, Lizenzen, Changelog) öffnen im selben Tab, fremde Seiten in neuem', () => {
+    const { root } = mount();
+    const links = [...root.querySelectorAll<HTMLAnchorElement>('a[href]')];
+    const own = links.filter((a) => /^\.\/[a-z-]+\.html/.test(a.getAttribute('href')!));
+    expect(own.map((a) => a.getAttribute('href'))).toEqual(
+      expect.arrayContaining(['./hilfe.html', './impressum.html', './datenschutz.html', './lizenz.html', './lizenzen-drittanbieter.html', './changelog.html']),
+    );
+    for (const a of own) expect(a.hasAttribute('target'), a.getAttribute('href')!).toBe(false);
+    const external = links.filter((a) => /^https:/.test(a.getAttribute('href')!));
+    expect(external.length).toBeGreaterThan(0);
+    for (const a of external) {
+      expect(a.target, a.href).toBe('_blank');
+      expect(a.rel, a.href).toContain('noopener');
+    }
   });
 });
 
