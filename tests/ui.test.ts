@@ -141,6 +141,14 @@ describe('UI (Smoke-Test)', () => {
     expect(root.querySelector('#year-table')!.textContent).toContain('Nov: Kauf eines neuen Kessels');
   });
 
+  it('F10.6 Hinweis, wenn der Start der Betrachtung in der Zukunft liegt (Datum aus der App)', () => {
+    const { root } = mount();
+    const events = () => root.querySelector('#events')!.textContent!;
+    expect(events()).not.toContain('Start der Betrachtung liegt in der Zukunft');
+    setValue(root, 'general.startMonth', '2030-05');
+    expect(events()).toContain('Start der Betrachtung liegt in der Zukunft (05/2030)');
+  });
+
   it('Förderhinweise werden nicht doppelt als Warnung angezeigt', () => {
     const i = defaults();
     i.oldHeating.ageYears = 16;

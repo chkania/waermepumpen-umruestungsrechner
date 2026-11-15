@@ -202,3 +202,33 @@ describe('F10 Wichtige Ereignisse', () => {
     expect(find(ev(userCase((i) => (i.heatPump.installMonth = '2027-04'))).hints, /Grundförderung/)).toBeUndefined();
   });
 });
+
+describe('F10.6 Start der Betrachtung in der Zukunft', () => {
+  const today = new Date(2026, 10, 15);
+  const hint = (start: string, mut?: (i: Inputs) => void) => {
+    const i = userCase((x) => {
+      x.general.startMonth = start;
+      x.heatPump.installMonth = start;
+      mut?.(x);
+    });
+    return find(keyEvents(i, runAll(i), today).hints, /Start der Betrachtung liegt in der Zukunft/);
+  };
+
+  it('warnt, wenn der Start nach dem aktuellen Monat liegt, und nennt die betroffenen Werte', () => {
+    const h = hint('2030-05')!;
+    expect(h.level).toBe('warning');
+    expect(h.scenario).toBe('all');
+    expect(h.title).toContain('05/2030');
+    expect(h.detail).toMatch(/Gaspreis, Strompreise, Investition/);
+    expect(h.detail).toMatch(/CO₂-Anteil/);
+    expect(h.detail).toMatch(/„Geplante Inbetriebnahme“ verschieben/);
+    expect(hint('2030-05', (i) => (i.oldHeating.fuel = 'oil'))!.detail).toMatch(/Heizölpreis/);
+  });
+
+  it('kein Hinweis für den aktuellen Monat, die Vergangenheit oder ohne Datum', () => {
+    expect(hint('2026-11')).toBeUndefined();
+    expect(hint('2025-01')).toBeUndefined();
+    const i = userCase((x) => (x.general.startMonth = '2030-05'));
+    expect(find(keyEvents(i, runAll(i)).hints, /Start der Betrachtung/)).toBeUndefined();
+  });
+});

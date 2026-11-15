@@ -97,6 +97,7 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 - F10.3 Zeitleiste WP: Förderantrag, Inbetriebnahme (Investition), Auszahlung Zuschuss, Tilgungsbeginn, Ende der Zinsbindung (Anschlusszins), vollständige Tilgung bzw. Restschuld am Ende. *(Test: events)*
 - F10.4 Hinweise: Klimageschwindigkeitsbonus – gesichert (mit Betrag und nächster Absenkung), ausgelaufen, später erreichbar (ab wann, welcher Satz) oder **nicht erreichbar** (Heizung erreicht das Mindestalter erst nach Auslaufen des Bonus bzw. nach Ende der Restlebensdauer); Einkommensbonus ja/nein; Begrenzung der förderfähigen Kosten mit nächster Absenkung; KfW 359 statt 358; Frist bzw. Nichtverfügbarkeit des Steuerbonus. *(Test: events)*
 - F10.5 Diese Fakten werden im Warnhinweis-Block nicht doppelt angezeigt. *(Test: ui)*
+- F10.6 Liegt der Start der Betrachtung nach dem aktuellen Monat, warnt ein Hinweis: Alle Preise und Kosten gelten als Werte des Startmonats und steigen erst ab dann (beim Gas-/Heizölpreis wird zudem der CO₂-Anteil des Startjahres abgezogen); Alter und Restlebensdauer der Heizung zählen ebenfalls ab dann. Empfehlung: Start auf den aktuellen Monat, nur die geplante Inbetriebnahme verschieben. *(Test: events, ui)*
 
 ### F11 – Herkunft der Standardwerte
 - F11.1 Jedes Eingabefeld hat einen Info-Button („i") neben der Beschriftung; er öffnet ein Popover mit dem Standardwert, der Art der Herkunft und einer Erläuterung (ggf. Link und Stand). Nur ein Popover ist gleichzeitig offen; Klick daneben oder Escape schließt. *(Test: ui)*
@@ -315,3 +316,4 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 | 2026-11-15 | F22.3 Vorprüfung der Annahmen mit Claude: liest Werte aus `defaults.ts` und Quellen aus `sources.ts`, nur Bericht, keine automatische Änderung. Ergebnisse unverändert. |
 | 2026-11-15 | F11 Herkunft der Untergrenze der förderfähigen Kosten (22.000 € ab 01.08.2030) korrigiert: steht in der BEG-EM-Richtlinie Nr. 8.3.1, nicht auf der KfW-Seite (gefunden mit F22.3). Ergebnisse unverändert. |
 | 2026-11-15 | N12.1 Deployment zeigt vor der Freigabe die Changelog-Einträge seit der Live-Version. Ergebnisse unverändert. |
+| 2026-11-15 | F10.6 Hinweis, wenn der Start der Betrachtung in der Zukunft liegt (heutige Preise würden sonst ohne Steigerung bis zum Start gerechnet). Ergebnisse unverändert. |

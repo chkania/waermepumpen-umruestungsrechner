@@ -1,4 +1,4 @@
-import { formatMonthDe, halfYearSteps, parseMonth, tryParseMonth, yearOf } from './dates';
+import { formatMonthDe, halfYearSteps, monthFromDate, parseMonth, tryParseMonth, yearOf } from './dates';
 import { cap1At, incomeBonusRate, kfwLoanVariant, kgbRateAt } from './funding';
 import { annualHeatDemand, createPriceModel, energySplit, parsePath } from './prices';
 import { estimateJaz } from './jaz';
@@ -33,8 +33,11 @@ const eur = (x: number) => `${Math.round(x).toLocaleString('de-DE')} €`;
 const pct = (x: number) => `${Math.round(x * 100)} %`;
 const M = formatMonthDe;
 
-/** Determines the key events and notices (F10). */
-export function keyEvents(inp: Inputs, run: RunResult): KeyEvents {
+/**
+ * Determines the key events and notices (F10).
+ * @param today current date – for notices that depend on it (start month in the future, F10.6); omitted = no such notices
+ */
+export function keyEvents(inp: Inputs, run: RunResult, today?: Date): KeyEvents {
   const hints: KeyEvent[] = [];
   const timeline: KeyEvent[] = [];
   const start = parseMonth(inp.general.startMonth);
@@ -177,6 +180,8 @@ export function keyEvents(inp: Inputs, run: RunResult): KeyEvents {
   }
 
   // ---------- Notices ----------
+  const future = today ? futureStartHint(inp, start, today) : null;
+  if (future) hints.push(future);
   if (install !== null) {
     const cook = cookingSwitchHint(inp, run);
     if (cook) hints.push(cook);
@@ -489,4 +494,26 @@ function hint(level: EventLevel, title: string, detail: string): KeyEvent {
 function fmtYears(y: number): string {
   const r = Math.round(y * 10) / 10;
   return `${r.toLocaleString('de-DE')} ${r === 1 ? 'Jahr' : 'Jahre'}`;
+}
+
+/**
+ * F10.6: Start month (Start der Betrachtung) in the future. All prices and costs count as values of the start month and
+ * only increase from then on – "today's" values entered there lack the increase up to the start, gas and oil prices
+ * additionally the higher CO2 share (the CO2 share of the start year is deducted from the entered price).
+ */
+export function futureStartHint(inp: Inputs, start: number, today: Date): KeyEvent | null {
+  const now = parseMonth(monthFromDate(today));
+  if (start <= now) return null;
+  const fossil = inp.oldHeating.fuel === 'oil' ? 'Heizölpreis' : 'Gaspreis';
+  return {
+    month: null,
+    scenario: 'all',
+    level: 'warning',
+    title: `Start der Betrachtung liegt in der Zukunft (${M(start)})`,
+    detail:
+      `Alle Preise und Kosten gelten als Werte von ${M(start)} und steigen erst ab dann: ${fossil}, Strompreise, Investition, Wartung und Ersatzkessel. ` +
+      `Stehen dort heutige Werte, fehlt die Preissteigerung bis ${M(start)} – beim ${fossil} zusätzlich der bis dahin höhere CO₂-Anteil. ` +
+      'Alter und Restlebensdauer der Heizung zählen ebenfalls ab diesem Monat. ' +
+      'Für einen späteren Umstieg besser den Start auf den aktuellen Monat setzen und nur die „Geplante Inbetriebnahme“ verschieben.',
+  };
 }

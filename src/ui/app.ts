@@ -448,7 +448,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       run = runAll(inputs);
       // Reuse the base run: avoids the duplicate reference/simulation in comparison and sensitivity (F7, F27)
       cmp = compareInstallTimes(inputs, run);
-      events = keyEvents(inputs, run);
+      events = keyEvents(inputs, run, env.today ?? new Date());
       sens = sensitivity(inputs, run);
     } catch (err) {
       $<HTMLElement>('#warnings').innerHTML = `<div class="alert error">${escapeHtml((err as Error).message)}</div>`;
