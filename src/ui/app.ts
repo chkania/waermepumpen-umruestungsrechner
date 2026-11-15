@@ -33,7 +33,7 @@ function withChartLib(fn: (lib: ChartLib) => void): void {
 }
 import { SECTIONS, getPath, setPath, type Field } from './fields';
 import { escapeHtml, fmtDuration, fmtEur, fmtMonth, fmtNum, fmtPct } from './format';
-import { RECOMMEND_SUBJECT, RECOMMEND_TEXT, calculatorUrl, recommendLinks } from './share';
+import { RECOMMEND_SUBJECT, RECOMMEND_TEXT, calculatorUrl, recommendLinks, shareBaseUrl } from './share';
 import { logoSvg } from '../logo';
 import { BUG_REPORT_URL, CONTRIBUTING_URL, FEATURE_REQUEST_URL, REPO_URL } from '../project';
 
@@ -312,7 +312,8 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   $<HTMLButtonElement>('#btn-share').addEventListener('click', async () => {
     const hash = encodeHash(defaults, inputs);
     history.replaceState(null, '', hash);
-    const url = location.href;
+    // short domain (F9.2); the address bar keeps the current address
+    const url = shareBaseUrl(location.href) + hash;
     try {
       await navigator.clipboard.writeText(url);
       toast('Link in die Zwischenablage kopiert.');
@@ -1110,6 +1111,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       events: last.events,
       today: env.today ?? new Date(),
       url: calculatorUrl(location.href),
+      shareUrl: shareBaseUrl(location.href),
       detailsHtml: $<HTMLElement>('#details').innerHTML,
     });
     // Charts: render off screen in light colours at print width, then keep a static copy of each bitmap.

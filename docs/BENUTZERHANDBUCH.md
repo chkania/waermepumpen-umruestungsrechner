@@ -54,6 +54,7 @@ Die Wahl wird im Browser gespeichert.
 
 Erzeugt einen Link, der alle **vom Standard abweichenden Eingaben** enthält, und kopiert ihn in die Zwischenablage (sonst steht er in der Adresszeile). Wer den Link öffnet, sieht den Rechner mit genau Ihren Eingaben.
 
+- Der Link beginnt mit der kurzen Adresse **wpir.de** und führt von dort zum Rechner.
 - Der Link enthält die Eingaben selbst, komprimiert im Teil nach `#z=`. Es wird **nichts auf einem Server gespeichert**. Ältere Links (mit `#s=`) funktionieren weiterhin.
 - **Achtung:** Auch persönliche Angaben wie das Haushaltseinkommen stehen im Link. Teilen Sie ihn nur mit Personen, die diese Angaben sehen dürfen.
 - Solange ein geteilter Link in der Adresszeile steht, wird er bei jeder Änderung mit aktualisiert.
@@ -75,7 +76,7 @@ Jede Variante wird für sich gerechnet, mit ihrer eigenen Referenz „ohne Wärm
 Erstellt eine **kompakte Zusammenfassung** für das Gespräch mit Energieberatung, Handwerksbetrieb oder Bank und öffnet den Druckdialog des Browsers. Dort wählen Sie einen Drucker oder **„Als PDF speichern“**. Der Bericht enthält:
 
 - Bezeichnung und Bemerkungen des Szenarios, Datum, Version und Betrachtungszeitraum,
-- oben rechts einen **QR-Code**: Mit dem Handy gescannt, öffnet er den Rechner mit genau diesen Eingaben – so kann z. B. die Energieberatung direkt weiterrechnen. Die Bemerkungen sind darin nicht enthalten (sie stehen im Bericht),
+- oben rechts einen **QR-Code**: Mit dem Handy gescannt, öffnet er den Rechner (über die kurze Adresse wpir.de) mit genau diesen Eingaben – so kann z. B. die Energieberatung direkt weiterrechnen. Die Bemerkungen sind darin nicht enthalten (sie stehen im Bericht),
 - die Kennzahlen (Gesamtkosten, Ersparnis, Amortisation, CO₂-Einsparung) und den günstigsten Umrüstzeitpunkt,
 - Eckdaten zu Haus und Wärmepumpe (Kennwert, Effizienzklasse, Heizlast, JAZ-Schätzung, ggf. PV-Deckung),
 - die Diagramme „Kumulierte Kosten“, „Energie je Monat“ und „Einflussgrößen“,

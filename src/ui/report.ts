@@ -29,6 +29,8 @@ export interface ReportData {
   today: Date;
   /** Address of the calculator without user data. */
   url: string;
+  /** Base address for the link in the QR code (short domain, F30.3); default: url. */
+  shareUrl?: string;
   /** Already rendered cards of the app (funding/tax/financing and tariff comparison). */
   detailsHtml: string;
 }
@@ -147,10 +149,10 @@ function bestMonthHtml(cmp: InstallComparison): string {
  * Link that opens the calculator with the inputs of the report (F30.3). Without the notes: they can be very long
  * (QR code too large) and are printed in the report anyway.
  */
-export function reportLink(d: Pick<ReportData, 'inputs' | 'defaults' | 'url'>): string {
+export function reportLink(d: Pick<ReportData, 'inputs' | 'defaults' | 'url' | 'shareUrl'>): string {
   const inputs = structuredClone(d.inputs);
   inputs.scenario.notes = d.defaults.scenario.notes;
-  return d.url + encodeHash(d.defaults, inputs);
+  return (d.shareUrl ?? d.url) + encodeHash(d.defaults, inputs);
 }
 
 function qrHtml(d: ReportData): string {

@@ -9,7 +9,7 @@ import { fieldText, REPORT_CHARTS, reportHtml, reportLink } from '../src/ui/repo
 import { defaults, TODAY } from './helpers';
 
 /** F30 printable report. */
-const report = (mut?: (i: Inputs) => void) => {
+const report = (mut?: (i: Inputs) => void, extra: { shareUrl?: string } = {}) => {
   const i = defaults();
   mut?.(i);
   const run = runAll(i);
@@ -22,6 +22,7 @@ const report = (mut?: (i: Inputs) => void) => {
     today: TODAY,
     url: 'https://example.invalid/',
     detailsHtml: '<div class="card"><h3>KfW-Zuschuss (458)</h3></div>',
+    ...extra,
   });
 };
 const field = (path: string) => SECTIONS.flatMap((s) => s.fields).find((f) => f.path === path)!;
@@ -79,6 +80,13 @@ describe('F30 Bericht', () => {
     expect(back.heatPump.investment).toBe(41000);
     expect(back.scenario.name).toBe('Angebot A');
     expect(back.scenario.notes).toBe('');
+  });
+
+  it('F30.3 QR-Code nutzt die kurze Domain, die Fußzeile die Adresse des Rechners', () => {
+    const d = { inputs: defaults(), defaults: defaults(), url: 'https://waermepumpen-investitionsrechner.de/', shareUrl: 'https://wpir.de/' };
+    expect(reportLink(d)).toMatch(/^https:\/\/wpir\.de\/#z=/);
+    const html = report((i) => (i.heatPump.investment = 41000), { shareUrl: 'https://wpir.de/' });
+    expect(html).toContain('Erstellt mit dem Wärmepumpen-Investitionsrechner: https://example.invalid/');
   });
 
   it('F30.3 zu langer Link: Hinweis statt QR-Code', () => {

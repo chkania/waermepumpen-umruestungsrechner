@@ -127,7 +127,7 @@ Das Secret `SSH_KNOWN_HOSTS` enthält keinen passenden Eintrag. Häufige Ursache
 
 ### Weiterleitung auf die Hauptdomain
 
-Der Rechner ist unter mehreren Domains erreichbar: `waermepumpen-investitionsrechner.de`, `www.waermepumpen-investitionsrechner.de`, `waermepumpen-umruestungsrechner.de`, `www.waermepumpen-umruestungsrechner.de`. Alle Aufrufe sollen dauerhaft (301) auf **`https://waermepumpen-investitionsrechner.de`** gehen.
+Der Rechner ist unter mehreren Domains erreichbar: `waermepumpen-investitionsrechner.de`, `www.waermepumpen-investitionsrechner.de`, `waermepumpen-umruestungsrechner.de`, `www.waermepumpen-umruestungsrechner.de` und die Kurzdomain `wpir.de` (mit `www.wpir.de`). Die Kurzdomain steht in den Links mit Werten und im QR-Code des Berichts; diese Links funktionieren nur, solange `wpir.de` weiterleitet. Alle Aufrufe sollen dauerhaft (301) auf **`https://waermepumpen-investitionsrechner.de`** gehen.
 
 - Pfad und Parameter bleiben erhalten, z. B. `…/hilfe.html#link-mit-werten-teilen`.
 - Geteilte Links mit Eingaben (`#z=…`) funktionieren weiter: Der Teil nach `#` wird nie an den Server geschickt, und der Browser hängt ihn nach der Weiterleitung wieder an.
@@ -148,7 +148,7 @@ RewriteRule ^ https://waermepumpen-investitionsrechner.de%{REQUEST_URI} [R=301,L
 Prüfen, z. B.:
 
 ```bash
-for d in waermepumpen-umruestungsrechner.de www.waermepumpen-umruestungsrechner.de www.waermepumpen-investitionsrechner.de; do curl -sI "https://$d/hilfe.html?x=1" | grep -i -E '^(HTTP|location)'; done
+for d in waermepumpen-umruestungsrechner.de www.waermepumpen-umruestungsrechner.de www.waermepumpen-investitionsrechner.de wpir.de www.wpir.de; do curl -sI "https://$d/hilfe.html?x=1" | grep -i -E '^(HTTP|location)'; done
 ```
 
 Erwartet wird jeweils `HTTP/… 301` und `location: https://waermepumpen-investitionsrechner.de/hilfe.html?x=1`.
