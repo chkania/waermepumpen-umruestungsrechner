@@ -32,7 +32,7 @@ function withChartLib(fn: (lib: ChartLib) => void): void {
   else void loadChartLib().then(fn, () => undefined);
 }
 import { SECTIONS, getPath, setPath, type Field } from './fields';
-import { escapeHtml, fmtDuration, fmtEur, fmtMonth, fmtNum, fmtPct } from './format';
+import { escapeHtml, fmtDuration, fmtEur, fmtMonth, fmtNum, fmtPct, safeHref } from './format';
 import { RECOMMEND_SUBJECT, RECOMMEND_TEXT, calculatorUrl, recommendLinks, shareBaseUrl } from './share';
 import { logoSvg } from '../logo';
 import { BUG_REPORT_URL, CONTRIBUTING_URL, FEATURE_REQUEST_URL, REPO_URL } from '../project';
@@ -446,9 +446,10 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     let sens: Sensitivity;
     try {
       run = runAll(inputs);
-      cmp = compareInstallTimes(inputs);
+      // Reuse the base run: avoids the duplicate reference/simulation in comparison and sensitivity (F7, F27)
+      cmp = compareInstallTimes(inputs, run);
       events = keyEvents(inputs, run);
-      sens = sensitivity(inputs);
+      sens = sensitivity(inputs, run);
     } catch (err) {
       $<HTMLElement>('#warnings').innerHTML = `<div class="alert error">${escapeHtml((err as Error).message)}</div>`;
       return;
@@ -709,6 +710,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     }
     const y = t.firstFullYear;
     const hp = inputs.heatPump;
+    const priceGap = hp.householdPriceCt - hp.elecPriceCt;
     const cheaperLabel = t.cheaper === 'with' ? 'Wärmepumpentarif' : 'Haushaltsstrom';
     const selectedNote =
       t.selected === t.cheaper
@@ -737,7 +739,9 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
         t.breakEvenKWh === null
           ? 'Der WP-Tarif ist nicht günstiger als Haushaltsstrom – ein eigener Zähler lohnt sich nicht.'
           : t.breakEvenKWh === 0
-            ? 'Der eigene Zähler lohnt sich bei jedem Verbrauch: Die zusätzliche § 14a-Pauschale deckt den Zählergrundpreis.'
+            ? priceGap > 0
+              ? 'Der eigene Zähler lohnt sich bei jedem Verbrauch: Die zusätzliche § 14a-Pauschale deckt den Zählergrundpreis.'
+              : 'Der WP-Tarif ist nicht teurer als Haushaltsstrom – der eigene Zähler verursacht über den Verbrauch gerechnet keine Mehrkosten.'
             : `Der eigene Zähler lohnt sich ab ca. ${fmtNum(t.breakEvenKWh)} kWh WP-Strom pro Jahr (${hp.existing14aOnHousehold ? '(Zählergrundpreis − zusätzliche § 14a-Pauschale)' : 'Zählergrundpreis'} ÷ Preisvorteil, heutige Preise).`
       }${
         t.setupCost > 0
@@ -1292,13 +1296,13 @@ export function sourcePopHtml(path: string, defaults: Inputs): string {
         <span class="src-default">Standard: <strong>${escapeHtml(formatDefault(f, defaults))}</strong></span></div>
       <p>${escapeHtml(src.text)}</p>
       ${refsHtml(OFFICIAL_REFS[f.path])}
-      ${src.url || src.asOf ? `<p class="src-meta">${src.url ? `<a href="${src.url}" target="_blank" rel="noopener">${escapeHtml(host)}</a>` : ''}${src.url && src.asOf ? ' · ' : ''}${src.asOf ? `Stand ${src.asOf}` : ''}</p>` : ''}`;
+      ${src.url || src.asOf ? `<p class="src-meta">${src.url ? `<a href="${safeHref(src.url)}" target="_blank" rel="noopener">${escapeHtml(host)}</a>` : ''}${src.url && src.asOf ? ' · ' : ''}${src.asOf ? `Stand ${escapeHtml(src.asOf)}` : ''}</p>` : ''}`;
 }
 
 function refsHtml(refs: { label: string; url: string }[] | undefined): string {
   if (!refs?.length) return '';
   return `<div class="src-refs"><span>Offizielle Quellen</span><ul>${refs
-    .map((r) => `<li><a href="${r.url}" target="_blank" rel="noopener">${escapeHtml(r.label)}</a></li>`)
+    .map((r) => `<li><a href="${safeHref(r.url)}" target="_blank" rel="noopener">${escapeHtml(r.label)}</a></li>`)
     .join('')}</ul></div>`;
 }
 

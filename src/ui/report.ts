@@ -192,7 +192,7 @@ export function reportHtml(d: ReportData): string {
     <p class="muted">Alle sichtbaren Eingaben; aus den Experten-Abschnitten nur Werte, die vom Standard abweichen.</p>
     <div class="report-groups">${inputsHtml(inputs, d.defaults)}</div></section>
   <footer class="report-foot">
-    <p>Modellrechnung mit Annahmen, ohne Gewähr. Sie ersetzt keine Energieberatung, kein Angebot und keine Heizlastberechnung. Förder- und Preisannahmen geprüft am ${new Date(FUNDING_SOURCE_DATE).toLocaleDateString('de-DE')}.</p>
+    <p>Modellrechnung mit Annahmen, ohne Gewähr. Sie ersetzt keine Energieberatung, kein Angebot und keine Heizlastberechnung. Förder- und Preisannahmen geprüft am ${FUNDING_SOURCE_DATE.split('-').reverse().join('.')}.</p>
     <p>Erstellt mit dem Wärmepumpen-Investitionsrechner: ${escapeHtml(d.url)}</p>
   </footer>`;
 }
