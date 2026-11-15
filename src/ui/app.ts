@@ -47,6 +47,38 @@ export const THEME_KEY = 'wp-investitionsrechner:theme';
 export type ThemeChoice = 'auto' | 'light' | 'dark';
 /** Set once the introduction (F20) was closed; it is then no longer shown automatically. */
 export const INTRO_KEY = 'wp-investitionsrechner:intro-seen';
+/** Set when the notice on personal data before sharing/exporting (F9.7) should no longer be shown. */
+export const PRIVACY_ACK_KEY = 'wp-investitionsrechner:personal-data-notice-off';
+
+/**
+ * Confirmation notices: before passing on the inputs (personal data, F9.7) and before overwriting them (F9.8).
+ * Only the personal data notice can be switched off; the overwrite warning always appears.
+ */
+const CONFIRM_NOTICE = {
+  share: {
+    title: 'Link mit Ihren Eingaben teilen?',
+    text: 'Der Link enthält Ihre Eingaben – auch persönliche Angaben wie Haushaltseinkommen und Einkommensteuer, Angaben zu Haus und Heizung sowie Bezeichnung und Bemerkungen des Szenarios. Jede Person, die den Link erhält, kann sie sehen. Teilen Sie ihn nur mit Personen, die diese Angaben sehen dürfen.',
+    ok: 'Link kopieren',
+  },
+  export: {
+    title: 'Eingaben als Datei speichern?',
+    text: 'Die Datei enthält alle Eingaben – auch persönliche Angaben wie Haushaltseinkommen und Einkommensteuer, Angaben zu Haus und Heizung sowie Bezeichnung und Bemerkungen des Szenarios. Geben Sie sie nur an Personen weiter, die diese Angaben sehen dürfen.',
+    ok: 'Datei speichern',
+  },
+  import: {
+    title: 'Eingaben aus einer Datei laden?',
+    text: 'Der Import ersetzt alle aktuellen Eingaben im Rechner durch die Werte aus der Datei. Ihre bisherigen Eingaben gehen dabei verloren. Sichern Sie sie vorher bei Bedarf per „Export“.',
+    ok: 'Datei wählen',
+  },
+  reset: {
+    title: 'Alle Eingaben zurücksetzen?',
+    text: 'Alle Eingaben werden durch die Standardwerte ersetzt. Ihre bisherigen Eingaben gehen dabei verloren. Sichern Sie sie vorher bei Bedarf per „Export“.',
+    ok: 'Zurücksetzen',
+  },
+} as const;
+type ConfirmKind = keyof typeof CONFIRM_NOTICE;
+/** Notices that can be switched off with "Diesen Hinweis nicht mehr anzeigen". */
+const SKIPPABLE: readonly ConfirmKind[] = ['share', 'export'];
 
 export interface AppEnv {
   storage?: Storage | null;
@@ -311,7 +343,56 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     setTimeout(() => t.classList.remove('show'), 2500);
   };
 
-  $<HTMLButtonElement>('#btn-share').addEventListener('click', async () => {
+  // ---------- Confirmation before sharing/exporting (personal data, F9.7) and overwriting (F9.8) ----------
+  const privacyDlg = $<HTMLDialogElement>('#privacy-confirm');
+  const privacySkip = $<HTMLInputElement>('#privacy-skip');
+  let privacyAction: (() => void) | null = null;
+  let privacySkippable = false;
+  const noticeOff = () => {
+    try {
+      return storage?.getItem(PRIVACY_ACK_KEY) === '1';
+    } catch {
+      return false;
+    }
+  };
+  /** Runs `action` after the user confirmed the notice (or right away if a skippable notice was switched off). */
+  const confirmAction = (kind: ConfirmKind, action: () => void) => {
+    privacySkippable = SKIPPABLE.includes(kind);
+    if (privacySkippable && noticeOff()) return action();
+    const t = CONFIRM_NOTICE[kind];
+    $<HTMLElement>('.privacy-skip').hidden = !privacySkippable;
+    $<HTMLElement>('#privacy-title').textContent = t.title;
+    $<HTMLElement>('#privacy-text').textContent = t.text;
+    $<HTMLButtonElement>('#privacy-ok').textContent = t.ok;
+    privacySkip.checked = false;
+    privacyAction = action;
+    if (typeof privacyDlg.showModal === 'function') privacyDlg.showModal();
+    else privacyDlg.setAttribute('open', '');
+  };
+  const closePrivacy = () => {
+    privacyAction = null;
+    if (privacyDlg.open) privacyDlg.close();
+  };
+  $<HTMLButtonElement>('#privacy-ok').addEventListener('click', () => {
+    const action = privacyAction;
+    if (privacySkippable && privacySkip.checked) {
+      try {
+        storage?.setItem(PRIVACY_ACK_KEY, '1');
+      } catch {
+        /* storage not available */
+      }
+    }
+    closePrivacy();
+    // still inside the click: clipboard and download keep their user activation
+    action?.();
+  });
+  $<HTMLButtonElement>('#privacy-cancel').addEventListener('click', closePrivacy);
+  privacyDlg.addEventListener('cancel', () => (privacyAction = null)); // Esc
+  privacyDlg.addEventListener('click', (e) => {
+    if (e.target === privacyDlg) closePrivacy();
+  });
+
+  const shareLink = async () => {
     const hash = encodeHash(defaults, inputs);
     history.replaceState(null, '', hash);
     // short domain (F9.2); the address bar keeps the current address
@@ -322,17 +403,20 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     } catch {
       toast('Link steht in der Adresszeile.');
     }
-  });
-  $<HTMLButtonElement>('#btn-export').addEventListener('click', () => {
+  };
+  const exportFile = () => {
     const blob = new Blob([exportJson(inputs)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = exportFileName(inputs, env.today ?? new Date());
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-  });
+  };
+  $<HTMLButtonElement>('#btn-share').addEventListener('click', () => confirmAction('share', () => void shareLink()));
+  $<HTMLButtonElement>('#btn-export').addEventListener('click', () => confirmAction('export', exportFile));
   const fileInput = $<HTMLInputElement>('#file-import');
-  $<HTMLButtonElement>('#btn-import').addEventListener('click', () => fileInput.click());
+  // the file picker opens inside the confirming click (user activation)
+  $<HTMLButtonElement>('#btn-import').addEventListener('click', () => confirmAction('import', () => fileInput.click()));
   fileInput.addEventListener('change', async () => {
     const file = fileInput.files?.[0];
     if (!file) return;
@@ -349,14 +433,15 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     }
     fileInput.value = '';
   });
-  $<HTMLButtonElement>('#btn-reset').addEventListener('click', () => {
-    if (!confirm('Alle Eingaben auf die Standardwerte zurücksetzen?')) return;
-    leaveShared();
-    loadIssues = null;
-    controller.setInputs(createDefaults(env.today ?? new Date()));
-    renderNotice();
-    toast('Auf Standardwerte zurückgesetzt.');
-  });
+  $<HTMLButtonElement>('#btn-reset').addEventListener('click', () =>
+    confirmAction('reset', () => {
+      leaveShared();
+      loadIssues = null;
+      controller.setInputs(createDefaults(env.today ?? new Date()));
+      renderNotice();
+      toast('Auf Standardwerte zurückgesetzt.');
+    }),
+  );
 
   // ---------- Tabs ----------
   // Tabs per ARIA pattern: one tab stop, arrow keys/Home/End switch (WCAG 2.1.1, 4.1.2)
@@ -1527,6 +1612,14 @@ function layout(): string {
   ${introHtml()}
   ${recommendHtml()}
   ${supportHtml()}
+  <dialog id="privacy-confirm" class="intro privacy-confirm" aria-labelledby="privacy-title" aria-describedby="privacy-text">
+    <form method="dialog" class="intro-body">
+      <h2 id="privacy-title"></h2>
+      <p id="privacy-text"></p>
+      <label class="privacy-skip"><input id="privacy-skip" type="checkbox"> Diesen Hinweis nicht mehr anzeigen</label>
+      <div class="intro-actions"><button id="privacy-cancel" type="button">Abbrechen</button><button id="privacy-ok" type="button" class="primary" autofocus></button></div>
+    </form>
+  </dialog>
   ${variantsHtml()}`;
 }
 
