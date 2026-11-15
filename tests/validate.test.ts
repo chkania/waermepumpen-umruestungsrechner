@@ -34,6 +34,35 @@ describe('F9.5 Eingabeprüfung beim Laden', () => {
     expect(Number.isFinite(r.kfw.totalCost)).toBe(true);
   });
 
+  it('Experten-Parameter für Förderung und Steuer werden auf sinnvolle Grenzen geklemmt', () => {
+    const issues: InputIssue[] = [];
+    const i = decodeHash(
+      defaults(),
+      link({
+        funding: { grundRate: 5, kgbRate: -1, cap1: 1e12, loanMaxPerUnit: -5 },
+        tax: { rateYear1: 3, maxCost: 1e12 },
+      }),
+      issues,
+    )!;
+    expect(i.funding.grundRate).toBe(1);
+    expect(i.funding.kgbRate).toBe(0);
+    expect(i.funding.cap1).toBe(1e7);
+    expect(i.funding.loanMaxPerUnit).toBe(0);
+    expect(i.tax.rateYear1).toBe(1);
+    expect(i.tax.maxCost).toBe(1e7);
+    expect(issues.map((x) => x.path)).toEqual(
+      expect.arrayContaining([
+        'funding.grundRate',
+        'funding.kgbRate',
+        'funding.cap1',
+        'funding.loanMaxPerUnit',
+        'tax.rateYear1',
+        'tax.maxCost',
+      ]),
+    );
+    expect(() => runAll(i)).not.toThrow();
+  });
+
   it('ungültige Monate, Auswahlwerte und Typen → Standardwert; Texte gekürzt', () => {
     const d = defaults();
     const issues: InputIssue[] = [];
