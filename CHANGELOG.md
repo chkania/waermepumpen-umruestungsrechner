@@ -8,6 +8,14 @@ Alle wesentlichen Änderungen am Wärmepumpen-Investitionsrechner. Das Format or
 - **Minor** (1.x.0): neue Funktionen oder Eingaben sowie bewusst geänderte Rechenmodelle oder Standardwerte (Ergebnisse können sich ändern).
 - **Patch** (1.0.x): Fehlerkorrekturen, Texte, Darstellung – ohne neue Funktionen.
 
+## 1.9.1 – 2026-11-15
+
+### Fehlerkorrekturen
+- Suchmaschinen finden die Hauptadresse (kanonische Adresse, robots.txt, Sitemap)
+
+### Verbessert
+- Rechner lädt schneller – Diagramme werden nachgeladen, Quellenhinweise entstehen erst beim Öffnen
+
 ## 1.9.0 – 2026-11-15
 
 ### Neu
