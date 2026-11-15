@@ -154,6 +154,9 @@ describe('UI (Smoke-Test)', () => {
     const btn = root.querySelector<HTMLButtonElement>('[data-field="oldHeating.replacementCost"] .info-btn')!;
     const pop = document.getElementById(btn.getAttribute('aria-controls')!)!;
     expect(pop.hidden).toBe(true);
+    // N14: content is only created on first opening
+    expect(pop.childElementCount).toBe(0);
+    expect(root.querySelectorAll('.src-pop .src-head')).toHaveLength(0);
     btn.click();
     expect(pop.hidden).toBe(false);
     expect(btn.getAttribute('aria-expanded')).toBe('true');
@@ -168,11 +171,19 @@ describe('UI (Smoke-Test)', () => {
     expect(links.some((h) => h!.includes('bundesanzeiger.de'))).toBe(true);
     expect(links.some((h) => h!.includes('6000005131_M_458.pdf'))).toBe(true);
     expect(kgb.textContent).toContain('Nr. 8.4.4');
-    const child = root.querySelector('[data-field="building.hasChild"] .src-pop')!;
+    root.querySelector<HTMLButtonElement>('[data-field="building.hasChild"] .info-btn')!.click();
+    expect((kgb as HTMLElement).hidden).toBe(true);
+    const child = root.querySelector<HTMLElement>('[data-field="building.hasChild"] .src-pop')!;
     expect(child.textContent).toContain('Nr. 8.4.5');
     expect(child.textContent).toContain('Kindergeldberechtigung');
+    // reopening keeps the content (not rendered twice)
+    btn.click();
+    btn.click();
+    expect(pop.querySelectorAll('.src-head')).toHaveLength(1);
+    btn.click();
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
-    expect((kgb as HTMLElement).hidden).toBe(true);
+    expect(pop.hidden).toBe(true);
+    expect(child.hidden).toBe(true);
   });
 
   it('F13 Tarifvergleich wird angezeigt und reagiert auf Eingaben', () => {

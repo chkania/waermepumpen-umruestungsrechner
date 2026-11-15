@@ -122,16 +122,75 @@ for d in waermepumpen-umruestungsrechner.de www.waermepumpen-umruestungsrechner.
 
 Erwartet wird jeweils `HTTP/… 301` und `location: https://waermepumpen-investitionsrechner.de/hilfe.html?x=1`.
 
-### Empfohlene HTTP-Header
+### Zwischenspeichern im Browser (Cache)
 
-Die Content-Security-Policy steht bereits im HTML. Zusätzlich empfehlenswert, z. B. in `.htaccess` (Apache):
+Ohne eigene Angaben raten Browser, wie lange sie Dateien zwischenspeichern. Nach einem Deployment sieht man dann unter Umständen noch eine Weile die alte Version. Der Build legt JavaScript, CSS und Schriften unter `assets/` mit einem Inhalts-Hash im Dateinamen ab (z. B. `main-Cj4rdn9b.js`). Ändert sich eine Datei, ändert sich also auch ihr Name. Daraus ergeben sich diese Regeln (eingerichtet am 15.11.2026, in der `.htaccess` im Ordner des Rechners unter der Weiterleitung):
 
 ```apache
-Header always set X-Frame-Options "DENY"
-Header always set Content-Security-Policy "frame-ancestors 'none'"
-Header always set X-Content-Type-Options "nosniff"
-Header always set Referrer-Policy "strict-origin-when-cross-origin"
+<IfModule mod_headers.c>
+  # HTML: always revalidate, so a new release shows up immediately (cheap 304 via ETag)
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+  # Build files with a content hash in their name never change: cache for one year
+  <If "%{REQUEST_URI} =~ m#^/assets/#">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </If>
+  # Favicon and touch icon: one week
+  <FilesMatch "^(favicon\.svg|apple-touch-icon\.png)$">
+    Header set Cache-Control "public, max-age=604800"
+  </FilesMatch>
+</IfModule>
 ```
+
+| Dateien | Cache-Control | Wirkung |
+|---|---|---|
+| HTML-Seiten | `no-cache` | Vor jeder Nutzung kurz beim Server nachfragen. Ist nichts neu, antwortet er mit 304. Neue Versionen sind sofort sichtbar. |
+| `assets/…` | `public, max-age=31536000, immutable` | Ein Jahr ohne Nachfrage nutzen. Unproblematisch, weil eine geänderte Datei einen neuen Namen bekommt. |
+| Favicon, Touch-Icon | `public, max-age=604800` | Eine Woche |
+
+Prüfen:
+
+```bash
+curl -sI https://waermepumpen-investitionsrechner.de/ | grep -i cache-control
+```
+
+Erwartet: `cache-control: no-cache`. Für eine Datei unter `assets/` erwartet: `public, max-age=31536000, immutable`.
+
+### Sicherheits-Header
+
+Die Content-Security-Policy steht im HTML (`<meta>`-Tag, erzeugt aus `csp.ts`). Einige Schutzmaßnahmen wirken aber nur als HTTP-Header. Diese Header sind gesetzt (eingerichtet am 15.11.2026, ebenfalls in der `.htaccess` im Ordner des Rechners):
+
+```apache
+<IfModule mod_headers.c>
+  # Only HTTPS for one year (all domains redirect to HTTPS anyway)
+  Header always set Strict-Transport-Security "max-age=31536000"
+  # Own browsing context group: no access from pages opened via window.open
+  Header always set Cross-Origin-Opener-Policy "same-origin"
+  # Do not allow embedding in frames (clickjacking)
+  Header always set X-Frame-Options "DENY"
+  # Do not guess MIME types
+  Header always set X-Content-Type-Options "nosniff"
+  # Send only the origin to other sites, never path or hash (scenario link)
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+```
+
+| Header | Wirkung |
+|---|---|
+| `Strict-Transport-Security` | Der Browser ruft die Seite ein Jahr lang nur noch über HTTPS auf. Achtung: Diese Zusage lässt sich nicht kurzfristig zurücknehmen, die Domains müssen dauerhaft HTTPS anbieten. |
+| `Cross-Origin-Opener-Policy` | Fremde Seiten, die den Rechner in einem neuen Fenster öffnen, erhalten keinen Zugriff auf dieses Fenster. |
+| `X-Frame-Options` | Der Rechner kann nicht in fremde Seiten eingebettet werden (Schutz vor Clickjacking). `frame-ancestors` aus der CSP wirkt im `<meta>`-Tag nicht, deshalb dieser Header. |
+| `X-Content-Type-Options` | Der Browser hält sich an den angegebenen Dateityp und rät nicht. |
+| `Referrer-Policy` | Bei Links auf andere Seiten wird höchstens die Domain übertragen. |
+
+Prüfen:
+
+```bash
+curl -sI https://waermepumpen-investitionsrechner.de/ | grep -i -E 'strict-transport|cross-origin|x-frame|x-content|referrer'
+```
+
+Erwartet werden die fünf Header mit den Werten oben. Lighthouse (Best Practices, „Trust and Safety“) meldet danach nur noch, dass die CSP im `<meta>`-Tag statt im Header steht und keine Trusted Types nutzt – beides ist bewusst so.
 
 ### Datenschutzerklärung prüfen
 
