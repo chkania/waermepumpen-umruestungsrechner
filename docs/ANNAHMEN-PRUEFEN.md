@@ -17,7 +17,8 @@ So läuft die Prüfung:
    - **Abweichung**: Die Quelle nennt für diese Größe einen anderen Wert.
    - **unklar**: Die Quelle nennt die Größe nicht oder nicht eindeutig.
 4. Bei HTML-Quellen prüft das Werkzeug, ob die Textstelle wirklich in der Seite steht. Fehlt sie dort, wird aus „bestätigt“ oder „Abweichung“ ein „unklar“. So landet kein unbelegtes Urteil im Bericht. Bei PDFs ist dieser Abgleich nicht möglich.
-5. Quellen, die nicht abrufbar oder zu groß sind, stehen gesondert im Bericht. Seiten werden nie stillschweigend gekürzt.
+5. Quellen, die nicht abrufbar oder zu groß sind, stehen gesondert im Bericht. Seiten werden nie stillschweigend gekürzt. Dasselbe gilt für fehlgeschlagene Anfragen an Claude.
+6. Wiederholt sich ein Fehler bei jeder Quelle (Anmeldung, Berechtigung, zu wenig Guthaben im API-Konto), bricht der Lauf sofort ab. Dann wird kein Bericht geschrieben.
 
 ## Aufruf
 
@@ -58,7 +59,8 @@ Der Bericht hat diese Abschnitte, in dieser Reihenfolge:
 1. **Abweichungen**
 2. **Unklar**
 3. **Quelle nicht abrufbar**
-4. **Bestätigt**
+4. **Prüfung fehlgeschlagen**
+5. **Bestätigt**
 
 Jede Zeile enthält den Wert im Rechner, den Wert laut Quelle, die Textstelle und einen Link zur Quelle.
 

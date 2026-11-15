@@ -63,6 +63,8 @@ export interface CheckedItem extends CheckItem {
 export interface FailedGroup {
   url: string;
   items: CheckItem[];
+  /** download: source not reachable; check: model request or answer failed. */
+  stage: 'download' | 'check';
   error: string;
 }
 
@@ -249,14 +251,14 @@ export function buildReport(input: {
   const dev = by('abweichung');
   const unclear = by('unklar');
   const ok = by('bestaetigt');
-  const failedCount = failed.reduce((n, g) => n + g.items.length, 0);
+  const count = (stage: FailedGroup['stage']) => failed.filter((g) => g.stage === stage).reduce((n, g) => n + g.items.length, 0);
   const out: string[] = [
     `# Prüfung der Annahmen – ${input.date}`,
     '',
     `Automatische Vorprüfung mit \`${input.model}\` gegen die Quellen aus \`src/core/sources.ts\` (letzte manuelle Prüfung: ${input.lastReview}).`,
     'Der Bericht ändert nichts. Abweichungen bitte an der Quelle nachprüfen und wie im Issue „Annahmen prüfen“ beschrieben in `defaults.ts`/`sources.ts` übernehmen.',
     '',
-    `**${dev.length}** Abweichung(en) · **${unclear.length}** unklar · **${failedCount}** nicht abrufbar · **${ok.length}** bestätigt`,
+    `**${dev.length}** Abweichung(en) · **${unclear.length}** unklar · **${count('download')}** nicht abrufbar · **${count('check')}** Prüfung fehlgeschlagen · **${ok.length}** bestätigt`,
   ];
   const table = (rows: readonly CheckedItem[]) => [
     '',
@@ -269,9 +271,14 @@ export function buildReport(input: {
   ];
   if (dev.length) out.push('', '## Abweichungen', ...table(dev));
   if (unclear.length) out.push('', '## Unklar (bitte von Hand prüfen)', ...table(unclear));
-  if (failed.length) {
-    out.push('', '## Quelle nicht abrufbar');
-    for (const g of failed) out.push(`- [${g.url}](${g.url}): ${cell(g.error)} – ${g.items.map((i) => i.label).join(', ')}`);
+  for (const [stage, title] of [
+    ['download', 'Quelle nicht abrufbar'],
+    ['check', 'Prüfung fehlgeschlagen'],
+  ] as const) {
+    const groups = failed.filter((g) => g.stage === stage);
+    if (!groups.length) continue;
+    out.push('', `## ${title}`);
+    for (const g of groups) out.push(`- [${g.url}](${g.url}): ${cell(g.error)} – ${g.items.map((i) => i.label).join(', ')}`);
   }
   if (ok.length) out.push('', '## Bestätigt', ...table(ok));
   return out.join('\n') + '\n';

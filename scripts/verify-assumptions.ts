@@ -15,7 +15,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { createDefaults, FUNDING_SOURCE_DATE } from '../src/core/defaults';
 import { DEFAULT_SOURCES } from '../src/core/sources';
 import { SECTIONS } from '../src/ui/fields';
-import { checkGroups, claudeAsk, MODEL } from './assumptions-agent/check';
+import { checkGroups, claudeAsk, errorText, isFatalApiError, MODEL } from './assumptions-agent/check';
 import { fetchSource } from './assumptions-agent/fetch-source';
 import { buildReport, collectItems, groupBySource } from './assumptions-agent/lib';
 
@@ -61,7 +61,12 @@ async function main(): Promise<void> {
   if (existsSync('.env.local')) process.loadEnvFile('.env.local');
   const client = new Anthropic();
   console.log(`Prüfe ${items.length} Werte aus ${groups.length} Quellen mit ${MODEL} …`);
-  const { checked, failed } = await checkGroups(groups, { fetchSource: (url) => fetchSource(url), ask: claudeAsk(client), log: console.log });
+  const { checked, failed } = await checkGroups(groups, {
+    fetchSource: (url) => fetchSource(url),
+    ask: claudeAsk(client),
+    log: console.log,
+    isFatal: isFatalApiError,
+  });
 
   const report = buildReport({ date: today, model: MODEL, lastReview: FUNDING_SOURCE_DATE, checked, failed });
   const out = opts.out ?? `reports/annahmen-${today}.md`;
@@ -69,12 +74,13 @@ async function main(): Promise<void> {
   writeFileSync(out, report);
   const count = (v: string) => checked.filter((c) => c.finding.verdict === v).length;
   console.log(
-    `\n${count('abweichung')} Abweichung(en), ${count('unklar')} unklar, ${failed.reduce((n, g) => n + g.items.length, 0)} nicht abrufbar, ${count('bestaetigt')} bestätigt.\nBericht: ${out}`,
+    `\n${count('abweichung')} Abweichung(en), ${count('unklar')} unklar, ${failed.reduce((n, g) => n + g.items.length, 0)} nicht abrufbar oder nicht geprüft, ${count('bestaetigt')} bestätigt.\nBericht: ${out}`,
   );
 }
 
 main().catch((err) => {
   if (err instanceof Anthropic.AuthenticationError) console.error('Anmeldung bei der Claude-API fehlgeschlagen: ANTHROPIC_API_KEY in .env.local prüfen (siehe .env.example).');
+  else if (isFatalApiError(err)) console.error(`Abgebrochen, kein Bericht geschrieben. ${errorText(err)}`);
   else console.error((err as Error).message);
   process.exitCode = 1;
 });

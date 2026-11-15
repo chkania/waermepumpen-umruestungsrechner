@@ -3,7 +3,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { createDefaults } from '../src/core/defaults';
 import { DEFAULT_SOURCES } from '../src/core/sources';
 import { SECTIONS } from '../src/ui/fields';
-import { checkGroups, MAX_SOURCE_CHARS, MODEL } from '../scripts/assumptions-agent/check';
+import Anthropic from '@anthropic-ai/sdk';
+import { checkGroups, errorText, isFatalApiError, MAX_SOURCE_CHARS, MODEL } from '../scripts/assumptions-agent/check';
 import { fetchSource } from '../scripts/assumptions-agent/fetch-source';
 import {
   ANSWER_SCHEMA,
@@ -120,10 +121,10 @@ describe('F22.3 Vorprüfung der Annahmen – Ablauf und Bericht', () => {
       ['funding.maxRate', 'unklar', false],
     ]);
     expect(checked[1].finding.note).toMatch(/Zitat nicht in der Quelle gefunden/);
-    expect(failed).toEqual([{ url: 'https://example.org/offline', items: bad.items, error: 'nicht abrufbar (HTTP 503)' }]);
+    expect(failed).toEqual([{ url: 'https://example.org/offline', items: bad.items, stage: 'download', error: 'nicht abrufbar (HTTP 503)' }]);
 
     const report = buildReport({ date: '2026-11-15', model: MODEL, lastReview: '2026-11-11', checked, failed });
-    expect(report).toContain('**0** Abweichung(en) · **1** unklar · **1** nicht abrufbar · **1** bestätigt');
+    expect(report).toContain('**0** Abweichung(en) · **1** unklar · **1** nicht abrufbar · **0** Prüfung fehlgeschlagen · **1** bestätigt');
     expect(report).toContain('## Unklar (bitte von Hand prüfen)');
     expect(report).toContain('## Quelle nicht abrufbar');
     expect(report.indexOf('## Unklar')).toBeLessThan(report.indexOf('## Bestätigt'));
@@ -146,6 +147,30 @@ describe('F22.3 Vorprüfung der Annahmen – Ablauf und Bericht', () => {
 
     const big = await checkGroups([g], { fetchSource: async () => ({ kind: 'text', text: 'x'.repeat(MAX_SOURCE_CHARS + 1) }), ask });
     expect(big.failed[0].error).toMatch(/Quelle zu groß/);
+  });
+
+  it('API-Fehler: Anmeldung/Guthaben bricht den Lauf ab, andere Fehler stehen getrennt von Download-Fehlern', async () => {
+    const apiError = (status: number, message: string) =>
+      Anthropic.APIError.generate(status, { type: 'error', error: { type: 'invalid_request_error', message } }, undefined, new Headers());
+    const credit = apiError(400, 'Your credit balance is too low to access the Anthropic API.');
+    const other = apiError(400, 'prompt is too long');
+    expect(isFatalApiError(credit)).toBe(true);
+    expect(isFatalApiError(apiError(401, 'invalid x-api-key'))).toBe(true);
+    expect(isFatalApiError(other)).toBe(false);
+    expect(errorText(other)).toBe('Claude-API 400: prompt is too long');
+
+    const fetchOk = async () => ({ kind: 'text' as const, text: sourceText });
+    const ask = vi.fn(async () => {
+      throw credit;
+    });
+    await expect(checkGroups([g, g], { fetchSource: fetchOk, ask, isFatal: isFatalApiError })).rejects.toBe(credit);
+    expect(ask).toHaveBeenCalledTimes(1);
+
+    const res = await checkGroups([g], { fetchSource: fetchOk, ask: async () => { throw other; }, isFatal: isFatalApiError });
+    expect(res.failed).toEqual([{ url: g.url, items: g.items, stage: 'check', error: 'Claude-API 400: prompt is too long' }]);
+    const report = buildReport({ date: '2026-11-15', model: MODEL, lastReview: '2026-11-11', checked: [], failed: res.failed });
+    expect(report).toContain('## Prüfung fehlgeschlagen');
+    expect(report).not.toContain('## Quelle nicht abrufbar');
   });
 
   it('Download: HTML wird Text, PDF bleibt binär, Wiederholung nur bei Server-Fehlern', async () => {
