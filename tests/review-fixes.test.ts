@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { compareInstallTimes } from '../src/core/compare';
 import { keyEvents } from '../src/core/events';
@@ -68,6 +69,15 @@ describe('Review: sichere externe Links und Maskierung', () => {
     const svg = qrSvg('https://example.invalid/#s=abc', 'QR "Test" <x>')!;
     expect(svg).toContain('aria-label="QR &quot;Test&quot; &lt;x&gt;"');
     expect(svg).not.toContain('<x>');
+  });
+
+  it('externe Projekt-Links laufen ebenfalls durch safeHref', () => {
+    for (const file of ['src/ui/app.ts', 'src/doc-page.ts']) {
+      const code = readFileSync(file, 'utf8');
+      for (const name of ['REPO_URL', 'BUG_REPORT_URL', 'FEATURE_REQUEST_URL', 'CONTRIBUTING_URL']) {
+        expect(code, `${file}: ${name}`).not.toContain(`href="\${${name}}"`);
+      }
+    }
   });
 });
 

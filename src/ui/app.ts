@@ -217,7 +217,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     const today = env.today ?? new Date();
     if (assumptionsStale(today) && !staleDismissed) {
       parts.push(`<div class="notice-stale">
-        <p><strong>Annahmen möglicherweise veraltet.</strong> Förderbedingungen, Preise und Zinsen wurden zuletzt am ${FUNDING_SOURCE_DATE.split('-').reverse().join('.')} geprüft (vor ${assumptionsAgeMonths(today)} Monaten). Prüfen Sie wichtige Werte vor einer Entscheidung bei KfW, Ihrem Energieversorger oder einer Energieberatung. Ist Ihnen ein veralteter Wert aufgefallen? <a href="${BUG_REPORT_URL}" target="_blank" rel="noopener">Hier melden</a>.</p>
+        <p><strong>Annahmen möglicherweise veraltet.</strong> Förderbedingungen, Preise und Zinsen wurden zuletzt am ${FUNDING_SOURCE_DATE.split('-').reverse().join('.')} geprüft (vor ${assumptionsAgeMonths(today)} Monaten). Prüfen Sie wichtige Werte vor einer Entscheidung bei KfW, Ihrem Energieversorger oder einer Energieberatung. Ist Ihnen ein veralteter Wert aufgefallen? <a href="${safeHref(BUG_REPORT_URL)}" target="_blank" rel="noopener">Hier melden</a>.</p>
         <button type="button" data-notice="stale" class="ghost">Ausblenden</button></div>`);
     }
     notice.innerHTML = parts.join('');
@@ -1483,14 +1483,14 @@ function layout(): string {
         <h2 id="contribute-title">Mitmachen</h2>
         <p>Förderprogramme, Energiepreise und Steuerregeln ändern sich laufend – ein Rechner wie dieser ist nur so gut wie seine Annahmen. Er ist ein offenes Projekt, und mit deiner Hilfe wird er besser für alle, die vor der Entscheidung für eine Wärmepumpe stehen:</p>
         <ul>
-          <li>Dir ist ein Fehler oder ein veralteter Wert aufgefallen? <a href="${BUG_REPORT_URL}" target="_blank" rel="noopener">Melde ihn</a> – am besten mit Quelle, z. B. eine geänderte KfW-Regel oder ein neuer Preis.</li>
-          <li>Du hast eine Idee oder eine Frage, die der Rechner noch nicht beantwortet? <a href="${FEATURE_REQUEST_URL}" target="_blank" rel="noopener">Schlag sie vor</a>.</li>
-          <li>Du möchtest selbst mitentwickeln – an Rechenlogik, Texten, Tests oder Barrierefreiheit? <a href="${CONTRIBUTING_URL}" target="_blank" rel="noopener">So funktioniert die Mitarbeit</a>.</li>
+          <li>Dir ist ein Fehler oder ein veralteter Wert aufgefallen? <a href="${safeHref(BUG_REPORT_URL)}" target="_blank" rel="noopener">Melde ihn</a> – am besten mit Quelle, z. B. eine geänderte KfW-Regel oder ein neuer Preis.</li>
+          <li>Du hast eine Idee oder eine Frage, die der Rechner noch nicht beantwortet? <a href="${safeHref(FEATURE_REQUEST_URL)}" target="_blank" rel="noopener">Schlag sie vor</a>.</li>
+          <li>Du möchtest selbst mitentwickeln – an Rechenlogik, Texten, Tests oder Barrierefreiheit? <a href="${safeHref(CONTRIBUTING_URL)}" target="_blank" rel="noopener">So funktioniert die Mitarbeit</a>.</li>
         </ul>
-        <p class="muted small">Quellcode, Fragen und Vorschläge: <a href="${REPO_URL}" target="_blank" rel="noopener">github.com/chkania/waermepumpen-umruestungsrechner</a> – schön, wenn du dabei bist!</p>
+        <p class="muted small">Quellcode, Fragen und Vorschläge: <a href="${safeHref(REPO_URL)}" target="_blank" rel="noopener">github.com/chkania/waermepumpen-umruestungsrechner</a> – schön, wenn du dabei bist!</p>
       </aside>
       <p class="disclaimer">Keine Finanz-, Steuer- oder Förderberatung. Alle Angaben ohne Gewähr; Förderbedingungen Stand ${FUNDING_SOURCE_DATE.split('-').reverse().join('.')} – bitte vor Antragstellung bei KfW, Energieberatung und Steuerberatung prüfen.</p>
-      <p class="disclaimer license"><a href="./changelog.html">Version ${APP_VERSION}</a> · © 2026 Christoph Kania · Lizenz: <a href="./lizenz.html" target="_blank" rel="noopener">PolyForm Noncommercial 1.0.0</a> – kostenfreie Nutzung für nicht-kommerzielle Zwecke; kommerzielle Nutzung nur nach Absprache · <a href="./lizenzen-drittanbieter.html" target="_blank" rel="noopener">Lizenzen von Drittanbietern</a> · <a href="./impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="./datenschutz.html" target="_blank" rel="noopener">Datenschutz</a> · <a href="${REPO_URL}" target="_blank" rel="noopener">Quellcode auf GitHub</a></p>
+      <p class="disclaimer license"><a href="./changelog.html">Version ${APP_VERSION}</a> · © 2026 Christoph Kania · Lizenz: <a href="./lizenz.html" target="_blank" rel="noopener">PolyForm Noncommercial 1.0.0</a> – kostenfreie Nutzung für nicht-kommerzielle Zwecke; kommerzielle Nutzung nur nach Absprache · <a href="./lizenzen-drittanbieter.html" target="_blank" rel="noopener">Lizenzen von Drittanbietern</a> · <a href="./impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="./datenschutz.html" target="_blank" rel="noopener">Datenschutz</a> · <a href="${safeHref(REPO_URL)}" target="_blank" rel="noopener">Quellcode auf GitHub</a></p>
     </section>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
