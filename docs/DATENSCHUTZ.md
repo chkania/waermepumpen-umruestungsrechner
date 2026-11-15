@@ -8,7 +8,7 @@ Christoph Kania<br>
 Höhrather Str. 11<br>
 40591 Düsseldorf<br>
 Deutschland<br>
-E-Mail: blog [at] chkania [Punkt] net
+E-Mail: info [at] wpir [Punkt] de
 
 ### Das Wichtigste in Kürze
 
