@@ -2,8 +2,8 @@ import { DHW_PROFILE, SPACE_PROFILE } from './defaults';
 import { formatMonthDe, monthOf, parseMonth, tryParseMonth, yearOf } from './dates';
 import { kfwLoanVariant, kfwSubsidy } from './funding';
 import { loanScheduleDetailed, type LoanResult, type LoanSpec, type PrepaymentRules } from './loan';
-import { createPriceModel, energySplit } from './prices';
-import { createPvModel, pvSummary } from './pv';
+import { createPriceModel, energySplit, type EnergySplit, type PriceModel } from './prices';
+import { createPvModel, pvSummary, type PvModel } from './pv';
 import { taxBonus } from './tax';
 import type {
   CostBreakdown,
@@ -110,18 +110,41 @@ interface Asset {
 }
 
 /**
+ * Inputs derived once from the user inputs that do not depend on the scenario or the installation month.
+ * Shared by all scenarios of one calculation so the price model, PV model and energy split are not
+ * rebuilt for every simulation – the sensitivity analysis and the installation-time comparison run dozens.
+ */
+export interface SimContext {
+  start: number;
+  priceModel: PriceModel;
+  pvModel: PvModel;
+  split: EnergySplit;
+}
+
+export function createSimContext(inp: Inputs): SimContext {
+  return {
+    start: parseMonth(inp.general.startMonth),
+    priceModel: createPriceModel(inp),
+    pvModel: createPvModel(inp),
+    split: energySplit(inp),
+  };
+}
+
+/**
  * Simulates a scenario month by month.
  * @param installOverride absolute installation month (overrides inputs.heatPump.installMonth)
+ * @param ctx precomputed inputs shared by several simulations; defaults to a fresh context
  */
-export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: number): ScenarioResult {
+export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: number, ctx?: SimContext): ScenarioResult {
   const warnings: string[] = [];
-  const start = parseMonth(inp.general.startMonth);
+  const c = ctx ?? createSimContext(inp);
+  const start = c.start;
   const H = Math.max(1, Math.round(inp.general.horizonYears * 12));
   const end = start + H;
-  const pm = createPriceModel(inp);
-  const pv = createPvModel(inp);
+  const pm = c.priceModel;
+  const pv = c.pvModel;
   // Space heating (Raumwärme), hot water (Warmwasser) and cooking handled separately (F17)
-  const split = energySplit(inp);
+  const split = c.split;
   const cookStaysGas = split.cookingFuel > 0 && inp.oldHeating.cookingAfter === 'gas';
   const o = inp.oldHeating;
   const hp = inp.heatPump;
@@ -608,10 +631,10 @@ export interface RunResult {
   best: 'kfw' | 'tax';
 }
 
-export function runAll(inp: Inputs): RunResult {
-  const ref = simulate(inp, 'ref');
-  const kfw = simulate(inp, 'kfw');
-  const tax = simulate(inp, 'tax');
+export function runAll(inp: Inputs, ctx: SimContext = createSimContext(inp)): RunResult {
+  const ref = simulate(inp, 'ref', undefined, ctx);
+  const kfw = simulate(inp, 'kfw', undefined, ctx);
+  const tax = simulate(inp, 'tax', undefined, ctx);
   const best = tax.feasible && tax.totalCost < kfw.totalCost ? 'tax' : 'kfw';
   return {
     ref,

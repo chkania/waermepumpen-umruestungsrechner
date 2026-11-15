@@ -152,8 +152,11 @@ export function savingOf(inp: Inputs, run: RunResult = runAll(inp)): number {
   return run.ref.totalCost - best.totalCost;
 }
 
-export function sensitivity(inp: Inputs): Sensitivity {
-  const baseRun = runAll(inp);
+/**
+ * Tornado analysis (F27).
+ * @param baseRun result of `runAll` for the same inputs – avoids simulating the base case twice
+ */
+export function sensitivity(inp: Inputs, baseRun: RunResult = runAll(inp)): Sensitivity {
   const base = savingOf(inp, baseRun);
   const items: SensitivityItem[] = [];
   for (const l of LEVERS) {
