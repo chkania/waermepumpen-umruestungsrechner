@@ -100,5 +100,8 @@ describe('N15 Prüfung nach dem Deployment', () => {
     expect(verify).toMatch(/needs: \[build, deploy\]/);
     expect(verify).toMatch(/node scripts\/smoke-test\.ts "\$URL" --version "\$VERSION" --commit "\$COMMIT"/);
     expect(verify).not.toMatch(/secrets\.|environment:/);
+    // checkout of main, not of a ref from a job output (CodeQL: actions/cache-poisoning/poisonable-step)
+    expect(verify).toMatch(/ref: main\n/);
+    expect(verify).not.toMatch(/ref: \$\{\{/);
   });
 });

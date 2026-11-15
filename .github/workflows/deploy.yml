@@ -136,8 +136,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          # exactly the deployed commit (smoke test script and expected version)
-          ref: ${{ needs.build.outputs.commit }}
+          # main like the build job (only the smoke test script is used from it); the expected version and commit come
+          # from the build job outputs. A checkout of the commit output was flagged by CodeQL as possible cache poisoning.
+          ref: main
           persist-credentials: false
       - uses: actions/setup-node@v7
         with:
