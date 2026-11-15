@@ -8,16 +8,20 @@ export interface TocEntry {
 
 /** Creates a URL-safe ID from a German heading. */
 export function slugify(text: string): string {
-  return text
+  let current = text
     .toLowerCase()
     .replace(/ä/g, 'ae')
     .replace(/ö/g, 'oe')
     .replace(/ü/g, 'ue')
-    .replace(/ß/g, 'ss')
-    .replace(/<[^>]+>/g, '')
-    .replace(/&[a-z]+;/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+    .replace(/ß/g, 'ss');
+
+  let previous: string;
+  do {
+    previous = current;
+    current = current.replace(/<[^>]+>/g, '').replace(/&[a-z]+;/g, '');
+  } while (current !== previous);
+
+  return current.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
 
 function stripHeadingHtml(input: string): string {
