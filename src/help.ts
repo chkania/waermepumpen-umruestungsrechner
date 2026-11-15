@@ -20,14 +20,19 @@ export function slugify(text: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-function stripHeadingHtml(input: string): string {
-  let current = input;
+/**
+ * Plain text of a heading's HTML for the table of contents and the page title (escaped again on output).
+ * Tags are removed until none are left (e.g. "<scr<b>ipt>"), then any remaining angle bracket; only "&amp;" is
+ * decoded, as the last step, so that no new markup can arise.
+ */
+export function headingText(html: string): string {
+  let text = html;
   let previous: string;
   do {
-    previous = current;
-    current = current.replace(/[<>]/g, '').replace(/&[a-z]+;/g, '').replace(/&amp;/g, '&');
-  } while (current !== previous);
-  return current.trim();
+    previous = text;
+    text = text.replace(/<[^<>]*>/g, '');
+  } while (text !== previous);
+  return text.replace(/[<>]/g, '').replace(/&amp;/g, '&').trim();
 }
 
 /** Renders the manual (Markdown) to HTML with anchor IDs and table of contents (F15). */
@@ -38,7 +43,7 @@ export function renderHelp(markdown: string): { html: string; toc: TocEntry[]; t
   let title = '';
   html = html.replace(/<h([1-3])>([\s\S]*?)<\/h\1>/g, (_m, lvl: string, inner: string) => {
     const level = Number(lvl);
-    const text = stripHeadingHtml(inner);
+    const text = headingText(inner);
     if (level === 1) {
       title = text;
       return `<h1>${inner}</h1>`;

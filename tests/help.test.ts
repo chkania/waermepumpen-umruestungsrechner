@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { renderHelp, slugify } from '../src/help';
+import { headingText, renderHelp, slugify } from '../src/help';
 import { SECTIONS } from '../src/ui/fields';
 
 const read = (f: string) => readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
@@ -57,6 +57,14 @@ describe('F15 Hilfeseite – Darstellung', () => {
     expect(toc.find((t) => t.text === 'Link mit Werten teilen')).toMatchObject({ id: 'link-mit-werten-teilen', level: 3 });
     expect(html).toContain('<h3 id="link-mit-werten-teilen">');
     expect(html).toContain('<div class="table-wrap"><table>');
+  });
+
+  it('Inhaltsverzeichnis: Klartext der Überschrift, ohne neues Markup', () => {
+    const { toc } = renderHelp('# T\n\n## Haushalt & Gebäude\n\n## Feld `jaz` und **fett**\n');
+    expect(toc.map((t) => t.text)).toEqual(['Haushalt & Gebäude', 'Feld jaz und fett']);
+    expect(toc[0].id).toBe('haushalt-gebaeude');
+    expect(headingText('<scr<b>ipt>alert(1)</scr</b>ipt>')).toBe('alert(1)');
+    expect(headingText('a <b>b</b> &amp;lt;c&amp;gt; <i')).toBe('a b &lt;c&gt; i');
   });
 
   it('doppelte Überschriften erhalten eindeutige IDs', () => {
