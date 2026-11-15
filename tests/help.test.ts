@@ -76,7 +76,7 @@ describe('F15 Hilfeseite – Darstellung', () => {
 describe('F19 Projektlinks und Mitmachen', () => {
   it('Handbuch, README und CONTRIBUTING laden zur Mitarbeit ein und verlinken das Repository', async () => {
     const { REPO_URL, BUG_REPORT_URL, CONTRIBUTING_URL, FEATURE_REQUEST_URL } = await import('../src/project');
-    expect(REPO_URL).toBe('https://github.com/chkania/waermepumpen-umruestungsrechner');
+    expect(REPO_URL).toBe('https://github.com/chkania/wpir');
     const handbook = read('docs/BENUTZERHANDBUCH.md');
     expect(handbook).toMatch(/^## Mitmachen$/m);
     for (const url of [REPO_URL, BUG_REPORT_URL, CONTRIBUTING_URL, FEATURE_REQUEST_URL]) expect(handbook).toContain(url);
