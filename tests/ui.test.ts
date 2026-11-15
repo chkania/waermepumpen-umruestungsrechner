@@ -63,6 +63,23 @@ describe('UI (Smoke-Test)', () => {
     expect(contribute.querySelector('a[href$="/issues/new?template=bug_report.yml"]')!.textContent).toBe('Melde ihn');
     expect(contribute.querySelector('a[href$="/issues/new?template=feature_request.yml"]')!.textContent).toBe('Schlag sie vor');
     expect(contribute.querySelector('a[href$="/CONTRIBUTING.md"]')).not.toBeNull();
+    // F19.4 voluntary support: plain links, new tab, no embedded widgets/images
+    expect(contribute.querySelector<HTMLAnchorElement>('a[href="https://buymeacoffee.com/chkania"]')!.textContent).toBe('Buy me a coffee');
+    const paypal = contribute.querySelector<HTMLAnchorElement>('a[href="https://paypal.me/ChristophKania"]')!;
+    expect(paypal.textContent).toBe('PayPal');
+    expect(paypal.target).toBe('_blank');
+    expect(contribute.querySelector('img, iframe, script')).toBeNull();
+    // F19.4 toolbar button opens a dialog with the same links
+    const support = root.querySelector<HTMLDialogElement>('#support')!;
+    expect(support.open).toBe(false);
+    root.querySelector<HTMLButtonElement>('#btn-support')!.click();
+    expect(support.open).toBe(true);
+    expect([...support.querySelectorAll<HTMLAnchorElement>('a.share-btn')].map((a) => [a.textContent, a.getAttribute('href'), a.target])).toEqual([
+      ['Buy me a coffee', 'https://buymeacoffee.com/chkania', '_blank'],
+      ['PayPal', 'https://paypal.me/ChristophKania', '_blank'],
+    ]);
+    expect(support.querySelector('img, iframe, script')).toBeNull();
+    support.close();
     const repo = root.querySelector<HTMLAnchorElement>('.disclaimer.license a[href^="https://github.com/chkania/"]')!;
     expect(repo.textContent).toBe('Quellcode auf GitHub');
     expect(repo.rel).toBe('noopener');

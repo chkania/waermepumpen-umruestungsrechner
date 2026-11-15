@@ -1,5 +1,13 @@
 # Wärmepumpen-Investitionsrechner
 
+[![CI](https://github.com/chkania/waermepumpen-umruestungsrechner/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/chkania/waermepumpen-umruestungsrechner/actions/workflows/ci.yml)
+[![Deploy](https://github.com/chkania/waermepumpen-umruestungsrechner/actions/workflows/deploy.yml/badge.svg?branch=main)](https://github.com/chkania/waermepumpen-umruestungsrechner/actions/workflows/deploy.yml)
+[![Version](https://img.shields.io/github/package-json/v/chkania/waermepumpen-umruestungsrechner?label=Version)](CHANGELOG.md)
+[![Lizenz: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/Lizenz-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE.md)
+[![Rechner öffnen](https://img.shields.io/badge/Rechner-waermepumpen--investitionsrechner.de-2ea44f)](https://waermepumpen-investitionsrechner.de/)
+[![Buy me a coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/chkania)
+[![PayPal](https://img.shields.io/badge/PayPal-Spenden-00457C?logo=paypal&logoColor=white)](https://paypal.me/ChristophKania)
+
 Rechnet den Umstieg von einer Gas- oder Ölheizung auf eine Wärmepumpe durch – mit steigenden Energie- und CO₂-Preisen,
 KfW-Heizungsförderung (458), Ergänzungskredit (358/359), Bankkredit, Steuerbonus (§ 35c EStG) und einem Vergleich
 verschiedener Umrüstzeitpunkte.
@@ -37,6 +45,8 @@ Förderprogramme, Energiepreise und Steuerregeln ändern sich laufend – der Re
 - **Entwickle mit** – Rechenlogik, Texte, Tests, Barrierefreiheit. Ablauf, Commit-Format und Konventionen findest du in [CONTRIBUTING.md](CONTRIBUTING.md); `CLAUDE.md` und `docs/ANFORDERUNGEN.md` beschreiben Struktur und Anforderungen.
 
 Auch kleine Beiträge wie ein korrigierter Tippfehler oder eine geprüfte Quelle helfen – schön, wenn du dabei bist!
+
+Du möchtest das Hobbyprojekt einfach so unterstützen? Über einen Kaffee freue ich mich: [Buy me a coffee](https://buymeacoffee.com/chkania) oder [PayPal](https://paypal.me/ChristophKania). Freiwillig – der Rechner bleibt kostenlos und werbefrei.
 
 ## Lizenz
 

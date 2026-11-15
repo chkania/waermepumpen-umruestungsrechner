@@ -17,7 +17,7 @@ describe('F15 Benutzerhandbuch – Vollständigkeit', () => {
   });
 
   it('alle Funktionen der Werkzeugleiste sind beschrieben', () => {
-    for (const t of ['Einführung', 'Weiterempfehlen', 'Link mit Werten teilen', 'Varianten vergleichen', 'Bericht drucken', 'Export', 'Import', 'Zurücksetzen', 'Hilfe', 'Hell | Dunkel | Auto']) {
+    for (const t of ['Einführung', 'Weiterempfehlen', 'Unterstützen', 'Link mit Werten teilen', 'Varianten vergleichen', 'Bericht drucken', 'Export', 'Import', 'Zurücksetzen', 'Hilfe', 'Hell | Dunkel | Auto']) {
       expect(handbook, t).toContain(`### ${t}`);
     }
   });
@@ -87,6 +87,20 @@ describe('F19 Projektlinks und Mitmachen', () => {
     expect(read('README.md')).toContain(BUG_REPORT_URL);
     expect(read('CONTRIBUTING.md')).toContain(BUG_REPORT_URL);
     expect(read('CONTRIBUTING.md')).toContain(FEATURE_REQUEST_URL);
+  });
+
+  it('F19.4 Unterstützen: Buy Me a Coffee und PayPal in Handbuch, README und Datenschutz; Badges in der README', async () => {
+    const { PAYPAL_URL, BUY_ME_A_COFFEE_URL } = await import('../src/project');
+    expect(PAYPAL_URL).toBe('https://paypal.me/ChristophKania');
+    expect(BUY_ME_A_COFFEE_URL).toBe('https://buymeacoffee.com/chkania');
+    const readme = read('README.md');
+    for (const doc of [read('docs/BENUTZERHANDBUCH.md'), readme]) {
+      expect(doc).toContain(`](${PAYPAL_URL})`);
+      expect(doc).toContain(`](${BUY_ME_A_COFFEE_URL})`);
+    }
+    for (const wf of ['ci.yml', 'deploy.yml']) expect(readme).toContain(`/actions/workflows/${wf}/badge.svg`);
+    expect(readme).toMatch(/^\[!\[CI\]/m);
+    expect(read('docs/DATENSCHUTZ.md')).toMatch(/\*\*Unterstützen \(Buy Me a Coffee, PayPal\):\*\*/);
   });
 
   it('Dokumentseiten verlinken das Repository im Seitenfuß', async () => {

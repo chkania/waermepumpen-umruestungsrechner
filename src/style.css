@@ -639,6 +639,8 @@ td.ev-cell { white-space: normal; min-width: 220px; }
   cursor: pointer;
 }
 .share-btn:hover { border-color: var(--accent); }
+/* support dialog (F19.4): two wider buttons, labels on one line */
+.support .share-list { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
 .rec-status { min-height: 1.4em; margin: 4px 0; font-size: 0.9rem; color: var(--good); }
 .rec-status.is-error { color: var(--c-text-2); }
 .rec-fallback { width: 100%; box-sizing: border-box; margin: 4px 0 8px; padding: 8px; border: 1px solid var(--accent); border-radius: var(--radius); background: var(--surface); color: var(--c-text); font: inherit; font-size: 0.85rem; resize: vertical; }
