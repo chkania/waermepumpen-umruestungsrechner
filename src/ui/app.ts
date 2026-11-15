@@ -19,7 +19,18 @@ import { energySplit } from '../core/prices';
 import { decodeHash, encodeHash, exportFileName, exportJson, importJson, mergeInputs } from '../core/serialize';
 import type { Inputs, ScenarioKind, ScenarioResult } from '../core/types';
 import { NUMBER_LIMITS, numberRange, TEXT_LIMITS, validMonth, type InputIssue } from '../core/validate';
-import { Charts, chartTables, variantsChart, type ChartId } from './charts';
+import { chartTables, type ChartId } from './charts';
+
+/** Chart.js module, loaded on demand so that it does not delay the first display (N14). */
+type ChartLib = typeof import('./chart-render');
+let chartLib: ChartLib | null = null;
+let chartLibLoading: Promise<ChartLib> | null = null;
+const loadChartLib = (): Promise<ChartLib> => (chartLibLoading ??= import('./chart-render').then((m) => (chartLib = m)));
+/** Runs fn with the chart module – immediately when loaded, otherwise after loading. */
+function withChartLib(fn: (lib: ChartLib) => void): void {
+  if (chartLib) fn(chartLib);
+  else void loadChartLib().then(fn, () => undefined);
+}
 import { SECTIONS, getPath, setPath, type Field } from './fields';
 import { escapeHtml, fmtDuration, fmtEur, fmtMonth, fmtNum, fmtPct } from './format';
 import { RECOMMEND_SUBJECT, RECOMMEND_TEXT, calculatorUrl, recommendLinks } from './share';
@@ -83,7 +94,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   root.innerHTML = layout();
   const $ = <T extends HTMLElement>(sel: string) => root.querySelector(sel) as T;
   const form = $<HTMLElement>('#inputs');
-  form.innerHTML = sectionsToggleHtml() + SECTIONS.map((s) => sectionHtml(s, defaults)).join('');
+  form.innerHTML = sectionsToggleHtml() + SECTIONS.map((s) => sectionHtml(s)).join('');
   // Expand/collapse all input sections at once (F24)
   form.querySelectorAll<HTMLButtonElement>('[data-sections]').forEach((b) =>
     b.addEventListener('click', () => {
@@ -95,7 +106,14 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   const canvases = Object.fromEntries(
     CHART_TABS.map(([id]) => [id, $<HTMLCanvasElement>(`canvas[data-chart="${id}"]`)]),
   ) as Record<ChartId, HTMLCanvasElement>;
-  const charts = new Charts(canvases);
+  let charts: InstanceType<ChartLib['Charts']> | null = null;
+  /** Draws the result charts with the latest result (after loading Chart.js if needed). */
+  const drawCharts = () =>
+    withChartLib((lib) => {
+      if (!last) return;
+      charts ??= new lib.Charts(canvases);
+      charts.update(last.run, priceRows(inputs), last.cmp, last.events, last.sens, energyYear(inputs));
+    });
 
   // ---------- Form ----------
   const fieldByPath = new Map<string, Field>();
@@ -254,6 +272,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     closePopovers(btn);
     const pop = document.getElementById(btn.getAttribute('aria-controls')!) as HTMLElement;
     const open = btn.getAttribute('aria-expanded') !== 'true';
+    if (open && !pop.firstElementChild && pop.dataset.src) pop.innerHTML = sourcePopHtml(pop.dataset.src, defaults);
     btn.setAttribute('aria-expanded', String(open));
     pop.hidden = !open;
   });
@@ -369,8 +388,8 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   });
 
   const redrawCharts = () => {
-    charts.reset();
-    if (last) charts.update(last.run, priceRows(inputs), last.cmp, last.events, last.sens, energyYear(inputs));
+    charts?.reset();
+    drawCharts();
   };
   // ---------- Light/dark ----------
   const media = typeof matchMedia === 'function' ? matchMedia('(prefers-color-scheme: dark)') : null;
@@ -446,7 +465,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     renderYearTable(run, events);
     const prices = priceRows(inputs);
     const energy = energyYear(inputs);
-    charts.update(run, prices, cmp, events, sens, energy);
+    drawCharts();
     renderChartTables(run, prices, cmp, sens, energy);
   }
 
@@ -1002,7 +1021,13 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       <div class="chart-wrap"><canvas role="img" aria-label="Diagramm: kumulierte Kosten je Variante, mit und ohne Wärmepumpe. Die Werte stehen in der Tabelle darunter."></canvas></div>
       <details class="chart-data"><summary>Werte als Tabelle</summary><div class="table-wrap">${variantCurvesTableHtml(rs)}</div></details>
       ${variants.length > 1 ? `<h3>Unterschiede in den Eingaben</h3>${variantDiffsHtml(rs)}` : ''}`;
-    varChart = variantsChart(varResult.querySelector('canvas')!, variantCurves(rs));
+    const canvas = varResult.querySelector('canvas')!;
+    const curves = variantCurves(rs);
+    withChartLib((lib) => {
+      if (!canvas.isConnected) return;
+      varChart?.destroy();
+      varChart = lib.variantsChart(canvas, curves);
+    });
   }
   $<HTMLButtonElement>('#btn-variants').addEventListener('click', () => {
     setVarStatus('');
@@ -1100,13 +1125,14 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       fig.appendChild(wrap);
       canvases[fig.dataset.reportChart as ChartId] = canvas;
     }
-    const rc = new Charts(canvases, 2);
-    rc.update(last.run, priceRows(inputs), last.cmp, last.events, last.sens, energyYear(inputs));
+    // Chart.js is normally loaded long before; without it the placeholder text stays (e.g. printing right at the start)
+    const rc = chartLib ? new chartLib.Charts(canvases, 2) : null;
+    rc?.update(last.run, priceRows(inputs), last.cmp, last.events, last.sens, energyYear(inputs));
     for (const fig of report.querySelectorAll<HTMLElement>('[data-report-chart]')) {
       const source = fig.querySelector('canvas');
       const copy = document.createElement('canvas');
       const ctx = copy.getContext?.('2d');
-      if (!source || !ctx || !source.width) continue;
+      if (!rc || !source || !ctx || !source.width) continue;
       copy.width = source.width;
       copy.height = source.height;
       ctx.drawImage(source, 0, 0);
@@ -1116,7 +1142,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       fig.querySelector('.muted')?.remove();
       fig.querySelector('.report-chart-wrap')?.replaceWith(copy);
     }
-    rc.reset();
+    rc?.reset();
     report.classList.remove('is-rendering');
     return report;
   }
@@ -1132,7 +1158,8 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     if (themeBeforePrint === null) buildReport();
   });
   window.addEventListener('afterprint', restoreTheme);
-  $<HTMLButtonElement>('#btn-report').addEventListener('click', () => {
+  $<HTMLButtonElement>('#btn-report').addEventListener('click', async () => {
+    await loadChartLib().catch(() => undefined);
     if (!buildReport()) return;
     window.print();
   });
@@ -1235,26 +1262,35 @@ export function formatDefault(f: Field, defaults: Inputs): string {
   return `${n.toLocaleString('de-DE', { maximumFractionDigits: 3 })}${unit ? ' ' + unit : ''}`;
 }
 
-function sourceHtml(f: Field, id: string, defaults: Inputs): { button: string; pop: string } {
+function sourceHtml(f: Field, id: string): { button: string; pop: string } {
   const src = DEFAULT_SOURCES[f.path];
   if (!src) return { button: '', pop: '' };
   const popId = `${id}-src`;
+  return {
+    button: `<button type="button" class="info-btn" aria-label="Woher kommt der Standardwert?" aria-expanded="false" aria-controls="${popId}">i</button>`,
+    // Content is filled in on first opening (sourcePopHtml) – keeps the page small (N14)
+    pop: `<div class="src-pop" id="${popId}" role="note" data-src="${f.path}" hidden></div>`,
+  };
+}
+
+const FIELD_BY_PATH = new Map(SECTIONS.flatMap((s) => s.fields).map((f) => [f.path, f]));
+
+/** Content of the origin popover of a field (F11). */
+export function sourcePopHtml(path: string, defaults: Inputs): string {
+  const f = FIELD_BY_PATH.get(path);
+  const src = DEFAULT_SOURCES[path];
+  if (!f || !src) return '';
   let host = '';
   try {
     host = src.url ? new URL(src.url).hostname.replace(/^www\./, '') : '';
   } catch {
     host = '';
   }
-  return {
-    button: `<button type="button" class="info-btn" aria-label="Woher kommt der Standardwert?" aria-expanded="false" aria-controls="${popId}">i</button>`,
-    pop: `<div class="src-pop" id="${popId}" role="note" hidden>
-      <div class="src-head"><span class="src-kind kind-${src.kind}">${SOURCE_KIND_LABEL[src.kind]}</span>
+  return `<div class="src-head"><span class="src-kind kind-${src.kind}">${SOURCE_KIND_LABEL[src.kind]}</span>
         <span class="src-default">Standard: <strong>${escapeHtml(formatDefault(f, defaults))}</strong></span></div>
       <p>${escapeHtml(src.text)}</p>
       ${refsHtml(OFFICIAL_REFS[f.path])}
-      ${src.url || src.asOf ? `<p class="src-meta">${src.url ? `<a href="${src.url}" target="_blank" rel="noopener">${escapeHtml(host)}</a>` : ''}${src.url && src.asOf ? ' · ' : ''}${src.asOf ? `Stand ${src.asOf}` : ''}</p>` : ''}
-    </div>`,
-  };
+      ${src.url || src.asOf ? `<p class="src-meta">${src.url ? `<a href="${src.url}" target="_blank" rel="noopener">${escapeHtml(host)}</a>` : ''}${src.url && src.asOf ? ' · ' : ''}${src.asOf ? `Stand ${src.asOf}` : ''}</p>` : ''}`;
 }
 
 function refsHtml(refs: { label: string; url: string }[] | undefined): string {
@@ -1304,11 +1340,11 @@ export function fieldErrorText(f: Field): string {
   return `Ungültige Eingabe.${keep}`;
 }
 
-function fieldHtml(f: Field, defaults: Inputs): string {
+function fieldHtml(f: Field): string {
   const id = `f-${f.path.replace(/\./g, '-')}`;
   const unit = typeof f.unit === 'string' ? f.unit : '';
   const help = f.help ? `<small class="help" id="${id}-help">${escapeHtml(f.help)}</small>` : '';
-  const src = f.noSource ? { button: '', pop: '' } : sourceHtml(f, id, defaults);
+  const src = f.noSource ? { button: '', pop: '' } : sourceHtml(f, id);
   const ph = f.placeholder ? ` placeholder="${escapeHtml(f.placeholder)}"` : '';
   if (f.type === 'checkbox') {
     return `<div class="field check" data-field="${f.path}">
@@ -1347,7 +1383,7 @@ function sectionsToggleHtml(): string {
   </div>`;
 }
 
-function sectionHtml(s: (typeof SECTIONS)[number], defaults: Inputs): string {
+function sectionHtml(s: (typeof SECTIONS)[number]): string {
   // SPF (JAZ) estimate (F26) directly below the SPF field
   const after = (f: Field) =>
     f.path === 'heatPump.jaz'
@@ -1358,7 +1394,7 @@ function sectionHtml(s: (typeof SECTIONS)[number], defaults: Inputs): string {
   return `<details class="section${s.expert ? ' expert' : ''}" ${s.open ? 'open' : ''}>
     <summary>${escapeHtml(s.title)}</summary>
     ${s.note ? `<p class="note">${escapeHtml(s.note)}</p>` : ''}
-    <div class="fields">${s.fields.map((f) => fieldHtml(f, defaults) + after(f)).join('')}</div>
+    <div class="fields">${s.fields.map((f) => fieldHtml(f) + after(f)).join('')}</div>
   </details>`;
 }
 
