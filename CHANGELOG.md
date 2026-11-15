@@ -8,6 +8,12 @@ Alle wesentlichen Änderungen am Wärmepumpen-Investitionsrechner. Das Format or
 - **Minor** (1.x.0): neue Funktionen oder Eingaben sowie bewusst geänderte Rechenmodelle oder Standardwerte (Ergebnisse können sich ändern).
 - **Patch** (1.0.x): Fehlerkorrekturen, Texte, Darstellung – ohne neue Funktionen.
 
+## 1.10.8 – 2026-11-15
+
+### Fehlerkorrekturen
+- Quellenhinweis zur Untergrenze der förderfähigen Kosten verweist auf die Förderrichtlinie
+- Potential fix for pull request finding 'CodeQL / Incomplete string escaping or encoding'
+
 ## 1.10.7 – 2026-11-15
 
 ### Fehlerkorrekturen
