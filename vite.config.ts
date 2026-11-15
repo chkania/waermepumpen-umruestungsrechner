@@ -1,12 +1,38 @@
 /// <reference types="vitest/config" />
+import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import { cspPlugin } from './csp';
+import { version } from './package.json';
+
+/**
+ * Commit of the build: the checked-out HEAD (in the deploy workflow the release commit on main – GITHUB_SHA would be the
+ * commit that triggered the workflow), GITHUB_SHA only without git.
+ */
+function buildCommit(): string {
+  try {
+    return execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+  } catch {
+    return process.env.GITHUB_SHA ?? 'unbekannt';
+  }
+}
+
+/** Writes version.json (version and commit) into the build – checked after every deployment (N15, scripts/smoke-test.ts). */
+function versionFilePlugin(): Plugin {
+  return {
+    name: 'version-file',
+    apply: 'build',
+    generateBundle() {
+      this.emitFile({ type: 'asset', fileName: 'version.json', source: `${JSON.stringify({ version, commit: buildCommit() }, null, 2)}\n` });
+    },
+  };
+}
 
 export default defineConfig({
   base: './',
   plugins: [
     cspPlugin(),
+    versionFilePlugin(),
   ],
   build: {
     rollupOptions: {

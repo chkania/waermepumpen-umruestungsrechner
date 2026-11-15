@@ -5,6 +5,8 @@ name: Deploy
 #   (the release commit is pushed with GITHUB_TOKEN and therefore triggers no push workflows itself).
 # - build: installs, tests and builds WITHOUT access to the SSH key (third-party package code never sees it).
 # - deploy: only downloads the finished build and uploads it – no npm, no repository code.
+# - verify: checks the live site afterwards WITHOUT secrets (N15, scripts/smoke-test.ts): version.json carries the built
+#   version and commit, the calculator calculates and draws its charts, all pages load without errors.
 #
 # Setup (Settings → Environments → "production"):
 #   secrets:   SSH_PRIVATE_KEY  – private key of a deploy key without passphrase (only for this webspace)
@@ -46,9 +48,11 @@ jobs:
         run: npm test
       - name: Typecheck und Build
         run: npm run build
-      - name: Version für die Zusammenfassung
+      - name: Version und Commit für Zusammenfassung und Prüfung
         id: meta
-        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+          echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v7
         with:
           name: dist
@@ -57,6 +61,7 @@ jobs:
           retention-days: 7
     outputs:
       version: ${{ steps.meta.outputs.version }}
+      commit: ${{ steps.meta.outputs.commit }}
 
   deploy:
     needs: build
@@ -69,6 +74,9 @@ jobs:
       SSH_USER: ${{ vars.DEPLOY_USER }}
       SSH_PORT: ${{ vars.DEPLOY_PORT || '22' }}
       TARGET: ${{ vars.DEPLOY_PATH }}
+    # DEPLOY_URL is a variable of the environment "production" and therefore only readable here – passed on to verify
+    outputs:
+      url: ${{ vars.DEPLOY_URL }}
     steps:
       - uses: actions/download-artifact@v8
         with:
@@ -122,3 +130,25 @@ jobs:
       - name: SSH-Schlüssel entfernen
         if: always()
         run: rm -f ~/.ssh/deploy_key
+
+  verify:
+    needs: [build, deploy]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # exactly the deployed commit (smoke test script and expected version)
+          ref: ${{ needs.build.outputs.commit }}
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+          cache: npm
+      - run: npm ci
+      - name: Prüfung der ausgelieferten Seite
+        env:
+          URL: ${{ needs.deploy.outputs.url || 'https://waermepumpen-investitionsrechner.de/' }}
+          VERSION: ${{ needs.build.outputs.version }}
+          COMMIT: ${{ needs.build.outputs.commit }}
+        # Google Chrome is preinstalled on the runner (playwright-core downloads no browser)
+        run: node scripts/smoke-test.ts "$URL" --version "$VERSION" --commit "$COMMIT"

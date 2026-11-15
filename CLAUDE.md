@@ -37,11 +37,12 @@ PolyForm Noncommercial 1.0.0 (`LICENSE.md`). Neue/aktualisierte Laufzeit-Abhäng
 - `.github/workflows/ci.yml` – Tests, Build und `npm audit` (Laufzeit, ab „high“) für Push auf `main` und PRs.
 - `.github/dependabot.yml` – wöchentliche Updates (npm mit 7 Tagen Cooldown, GitHub Actions); Patch/Minor gruppiert.
 - `.github/workflows/release.yml` – leitet nach Push auf `main` die Version ab und committet `chore(release): x.y.z` (nur Node/Git, kein `npm ci`). `.github/workflows/pr-title.yml` – prüft PR-Titel auf Conventional Commits.
-- `.github/workflows/deploy.yml` – nach erfolgreichem Release auf `main` (oder manuell) bauen und per SSH/rsync auf den Webspace laden (N12); Build-Job ohne Secrets, Deploy-Job ohne npm. Einrichtung: `docs/DEPLOYMENT.md`.
+- `.github/workflows/deploy.yml` – nach erfolgreichem Release auf `main` (oder manuell) bauen und per SSH/rsync auf den Webspace laden (N12); Build-Job ohne Secrets, Deploy-Job ohne npm; danach prüft der Job `verify` (ohne Secrets) die Live-Seite mit `scripts/smoke-test.ts` (N15: `version.json`, Rechner rechnet, Diagramme, alle Seiten fehlerfrei). Neue Seite oder geänderte Selektoren (`#app-version`, `#kpis`, `.info-btn`, `#f-oldHeating-consumption`) → Rauchtest anpassen. Einrichtung: `docs/DEPLOYMENT.md`.
 - `.github/workflows/annahmen-pruefen.yml` – vierteljährliches Issue mit Checkliste der zeitkritischen Standardwerte (aus `sources.ts`, F22). Nach der Prüfung `FUNDING_SOURCE_DATE` in `defaults.ts` auf das Prüfdatum setzen (steuert den Hinweis „Annahmen möglicherweise veraltet“ nach 6 Monaten).
 - `.github/workflows/dependabot.yml` – prüft Dependabot-PRs ohne Schreibrechte, committet aktualisierte `THIRD-PARTY-NOTICES.md` und merged Patch/Minor automatisch (Squash); Major bleibt zur manuellen Prüfung offen. Abhängigkeits-Updates erhöhen die App-Version nicht.
 
 ## Befehle
+- `npm run smoke [-- <url>]` – Rauchtest gegen die Live-Seite oder die lokale Vorschau (N15)
 - `npm run dev` – Entwicklungsserver (Port 5173, siehe `.claude/launch.json`)
 - `npm test` – alle Tests · `npm run test:coverage` – Tests mit Testabdeckung (Bericht in `coverage/`, HTML unter `coverage/index.html`; in der CI als Zusammenfassung). Mindestwerte in `vite.config.ts`: gesamt 90 % Zeilen / 78 % Verzweigungen, `src/core` 95 / 85, `src/ui` 80 / 65 – Unterschreiten lässt die CI fehlschlagen; nach oben nachziehen, nie senken · `npm run build` – Typecheck + statischer Build nach `dist/`
 
