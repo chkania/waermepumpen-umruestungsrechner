@@ -38,7 +38,7 @@ Die Wahl wird im Browser gespeichert.
 
 ### Hilfe
 
-Öffnet dieses Handbuch in einem neuen Tab. Es ist auch direkt unter der Adresse **hilfe.html** neben dem Rechner erreichbar.
+Öffnet dieses Handbuch. Mit „← Zum Rechner“ oben oder der Zurück-Taste des Browsers kommen Sie zu Ihren Eingaben zurück; sie bleiben gespeichert. Es ist auch direkt unter der Adresse **hilfe.html** neben dem Rechner erreichbar.
 
 ### Weiterempfehlen
 

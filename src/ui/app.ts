@@ -1421,7 +1421,7 @@ function layout(): string {
         <button type="button" data-theme-choice="auto" aria-pressed="false" title="Wie Browser bzw. System">Auto</button>
       </div>
       <button id="btn-intro" type="button" aria-haspopup="dialog" title="Kurze Einführung: Wozu dient der Rechner, wie bedient man ihn?">Einführung</button>
-      <a id="btn-help" class="tool-link" href="./hilfe.html" target="_blank" rel="noopener" title="Benutzerhandbuch in neuem Tab öffnen">Hilfe</a>
+      <a id="btn-help" class="tool-link" href="./hilfe.html" title="Benutzerhandbuch öffnen">Hilfe</a>
       <button id="btn-recommend" type="button" aria-haspopup="dialog" title="Den Rechner per WhatsApp, Threema, E-Mail, Link oder einer anderen App (z. B. Signal) weiterempfehlen">Weiterempfehlen</button>
       <button id="btn-share" type="button" title="Link mit Ihren aktuellen Eingaben kopieren – zum Sichern oder Weitergeben Ihrer Berechnung">Link mit Werten teilen</button>
       <button id="btn-variants" type="button" aria-haspopup="dialog" title="Zwei oder drei Varianten (Export-Dateien oder aktuelle Eingaben) nebeneinander vergleichen">Varianten vergleichen</button>
@@ -1490,7 +1490,7 @@ function layout(): string {
         <p class="muted small">Quellcode, Fragen und Vorschläge: <a href="${safeHref(REPO_URL)}" target="_blank" rel="noopener">github.com/chkania/waermepumpen-umruestungsrechner</a> – schön, wenn du dabei bist!</p>
       </aside>
       <p class="disclaimer">Keine Finanz-, Steuer- oder Förderberatung. Alle Angaben ohne Gewähr; Förderbedingungen Stand ${FUNDING_SOURCE_DATE.split('-').reverse().join('.')} – bitte vor Antragstellung bei KfW, Energieberatung und Steuerberatung prüfen.</p>
-      <p class="disclaimer license"><a href="./changelog.html">Version ${APP_VERSION}</a> · © 2026 Christoph Kania · Lizenz: <a href="./lizenz.html" target="_blank" rel="noopener">PolyForm Noncommercial 1.0.0</a> – kostenfreie Nutzung für nicht-kommerzielle Zwecke; kommerzielle Nutzung nur nach Absprache · <a href="./lizenzen-drittanbieter.html" target="_blank" rel="noopener">Lizenzen von Drittanbietern</a> · <a href="./impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="./datenschutz.html" target="_blank" rel="noopener">Datenschutz</a> · <a href="${safeHref(REPO_URL)}" target="_blank" rel="noopener">Quellcode auf GitHub</a></p>
+      <p class="disclaimer license"><a href="./changelog.html">Version ${APP_VERSION}</a> · © 2026 Christoph Kania · Lizenz: <a href="./lizenz.html">PolyForm Noncommercial 1.0.0</a> – kostenfreie Nutzung für nicht-kommerzielle Zwecke; kommerzielle Nutzung nur nach Absprache · <a href="./lizenzen-drittanbieter.html">Lizenzen von Drittanbietern</a> · <a href="./impressum.html">Impressum</a> · <a href="./datenschutz.html">Datenschutz</a> · <a href="${safeHref(REPO_URL)}" target="_blank" rel="noopener">Quellcode auf GitHub</a></p>
     </section>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -1557,7 +1557,7 @@ function introHtml(): string {
       <p class="intro-about">Ein privates Hobbyprojekt: Der Rechner ist aus meiner eigenen Frage entstanden, ob sich der Umstieg finanziell lohnt. <a href="#ueber" data-about-link>Wie und warum er entstanden ist</a></p>
       <p class="muted small">Gerechnet wird nur in Ihrem Browser. Die Ergebnisse sind eine Modellrechnung und ersetzen keine Energie-, Förder- oder Steuerberatung.</p>
       <div class="intro-actions">
-        <a href="./hilfe.html" target="_blank" rel="noopener">Ausführliche Anleitung in der Hilfe</a>
+        <a href="./hilfe.html">Ausführliche Anleitung in der Hilfe</a>
         <button type="submit" value="close" class="primary" autofocus>Los geht’s</button>
       </div>
       <p class="muted small intro-again">Diese Einführung können Sie jederzeit über „Einführung“ oben wieder öffnen.</p>

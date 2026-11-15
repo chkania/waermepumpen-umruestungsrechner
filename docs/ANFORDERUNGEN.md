@@ -130,8 +130,10 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 
 ### F15 – Benutzerhandbuch
 - F15.1 Benutzerhandbuch in `docs/BENUTZERHANDBUCH.md`: Schnellstart, Aufbau der Oberfläche, Werkzeugleiste (Hell/Dunkel, Hilfe, Link mit Werten teilen inkl. Datenschutzhinweis, Export, Import, Zurücksetzen, automatisches Speichern), alle Eingabe-Abschnitte und Felder, Ergebnisbereiche, Tipps, Datenschutz. *(Test: help)*
-- F15.2 Im Browser aufrufbar als eigene Seite `hilfe.html` (Vite-Mehrseiten-Build): gerendert aus dem Markdown, Inhaltsverzeichnis mit Sprungmarken (`hilfe.html#link-mit-werten-teilen`), gleiches Design und Hell/Dunkel wie der Rechner (folgt Änderungen im anderen Tab), mobil ohne Überlauf. Im Rechner öffnet „Hilfe“ in der Werkzeugleiste die Seite in einem neuen Tab. *(Test: help, ui)*
+- F15.2 Im Browser aufrufbar als eigene Seite `hilfe.html` (Vite-Mehrseiten-Build): gerendert aus dem Markdown, Inhaltsverzeichnis mit Sprungmarken (`hilfe.html#link-mit-werten-teilen`), gleiches Design und Hell/Dunkel wie der Rechner (folgt Änderungen im anderen Tab), mobil ohne Überlauf. Im Rechner öffnet „Hilfe“ in der Werkzeugleiste die Seite im selben Tab (bis 1.11.0: neuer Tab). *(Test: help, ui)*
 - F15.3 Das Handbuch muss jeden Eingabe-Abschnitt, jedes Feld (Beschriftung wie in `fields.ts`), jede Werkzeugleisten-Funktion und jeden Ergebnisbereich nennen – neue Felder/Funktionen erfordern eine Ergänzung (Test schlägt sonst fehl). *(Test: help)*
+
+- F15.4 Links auf eigene Seiten (Hilfe, Impressum, Datenschutz, Lizenzen, Changelog) öffnen im selben Tab – die Eingaben bleiben gespeichert, jede Seite führt zurück zum Rechner. Links auf fremde Seiten (Quellen, GitHub, Messenger) öffnen in einem neuen Tab mit `rel="noopener"`. *(Test: ui)*
 
 ### F16 – Szenario-Beschreibung
 - F16.1 Abschnitt „Szenario“ (oben, geöffnet) mit „Bezeichnung des Szenarios“ (einzeilig) und „Bemerkungen“ (mehrzeilig). Beide ohne Einfluss auf die Rechnung (keine Neuberechnung), ohne Herkunfts-Popover; gespeichert wie alle Eingaben (localStorage, Link, JSON). Die Bezeichnung erscheint über den Ergebnissen und im Fenstertitel. *(Test: serialize, ui)*
@@ -317,3 +319,4 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 | 2026-11-15 | F11 Herkunft der Untergrenze der förderfähigen Kosten (22.000 € ab 01.08.2030) korrigiert: steht in der BEG-EM-Richtlinie Nr. 8.3.1, nicht auf der KfW-Seite (gefunden mit F22.3). Ergebnisse unverändert. |
 | 2026-11-15 | N12.1 Deployment zeigt vor der Freigabe die Changelog-Einträge seit der Live-Version. Ergebnisse unverändert. |
 | 2026-11-15 | F10.6 Hinweis, wenn der Start der Betrachtung in der Zukunft liegt (heutige Preise würden sonst ohne Steigerung bis zum Start gerechnet). Ergebnisse unverändert. |
+| 2026-11-15 | F15.4 Eigene Seiten (Hilfe, Impressum, Datenschutz, Lizenzen) öffnen im selben Tab statt in einem neuen; fremde Seiten weiter in neuem Tab. |
