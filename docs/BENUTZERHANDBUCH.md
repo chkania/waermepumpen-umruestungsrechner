@@ -52,7 +52,12 @@ Die Wahl wird im Browser gespeichert.
 
 ### Unterstützen
 
-Öffnet ein Fenster mit zwei Links, über die Sie das Hobbyprojekt freiwillig unterstützen können: **Buy me a coffee** und **PayPal**. Beide öffnen die Seite des Anbieters in einem neuen Tab. Der Rechner bleibt kostenlos und ohne Werbung, eine Unterstützung ist keine Voraussetzung für irgendeine Funktion.
+Öffnet ein Fenster, über das Sie das Hobbyprojekt freiwillig unterstützen können:
+
+- **Buy me a coffee** und **PayPal** öffnen die Seite des Anbieters in einem neuen Tab.
+- **Per Überweisung:** Den **GiroCode** (QR-Code) scannen Sie mit Ihrer Banking-App; Empfänger, IBAN und Verwendungszweck sind dann ausgefüllt, den Betrag wählen Sie selbst. Auf dem Smartphone kopieren Sie stattdessen mit **IBAN kopieren** die IBAN.
+
+Der Rechner bleibt kostenlos und ohne Werbung, eine Unterstützung ist keine Voraussetzung für irgendeine Funktion.
 
 ### Link mit Werten teilen
 

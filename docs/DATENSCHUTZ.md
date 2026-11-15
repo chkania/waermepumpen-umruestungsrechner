@@ -46,7 +46,7 @@ Alle Berechnungen laufen lokal in Ihrem Browser. Damit Ihre Eingaben beim nächs
 
 **Weiterempfehlen:** Die Schaltflächen öffnen die WhatsApp- oder Threema-App, das Teilen-Menü Ihres Geräts oder Ihr E-Mail-Programm mit einem vorbereiteten Text, der nur die Adresse des Rechners enthält. Der Rechner selbst überträgt dabei nichts; was Sie anschließend senden und an wen, entscheiden Sie im jeweiligen Programm, für das dessen Datenschutzbestimmungen gelten.
 
-**Unterstützen (Buy Me a Coffee, PayPal):** Im Fenster „Unterstützen“ und im Kasten „Mitmachen“ stehen einfache Links zu Buy Me a Coffee und PayPal. Es werden keine Inhalte dieser Dienste eingebunden; beim Laden des Rechners wird keine Verbindung zu ihnen aufgebaut. Erst wenn Sie einen Link anklicken, öffnet sich die Seite des Anbieters in einem neuen Tab. Dort gelten dessen Datenschutzbestimmungen.
+**Unterstützen (Buy Me a Coffee, PayPal):** Im Fenster „Unterstützen“ und im Kasten „Mitmachen“ stehen einfache Links zu Buy Me a Coffee und PayPal. Es werden keine Inhalte dieser Dienste eingebunden; beim Laden des Rechners wird keine Verbindung zu ihnen aufgebaut. Erst wenn Sie einen Link anklicken, öffnet sich die Seite des Anbieters in einem neuen Tab. Dort gelten dessen Datenschutzbestimmungen. Für eine Überweisung zeigt das Fenster meine Bankverbindung und einen GiroCode (QR-Code); dieser wird in Ihrem Browser erzeugt, dabei wird nichts übertragen.
 
 **Export und Import:** Exportierte JSON-Dateien werden direkt auf Ihrem Gerät gespeichert; beim Import liest der Browser die Datei lokal ein. Es findet keine Übertragung an mich statt.
 

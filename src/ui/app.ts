@@ -35,7 +35,9 @@ import { SECTIONS, getPath, setPath, type Field } from './fields';
 import { escapeHtml, fmtDuration, fmtEur, fmtMonth, fmtNum, fmtPct, safeHref } from './format';
 import { RECOMMEND_SUBJECT, RECOMMEND_TEXT, calculatorUrl, recommendLinks, shareBaseUrl } from './share';
 import { logoSvg } from '../logo';
-import { BUG_REPORT_URL, BUY_ME_A_COFFEE_URL, CONTRIBUTING_URL, FEATURE_REQUEST_URL, PAYPAL_URL, REPO_URL } from '../project';
+import { BUG_REPORT_URL, BUY_ME_A_COFFEE_URL, CONTRIBUTING_URL, DONATION_ACCOUNT, FEATURE_REQUEST_URL, PAYPAL_URL, REPO_URL } from '../project';
+import { compactIban, epcPayload, formatIban } from './donate';
+import { qrSvg } from './qr';
 
 export const STORAGE_KEY = 'wp-investitionsrechner:v1';
 /** Former design choice (modern/classic, F14); only the modern design remains, the stored value is removed. */
@@ -967,6 +969,22 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   support.addEventListener('click', (e) => {
     if (e.target === support) support.close();
   });
+  $<HTMLButtonElement>('#support-copy-iban').addEventListener('click', async () => {
+    const status = $<HTMLElement>('#support-status');
+    try {
+      await navigator.clipboard.writeText(compactIban(DONATION_ACCOUNT.iban));
+      status.textContent = 'IBAN kopiert.';
+      status.classList.remove('is-error');
+    } catch {
+      // clipboard blocked: select the IBAN for manual copying
+      const range = document.createRange();
+      range.selectNodeContents($<HTMLElement>('#support-iban'));
+      getSelection()?.removeAllRanges();
+      getSelection()?.addRange(range);
+      status.textContent = 'Automatisches Kopieren ist hier nicht möglich – die IBAN ist markiert, bitte mit Strg+C bzw. ⌘+C kopieren.';
+      status.classList.add('is-error');
+    }
+  });
 
   const controller: AppController = {
     getInputs: () => inputs,
@@ -1554,8 +1572,10 @@ function recommendHtml(): string {
   </dialog>`;
 }
 
-/** Voluntary support of the hobby project (F19.4): plain links to Buy Me a Coffee and PayPal, no embedded widgets. */
+/** Voluntary support of the hobby project (F19.4, F19.5): links to Buy Me a Coffee and PayPal, SEPA transfer with GiroCode. */
 function supportHtml(): string {
+  const qr = qrSvg(epcPayload(DONATION_ACCOUNT), `GiroCode: Überweisung an ${DONATION_ACCOUNT.name} mit der Banking-App scannen`);
+  const transferQr = qr ? `<figure class="support-qr">${qr}<figcaption>GiroCode</figcaption></figure>` : '';
   return `
   <dialog id="support" class="intro recommend support" aria-labelledby="support-title" aria-describedby="support-lead">
     <form method="dialog" class="intro-body">
@@ -1565,7 +1585,21 @@ function supportHtml(): string {
         <li><a class="share-btn" href="${safeHref(BUY_ME_A_COFFEE_URL)}" target="_blank" rel="noopener">Buy me a coffee</a></li>
         <li><a class="share-btn" href="${safeHref(PAYPAL_URL)}" target="_blank" rel="noopener">PayPal</a></li>
       </ul>
-      <p class="muted small">Beide Links öffnen die Seite des Anbieters in einem neuen Tab; dort gelten dessen Datenschutzbestimmungen. Der Rechner überträgt dabei nichts. Ebenso hilfreich: Fehler melden oder den Rechner weiterempfehlen.</p>
+      <p class="muted small">Beide Links öffnen die Seite des Anbieters in einem neuen Tab; dort gelten dessen Datenschutzbestimmungen. Der Rechner überträgt dabei nichts.</p>
+      <h3 id="support-transfer-title">Per Überweisung</h3>
+      <div class="support-transfer" aria-labelledby="support-transfer-title">
+        ${transferQr}
+        <div class="support-details">
+          <dl class="support-account">
+            <dt>Empfänger</dt><dd>${escapeHtml(DONATION_ACCOUNT.name)}</dd>
+            <dt>IBAN</dt><dd><span id="support-iban" class="support-iban">${escapeHtml(formatIban(DONATION_ACCOUNT.iban))}</span></dd>
+            <dt>Verwendungszweck</dt><dd>${escapeHtml(DONATION_ACCOUNT.purpose)}</dd>
+          </dl>
+          <button id="support-copy-iban" class="share-btn" type="button">IBAN kopieren</button>
+          <p id="support-status" class="rec-status" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+      <p class="muted small">Den GiroCode mit der Banking-App scannen: Empfänger, IBAN und Verwendungszweck sind dann ausgefüllt, den Betrag wählen Sie selbst. Der Code wird in Ihrem Browser erzeugt. Ebenso hilfreich: Fehler melden oder den Rechner weiterempfehlen.</p>
       <div class="intro-actions"><span></span><button type="submit" value="close" class="primary">Schließen</button></div>
     </form>
   </dialog>`;
