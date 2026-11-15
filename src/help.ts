@@ -18,7 +18,7 @@ export function slugify(text: string): string {
   let previous: string;
   do {
     previous = current;
-    current = current.replace(/<[^>]+>/g, '').replace(/&[a-z]+;/g, '');
+    current = current.replace(/[<>]/g, '').replace(/&[a-z]+;/g, '');
   } while (current !== previous);
 
   return current.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
