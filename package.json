@@ -16,7 +16,8 @@
     "typecheck": "tsc --noEmit",
     "notices": "node scripts/third-party-notices.mjs",
     "release": "node scripts/release.ts",
-    "release:preview": "node scripts/release.ts --dry-run"
+    "release:preview": "node scripts/release.ts --dry-run",
+    "verify:assumptions": "tsx scripts/verify-assumptions.ts"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",
@@ -27,9 +28,14 @@
     "uqr": "^0.1.3"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.24.3",
+    "@types/js-yaml": "^4.0.9",
     "@vitest/coverage-v8": "^5.1.0",
+    "dotenv": "^16.4.5",
     "happy-dom": "^21.0.4",
+    "js-yaml": "^4.1.0",
     "playwright-core": "^1.65.1",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vite": "^8.3.6",
     "vitest": "^5.1.0"

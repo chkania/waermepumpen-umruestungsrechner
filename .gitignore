@@ -2,3 +2,11 @@ node_modules
 dist
 .DS_Store
 coverage/
+
+# Agent Configuration
+.env.local
+.cache/
+
+# IDE
+.vscode/
+.idea/
