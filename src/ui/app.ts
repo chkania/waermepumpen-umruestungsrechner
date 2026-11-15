@@ -1159,19 +1159,32 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     varStatus.textContent = text;
     varStatus.classList.toggle('is-error', isError);
   };
-  const addVariant = (inp: Inputs, fallback: string): boolean => {
+  const LIVE_NAME = 'Aktuelle Eingaben';
+  const addVariant = (inp: Inputs, fallback: string, live = false): boolean => {
     if (variants.length >= MAX_VARIANTS) {
       setVarStatus(VARIANTS_LIMIT_TEXT, true);
       return false;
     }
-    variants.push({ name: variantName(inp, fallback, variants.map((v) => v.name)), inputs: structuredClone(inp) });
+    variants.push({ name: variantName(inp, fallback, variants.map((v) => v.name)), inputs: structuredClone(inp), ...(live ? { live } : {}) });
     return true;
   };
+  /** The live variant always shows what is in the calculator right now (values and name). */
+  function syncLiveVariant(): void {
+    const v = variants.find((x) => x.live);
+    if (!v) return;
+    v.inputs = structuredClone(inputs);
+    v.name = variantName(inputs, LIVE_NAME, variants.filter((x) => x !== v).map((x) => x.name));
+  }
   function renderVariants(): void {
+    syncLiveVariant();
     varList.innerHTML = variants
       .map(
-        (v, i) => `<li><span class="variants-name">${escapeHtml(v.name)}</span>
-          <button type="button" data-var-open="${i}" title="Diese Variante in den Rechner übernehmen">Im Rechner öffnen</button>
+        (v, i) => `<li><span class="variants-name">${escapeHtml(v.name)}${v.live ? ' <small class="muted">folgt dem Rechner</small>' : ''}</span>
+          ${
+            v.live
+              ? `<button type="button" data-var-freeze="${i}" title="Diesen Stand als feste Variante behalten, um ihn mit späteren Eingaben zu vergleichen">Stand festhalten</button>`
+              : `<button type="button" data-var-open="${i}" title="Diese Variante in den Rechner übernehmen">Im Rechner öffnen</button>`
+          }
           <button type="button" data-var-remove="${i}" aria-label="${escapeHtml(v.name)} entfernen">Entfernen</button></li>`,
       )
       .join('');
@@ -1207,7 +1220,11 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     varChart = null;
   });
   $<HTMLButtonElement>('#var-current').addEventListener('click', () => {
-    if (addVariant(inputs, 'Aktuelle Eingaben')) setVarStatus('Aktuelle Eingaben hinzugefügt.');
+    if (variants.some((v) => v.live)) {
+      setVarStatus('Die aktuellen Eingaben sind schon im Vergleich und folgen dem Rechner. Mit „Stand festhalten“ bleibt der jetzige Stand als eigene Variante stehen.');
+    } else if (addVariant(inputs, LIVE_NAME, true)) {
+      setVarStatus('Aktuelle Eingaben hinzugefügt. Die Variante folgt dem Rechner, bis Sie den Stand festhalten.');
+    }
     renderVariants();
   });
   $<HTMLButtonElement>('#var-files').addEventListener('click', () => varFiles.click());
@@ -1233,6 +1250,15 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     if (btn.dataset.varRemove !== undefined) {
       variants.splice(Number(btn.dataset.varRemove), 1);
       setVarStatus('');
+      renderVariants();
+    } else if (btn.dataset.varFreeze !== undefined) {
+      const v = variants[Number(btn.dataset.varFreeze)];
+      if (!v?.live) return;
+      // A snapshot must not be called "Aktuelle Eingaben": without a scenario name it gets the time
+      const time = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+      delete v.live;
+      v.name = variantName(v.inputs, `Stand ${time} Uhr`, variants.filter((x) => x !== v).map((x) => x.name));
+      setVarStatus(`„${v.name}“ festgehalten. Ändern Sie nun die Eingaben im Rechner und fügen Sie die aktuellen Eingaben erneut hinzu.`);
       renderVariants();
     } else if (btn.dataset.varOpen !== undefined) {
       const v = variants[Number(btn.dataset.varOpen)];
@@ -1687,7 +1713,7 @@ function variantsHtml(): string {
   <dialog id="variants" class="intro variants" aria-labelledby="variants-title">
     <form method="dialog" class="intro-body">
       <h2 id="variants-title">Varianten vergleichen</h2>
-      <p class="intro-lead">Laden Sie zwei oder drei Export-Dateien, etwa „Angebot A“ und „Angebot B“ oder „jetzt“ und „2028“, oder übernehmen Sie die aktuellen Eingaben. Die Varianten werden nur für diesen Vergleich gerechnet und nicht gespeichert.</p>
+      <p class="intro-lead">Laden Sie zwei oder drei Export-Dateien, etwa „Angebot A“ und „Angebot B“ oder „jetzt“ und „2028“, oder übernehmen Sie die aktuellen Eingaben – diese Variante folgt dem Rechner, bis Sie den Stand festhalten. Die Varianten werden nur für diesen Vergleich gerechnet und nicht gespeichert.</p>
       <div class="variants-actions">
         <button type="button" id="var-current">Aktuelle Eingaben hinzufügen</button>
         <button type="button" id="var-files">Export-Dateien laden …</button>

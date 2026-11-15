@@ -500,7 +500,13 @@ describe('UI (Smoke-Test)', () => {
     expect(result.querySelectorAll('.variants-table')[0].querySelectorAll('thead th')).toHaveLength(4);
     expect(result.textContent).toContain('Unterschiede in den Eingaben');
     expect(result.textContent).toContain('05/2028');
+    // the current inputs are in the comparison only once
+    root.querySelector<HTMLButtonElement>('#var-current')!.click();
+    expect(app.getVariants()).toHaveLength(3);
+    expect(root.querySelector('#var-status')!.textContent).toContain('schon im Vergleich');
     // a fourth one is refused
+    root.querySelector<HTMLButtonElement>('[data-var-freeze="0"]')!.click();
+    expect(app.getVariants()[0]).toMatch(/^Stand \d{2}:\d{2} Uhr$/);
     root.querySelector<HTMLButtonElement>('#var-current')!.click();
     expect(app.getVariants()).toHaveLength(3);
     expect(root.querySelector('#var-status')!.textContent).toContain('Höchstens 3 Varianten');
@@ -520,6 +526,36 @@ describe('UI (Smoke-Test)', () => {
     root.querySelector<HTMLButtonElement>('#privacy-ok')!.click();
     expect(app.getInputs().heatPump.installMonth).toBe('2028-05');
     expect(root.querySelector<HTMLDialogElement>('#variants')?.open ?? false).toBe(false);
+  });
+
+  it('F31.3 Aktuelle Eingaben folgen dem Rechner, bis der Stand festgehalten wird', () => {
+    const { root, app } = mount();
+    const open = () => root.querySelector<HTMLButtonElement>('#btn-variants')!.click();
+    const jazRow = () => [...root.querySelectorAll('#var-result .variants-table')[0].querySelectorAll('tbody tr')].find((r) => r.textContent!.includes('Jahresarbeitszahl'))!;
+    const setValue = (id: string, value: string) => {
+      const el = root.querySelector<HTMLInputElement>(id)!;
+      el.value = value;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    };
+    open();
+    root.querySelector<HTMLButtonElement>('#var-current')!.click();
+    expect(root.querySelector('#var-list')!.textContent).toContain('folgt dem Rechner');
+    // changed afterwards in the calculator: the column shows the new values and the new name
+    setValue('#f-heatPump-jaz', '4.4');
+    setValue('#f-scenario-name', 'Angebot B');
+    open();
+    expect(app.getVariants()).toEqual(['Angebot B']);
+    expect(jazRow().textContent).toContain('4,4');
+    // frozen: stays as it is, the current inputs can be added again
+    root.querySelector<HTMLButtonElement>('[data-var-freeze="0"]')!.click();
+    expect(root.querySelector('[data-var-freeze]')).toBeNull();
+    setValue('#f-heatPump-jaz', '3.1');
+    open();
+    root.querySelector<HTMLButtonElement>('#var-current')!.click();
+    expect(app.getVariants()).toEqual(['Angebot B', 'Angebot B (2)']);
+    const cells = [...jazRow().querySelectorAll('td')].map((c) => c.textContent);
+    expect(cells).toEqual(['4,4', '3,1']);
   });
 
   it('F30 Bericht: wird aufgebaut, druckt hell und stellt das Design danach wieder her', () => {

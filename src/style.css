@@ -603,6 +603,7 @@ td.ev-cell { white-space: normal; min-width: 220px; }
 .variants-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .variants-list li { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm, 4px); }
 .variants-name { flex: 1; font-weight: 600; min-width: 10em; }
+.variants-name small { font-weight: 400; margin-left: 6px; }
 .variants-list button, .variants-actions button { font-size: 0.85rem; padding: 4px 10px; }
 .variants-table th[scope='row'] small { display: block; font-weight: 400; }
 #var-result h3 { margin-top: 18px; }
