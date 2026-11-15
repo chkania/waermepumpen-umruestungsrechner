@@ -156,6 +156,8 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 
 - F19.4 Freiwillige Unterstützung: Schaltfläche „Unterstützen“ in der Werkzeugleiste öffnet einen Dialog mit Links zu Buy Me a Coffee und PayPal; außerdem im Kasten „Mitmachen“, in der README und im Handbuch („Mitmachen“) stehen Links zu Buy Me a Coffee und PayPal (`src/project.ts`). Im Rechner nur Text-Links in neuem Tab – keine eingebetteten Widgets oder Bilder fremder Dienste (keine Verbindung beim Laden, CSP und Datenschutz unverändert bis auf einen Hinweis in `docs/DATENSCHUTZ.md`). Die README zeigt zusätzlich Badges für CI, Deploy, Version, Lizenz, Rechner-Adresse und die Spendenwege. *(Test: ui, help, legal)*
 
+- F19.5 Unterstützen per Überweisung: Das Fenster „Unterstützen“ zeigt Empfänger, IBAN (in Vierergruppen) und Verwendungszweck (`DONATION_ACCOUNT` in `src/project.ts`), einen GiroCode nach EPC069-12 (Version 002, UTF-8, ohne BIC und Betrag; lokal mit `uqr` erzeugt, Fehlerkorrektur M) und „IBAN kopieren“ (ohne Leerzeichen; ist die Zwischenablage gesperrt, wird die IBAN markiert). IBAN wird per Prüfziffer getestet. *(Test: donate, ui)*
+
 ### F20 – Einführung beim ersten Besuch
 - F20.1 Beim ersten Besuch (keine gespeicherten Eingaben, Einführung noch nie geschlossen) öffnet sich ein modaler Dialog: Zweck des Rechners, Bedienung in drei Schritten (Eingaben links bzw. oben, Ergebnisse rechts bzw. darunter, Varianten sichern), Hinweis auf Berechnung im Browser und fehlende Beratung, Link zur Hilfe. *(Test: ui)*
 - F20.2 Schließen per „Los geht’s“, Esc oder Klick neben den Dialog merkt sich der Browser (`localStorage`); danach ist die Einführung über „Einführung“ in der Werkzeugleiste erreichbar. Barrierefrei als natives `<dialog>` mit Titel, Fokus auf der Hauptschaltfläche. *(Test: ui, help)*
@@ -323,3 +325,4 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 | 2026-11-15 | F10.6 Hinweis, wenn der Start der Betrachtung in der Zukunft liegt (heutige Preise würden sonst ohne Steigerung bis zum Start gerechnet). Ergebnisse unverändert. |
 | 2026-11-15 | F15.4 Eigene Seiten (Hilfe, Impressum, Datenschutz, Lizenzen) öffnen im selben Tab statt in einem neuen; fremde Seiten weiter in neuem Tab. |
 | 2026-11-15 | F19.4 Schaltfläche „Unterstützen“ mit Dialog sowie Links zum Unterstützen (Buy Me a Coffee, PayPal) im Kasten „Mitmachen“, in README und Handbuch; Badges in der README. Ergebnisse unverändert. |
+| 2026-11-15 | F19.5 Unterstützen per Überweisung mit GiroCode und „IBAN kopieren“. Ergebnisse unverändert. |

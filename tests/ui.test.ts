@@ -79,6 +79,10 @@ describe('UI (Smoke-Test)', () => {
       ['PayPal', 'https://paypal.me/ChristophKania', '_blank'],
     ]);
     expect(support.querySelector('img, iframe, script')).toBeNull();
+    // F19.5 SEPA transfer: GiroCode generated locally, account details, copy button
+    expect(support.querySelector('.support-qr svg[role="img"]')!.getAttribute('aria-label')).toContain('GiroCode');
+    expect(support.querySelector('#support-iban')!.textContent).toBe('DE62 5002 4024 0752 9433 31');
+    expect(support.textContent).toContain('Christoph Kania');
     support.close();
     const repo = root.querySelector<HTMLAnchorElement>('.disclaimer.license a[href^="https://github.com/chkania/"]')!;
     expect(repo.textContent).toBe('Quellcode auf GitHub');
@@ -695,6 +699,21 @@ describe('F21 Weiterempfehlen-Dialog', () => {
     expect(fallback.hidden).toBe(false);
     expect(fallback.value).toMatch(/^http:\/\/localhost:3000\/$/);
     expect(root.querySelector('#rec-status')!.textContent).toContain('markiert');
+  });
+
+  it('F19.5 IBAN kopieren: ohne Leerzeichen in die Zwischenablage, sonst markiert', async () => {
+    const { root } = mount();
+    let copied = '';
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async (t: string) => void (copied = t) } });
+    root.querySelector<HTMLButtonElement>('#btn-support')!.click();
+    root.querySelector<HTMLButtonElement>('#support-copy-iban')!.click();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(copied).toBe('DE62500240240752943331');
+    expect(root.querySelector('#support-status')!.textContent).toBe('IBAN kopiert.');
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: () => Promise.reject(new Error('denied')) } });
+    root.querySelector<HTMLButtonElement>('#support-copy-iban')!.click();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(root.querySelector('#support-status')!.textContent).toContain('markiert');
   });
 });
 

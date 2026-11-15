@@ -641,6 +641,16 @@ td.ev-cell { white-space: normal; min-width: 220px; }
 .share-btn:hover { border-color: var(--accent); }
 /* support dialog (F19.4): two wider buttons, labels on one line */
 .support .share-list { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+.support h3 { margin: 18px 0 8px; font-size: 1rem; }
+.support-transfer { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+.support-qr { margin: 0; width: 148px; text-align: center; }
+.support-qr .qr { display: block; width: 148px; height: 148px; border-radius: 4px; }
+.support-qr figcaption { font-size: 0.8rem; color: var(--c-muted); margin-top: 4px; }
+.support-account { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 0 0 10px; }
+.support-account dt { color: var(--c-muted); }
+.support-details { flex: 1 1 220px; min-width: 0; }
+.support-account dd { margin: 0; overflow-wrap: anywhere; text-align: left; }
+.support-iban { font-family: var(--font-mono, ui-monospace, monospace); }
 .rec-status { min-height: 1.4em; margin: 4px 0; font-size: 0.9rem; color: var(--good); }
 .rec-status.is-error { color: var(--c-text-2); }
 .rec-fallback { width: 100%; box-sizing: border-box; margin: 4px 0 8px; padding: 8px; border: 1px solid var(--accent); border-radius: var(--radius); background: var(--surface); color: var(--c-text); font: inherit; font-size: 0.85rem; resize: vertical; }
