@@ -162,6 +162,7 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 ### F22 – Regelmäßige Prüfung der Annahmen
 - F22.1 Workflow „Annahmen prüfen“ (`.github/workflows/annahmen-pruefen.yml`) legt vierteljährlich (1. Januar, April, Juli, Oktober) und manuell ein Issue mit Label `annahmen-pruefen` an: Checkliste aller zeitkritischen Standardwerte (Herkunft „Offizielle Quelle“, „Gesetz / Regelung“, „Marktdaten“) mit Abrufdatum und Links, erzeugt aus `src/core/sources.ts` (`scripts/assumptions-checklist.ts`, reines Node ohne npm). Ist noch ein Prüf-Issue offen, wird dort nur erinnert. *(Test: freshness)*
 - F22.2 Liegt die letzte Prüfung (`FUNDING_SOURCE_DATE` in `defaults.ts`) mindestens 6 Monate zurück, zeigt der Rechner über den Ergebnissen den Hinweis „Annahmen möglicherweise veraltet“ mit Prüfdatum und Link zum Fehlerformular; ausblendbar bis zum nächsten Laden. *(Test: freshness, ui)*
+- F22.3 Vorprüfung mit Claude (`npm run verify:assumptions`, `scripts/assumptions-agent/`, nur lokal mit eigenem API-Schlüssel): prüft dieselben Werte wie F22.1 gegen ihre Quell-URL (eine Anfrage je Quelle, Modell `claude-opus-5-5`, Antwort als JSON-Schema) und schreibt nur einen Bericht nach `reports/` (Abweichung / unklar / nicht abrufbar / bestätigt, je mit Quellwert und wörtlicher Textstelle). Bei HTML-Quellen muss die Textstelle im Seitentext stehen, sonst „unklar“; zu große Seiten werden gemeldet statt gekürzt. Ändert keine Dateien in `src/`. Anleitung: `docs/ANNAHMEN-PRUEFEN.md`. *(Test: assumptions-agent)*
 
 
 ### F23 – Logo
@@ -310,3 +311,4 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 | 2026-11-15 | N14 Schnellere Ladezeit: Chart.js wird nachgeladen, Quellen-Popover entstehen erst beim Öffnen. Ergebnisse unverändert. |
 | 2026-11-15 | N15 Prüfung nach dem Deployment: `version.json` im Build, Job `verify` im Deploy-Workflow mit Rauchtest im Browser (`npm run smoke`). Ergebnisse unverändert. |
 | 2026-11-15 | F9.2/F30.3 Link mit Werten und QR-Code im Bericht verwenden die Kurzdomain `wpir.de` (leitet auf die Hauptdomain weiter). Ergebnisse unverändert. |
+| 2026-11-15 | F22.3 Vorprüfung der Annahmen mit Claude: liest Werte aus `defaults.ts` und Quellen aus `sources.ts`, nur Bericht, keine automatische Änderung. Ergebnisse unverändert. |

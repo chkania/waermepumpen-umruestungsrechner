@@ -63,7 +63,7 @@ Vorschau, was der nächste Release ergäbe: `npm run release:preview`. Einen Tit
 
 ## Annahmen aktuell halten
 
-Jedes Quartal legt der Workflow „Annahmen prüfen“ ein Issue mit einer Checkliste aller Standardwerte an, die sich ändern können (Förderregeln, Gesetze, Preise) – mit Links zu den Quellen. Hilf gern beim Abhaken: Quelle öffnen, Wert vergleichen, Abweichungen im Issue notieren oder direkt per Pull Request korrigieren (`src/core/defaults.ts` und `src/core/sources.ts`, danach `FUNDING_SOURCE_DATE` auf das Prüfdatum setzen).
+Jedes Quartal legt der Workflow „Annahmen prüfen“ ein Issue mit einer Checkliste aller Standardwerte an, die sich ändern können (Förderregeln, Gesetze, Preise) – mit Links zu den Quellen. Hilf gern beim Abhaken: Quelle öffnen, Wert vergleichen, Abweichungen im Issue notieren oder direkt per Pull Request korrigieren (`src/core/defaults.ts` und `src/core/sources.ts`, danach `FUNDING_SOURCE_DATE` auf das Prüfdatum setzen). Mit eigenem Claude-API-Schlüssel kannst du die Quellen vorab automatisch abgleichen lassen: [docs/ANNAHMEN-PRUEFEN.md](docs/ANNAHMEN-PRUEFEN.md).
 
 ## Abhängigkeiten
 

@@ -10,3 +10,6 @@ coverage/
 # IDE
 .vscode/
 .idea/
+
+# Reports of npm run verify:assumptions
+reports/
