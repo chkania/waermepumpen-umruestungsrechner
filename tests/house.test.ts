@@ -162,8 +162,10 @@ describe('F17.3/F17.4 Kochfeld und Umstiegs-Hinweis', () => {
     expect(h.level).toBe('important');
     expect(h.detail).toMatch(/Grundpreis 180 €/);
     // no notice if induction is already selected or there is no gas cooker (Gasherd)
-    expect(cookingSwitchSaving(cooking('electric'))).toBeNull();
-    expect(cookingSwitchSaving(wp())).toBeNull();
+    const electric = cooking('electric');
+    expect(cookingSwitchSaving(electric, runAll(electric))).toBeNull();
+    const noGas = wp();
+    expect(cookingSwitchSaving(noGas, runAll(noGas))).toBeNull();
   });
 
   it('teures Kochfeld: Hinweis nennt Mehrkosten', () => {

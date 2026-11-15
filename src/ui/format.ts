@@ -12,6 +12,20 @@ export function escapeHtml(s: string): string {
   return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 }
 
+/**
+ * Escaped `href` value for an external link. Only http(s) is allowed; anything else becomes "#".
+ * Source URLs are constants today, but this keeps the N6 rule "escape all dynamic text" intact if they are ever loaded from data.
+ */
+export function safeHref(url: string): string {
+  try {
+    const protocol = new URL(url).protocol;
+    if (protocol !== 'https:' && protocol !== 'http:') return '#';
+  } catch {
+    return '#';
+  }
+  return escapeHtml(url);
+}
+
 /** Duration in months as "x J. y M." */
 export function fmtDuration(months: number): string {
   const y = Math.floor(months / 12);

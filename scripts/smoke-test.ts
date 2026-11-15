@@ -11,7 +11,7 @@
  */
 import { appendFileSync, readFileSync } from 'node:fs';
 import { chromium, type Browser, type Page } from 'playwright-core';
-import { checkVersionInfo, isIgnoredUrl, parseArgs, sitemapPages, type SmokeOptions } from './smoke-lib.ts';
+import { checkVersionInfo, isIgnoredUrl, parseArgs, REQUIRED_SECURITY_HEADERS, securityHeaderErrors, sitemapPages, type SmokeOptions } from './smoke-lib.ts';
 
 const INTRO_KEY = 'wp-investitionsrechner:intro-seen';
 const OPT_OUT_KEY = 'wp-investitionsrechner:analytics-opt-out';
@@ -39,6 +39,27 @@ async function checkVersionFile(opts: SmokeOptions): Promise<void> {
     if (attempt < 6) await sleep(10_000);
   }
   errors.forEach(fail);
+}
+
+/**
+ * HTTP security headers that the web server must set (docs/DEPLOYMENT.md). They live in the `.htaccess` on the
+ * webspace, so only the deployed HTTPS site can be checked – the local preview has neither.
+ */
+async function checkSecurityHeaders(opts: SmokeOptions): Promise<void> {
+  if (new URL(opts.url).protocol !== 'https:') {
+    console.log(`– Sicherheits-Header: übersprungen (${opts.url} ist kein HTTPS)`);
+    return;
+  }
+  await step('Sicherheits-Header', async () => {
+    const res = await fetch(new URL(`?t=${Date.now()}`, opts.url), {
+      method: 'HEAD',
+      headers: { 'Cache-Control': 'no-cache' },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const errors = securityHeaderErrors(res.headers);
+    if (errors.length) throw new Error(errors.join('; '));
+    return `${REQUIRED_SECURITY_HEADERS.length} Header gesetzt`;
+  });
 }
 
 async function launch(): Promise<Browser> {
@@ -168,6 +189,7 @@ async function main(): Promise<void> {
   const opts = parseArgs(process.argv.slice(2), pkg.version);
   console.log(`Prüfe ${opts.url} (erwartet Version ${opts.version})`);
   await checkVersionFile(opts);
+  await checkSecurityHeaders(opts);
   const browser = await launch();
   try {
     await checkCalculator(browser, opts);

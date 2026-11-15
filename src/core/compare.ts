@@ -1,6 +1,6 @@
 import { formatMonthDe, monthOf, parseMonth } from './dates';
 import { SPACE_PROFILE } from './defaults';
-import { simulate } from './simulation';
+import { createSimContext, simulate, type RunResult } from './simulation';
 import type { Inputs, ScenarioResult } from './types';
 
 /** Cost categories for explaining the cheapest point in time (F7.3). */
@@ -64,19 +64,23 @@ export function costParts(s: ScenarioResult, opportunityRate: number): Record<Co
   return out;
 }
 
-/** Compares installation dates from the start month in fixed steps (F7). */
-export function compareInstallTimes(inp: Inputs): InstallComparison {
-  const start = parseMonth(inp.general.startMonth);
+/**
+ * Compares installation dates from the start month in fixed steps (F7).
+ * @param run result of `runAll` for the same inputs – its reference scenario is reused
+ */
+export function compareInstallTimes(inp: Inputs, run?: RunResult): InstallComparison {
+  const ctx = createSimContext(inp);
+  const start = ctx.start;
   const end = start + Math.round(inp.general.horizonYears * 12);
   const step = Math.max(1, Math.round(inp.compare.stepMonths));
   const count = Math.max(1, Math.round(inp.compare.count));
-  const ref = simulate(inp, 'ref');
+  const ref = run?.ref ?? simulate(inp, 'ref', undefined, ctx);
   const rows: InstallComparisonRow[] = [];
   for (let i = 0; i < count; i++) {
     const month = start + i * step;
     if (month >= end) break;
-    const kfw = simulate(inp, 'kfw', month);
-    const tax = simulate(inp, 'tax', month);
+    const kfw = simulate(inp, 'kfw', month, ctx);
+    const tax = simulate(inp, 'tax', month, ctx);
     const best = tax.feasible && tax.totalCost < kfw.totalCost ? 'tax' : 'kfw';
     const bestRun = best === 'tax' ? tax : kfw;
     rows.push({

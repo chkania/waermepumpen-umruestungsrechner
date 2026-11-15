@@ -32,7 +32,7 @@ function withChartLib(fn: (lib: ChartLib) => void): void {
   else void loadChartLib().then(fn, () => undefined);
 }
 import { SECTIONS, getPath, setPath, type Field } from './fields';
-import { escapeHtml, fmtDuration, fmtEur, fmtMonth, fmtNum, fmtPct } from './format';
+import { escapeHtml, fmtDuration, fmtEur, fmtMonth, fmtNum, fmtPct, safeHref } from './format';
 import { RECOMMEND_SUBJECT, RECOMMEND_TEXT, calculatorUrl, recommendLinks, shareBaseUrl } from './share';
 import { logoSvg } from '../logo';
 import { BUG_REPORT_URL, CONTRIBUTING_URL, FEATURE_REQUEST_URL, REPO_URL } from '../project';
@@ -217,7 +217,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     const today = env.today ?? new Date();
     if (assumptionsStale(today) && !staleDismissed) {
       parts.push(`<div class="notice-stale">
-        <p><strong>Annahmen möglicherweise veraltet.</strong> Förderbedingungen, Preise und Zinsen wurden zuletzt am ${FUNDING_SOURCE_DATE.split('-').reverse().join('.')} geprüft (vor ${assumptionsAgeMonths(today)} Monaten). Prüfen Sie wichtige Werte vor einer Entscheidung bei KfW, Ihrem Energieversorger oder einer Energieberatung. Ist Ihnen ein veralteter Wert aufgefallen? <a href="${BUG_REPORT_URL}" target="_blank" rel="noopener">Hier melden</a>.</p>
+        <p><strong>Annahmen möglicherweise veraltet.</strong> Förderbedingungen, Preise und Zinsen wurden zuletzt am ${FUNDING_SOURCE_DATE.split('-').reverse().join('.')} geprüft (vor ${assumptionsAgeMonths(today)} Monaten). Prüfen Sie wichtige Werte vor einer Entscheidung bei KfW, Ihrem Energieversorger oder einer Energieberatung. Ist Ihnen ein veralteter Wert aufgefallen? <a href="${safeHref(BUG_REPORT_URL)}" target="_blank" rel="noopener">Hier melden</a>.</p>
         <button type="button" data-notice="stale" class="ghost">Ausblenden</button></div>`);
     }
     notice.innerHTML = parts.join('');
@@ -446,9 +446,10 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     let sens: Sensitivity;
     try {
       run = runAll(inputs);
-      cmp = compareInstallTimes(inputs);
+      // Reuse the base run: avoids the duplicate reference/simulation in comparison and sensitivity (F7, F27)
+      cmp = compareInstallTimes(inputs, run);
       events = keyEvents(inputs, run);
-      sens = sensitivity(inputs);
+      sens = sensitivity(inputs, run);
     } catch (err) {
       $<HTMLElement>('#warnings').innerHTML = `<div class="alert error">${escapeHtml((err as Error).message)}</div>`;
       return;
@@ -709,6 +710,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     }
     const y = t.firstFullYear;
     const hp = inputs.heatPump;
+    const priceGap = hp.householdPriceCt - hp.elecPriceCt;
     const cheaperLabel = t.cheaper === 'with' ? 'Wärmepumpentarif' : 'Haushaltsstrom';
     const selectedNote =
       t.selected === t.cheaper
@@ -737,7 +739,9 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
         t.breakEvenKWh === null
           ? 'Der WP-Tarif ist nicht günstiger als Haushaltsstrom – ein eigener Zähler lohnt sich nicht.'
           : t.breakEvenKWh === 0
-            ? 'Der eigene Zähler lohnt sich bei jedem Verbrauch: Die zusätzliche § 14a-Pauschale deckt den Zählergrundpreis.'
+            ? priceGap > 0
+              ? 'Der eigene Zähler lohnt sich bei jedem Verbrauch: Die zusätzliche § 14a-Pauschale deckt den Zählergrundpreis.'
+              : 'Der WP-Tarif ist nicht teurer als Haushaltsstrom – der eigene Zähler verursacht über den Verbrauch gerechnet keine Mehrkosten.'
             : `Der eigene Zähler lohnt sich ab ca. ${fmtNum(t.breakEvenKWh)} kWh WP-Strom pro Jahr (${hp.existing14aOnHousehold ? '(Zählergrundpreis − zusätzliche § 14a-Pauschale)' : 'Zählergrundpreis'} ÷ Preisvorteil, heutige Preise).`
       }${
         t.setupCost > 0
@@ -1292,13 +1296,13 @@ export function sourcePopHtml(path: string, defaults: Inputs): string {
         <span class="src-default">Standard: <strong>${escapeHtml(formatDefault(f, defaults))}</strong></span></div>
       <p>${escapeHtml(src.text)}</p>
       ${refsHtml(OFFICIAL_REFS[f.path])}
-      ${src.url || src.asOf ? `<p class="src-meta">${src.url ? `<a href="${src.url}" target="_blank" rel="noopener">${escapeHtml(host)}</a>` : ''}${src.url && src.asOf ? ' · ' : ''}${src.asOf ? `Stand ${src.asOf}` : ''}</p>` : ''}`;
+      ${src.url || src.asOf ? `<p class="src-meta">${src.url ? `<a href="${safeHref(src.url)}" target="_blank" rel="noopener">${escapeHtml(host)}</a>` : ''}${src.url && src.asOf ? ' · ' : ''}${src.asOf ? `Stand ${escapeHtml(src.asOf)}` : ''}</p>` : ''}`;
 }
 
 function refsHtml(refs: { label: string; url: string }[] | undefined): string {
   if (!refs?.length) return '';
   return `<div class="src-refs"><span>Offizielle Quellen</span><ul>${refs
-    .map((r) => `<li><a href="${r.url}" target="_blank" rel="noopener">${escapeHtml(r.label)}</a></li>`)
+    .map((r) => `<li><a href="${safeHref(r.url)}" target="_blank" rel="noopener">${escapeHtml(r.label)}</a></li>`)
     .join('')}</ul></div>`;
 }
 
@@ -1479,14 +1483,14 @@ function layout(): string {
         <h2 id="contribute-title">Mitmachen</h2>
         <p>Förderprogramme, Energiepreise und Steuerregeln ändern sich laufend – ein Rechner wie dieser ist nur so gut wie seine Annahmen. Er ist ein offenes Projekt, und mit deiner Hilfe wird er besser für alle, die vor der Entscheidung für eine Wärmepumpe stehen:</p>
         <ul>
-          <li>Dir ist ein Fehler oder ein veralteter Wert aufgefallen? <a href="${BUG_REPORT_URL}" target="_blank" rel="noopener">Melde ihn</a> – am besten mit Quelle, z. B. eine geänderte KfW-Regel oder ein neuer Preis.</li>
-          <li>Du hast eine Idee oder eine Frage, die der Rechner noch nicht beantwortet? <a href="${FEATURE_REQUEST_URL}" target="_blank" rel="noopener">Schlag sie vor</a>.</li>
-          <li>Du möchtest selbst mitentwickeln – an Rechenlogik, Texten, Tests oder Barrierefreiheit? <a href="${CONTRIBUTING_URL}" target="_blank" rel="noopener">So funktioniert die Mitarbeit</a>.</li>
+          <li>Dir ist ein Fehler oder ein veralteter Wert aufgefallen? <a href="${safeHref(BUG_REPORT_URL)}" target="_blank" rel="noopener">Melde ihn</a> – am besten mit Quelle, z. B. eine geänderte KfW-Regel oder ein neuer Preis.</li>
+          <li>Du hast eine Idee oder eine Frage, die der Rechner noch nicht beantwortet? <a href="${safeHref(FEATURE_REQUEST_URL)}" target="_blank" rel="noopener">Schlag sie vor</a>.</li>
+          <li>Du möchtest selbst mitentwickeln – an Rechenlogik, Texten, Tests oder Barrierefreiheit? <a href="${safeHref(CONTRIBUTING_URL)}" target="_blank" rel="noopener">So funktioniert die Mitarbeit</a>.</li>
         </ul>
-        <p class="muted small">Quellcode, Fragen und Vorschläge: <a href="${REPO_URL}" target="_blank" rel="noopener">github.com/chkania/waermepumpen-umruestungsrechner</a> – schön, wenn du dabei bist!</p>
+        <p class="muted small">Quellcode, Fragen und Vorschläge: <a href="${safeHref(REPO_URL)}" target="_blank" rel="noopener">github.com/chkania/waermepumpen-umruestungsrechner</a> – schön, wenn du dabei bist!</p>
       </aside>
       <p class="disclaimer">Keine Finanz-, Steuer- oder Förderberatung. Alle Angaben ohne Gewähr; Förderbedingungen Stand ${FUNDING_SOURCE_DATE.split('-').reverse().join('.')} – bitte vor Antragstellung bei KfW, Energieberatung und Steuerberatung prüfen.</p>
-      <p class="disclaimer license"><a href="./changelog.html">Version ${APP_VERSION}</a> · © 2026 Christoph Kania · Lizenz: <a href="./lizenz.html" target="_blank" rel="noopener">PolyForm Noncommercial 1.0.0</a> – kostenfreie Nutzung für nicht-kommerzielle Zwecke; kommerzielle Nutzung nur nach Absprache · <a href="./lizenzen-drittanbieter.html" target="_blank" rel="noopener">Lizenzen von Drittanbietern</a> · <a href="./impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="./datenschutz.html" target="_blank" rel="noopener">Datenschutz</a> · <a href="${REPO_URL}" target="_blank" rel="noopener">Quellcode auf GitHub</a></p>
+      <p class="disclaimer license"><a href="./changelog.html">Version ${APP_VERSION}</a> · © 2026 Christoph Kania · Lizenz: <a href="./lizenz.html" target="_blank" rel="noopener">PolyForm Noncommercial 1.0.0</a> – kostenfreie Nutzung für nicht-kommerzielle Zwecke; kommerzielle Nutzung nur nach Absprache · <a href="./lizenzen-drittanbieter.html" target="_blank" rel="noopener">Lizenzen von Drittanbietern</a> · <a href="./impressum.html" target="_blank" rel="noopener">Impressum</a> · <a href="./datenschutz.html" target="_blank" rel="noopener">Datenschutz</a> · <a href="${safeHref(REPO_URL)}" target="_blank" rel="noopener">Quellcode auf GitHub</a></p>
     </section>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>

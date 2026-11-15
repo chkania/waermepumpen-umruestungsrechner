@@ -1,4 +1,4 @@
-import { escapeHtml } from './ui/format';
+import { escapeHtml, safeHref } from './ui/format';
 import { renderHelp } from './help';
 import { REPO_URL } from './project';
 import { APP_VERSION } from './version';
@@ -66,7 +66,7 @@ export function renderDocPage(page: DocPage): { html: string; title: string } {
       ([href, label]) =>
         `<li><a href="${href}"${href.endsWith(here) ? ' aria-current="page"' : ''}>${escapeHtml(label)}</a></li>`,
     ).join('')}</ul></nav>
-    <p>Version ${APP_VERSION} · © 2026 Christoph Kania · PolyForm Noncommercial License 1.0.0 · <a href="${REPO_URL}">Quellcode auf GitHub – Mitmachen willkommen</a></p>
+    <p>Version ${APP_VERSION} · © 2026 Christoph Kania · PolyForm Noncommercial License 1.0.0 · <a href="${safeHref(REPO_URL)}">Quellcode auf GitHub – Mitmachen willkommen</a></p>
   </footer>`;
   return { html: body, title };
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatMonth } from '../src/core/dates';
+import { formatMonth, parseMonth } from '../src/core/dates';
 import { keyEvents, type KeyEvent } from '../src/core/events';
 import { estimateJaz } from '../src/core/jaz';
 import { runAll } from '../src/core/simulation';
@@ -110,6 +110,23 @@ describe('F10 Wichtige Ereignisse', () => {
     // sorted chronologically
     const months = timeline.map((e) => e.month!);
     expect([...months].sort((a, b) => a - b)).toEqual(months);
+  });
+
+  it('F10.3 Inbetriebnahme nennt die Investition des Monats; ein Ersatzkessel bleibt ein eigenes Ereignis', () => {
+    // Old system fails after one year, the heat pump only comes later → boiler purchase strictly before commissioning
+    const i = userCase((x) => {
+      x.oldHeating.remainingLifeYears = 1;
+      x.heatPump.installMonth = '2029-01';
+    });
+    const run = runAll(i);
+    const start = parseMonth(i.general.startMonth);
+    const install = run.kfw.installMonth!;
+    const boiler = run.kfw.boilerPurchases[0];
+    expect(boiler.month).toBeLessThan(install);
+    expect(run.kfw.boilerPurchases.some((b) => b.month === install)).toBe(false);
+    const commissioning = find(keyEvents(i, run).timeline, /^Inbetriebnahme der Wärmepumpe$/)!;
+    expect(commissioning.amount).toBeCloseTo(run.kfw.months[install - start].investment, 6);
+    expect(find(keyEvents(i, run).timeline, /Altanlage fällt/)!.amount).toBeCloseTo(boiler.cost, 6);
   });
 
   it('F10.4 Klimageschwindigkeitsbonus nicht erreichbar (Heizung wird erst nach Auslaufen 20 J. alt)', () => {

@@ -1,4 +1,5 @@
 import { encode } from 'uqr';
+import { escapeHtml } from './format';
 
 /**
  * QR code as inline SVG (F30.3), e.g. for the link with the inputs in the printed report.
@@ -23,5 +24,5 @@ export function qrSvg(text: string, label: string): string | null {
       if (dark) d += `M${x} ${y}h1v1h-1z`;
     }),
   );
-  return `<svg class="qr" viewBox="0 0 ${qr.size} ${qr.size}" role="img" aria-label="${label}" shape-rendering="crispEdges"><rect width="${qr.size}" height="${qr.size}" fill="#fff"/><path d="${d}" fill="#000"/></svg>`;
+  return `<svg class="qr" viewBox="0 0 ${qr.size} ${qr.size}" role="img" aria-label="${escapeHtml(label)}" shape-rendering="crispEdges"><rect width="${qr.size}" height="${qr.size}" fill="#fff"/><path d="${d}" fill="#000"/></svg>`;
 }
