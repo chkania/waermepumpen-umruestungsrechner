@@ -606,6 +606,8 @@ td.ev-cell { white-space: normal; min-width: 220px; }
 .variants-name small { font-weight: 400; margin-left: 6px; }
 .variants-list button, .variants-actions button { font-size: 0.85rem; padding: 4px 10px; }
 .variants-table th[scope='row'] small { display: block; font-weight: 400; }
+/* Long option texts and names wrap instead of forcing horizontal scrolling */
+.variants-table th, .variants-table td { white-space: normal; overflow-wrap: break-word; hyphens: auto; vertical-align: top; }
 #var-result h3 { margin-top: 18px; }
 .intro-body { padding: 22px 24px 18px; overflow-y: auto; }
 .intro h2 { margin: 0 0 10px; font-size: 1.25rem; line-height: 1.3; }
