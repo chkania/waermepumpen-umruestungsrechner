@@ -25,7 +25,7 @@ function stripHeadingHtml(input: string): string {
   let previous: string;
   do {
     previous = current;
-    current = current.replace(/<[^>]+>/g, '').replace(/&[a-z]+;/g, '').replace(/&amp;/g, '&');
+    current = current.replace(/[<>]/g, '').replace(/&[a-z]+;/g, '').replace(/&amp;/g, '&');
   } while (current !== previous);
   return current.trim();
 }
