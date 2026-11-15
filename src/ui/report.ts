@@ -171,7 +171,7 @@ export function reportHtml(d: ReportData): string {
   <header class="report-head">
     ${logoSvg('report-logo')}
     <div>
-      <h1>Wärmepumpen-Umrüstungsrechner – Bericht</h1>
+      <h1>Wärmepumpen-Investitionsrechner – Bericht</h1>
       <p>${name ? `<strong>${escapeHtml(name)}</strong> · ` : ''}Stand ${date} · Version ${APP_VERSION} · Betrachtung ${fmtMonth(start)} – ${fmtMonth(end)}, Inbetriebnahme WP ${fmtMonth(run.kfw.installMonth)}</p>
     </div>
     ${qrHtml(d)}
@@ -191,6 +191,6 @@ export function reportHtml(d: ReportData): string {
     <div class="report-groups">${inputsHtml(inputs, d.defaults)}</div></section>
   <footer class="report-foot">
     <p>Modellrechnung mit Annahmen, ohne Gewähr. Sie ersetzt keine Energieberatung, kein Angebot und keine Heizlastberechnung. Förder- und Preisannahmen geprüft am ${new Date(FUNDING_SOURCE_DATE).toLocaleDateString('de-DE')}.</p>
-    <p>Erstellt mit dem Wärmepumpen-Umrüstungsrechner: ${escapeHtml(d.url)}</p>
+    <p>Erstellt mit dem Wärmepumpen-Investitionsrechner: ${escapeHtml(d.url)}</p>
   </footer>`;
 }

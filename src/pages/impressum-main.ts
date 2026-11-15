@@ -7,5 +7,5 @@ import imprint from '../../docs/IMPRESSUM.md?raw';
 import { initAnalytics } from '../analytics';
 import { mountDocPage } from '../doc-page';
 
-mountDocPage(document.getElementById('doc')!, { markdown: imprint, subtitle: 'Wärmepumpen-Umrüstungsrechner', toc: false });
+mountDocPage(document.getElementById('doc')!, { markdown: imprint, subtitle: 'Wärmepumpen-Investitionsrechner', toc: false });
 initAnalytics('Impressum');

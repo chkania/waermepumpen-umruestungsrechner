@@ -1,4 +1,4 @@
-# Wärmepumpen-Umrüstungsrechner – Anforderungen
+# Wärmepumpen-Investitionsrechner – Anforderungen
 
 Dieses Dokument ist die verbindliche Sammlung der Anforderungen. Bei jeder Änderung
 an der Anwendung wird es mitgepflegt (neue Anforderung → neue ID, geänderte
@@ -301,3 +301,4 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 | 2026-11-14 | F30.3 QR-Code im Bericht, der den Rechner mit den Eingaben öffnet; F9.2 Link mit Werten jetzt komprimiert (`#z=…`, etwa ein Drittel bis halb so lang), ältere Links `#s=…` bleiben gültig. Neue Laufzeit-Abhängigkeiten `fflate` und `uqr` (MIT). |
 | 2026-11-14 | F31 Varianten vergleichen: zwei oder drei Exporte bzw. die aktuellen Eingaben mit Kennzahlen, Kostenkurven und Unterschieden nebeneinander. |
 | 2026-11-14 | F19.3 Kasten „Über diesen Rechner“ mit der Entstehungsgeschichte als privates Hobbyprojekt. |
+| 2026-11-15 | Name wieder „Wärmepumpen-Investitionsrechner“ (statt „Wärmepumpen-Umrüstungsrechner“): Kopf, Seitentitel, Einführung, Weiterempfehlen, Bericht, Logo-Dateien, Handbuch und rechtliche Seiten. Repository-Name, Domain und Speicherschlüssel unverändert. |

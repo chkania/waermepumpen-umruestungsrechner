@@ -1,6 +1,6 @@
 # Benutzerhandbuch
 
-Der **Wärmepumpen-Umrüstungsrechner** zeigt, was der Umstieg von einer Gas- oder Ölheizung auf eine Wärmepumpe über die nächsten Jahre kostet – im Vergleich dazu, die alte Heizung weiterzubetreiben. Er berücksichtigt steigende Energie- und CO₂-Preise, die KfW-Heizungsförderung, Kredite, den Steuerbonus und den richtigen Zeitpunkt für den Umstieg.
+Der **Wärmepumpen-Investitionsrechner** zeigt, was der Umstieg von einer Gas- oder Ölheizung auf eine Wärmepumpe über die nächsten Jahre kostet – im Vergleich dazu, die alte Heizung weiterzubetreiben. Er berücksichtigt steigende Energie- und CO₂-Preise, die KfW-Heizungsförderung, Kredite, den Steuerbonus und den richtigen Zeitpunkt für den Umstieg.
 
 > **Hinweis:** Der Rechner ist keine Finanz-, Steuer- oder Förderberatung. Förderbedingungen, Preise und Zinsen ändern sich. Prüfen Sie vor einer Entscheidung die aktuellen Bedingungen bei der KfW, einem Energieeffizienz-Experten und ggf. einer Steuerberatung.
 
@@ -46,7 +46,7 @@ Die Wahl wird im Browser gespeichert.
 
 - **WhatsApp** öffnet die installierte WhatsApp-App (Smartphone oder Desktop) mit vorbereiteter Nachricht; Sie wählen dort nur noch den Kontakt. Ohne installierte App passiert nichts – nutzen Sie dann „Link kopieren“.
 - **Threema** öffnet die Threema-App mit vorbereiteter Nachricht.
-- **E-Mail** öffnet Ihr Standard-E-Mail-Programm mit vorbelegtem Betreff („Tipp: Wärmepumpen-Umrüstungsrechner“) und Text, den Sie vor dem Senden anpassen können.
+- **E-Mail** öffnet Ihr Standard-E-Mail-Programm mit vorbelegtem Betreff („Tipp: Wärmepumpen-Investitionsrechner“) und Text, den Sie vor dem Senden anpassen können.
 - **Link kopieren** legt die Adresse des Rechners in die Zwischenablage.
 - **Andere** öffnet auf Smartphones und in manchen Browsern das Teilen-Menü des Geräts – dort wählen Sie z. B. Signal oder Telegram (Signal bietet keinen eigenen Link zum Teilen). Wo es das Teilen-Menü nicht gibt, wird der Text in die Zwischenablage kopiert und Sie fügen ihn in die gewünschte App ein.
 

@@ -12,7 +12,7 @@ E-Mail: blog [at] chkania [Punkt] net
 
 ### Das Wichtigste in Kürze
 
-- Der Wärmepumpen-Umrüstungsrechner rechnet **vollständig in Ihrem Browser**. Ihre Eingaben und Ergebnisse werden nicht an einen Server übertragen.
+- Der Wärmepumpen-Investitionsrechner rechnet **vollständig in Ihrem Browser**. Ihre Eingaben und Ergebnisse werden nicht an einen Server übertragen.
 - Für die Besucherstatistik nutze ich **Matomo auf meinem eigenen Server** – ohne Cookies, mit gekürzter IP-Adresse und ohne Ihre Eingaben. Sie können dem [unten](#4-plugins-und-tools) jederzeit widersprechen.
 - Schriften und Bibliotheken sind Teil des Rechners und werden nicht von fremden Servern (z. B. Google Fonts oder CDNs) geladen.
 

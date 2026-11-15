@@ -120,7 +120,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     const el = $<HTMLElement>('#scenario-name');
     el.textContent = name;
     el.hidden = name === '';
-    document.title = name ? `${name} – Wärmepumpen-Umrüstungsrechner` : 'Wärmepumpen-Umrüstungsrechner';
+    document.title = name ? `${name} – Wärmepumpen-Investitionsrechner` : 'Wärmepumpen-Investitionsrechner';
   }
 
   function refreshVisibility(): void {
@@ -1367,7 +1367,7 @@ function layout(): string {
   <header class="top">
     <div class="brand">
       ${logoSvg()}
-      <h1>Wärmepumpen-Umrüstungsrechner</h1>
+      <h1>Wärmepumpen-Investitionsrechner</h1>
       <p>Umstieg von Gas oder Öl: Energiepreise, KfW-Förderung, Kredit und Steuerbonus im Vergleich
         <a id="app-version" class="version-link" href="./changelog.html" title="Änderungen dieser und früherer Versionen (Changelog)">Version ${APP_VERSION}</a>
         <a class="version-link" href="#ueber" data-about-link title="Wie und warum dieser Rechner entstanden ist">Über diesen Rechner</a></p>
@@ -1504,7 +1504,7 @@ function introHtml(): string {
   return `
   <dialog id="intro" class="intro" aria-labelledby="intro-title" aria-describedby="intro-purpose">
     <form method="dialog" class="intro-body">
-      <h2 id="intro-title">Willkommen beim Wärmepumpen-Umrüstungsrechner</h2>
+      <h2 id="intro-title">Willkommen beim Wärmepumpen-Investitionsrechner</h2>
       <p id="intro-purpose" class="intro-lead">Lohnt sich der Umstieg von Ihrer Gas- oder Ölheizung auf eine Wärmepumpe – und wann ist der beste Zeitpunkt? Der Rechner stellt die Gesamtkosten über viele Jahre gegenüber: <strong>bisherige Heizung weiterbetreiben</strong> oder <strong>auf eine Wärmepumpe umsteigen</strong> – mit KfW-Zuschuss oder Steuerbonus, Kredit, steigenden Energie- und CO₂-Preisen und den Kosten des Wartens.</p>
       <h3>So geht’s</h3>
       <ol class="intro-steps">
