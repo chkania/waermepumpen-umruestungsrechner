@@ -35,6 +35,8 @@ const KFW_458 =
 const KFW_358 =
   'https://www.kfw.de/inlandsfoerderung/Privatpersonen/Bestehende-Immobilie/F%C3%B6rderprodukte/Einzelma%C3%9Fnahmen-Erg%C3%A4nzungskredit-Wohngeb%C3%A4ude-(358-359)/';
 const ESTG_35C = 'https://www.gesetze-im-internet.de/estg/__35c.html';
+/** BEG-EM guideline (Förderrichtlinie) of 17.08.2026 – also used for the official references below (F11.4). */
+const RL = 'https://www.bundesanzeiger.de/pub/publication/jLXvW09kHTQoDINAdoC/content/jLXvW09kHTQoDINAdoC/BAnz%20AT%2027.08.2026%20B1.pdf?inline';
 const GMODG = 'https://www.co2online.de/modernisieren-und-bauen/sanierung-modernisierung/gebaeudeenergiegesetz-geg/';
 const ASOF = '11.11.2026';
 const mkt = (text: string, url: string, asOf = ASOF): DefaultSource => ({ kind: 'markt', text, url, asOf });
@@ -238,7 +240,12 @@ export const DEFAULT_SOURCES: Record<string, DefaultSource> = {
   'funding.cap1': kfw('Förderfähige Kosten: 28.000 € für die erste Wohneinheit.'),
   'funding.capStep': kfw('Ab 01.02.2027 sinkt der Höchstbetrag der ersten Wohneinheit halbjährlich um 750 €.'),
   'funding.capDegressionStart': kfw('Erste Absenkung zum 01.02.2027.'),
-  'funding.capFloor': kfw('Die Absenkung endet: ab 1. August 2030 gilt dauerhaft 22.000 € für die erste Wohneinheit.'),
+  'funding.capFloor': {
+    kind: 'quelle',
+    text: 'BEG-EM-Richtlinie Nr. 8.3.1 (Tabelle der Zeiträume): Die Absenkung endet, ab 1. August 2030 gelten 22.000 € für die erste Wohneinheit (die Richtlinie gilt bis 31.12.2030, Nr. 10). KfW-Seite und Merkblatt 458 nennen nur die halbjährliche Absenkung um 750 €, keine Untergrenze.',
+    url: RL,
+    asOf: '15.11.2026',
+  },
   'funding.cap2to6': kfw('2. bis 6. Wohneinheit je 15.000 €.'),
   'funding.cap7plus': kfw('Ab der 7. Wohneinheit je 8.000 €.'),
   'funding.loanMaxPerUnit': kfwLoan('Ergänzungskredit bis 120.000 € je Wohneinheit.'),
@@ -256,7 +263,6 @@ export const DEFAULT_SOURCES: Record<string, DefaultSource> = {
 };
 
 // ---------- Official references (F11.4) ----------
-const RL = 'https://www.bundesanzeiger.de/pub/publication/jLXvW09kHTQoDINAdoC/content/jLXvW09kHTQoDINAdoC/BAnz%20AT%2027.08.2026%20B1.pdf?inline';
 const M458 = 'https://www.kfw.de/PDF/Download-Center/F%C3%B6rderprogramme-(Inlandsf%C3%B6rderung)/PDF-Dokumente/6000005131_M_458.pdf';
 const M358 = 'https://www.kfw.de/PDF/Download-Center/F%C3%B6rderprogramme-(Inlandsf%C3%B6rderung)/PDF-Dokumente/6000005135_M_358_359.pdf';
 const INFOBLATT = 'https://www.kfw.de/PDF/Download-Center/F%C3%B6rderprogramme-(Inlandsf%C3%B6rderung)/PDF-Dokumente/6000004863_Infoblatt_BEG_F%C3%B6rderf%C3%A4hige_Ma%C3%9Fnahmen.pdf';
@@ -325,7 +331,7 @@ export const OFFICIAL_REFS: Record<string, OfficialRef[]> = {
   'funding.cap1': [rl('8.3.1 a'), m458('S. 4 „Förderhöchstbetrag“')],
   'funding.capStep': [rl('8.3.1 a'), m458('S. 4')],
   'funding.capDegressionStart': [rl('8.3.1 a'), m458('S. 4')],
-  'funding.capFloor': [rl('8.3.1 a (Tabelle der Zeiträume)')],
+  'funding.capFloor': [rl('8.3.1 (Tabelle der Zeiträume)')],
   'funding.cap2to6': [rl('8.3.1 a'), m458('S. 4')],
   'funding.cap7plus': [rl('8.3.1 a'), m458('S. 4')],
   'funding.loanMaxPerUnit': [rl('8.5.1'), m358('S. 3')],

@@ -312,3 +312,4 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 | 2026-11-15 | N15 Prüfung nach dem Deployment: `version.json` im Build, Job `verify` im Deploy-Workflow mit Rauchtest im Browser (`npm run smoke`). Ergebnisse unverändert. |
 | 2026-11-15 | F9.2/F30.3 Link mit Werten und QR-Code im Bericht verwenden die Kurzdomain `wpir.de` (leitet auf die Hauptdomain weiter). Ergebnisse unverändert. |
 | 2026-11-15 | F22.3 Vorprüfung der Annahmen mit Claude: liest Werte aus `defaults.ts` und Quellen aus `sources.ts`, nur Bericht, keine automatische Änderung. Ergebnisse unverändert. |
+| 2026-11-15 | F11 Herkunft der Untergrenze der förderfähigen Kosten (22.000 € ab 01.08.2030) korrigiert: steht in der BEG-EM-Richtlinie Nr. 8.3.1, nicht auf der KfW-Seite (gefunden mit F22.3). Ergebnisse unverändert. |
