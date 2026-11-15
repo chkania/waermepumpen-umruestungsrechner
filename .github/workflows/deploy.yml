@@ -143,7 +143,6 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: lts/*
-          cache: npm
       - run: npm ci
       - name: Prüfung der ausgelieferten Seite
         env:

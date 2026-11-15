@@ -20,6 +20,16 @@ export function slugify(text: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
+function stripHeadingHtml(input: string): string {
+  let current = input;
+  let previous: string;
+  do {
+    previous = current;
+    current = current.replace(/[<>]/g, '').replace(/&[a-z]+;/g, '').replace(/&amp;/g, '&');
+  } while (current !== previous);
+  return current.trim();
+}
+
 /** Renders the manual (Markdown) to HTML with anchor IDs and table of contents (F15). */
 export function renderHelp(markdown: string): { html: string; toc: TocEntry[]; title: string } {
   let html = marked.parse(markdown, { async: false, gfm: true }) as string;
@@ -28,7 +38,7 @@ export function renderHelp(markdown: string): { html: string; toc: TocEntry[]; t
   let title = '';
   html = html.replace(/<h([1-3])>([\s\S]*?)<\/h\1>/g, (_m, lvl: string, inner: string) => {
     const level = Number(lvl);
-    const text = inner.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').trim();
+    const text = stripHeadingHtml(inner);
     if (level === 1) {
       title = text;
       return `<h1>${inner}</h1>`;
