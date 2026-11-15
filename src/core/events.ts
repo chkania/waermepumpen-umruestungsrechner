@@ -108,19 +108,21 @@ export function keyEvents(inp: Inputs, run: RunResult): KeyEvents {
     });
   }
   if (install !== null) {
-    const invest = kfw.months[install - start].investment - sumBoiler(kfw, install);
+    const cooking = energySplit(inp).cookingFuel > 0;
     timeline.push({
       month: install,
       scenario: 'all',
       level: 'important',
       title: 'Inbetriebnahme der Wärmepumpe',
       detail:
-        energySplit(inp).cookingFuel > 0 && inp.oldHeating.cookingAfter === 'electric'
+        cooking && inp.oldHeating.cookingAfter === 'electric'
           ? 'Investition inkl. Preissteigerung bis zum Kaufzeitpunkt und neuem Kochfeld (Induktion); Gasanschluss und Wartung der Altanlage entfallen.'
-          : inp.oldHeating.cookingAfter === 'gas' && energySplit(inp).cookingFuel > 0
+          : inp.oldHeating.cookingAfter === 'gas' && cooking
             ? 'Investition inkl. Preissteigerung bis zum Kaufzeitpunkt; Wartung der Altanlage entfällt, der Gasanschluss bleibt für den Herd.'
             : 'Investition inkl. Preissteigerung bis zum Kaufzeitpunkt; Gasanschluss/Öltank und Wartung der Altanlage entfallen.',
-      amount: invest,
+      // Boiler purchases always happen strictly before commissioning and appear as their own events above, so the
+      // investment of this month is exactly the heat pump plus the optional induction hob (F17.3).
+      amount: kfw.months[install - start].investment,
     });
   }
 
@@ -287,10 +289,6 @@ function addWindfallEvents(timeline: KeyEvent[], s: ScenarioResult, scenario: 'k
   }
 }
 
-function sumBoiler(s: ScenarioResult, month: number): number {
-  return s.boilerPurchases.filter((b) => b.month === month).reduce((a, b) => a + b.cost, 0);
-}
-
 function addLoanEvents(timeline: KeyEvent[], s: ScenarioResult, scenario: 'kfw' | 'tax'): void {
   const end = s.months.length ? s.months[s.months.length - 1].month : 0;
   for (const l of s.loans) {
@@ -330,8 +328,9 @@ function addLoanEvents(timeline: KeyEvent[], s: ScenarioResult, scenario: 'kfw' 
 /**
  * If the gas cooker (Gasherd) stays, the calculator evaluates the "induction" alternative (F17.4):
  * saving over the period (like the key figures, incl. opportunity interest (Opportunitätszins)), best variant in each case.
+ * @param run result of `runAll` for the same inputs – only the alternative still has to be simulated
  */
-export function cookingSwitchSaving(inp: Inputs, run: RunResult = runAll(inp)): number | null {
+export function cookingSwitchSaving(inp: Inputs, run: RunResult): number | null {
   const s = energySplit(inp);
   if (s.cookingFuel <= 0 || inp.oldHeating.cookingAfter !== 'gas' || run.kfw.installMonth === null) return null;
   const alt = runAll({ ...inp, oldHeating: { ...inp.oldHeating, cookingAfter: 'electric' } });
