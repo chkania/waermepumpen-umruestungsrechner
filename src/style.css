@@ -745,6 +745,8 @@ td.ev-cell { white-space: normal; min-width: 220px; }
 }
 
 /* Static content of index.html (F33.1): visible for a moment before the calculator starts, and without JavaScript */
+/* With JavaScript the calculator (or the derivation page) replaces the static content; hiding it avoids a jump (F33.9) */
+.js .static-intro { display: none; }
 .static-intro { max-width: 78ch; margin: 0 auto; padding: 32px 24px 48px; line-height: 1.6; color: var(--c-text); }
 .static-intro h1 { font-size: 1.6rem; margin: 0 0 12px; }
 .static-intro h2 { font-size: 1.15rem; margin: 1.6em 0 0.5em; }

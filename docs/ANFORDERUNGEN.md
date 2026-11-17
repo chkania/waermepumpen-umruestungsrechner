@@ -237,6 +237,8 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 
 - F33.8 `public/llms.txt`: kurze Beschreibung des Rechners für KI-Assistenten, Liste aller Seiten und Quellen mit absoluten Adressen. Keine Einstellungen für KI-Crawler (`robots.txt` bleibt unverändert). Das JSON-LD nennt das GitHub-Profil des Autors als `sameAs`; weitere Angaben zur Person sind bewusst nicht enthalten. *(Test: seo)*
 
+- F33.9 Mit JavaScript wird die statische Einführung (Rechner, Rechenweg) vor der ersten Anzeige ausgeblendet (Klasse `js` auf `<html>`, gesetzt in `public/theme-init.js`). Sie wird dann durch den Rechner ersetzt, ohne sichtbaren Sprung. Ohne JavaScript bleibt sie sichtbar. *(Test: seo)*
+
 ### F9 – Persistenz
 - F9.1 Eingaben werden automatisch im localStorage gespeichert und beim Laden wiederhergestellt. *(Test: serialize)*
 - F9.2 „Link mit Werten teilen" (bis 1.4: „Link teilen"): Eingaben (nur Abweichungen von den Defaults) als JSON, komprimiert (DEFLATE, `fflate`) und Base64url-kodiert im URL-Hash `#z=…` (bis 1.6: unkomprimiert `#s=…`, wird weiterhin gelesen); entpackt höchstens 256 KB, sonst ungültig (Schutz vor manipulierten Links); ein Link hat Vorrang vor localStorage. Der geteilte Link zeigt auf die kurze Domain `https://wpir.de/` (leitet per 301 auf die Hauptdomain weiter, der Teil nach `#` bleibt erhalten), auf einem lokalen Entwicklungsrechner (localhost, `*.localhost`, `*.test`) auf die eigene Adresse; die Adresszeile behält die aufgerufene Adresse. *(Test: serialize, share)*
@@ -365,3 +367,4 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 | 2026-11-18 | F33.7 Einführung ausgebaut: Methode und Regeln mit Quellenlinks (KfW, § 35c EStG, Umweltbundesamt), Wortzahl und Lesbarkeit verbessert. Ergebnisse unverändert. |
 | 2026-11-18 | F33.8 `llms.txt` für KI-Assistenten, GitHub-Profil als Autor-Link im strukturierten Datensatz. Ergebnisse unverändert. |
 | 2026-11-18 | F20.3 Einführung und Bestätigungsdialoge öffnen auf dem Smartphone oben statt mit dem Button am Ende. |
+| 2026-11-18 | F33.9 Beim Laden springt die Seite nicht mehr zwischen statischer Einführung und Rechner; mit JavaScript ist die Einführung von Anfang an ausgeblendet. |
