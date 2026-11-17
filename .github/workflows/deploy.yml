@@ -63,6 +63,8 @@ jobs:
         with:
           name: dist
           path: dist/
+          # .htaccess is a hidden file: without this the artifact drops it and the deployment check fails (F33.6)
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 7
     outputs:

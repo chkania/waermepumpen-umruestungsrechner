@@ -32,6 +32,8 @@ describe('F33.6 .htaccess aus dem Repository', () => {
     expect(deploy).not.toMatch(/--exclude='\.htaccess'/);
     expect(deploy).toContain("[ -f dist/.htaccess ]");
     expect(deploy).toContain("--exclude='.well-known/'");
+    // hidden files (.htaccess) are dropped by upload-artifact unless this is set
+    expect(deploy).toMatch(/uses: actions\/upload-artifact@v\d+\n(?:.*\n)*?\s+include-hidden-files: true/);
   });
 
   it('Shell-Syntax des Prüfschritts „Konfiguration prüfen“ ist gültig (sonst bricht jedes Deployment ab)', () => {
