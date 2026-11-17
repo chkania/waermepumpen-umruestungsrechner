@@ -163,6 +163,7 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 - F20.1 Beim ersten Besuch (keine gespeicherten Eingaben, Einführung noch nie geschlossen) öffnet sich ein modaler Dialog: Zweck des Rechners, Bedienung in drei Schritten (Eingaben links bzw. oben, Ergebnisse rechts bzw. darunter, Varianten sichern), Hinweis auf Berechnung im Browser und fehlende Beratung, Link zur Hilfe. *(Test: ui)*
 - F20.2 Schließen per „Los geht’s“, Esc oder Klick neben den Dialog merkt sich der Browser (`localStorage`); danach ist die Einführung über „Einführung“ in der Werkzeugleiste erreichbar. Barrierefrei als natives `<dialog>` mit Titel, Fokus auf der Hauptschaltfläche. *(Test: ui, help)*
 
+- F20.3 Modale Dialoge (Einführung, Bestätigungen, Empfehlen, Unterstützen, Varianten) öffnen mit dem Titel im Fokus und oben im Inhalt, nicht mit einem Button am Ende; sonst scrollt das Smartphone bei langen Dialogen nach unten. *(Test: ui)*
 ### F21 – Weiterempfehlen
 - F21.1 Schaltfläche „Weiterempfehlen“ in der Werkzeugleiste öffnet einen Dialog mit WhatsApp (`whatsapp://send?text=`, öffnet die App direkt – über `wa.me` ging der Text in WhatsApp Desktop für macOS verloren), „Andere“ (Teilen-Menü des Geräts per Web Share API, z. B. für Signal, das keinen Teilen-Link anbietet; sonst Text in die Zwischenablage), Threema (`threema.id/compose?text=`), E-Mail (`mailto:` mit Betreff und Text) und „Link kopieren“; bewusst ohne Facebook und X. *(Test: share, ui, help)*
 - F21.2 Geteilt wird nur die Adresse des Rechners (ohne `#z=…`/`#s=…` und Query-Parameter), nie die Eingaben; Empfehlungstext in `src/ui/share.ts`. *(Test: share)*
@@ -363,3 +364,4 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 | 2026-11-18 | F33.6 `.htaccess` aus dem Repository (`public/.htaccess`) wird mit dem Deployment übertragen; Weiterleitung, Cache- und Sicherheitsheader unverändert. |
 | 2026-11-18 | F33.7 Einführung ausgebaut: Methode und Regeln mit Quellenlinks (KfW, § 35c EStG, Umweltbundesamt), Wortzahl und Lesbarkeit verbessert. Ergebnisse unverändert. |
 | 2026-11-18 | F33.8 `llms.txt` für KI-Assistenten, GitHub-Profil als Autor-Link im strukturierten Datensatz. Ergebnisse unverändert. |
+| 2026-11-18 | F20.3 Einführung und Bestätigungsdialoge öffnen auf dem Smartphone oben statt mit dem Button am Ende. |
