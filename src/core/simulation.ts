@@ -8,6 +8,7 @@ import { taxBonus } from './tax';
 import type {
   CostBreakdown,
   Inputs,
+  InvestInfo,
   LoanInfo,
   MonthRow,
   ScenarioKind,
@@ -256,6 +257,9 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
   let windfall: WindfallInfo | undefined;
   let kfwRes: ScenarioResult['kfw'];
   let taxRes: ScenarioResult['tax'];
+  let invest: InvestInfo | undefined;
+  let subsidyMonthOut: number | undefined;
+  let taxRefunds: ScenarioResult['taxRefunds'];
 
   if (install !== null) {
     const iIdx = install - start;
@@ -267,9 +271,19 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
     const total = wpGross + extra + (hp.meterSetupEligible ? meterSetup : 0);
     rows[iIdx].investment += total;
     // New cooktop (Kochfeld) when switching to electricity (F17.3): one-off, not eligible for funding, paid from own funds
-    if (split.cookingFuel > 0 && !cookStaysGas) {
-      rows[iIdx].investment += Math.max(0, inp.oldHeating.cookingSwitchCost) * growth(inp.general.investIncrease, iIdx);
-    }
+    const cooktop = split.cookingFuel > 0 && !cookStaysGas ? Math.max(0, inp.oldHeating.cookingSwitchCost) * growth(inp.general.investIncrease, iIdx) : 0;
+    rows[iIdx].investment += cooktop;
+    invest = {
+      month: install,
+      growth: growth(inp.general.investIncrease, iIdx),
+      heatPump: wpGross,
+      extra,
+      meterSetup,
+      eligible: eligibleGross,
+      total,
+      cooktop,
+      equity: Math.min(Math.max(0, kind === 'kfw' ? fin.kfwEquity : fin.taxEquity), total),
+    };
     const hpLife = Math.max(1, Math.round(hp.lifeYears * 12));
     assets.push({ cost: wpGross, install, lifeMonths: hpLife });
     // Replacement heat pump (Ersatz-Wärmepumpe) if the period is longer than its lifetime (without funding, like the replacement boiler (Ersatzkessel))
@@ -409,6 +423,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
       );
       warnings.push(...kfwRes.notes);
       const subsidyMonth = install + Math.max(0, Math.round(fin.subsidyDelayMonths));
+      subsidyMonthOut = subsidyMonth;
       if (subsidyMonth < end) {
         rows[subsidyMonth - start].subsidy -= kfwRes.subsidy;
       } else if (kfwRes.subsidy > 0) {
@@ -476,6 +491,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
       warnings.push(...taxRes.notes);
       if (!taxRes.eligible) feasible = false;
       const refundMonth = Math.min(12, Math.max(1, Math.round(fin.taxRefundMonth)));
+      taxRefunds = taxRes.yearly.map((y) => ({ year: y.year, month: (y.year + 1) * 12 + (refundMonth - 1), amount: y.amount }));
       for (const y of taxRes.yearly) {
         const month = (y.year + 1) * 12 + (refundMonth - 1);
         if (month >= start && month < end) rows[month - start].taxBonus -= y.amount;
@@ -543,6 +559,9 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
     boilerPurchases,
     hpReplacements,
     windfall,
+    invest,
+    subsidyMonth: subsidyMonthOut,
+    taxRefunds,
   };
 }
 

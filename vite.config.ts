@@ -48,6 +48,8 @@ export default defineConfig({
         // Legal pages: imprint and privacy policy (N11)
         impressum: resolve(__dirname, 'impressum.html'),
         datenschutz: resolve(__dirname, 'datenschutz.html'),
+        // Derivation of all figures (F32)
+        rechenweg: resolve(__dirname, 'rechenweg.html'),
       },
     },
   },

@@ -39,6 +39,16 @@ describe('F15 Benutzerhandbuch – Vollständigkeit', () => {
     expect(handbook).toContain('rein privates Hobbyprojekt');
   });
 
+  it('F32.4 Rechenweg: Link, Teilen für Fehlermeldungen und Hinweis auf persönliche Daten', () => {
+    expect(handbook).toContain('## Rechenweg');
+    expect(handbook).toContain('[Rechenweg](./rechenweg.html)');
+    expect(handbook).toContain('### Rechenweg mit eigenen Werten teilen');
+    expect(handbook).toContain('Link zu diesem Rechenweg kopieren');
+    expect(handbook).toMatch(/Haushaltseinkommen[^\n]*öffentlich/);
+    const { html } = renderHelp(handbook);
+    expect(html).toContain('<a href="./rechenweg.html" target="_blank" rel="noopener">');
+  });
+
   it('alle Ergebnisbereiche sind beschrieben', () => {
     for (const t of ['Kennzahlen', 'Wichtige Ereignisse & Hinweise', 'Diagramme', 'Stromkosten: mit oder ohne Wärmepumpentarif', 'Wann umrüsten?', 'Jahresübersicht']) {
       expect(handbook, t).toContain(t);

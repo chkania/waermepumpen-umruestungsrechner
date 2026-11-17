@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="de" data-design="modern">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Rechenweg des Wärmepumpen-Investitionsrechners: wie Gesamtkosten, Förderung, Kredite, Amortisation und CO₂-Bilanz zustande kommen, mit allen Zwischenwerten." />
+    <title>Rechenweg – Wärmepumpen-Investitionsrechner</title>
+    <link rel="canonical" href="https://waermepumpen-investitionsrechner.de/rechenweg.html" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <script>
+      // Hell/Dunkel wie im Rechner (vor dem ersten Zeichnen)
+      (function () {
+        var t = null;
+        try {
+          t = localStorage.getItem('wp-investitionsrechner:theme');
+        } catch (e) {}
+        var html = document.documentElement;
+        var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        html.dataset.theme = t === 'light' || t === 'dark' ? t : dark ? 'dark' : 'light';
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="doc"></div>
+    <script type="module" src="/src/pages/rechenweg-main.ts"></script>
+  </body>
+</html>

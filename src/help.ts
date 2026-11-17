@@ -54,6 +54,8 @@ export function renderHelp(markdown: string): { html: string; toc: TocEntry[]; t
     toc.push({ id, text, level: level as 2 | 3 });
     return `<h${level} id="${id}"><a class="anchor" href="#${id}" aria-hidden="true">#</a>${inner}</h${level}>`;
   });
+  // The derivation page (F32) opens in a new tab, so that calculator or manual and derivation can be viewed side by side
+  html = html.replace(/<a href="(\.\/rechenweg\.html[^"]*)">/g, '<a href="$1" target="_blank" rel="noopener">');
   // Make tables scrollable (mobile)
   html = html.replace(/<table>/g, '<div class="table-wrap"><table>').replace(/<\/table>/g, '</table></div>');
   return { html, toc, title };

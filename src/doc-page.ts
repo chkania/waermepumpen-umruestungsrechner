@@ -1,12 +1,14 @@
 import { escapeHtml, safeHref } from './ui/format';
-import { renderHelp } from './help';
+import { renderHelp, type TocEntry } from './help';
 import { REPO_URL } from './project';
 import { APP_VERSION } from './version';
 import { logoSvg } from './logo';
 
 export interface DocPage {
   /** Markdown source (imported via `?raw`, stays as .md file in the repo). */
-  markdown: string;
+  markdown?: string;
+  /** Content already rendered to HTML (instead of Markdown), e.g. the derivation page (F32). */
+  rendered?: { html: string; toc: TocEntry[]; title: string };
   /** Subtitle in the header. */
   subtitle: string;
   /** Optional HTML preamble before the content (e.g. German summary). */
@@ -32,7 +34,7 @@ export const DOC_LINKS: [string, string][] = [
 
 /** Renders a Markdown document page in the calculator's style (manual F15, license pages N8). */
 export function renderDocPage(page: DocPage): { html: string; title: string } {
-  const rendered = renderHelp(page.markdown);
+  const rendered = page.rendered ?? renderHelp(page.markdown ?? '');
   const { toc, title } = rendered;
   let html = rendered.html.replace(/<h1>[\s\S]*?<\/h1>/, '');
   if (page.codeLang) html = html.replace(/<pre>/g, `<pre lang="${page.codeLang}">`);

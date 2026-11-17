@@ -346,6 +346,27 @@ export interface WindfallInfo {
   note?: string;
 }
 
+/** Investment of the heat pump scenarios at installation (gross €, with the investment price increase), for the derivation page (F32). */
+export interface InvestInfo {
+  month: number;
+  /** Factor of the investment price increase from the start month to the installation month. */
+  growth: number;
+  /** Heat pump price (offer) at installation. */
+  heatPump: number;
+  /** Not eligible extra costs (incl. second meter if not eligible). */
+  extra: number;
+  /** Second meter (Zählerschrank-Umbau), only with a separate heat pump tariff (Wärmepumpentarif). */
+  meterSetup: number;
+  /** Eligible costs (förderfähige Kosten) before the cap (Höchstbetrag). */
+  eligible: number;
+  /** Total investment (financed with equity and loans). */
+  total: number;
+  /** New cooktop (Kochfeld) when cooking switches to electricity; paid from own funds. */
+  cooktop: number;
+  /** Equity (Eigenkapital) used. */
+  equity: number;
+}
+
 export interface ScenarioResult {
   kind: ScenarioKind;
   label: string;
@@ -369,4 +390,10 @@ export interface ScenarioResult {
   /** Replacement heat pumps (Ersatz-Wärmepumpe) after the end of their lifetime (month, gross cost). */
   hpReplacements: { month: number; cost: number }[];
   windfall?: WindfallInfo;
+  /** Investment at installation (heat pump scenarios only). */
+  invest?: InvestInfo;
+  /** Payout month of the KfW subsidy (Zuschuss); may lie after the period (then included at the end). */
+  subsidyMonth?: number;
+  /** Refunds of the tax bonus (Steuerbonus) per tax year with the refund month; may lie after the period. */
+  taxRefunds?: { year: number; month: number; amount: number }[];
 }

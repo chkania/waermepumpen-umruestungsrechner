@@ -3,7 +3,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SECTIONS, getPath } from '../src/ui/fields';
 import { INTRO_KEY, LEGACY_DESIGN_KEY, mountApp, PRIVACY_ACK_KEY, STORAGE_KEY, THEME_KEY } from '../src/ui/app';
-import { encodeHash } from '../src/core/serialize';
+import { decodeHash, encodeHash } from '../src/core/serialize';
 import { APP_VERSION } from '../src/version';
 import { defaults, TODAY } from './helpers';
 
@@ -655,6 +655,13 @@ describe('UI (Smoke-Test)', () => {
     expect(a.hasAttribute('target')).toBe(false);
   });
 
+  it('F32.1 Link „Rechenweg“ in der Fußzeile folgt den Eingaben', () => {
+    const { root } = mount();
+    setValue(root, 'heatPump.jaz', '4.2');
+    const href = root.querySelector<HTMLAnchorElement>('#link-derivation')!.getAttribute('href')!;
+    expect(decodeHash(defaults(), href.slice(href.indexOf('#')))!.heatPump.jaz).toBe(4.2);
+  });
+
   it('F15.4 eigene Seiten (Hilfe, Impressum, Datenschutz, Lizenzen, Changelog) öffnen im selben Tab, fremde Seiten in neuem', () => {
     const { root } = mount();
     const links = [...root.querySelectorAll<HTMLAnchorElement>('a[href]')];
@@ -662,7 +669,12 @@ describe('UI (Smoke-Test)', () => {
     expect(own.map((a) => a.getAttribute('href'))).toEqual(
       expect.arrayContaining(['./hilfe.html', './impressum.html', './datenschutz.html', './lizenz.html', './lizenzen-drittanbieter.html', './changelog.html']),
     );
-    for (const a of own) expect(a.hasAttribute('target'), a.getAttribute('href')!).toBe(false);
+    // F32 exception: the derivation opens in a new tab and carries the current inputs
+    const derivation = own.filter((a) => a.getAttribute('href')!.startsWith('./rechenweg.html'));
+    expect(derivation).toHaveLength(1);
+    expect(derivation[0].target).toBe('_blank');
+    expect(derivation[0].getAttribute('href')).toMatch(/^\.\/rechenweg\.html#z=/);
+    for (const a of own.filter((x) => !derivation.includes(x))) expect(a.hasAttribute('target'), a.getAttribute('href')!).toBe(false);
     const external = links.filter((a) => /^https:/.test(a.getAttribute('href')!));
     expect(external.length).toBeGreaterThan(0);
     for (const a of external) {
