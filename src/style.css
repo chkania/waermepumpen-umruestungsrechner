@@ -749,3 +749,11 @@ td.ev-cell { white-space: normal; min-width: 220px; }
 .static-intro .static-note { padding: 10px 14px; border: 1px solid var(--warn-border); background: var(--warn-bg); border-radius: 6px; }
 .static-intro a { color: var(--accent); }
 .static-links { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.static-head { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
+.static-head h1 { margin: 0; }
+.static-logo { flex: none; width: 56px; height: 56px; }
+.static-intro section { margin-bottom: 8px; }
+.static-intro ol { padding-left: 1.4em; }
+.static-intro li { margin: 0.4em 0; }
+.static-intro h3 { font-size: 1rem; margin: 1.2em 0 0.3em; }
+.static-foot { margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--border); }

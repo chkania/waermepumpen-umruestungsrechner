@@ -1,0 +1,25 @@
+# Wärmepumpen-Investitionsrechner
+
+> Kostenloser Rechner im Browser: Umstieg von Gas- oder Ölheizung auf eine Wärmepumpe. Er rechnet Monat für Monat die Gesamtkosten mit und ohne Wärmepumpe über einen Betrachtungszeitraum (standardmäßig 20 Jahre). Berücksichtigt werden KfW-Zuschuss (Programm 458), Steuerbonus nach § 35c EStG, Finanzierung mit Krediten, steigende Energiepreise, CO₂-Preis und Strommix, eigene PV-Anlage sowie Amortisation und CO₂-Bilanz. Es werden keine Eingaben an einen Server übertragen. Der Rechner ist ein privates Hobbyprojekt und ersetzt keine Energie-, Förder- oder Steuerberatung.
+
+Quellcode und Lizenz: PolyForm Noncommercial 1.0.0 (nicht-kommerzielle Nutzung).
+
+## Seiten
+
+- [Rechner](https://waermepumpen-investitionsrechner.de/): Eingaben, Kennzahlen, Diagramme, Vergleich der Installationszeitpunkte und Varianten.
+- [Benutzerhandbuch](https://waermepumpen-investitionsrechner.de/hilfe.html): Erklärung aller Eingaben, Ergebnisse und Funktionen.
+- [Rechenweg](https://waermepumpen-investitionsrechner.de/rechenweg.html): Herleitung aller Kennzahlen mit den eingesetzten Werten, Kosten je Jahr und Monat als CSV.
+- [Änderungen](https://waermepumpen-investitionsrechner.de/changelog.html): Versionsverlauf.
+- [Impressum](https://waermepumpen-investitionsrechner.de/impressum.html)
+- [Datenschutz](https://waermepumpen-investitionsrechner.de/datenschutz.html)
+- [Lizenz](https://waermepumpen-investitionsrechner.de/lizenz.html)
+
+## Quellen
+
+- [KfW-Merkblatt Programm 458](https://www.kfw.de/PDF/Download-Center/F%C3%B6rderprogramme-(Inlandsf%C3%B6rderung)/PDF-Dokumente/6000005131_M_458.pdf): Bedingungen des Zuschusses für Heizungen mit erneuerbaren Energien.
+- [§ 35c EStG](https://www.gesetze-im-internet.de/estg/__35c.html): Steuerermäßigung für energetische Maßnahmen.
+- [Umweltbundesamt: CO₂-Emissionen je kWh Strom](https://www.umweltbundesamt.de/themen/co2-emissionen-pro-kilowattstunde-strom-2025-nur)
+
+## Quellcode
+
+- [GitHub-Repository](https://github.com/chkania/wpir)
