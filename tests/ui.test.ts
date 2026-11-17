@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
 import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SECTIONS, getPath } from '../src/ui/fields';
 import { INTRO_KEY, LEGACY_DESIGN_KEY, mountApp, PRIVACY_ACK_KEY, STORAGE_KEY, THEME_KEY } from '../src/ui/app';
@@ -978,5 +979,13 @@ describe('F20.3 Dialoge öffnen oben, der Fokus liegt auf der Überschrift', () 
     expect(dlg.open).toBe(true);
     expect(document.activeElement?.id).toBe('privacy-title');
     expect(dlg.querySelector('[autofocus]')).toBeNull();
+  });
+});
+
+describe('F20.3 Fokusrahmen der Überschrift nur bei Tastaturbedienung', () => {
+  it('die Überschrift bekommt den Rahmen nur, wenn der Fokus sichtbar sein soll (keyboard), nicht nach einem Tippen', () => {
+    const css = readFileSync(join(process.cwd(), 'src/style.css'), 'utf8');
+    expect(css).toContain(":focus:not(:focus-visible)");
+    expect(css).toMatch(/\.intro h2\[tabindex='-1'\]:focus:not\(:focus-visible\) \{ outline-color: transparent; \}/);
   });
 });
