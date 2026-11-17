@@ -33,7 +33,16 @@ describe('N13 Suchmaschinen: kanonische Adresse, robots.txt, Sitemap', () => {
 
 describe('F33 Inhalt für Suchmaschinen und Linkvorschauen', () => {
   const index = read('index.html');
-  const text = (html: string) => html.replace(/<script[\s\S]*?<\/script>/g, '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  // Plain text of an HTML fragment. Tags are removed until none are left, so nested fragments cannot survive as markup.
+  const text = (html: string) => {
+    let t = html;
+    let previous: string;
+    do {
+      previous = t;
+      t = t.replace(/<[^<>]*>/g, ' ');
+    } while (t !== previous);
+    return t.replace(/[<>]/g, ' ').replace(/\s+/g, ' ').trim();
+  };
 
   it('F33.1 Rechner ohne JavaScript: Überschrift, Text und Links zu allen Seiten im HTML', () => {
     const app = /<div id="app">([\s\S]*?)<\/div>\s*<script/.exec(index)![1];
