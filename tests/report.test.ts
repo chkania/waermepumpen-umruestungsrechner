@@ -89,6 +89,13 @@ describe('F30 Bericht', () => {
     expect(html).toContain('Erstellt mit dem Wärmepumpen-Investitionsrechner: https://example.invalid/');
   });
 
+  it('F30.4 Text unter dem QR-Code ist mit demselben Link hinterlegt', () => {
+    const html = report((i) => (i.heatPump.investment = 41000), { shareUrl: 'https://wpir.de/' });
+    const href = /<figcaption><a class="report-open" href="([^"]+)">Berechnung mit diesen Eingaben öffnen<\/a><\/figcaption>/.exec(html)![1];
+    expect(href).toMatch(/^https:\/\/wpir\.de\/#z=/);
+    expect(decodeHash(defaults(), href.slice(href.indexOf('#')))!.heatPump.investment).toBe(41000);
+  });
+
   it('F30.3 zu langer Link: Hinweis statt QR-Code', () => {
     let seed = 1;
     const noise = () => Array.from({ length: 1990 }, () => String.fromCharCode(33 + ((seed = (seed * 16807) % 2147483647) % 90))).join('');
@@ -99,6 +106,8 @@ describe('F30 Bericht', () => {
     });
     expect(html).not.toContain('class="qr"');
     expect(html).toContain('Zu viele Eingaben für einen QR-Code');
+    // F30.4 the link stays usable in the PDF
+    expect(html).toMatch(/<a class="report-open" href="https:\/\/example\.invalid\/#z=/);
   });
 
   it('Feldwerte: Zahl mit Einheit, Prozent, ja/nein, Auswahl, Monat', () => {

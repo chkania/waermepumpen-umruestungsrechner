@@ -156,10 +156,13 @@ export function reportLink(d: Pick<ReportData, 'inputs' | 'defaults' | 'url' | '
 }
 
 function qrHtml(d: ReportData): string {
-  const svg = qrSvg(reportLink(d), 'QR-Code: Berechnung mit diesen Eingaben im Rechner öffnen');
+  const href = reportLink(d);
+  const svg = qrSvg(href, 'QR-Code: Berechnung mit diesen Eingaben im Rechner öffnen');
+  // Clickable in the PDF: the same link as in the QR code
+  const link = `<a class="report-open" href="${escapeHtml(href)}">Berechnung mit diesen Eingaben öffnen</a>`;
   return svg
-    ? `<figure class="report-qr">${svg}<figcaption>Berechnung mit diesen Eingaben öffnen</figcaption></figure>`
-    : '<p class="report-qr muted">Zu viele Eingaben für einen QR-Code – „Link mit Werten teilen“ im Rechner verwenden.</p>';
+    ? `<figure class="report-qr">${svg}<figcaption>${link}</figcaption></figure>`
+    : `<p class="report-qr muted">Zu viele Eingaben für einen QR-Code. ${link}</p>`;
 }
 
 export function reportHtml(d: ReportData): string {
