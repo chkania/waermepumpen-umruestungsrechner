@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Wärmepumpen-Investitionsrechner">
+  <!-- Link preview image (Open Graph, F33.4): logo, name and claim on a light background; PNG in public/og-image.png -->
+  <rect width="1200" height="630" fill="#f7f6f2"/>
+  <rect x="0" y="606" width="1200" height="24" fill="#2864a6"/>
+  <g transform="translate(96 150) scale(4.2)">
+    <path d="M10 29 L32 10 L54 29 V54 H10 Z" fill="none" stroke="#23252a" stroke-width="5" stroke-linejoin="miter"/>
+    <path d="M15.5 42.5 H25.06 L26.94 47.5 H15.5 Z" fill="#b4532a"/>
+    <path d="M26.94 47.5 L44.15 32.38 L40.85 28.62 L25.06 42.5 Z" fill="#2864a6"/>
+    <path d="M34 30 H43 V39" fill="none" stroke="#2864a6" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter"/>
+  </g>
+  <g font-family="Inter, 'Inter Variable', Helvetica, Arial, sans-serif" fill="#23252a">
+    <text x="400" y="235" font-size="58" font-weight="700" letter-spacing="-1">Wärmepumpen-</text>
+    <text x="400" y="305" font-size="58" font-weight="700" letter-spacing="-1">Investitionsrechner</text>
+    <text x="400" y="385" font-size="32" fill="#3d4048">Lohnt sich der Umstieg von Gas oder Öl?</text>
+    <text x="400" y="435" font-size="26" fill="#2864a6" font-weight="600">KfW-Zuschuss · Steuerbonus · CO₂-Preis</text>
+    <text x="400" y="472" font-size="26" fill="#2864a6" font-weight="600">Kredit · Amortisation · Umrüstzeitpunkt</text>
+    <text x="96" y="560" font-size="24" fill="#3d4048">Kostenlos · ohne Anmeldung · rechnet im Browser</text>
+    <text x="1104" y="560" font-size="24" fill="#3d4048" font-weight="600" text-anchor="end">wpir.de</text>
+  </g>
+</svg>

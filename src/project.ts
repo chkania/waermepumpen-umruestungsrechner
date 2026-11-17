@@ -1,3 +1,6 @@
+/** Window title of the calculator, the same as in index.html (F33.3); a scenario name is put in front (F16.1). */
+export const PAGE_TITLE = 'Wärmepumpe: Lohnt sich der Umstieg? Rechner mit KfW-Förderung';
+
 /** Public project links (F19): source code, issue tracker and contribution guide on GitHub. */
 export const REPO_URL = 'https://github.com/chkania/wpir';
 /** Issue form for errors and outdated values (.github/ISSUE_TEMPLATE/bug_report.yml). */
