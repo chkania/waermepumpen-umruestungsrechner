@@ -190,3 +190,11 @@ describe('F33.8 llms.txt', () => {
     expect(links.filter((l) => l.startsWith(BASE)).length).toBeGreaterThanOrEqual(7);
   });
 });
+
+describe('F33.9 Keine Inhaltswechsel beim Laden', () => {
+  it('theme-init.js setzt die Klasse js vor der ersten Anzeige; CSS blendet die Einführung dann aus', () => {
+    expect(read('public/theme-init.js')).toContain("html.classList.add('js')");
+    expect(read('src/style.css')).toMatch(/\.js \.static-intro \{ display: none; \}/);
+    for (const p of ['index.html', 'rechenweg.html']) expect(read(p), p).toContain('<script src="./theme-init.js"></script>');
+  });
+});
