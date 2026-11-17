@@ -363,7 +363,7 @@ Tabelle je Jahr mit allen Kostenarten (Energie, Grundkosten, Wartung, Investitio
 
 ## Rechenweg
 
-Der [Rechenweg](./rechenweg.html) zeigt auf einer eigenen Seite, wie die Zahlen des Rechners zustande kommen – mit allen Zwischenwerten und den eingesetzten Eingaben. Sie öffnen ihn über den Link **Rechenweg** im Seitenfuß des Rechners; er öffnet sich in einem neuen Tab, sodass Sie Rechner und Rechenweg nebeneinander legen können. Der Rechenweg rechnet nichts selbst nach: Er zeigt die Werte aus derselben Rechnung wie der Rechner und erklärt sie.
+Der [Rechenweg](./rechenweg.html) zeigt auf einer eigenen Seite, wie die Zahlen des Rechners zustande kommen – mit allen Zwischenwerten und den eingesetzten Eingaben. Sie öffnen ihn über den Link **Rechenweg** im Seitenfuß des Rechners. Er öffnet sich im selben Tab; über den Browser-Zurück-Knopf kehren Sie zum Rechner zurück. Der Rechenweg rechnet nichts selbst nach: Er zeigt die Werte aus derselben Rechnung wie der Rechner und erklärt sie.
 
 - **Ergebnis im Überblick:** Gesamtkosten der drei Szenarien, Summe ohne Verzinsung, CO₂ und Amortisation; wie der Opportunitätszins aus den Monatswerten die Gesamtkosten macht.
 - **Energiebedarf:** vom Verbrauch über Kochen, Warmwasser und Nutzungsgrad zur Nutzwärme, daraus der Strom der Wärmepumpe über die JAZ und der Anteil aus der PV-Anlage.

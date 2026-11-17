@@ -197,9 +197,9 @@ describe('F32 Rechenweg – Seite und Bedienung', () => {
     expect(root.querySelector('#dw-copy-status')!.textContent).toContain('Kopieren nicht möglich – Link: https://example.invalid/rechenweg.html#z=');
   });
 
-  it('Hilfe: Link zum Rechenweg öffnet in neuem Tab', () => {
+  it('Hilfe: Link zum Rechenweg öffnet im selben Tab', () => {
     const { html } = renderHelp('Siehe [Rechenweg](./rechenweg.html) und [Hilfe](./hilfe.html).');
-    expect(html).toContain('<a href="./rechenweg.html" target="_blank" rel="noopener">Rechenweg</a>');
+    expect(html).toContain('<a href="./rechenweg.html">Rechenweg</a>');
     expect(html).toContain('<a href="./hilfe.html">Hilfe</a>');
   });
 });
