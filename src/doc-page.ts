@@ -33,13 +33,14 @@ export const DOC_LINKS: [string, string][] = [
 ];
 
 /** Renders a Markdown document page in the calculator's style (manual F15, license pages N8). */
-export function renderDocPage(page: DocPage): { html: string; title: string } {
+export function renderDocPage(page: DocPage, currentFile?: string): { html: string; title: string } {
   const rendered = page.rendered ?? renderHelp(page.markdown ?? '');
   const { toc, title } = rendered;
   let html = rendered.html.replace(/<h1>[\s\S]*?<\/h1>/, '');
   if (page.codeLang) html = html.replace(/<pre>/g, `<pre lang="${page.codeLang}">`);
   if (page.contentLang) html = `<div lang="${page.contentLang}">${html}</div>`;
-  const here = typeof location !== 'undefined' ? location.pathname.split('/').pop() || 'index.html' : '';
+  // Current page for aria-current in the footer: given when rendering at build time (F33.2), otherwise from the address
+  const here = currentFile ?? (typeof location !== 'undefined' ? location.pathname.split('/').pop() || 'index.html' : '');
   const showToc = page.toc !== false && toc.length >= 2;
   const body = `
   <header class="top help-top">
@@ -66,7 +67,7 @@ export function renderDocPage(page: DocPage): { html: string; title: string } {
   <footer class="doc-footer">
     <nav aria-label="Weitere Seiten"><ul>${DOC_LINKS.map(
       ([href, label]) =>
-        `<li><a href="${href}"${href.endsWith(here) ? ' aria-current="page"' : ''}>${escapeHtml(label)}</a></li>`,
+        `<li><a href="${href}"${here && href.endsWith(here) ? ' aria-current="page"' : ''}>${escapeHtml(label)}</a></li>`,
     ).join('')}</ul></nav>
     <p>Version ${APP_VERSION} · © 2026 Christoph Kania · PolyForm Noncommercial License 1.0.0 · <a href="${safeHref(REPO_URL)}">Quellcode auf GitHub – Mitmachen willkommen</a></p>
   </footer>`;

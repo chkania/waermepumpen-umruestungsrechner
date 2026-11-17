@@ -35,7 +35,7 @@ import { SECTIONS, getPath, setPath, type Field } from './fields';
 import { escapeHtml, fmtDuration, fmtEur, fmtMonth, fmtNum, fmtPct, safeHref } from './format';
 import { RECOMMEND_SUBJECT, RECOMMEND_TEXT, calculatorUrl, recommendLinks, shareBaseUrl } from './share';
 import { logoSvg } from '../logo';
-import { BUG_REPORT_URL, BUY_ME_A_COFFEE_URL, CONTRIBUTING_URL, DONATION_ACCOUNT, FEATURE_REQUEST_URL, PAYPAL_URL, REPO_URL } from '../project';
+import { BUG_REPORT_URL, BUY_ME_A_COFFEE_URL, PAGE_TITLE, CONTRIBUTING_URL, DONATION_ACCOUNT, FEATURE_REQUEST_URL, PAYPAL_URL, REPO_URL } from '../project';
 import { compactIban, epcPayload, formatIban } from './donate';
 import { qrSvg } from './qr';
 import { DERIVATION_PAGE, derivationLink } from './derivation-link';
@@ -179,7 +179,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     const el = $<HTMLElement>('#scenario-name');
     el.textContent = name;
     el.hidden = name === '';
-    document.title = name ? `${name} – Wärmepumpen-Investitionsrechner` : 'Wärmepumpen-Investitionsrechner';
+    document.title = name ? `${name} – Wärmepumpen-Investitionsrechner` : PAGE_TITLE;
   }
 
   function refreshVisibility(): void {

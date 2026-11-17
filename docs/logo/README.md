@@ -11,6 +11,7 @@ Ein Haus mit einer „Umstiegskurve“: Die kurze warme Linie steht für Gas ode
 | `logo-kachel.svg` | Bildmarke auf heller Kachel (wie das Favicon), für beliebige Hintergründe |
 | `logo-schriftzug.png`, `logo-schriftzug-dunkel.png` | Bildmarke mit Schriftzug für Präsentationen, Dokumente und Social Media |
 | `logo-schriftzug.svg`, `logo-schriftzug-dunkel.svg` | dasselbe als Vektor; die Schrift Inter muss installiert sein, sonst lieber die PNG verwenden |
+| `og-image.svg` | Vorschaubild für Links in Messengern und sozialen Netzwerken (1200 × 630); als PNG in `public/og-image.png`: `rsvg-convert -w 1200 -h 630 og-image.svg -o ../../public/og-image.png` |
 
 Im Rechner selbst:
 - Die Kopfzeile nutzt `src/logo.ts` (Inline-SVG, Farben aus den Design-Tokens, folgt Hell/Dunkel).

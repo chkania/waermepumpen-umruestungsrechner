@@ -15,5 +15,5 @@
     "allowImportingTsExtensions": true,
     "types": ["vitest/globals"]
   },
-  "include": ["src", "tests", "scripts/**/*.ts", "vite.config.ts", "csp.ts"]
+  "include": ["src", "tests", "scripts/**/*.ts", "vite.config.ts", "csp.ts", "prerender.ts"]
 }

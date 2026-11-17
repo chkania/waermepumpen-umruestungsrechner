@@ -6,8 +6,9 @@ import '../help.css';
 import privacy from '../../docs/DATENSCHUTZ.md?raw';
 import { initAnalytics, isOptedOut, setOptOut } from '../analytics';
 import { mountDocPage } from '../doc-page';
+import { DOC_PAGES } from './doc-pages';
 
-mountDocPage(document.getElementById('doc')!, { markdown: privacy, subtitle: 'Wärmepumpen-Investitionsrechner' });
+mountDocPage(document.getElementById(DOC_PAGES['datenschutz.html'].element)!, { markdown: privacy, ...DOC_PAGES['datenschutz.html'].page });
 mountOptOut(document.getElementById('analytics-opt-out'));
 initAnalytics('Datenschutz');
 

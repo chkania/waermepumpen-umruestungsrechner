@@ -740,3 +740,12 @@ td.ev-cell { white-space: normal; min-width: 220px; }
   .report a { color: inherit; text-decoration: none; }
   .report a.report-open { text-decoration: underline; }
 }
+
+/* Static content of index.html (F33.1): visible for a moment before the calculator starts, and without JavaScript */
+.static-intro { max-width: 78ch; margin: 0 auto; padding: 32px 24px 48px; line-height: 1.6; color: var(--c-text); }
+.static-intro h1 { font-size: 1.6rem; margin: 0 0 12px; }
+.static-intro h2 { font-size: 1.15rem; margin: 1.6em 0 0.5em; }
+.static-intro .static-lead { font-size: 1.05rem; }
+.static-intro .static-note { padding: 10px 14px; border: 1px solid var(--warn-border); background: var(--warn-bg); border-radius: 6px; }
+.static-intro a { color: var(--accent); }
+.static-links { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 18px; }
