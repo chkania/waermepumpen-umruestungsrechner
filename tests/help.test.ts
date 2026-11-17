@@ -46,7 +46,7 @@ describe('F15 Benutzerhandbuch – Vollständigkeit', () => {
     expect(handbook).toContain('Link zu diesem Rechenweg kopieren');
     expect(handbook).toMatch(/Haushaltseinkommen[^\n]*öffentlich/);
     const { html } = renderHelp(handbook);
-    expect(html).toContain('<a href="./rechenweg.html" target="_blank" rel="noopener">');
+    expect(html).toContain('<a href="./rechenweg.html">');
   });
 
   it('alle Ergebnisbereiche sind beschrieben', () => {

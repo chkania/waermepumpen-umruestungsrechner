@@ -670,10 +670,10 @@ describe('UI (Smoke-Test)', () => {
     expect(own.map((a) => a.getAttribute('href'))).toEqual(
       expect.arrayContaining(['./hilfe.html', './impressum.html', './datenschutz.html', './lizenz.html', './lizenzen-drittanbieter.html', './changelog.html']),
     );
-    // F32 exception: the derivation opens in a new tab and carries the current inputs
+    // F32: the derivation page opens in the same tab (like the other own pages) and carries the current inputs
     const derivation = own.filter((a) => a.getAttribute('href')!.startsWith('./rechenweg.html'));
     expect(derivation).toHaveLength(1);
-    expect(derivation[0].target).toBe('_blank');
+    expect(derivation[0].hasAttribute('target')).toBe(false);
     expect(derivation[0].getAttribute('href')).toMatch(/^\.\/rechenweg\.html#z=/);
     for (const a of own.filter((x) => !derivation.includes(x))) expect(a.hasAttribute('target'), a.getAttribute('href')!).toBe(false);
     const external = links.filter((a) => /^https:/.test(a.getAttribute('href')!));
