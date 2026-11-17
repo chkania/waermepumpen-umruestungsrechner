@@ -3,7 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { defineConfig, type Plugin } from 'vite';
 import { cspPlugin } from './csp';
-import { prerenderPlugin } from './prerender';
+import { fontPreloadPlugin, prerenderPlugin } from './prerender';
 import { version } from './package.json';
 
 /**
@@ -33,6 +33,7 @@ export default defineConfig({
   base: './',
   plugins: [
     prerenderPlugin(__dirname),
+    fontPreloadPlugin(),
     cspPlugin(),
     versionFilePlugin(),
   ],

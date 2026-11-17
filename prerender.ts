@@ -29,3 +29,25 @@ export function prerenderPlugin(root: string): Plugin {
     },
   };
 }
+
+/**
+ * Preloads the main text font (Inter, latin, variable) so that text is drawn in the final font without a swap (F33.10).
+ * The file name carries a content hash, so the build finds it in the bundle. Fonts are always requested with CORS.
+ */
+export function preloadFontHtml(html: string, files: string[]): string {
+  const font = files.find((f) => /^assets\/inter-latin-wght-normal-[^/]+\.woff2$/.test(f));
+  if (!font || !html.includes('</head>')) return html;
+  const tag = `    <link rel="preload" href="./${font}" as="font" type="font/woff2" crossorigin />\n  </head>`;
+  return html.replace('</head>', () => tag);
+}
+
+export function fontPreloadPlugin(): Plugin {
+  return {
+    name: 'wp-preload-font',
+    apply: 'build',
+    transformIndexHtml: {
+      order: 'post',
+      handler: (html, ctx) => preloadFontHtml(html, Object.keys(ctx.bundle ?? {})),
+    },
+  };
+}
