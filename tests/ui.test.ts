@@ -952,3 +952,31 @@ describe('F22 Hinweis auf veraltete Annahmen', () => {
     expect(root.querySelector('.notice-stale')).toBeNull();
   });
 });
+
+describe('F20.3 Dialoge öffnen oben, der Fokus liegt auf der Überschrift', () => {
+  beforeEach(() => {
+    store.clear();
+    history.replaceState(null, '', '/');
+  });
+
+  it('Einführung: Überschrift hat den Fokus, kein Button am Ende wird automatisch fokussiert', () => {
+    const { root } = mount();
+    root.querySelector<HTMLButtonElement>('#btn-intro')!.click();
+    const dlg = root.querySelector<HTMLDialogElement>('#intro')!;
+    expect(dlg.open).toBe(true);
+    expect(document.activeElement?.id).toBe('intro-title');
+    expect(dlg.querySelector('[autofocus]')).toBeNull();
+  });
+
+  it('Bestätigung vor dem Übernehmen einer Variante: Überschrift hat den Fokus', () => {
+    const { root } = mount();
+    root.querySelector<HTMLButtonElement>('#btn-variants')!.click();
+    root.querySelector<HTMLButtonElement>('#var-current')!.click();
+    root.querySelector<HTMLButtonElement>('[data-var-freeze="0"]')!.click();
+    root.querySelector<HTMLButtonElement>('[data-var-open="0"]')!.click();
+    const dlg = root.querySelector<HTMLDialogElement>('#privacy-confirm')!;
+    expect(dlg.open).toBe(true);
+    expect(document.activeElement?.id).toBe('privacy-title');
+    expect(dlg.querySelector('[autofocus]')).toBeNull();
+  });
+});

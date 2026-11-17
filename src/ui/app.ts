@@ -118,6 +118,22 @@ const CHART_TABS: [ChartId, string][] = [
   ['sensitivity', 'Einflussgrößen'],
 ];
 
+/**
+ * Opens a modal dialog with its heading focused and the content at the top. Without this the browser focuses the first
+ * control, which on small screens can be a button at the bottom of a long dialog, and scrolls down to it.
+ */
+function showDialog(dlg: HTMLDialogElement): void {
+  if (typeof dlg.showModal === 'function') dlg.showModal();
+  else dlg.setAttribute('open', '');
+  const title = dlg.querySelector<HTMLElement>('h2');
+  if (title) {
+    title.tabIndex = -1;
+    title.focus({ preventScroll: true });
+  }
+  dlg.scrollTop = 0;
+  dlg.querySelector<HTMLElement>('.intro-body')?.scrollTo?.(0, 0);
+}
+
 export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   const storage = env.storage === undefined ? safeStorage() : env.storage;
   const defaults = createDefaults(env.today ?? new Date());
@@ -412,8 +428,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     $<HTMLButtonElement>('#privacy-ok').textContent = t.ok;
     privacySkip.checked = false;
     privacyAction = action;
-    if (typeof privacyDlg.showModal === 'function') privacyDlg.showModal();
-    else privacyDlg.setAttribute('open', '');
+    showDialog(privacyDlg);
   };
   const closePrivacy = () => {
     privacyAction = null;
@@ -1008,8 +1023,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   const introOpener = $<HTMLButtonElement>('#btn-intro');
   const showIntro = () => {
     if (intro.open) return;
-    if (typeof intro.showModal === 'function') intro.showModal();
-    else intro.setAttribute('open', '');
+    showDialog(intro);
   };
   const markIntroSeen = () => {
     try {
@@ -1079,8 +1093,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     $<HTMLAnchorElement>('#rec-email').href = links.email;
     setRecStatus('');
     recFallback.hidden = true;
-    if (typeof recommend.showModal === 'function') recommend.showModal();
-    else recommend.setAttribute('open', '');
+    showDialog(recommend);
   });
   $<HTMLButtonElement>('#rec-other').addEventListener('click', async () => {
     const links = recommendLinks(location.href);
@@ -1106,8 +1119,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   // ---------- Support (F19.4) ----------
   const support = $<HTMLDialogElement>('#support');
   $<HTMLButtonElement>('#btn-support').addEventListener('click', () => {
-    if (typeof support.showModal === 'function') support.showModal();
-    else support.setAttribute('open', '');
+    showDialog(support);
   });
   support.addEventListener('click', (e) => {
     if (e.target === support) support.close();
@@ -1222,7 +1234,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   $<HTMLButtonElement>('#btn-variants').addEventListener('click', () => {
     setVarStatus('');
     renderVariants();
-    varDialog.showModal?.();
+    showDialog(varDialog);
   });
   varDialog.addEventListener('close', () => {
     varChart?.destroy();
@@ -1710,7 +1722,7 @@ function layout(): string {
       <h2 id="privacy-title"></h2>
       <p id="privacy-text"></p>
       <label class="privacy-skip"><input id="privacy-skip" type="checkbox"> Diesen Hinweis nicht mehr anzeigen</label>
-      <div class="intro-actions"><button id="privacy-cancel" type="button">Abbrechen</button><button id="privacy-ok" type="button" class="primary" autofocus></button></div>
+      <div class="intro-actions"><button id="privacy-cancel" type="button">Abbrechen</button><button id="privacy-ok" type="button" class="primary"></button></div>
     </form>
   </dialog>
   ${variantsHtml()}`;
@@ -1808,7 +1820,7 @@ function introHtml(): string {
       <p class="muted small">Gerechnet wird nur in Ihrem Browser. Die Ergebnisse sind eine Modellrechnung und ersetzen keine Energie-, Förder- oder Steuerberatung.</p>
       <div class="intro-actions">
         <a href="./hilfe.html">Ausführliche Anleitung in der Hilfe</a>
-        <button type="submit" value="close" class="primary" autofocus>Los geht’s</button>
+        <button type="submit" value="close" class="primary">Los geht’s</button>
       </div>
       <p class="muted small intro-again">Diese Einführung können Sie jederzeit über „Einführung“ oben wieder öffnen.</p>
     </form>
