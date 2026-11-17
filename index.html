@@ -23,15 +23,25 @@
       {
         "@context": "https://schema.org",
         "@type": "WebApplication",
-        "name": "Wärmepumpen-Investitionsrechner",
+        "name": "W\u00e4rmepumpen-Investitionsrechner",
         "url": "https://waermepumpen-investitionsrechner.de/",
-        "description": "Kostenloser Rechner für den Umstieg von Gas- oder Ölheizung auf eine Wärmepumpe: Gesamtkosten, KfW-Zuschuss, Steuerbonus, Kredit, CO₂-Preis, Amortisation und günstigster Umrüstzeitpunkt.",
+        "description": "Kostenloser Rechner f\u00fcr den Umstieg von Gas- oder \u00d6lheizung auf eine W\u00e4rmepumpe: Gesamtkosten, KfW-Zuschuss, Steuerbonus, Kredit, CO\u2082-Preis, Amortisation und g\u00fcnstigster Umr\u00fcstzeitpunkt.",
         "applicationCategory": "FinanceApplication",
-        "operatingSystem": "Alle (läuft im Browser)",
+        "operatingSystem": "Alle (l\u00e4uft im Browser)",
         "inLanguage": "de",
         "isAccessibleForFree": true,
-        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
-        "author": { "@type": "Person", "name": "Christoph Kania", "sameAs": ["https://github.com/chkania"] },
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "EUR"
+        },
+        "author": {
+          "@type": "Person",
+          "name": "Christoph Kania",
+          "sameAs": [
+            "https://github.com/chkania"
+          ]
+        },
         "image": "https://waermepumpen-investitionsrechner.de/og-image.png"
       }
     </script>
@@ -44,17 +54,17 @@
     <div id="app">
       <main class="static-intro">
         <header class="static-head">
-          <img class="static-logo" src="./favicon.svg" width="56" height="56" alt="Logo: Haus mit einer Kurve, die von Gas oder Öl zur Wärmepumpe ansteigt" />
+          <img class="static-logo" src="./favicon.svg" width="56" height="56" alt="Logo: Haus mit einer Kurve, die von Gas oder Öl zur Wärmepumpe ansteigt" title="Wärmepumpen-Investitionsrechner" />
           <h1>Wärmepumpen-Investitionsrechner</h1>
         </header>
-        <p class="static-lead">Lohnt sich der Umstieg von der Gas- oder Ölheizung auf eine Wärmepumpe? Der kostenlose Rechner vergleicht die Gesamtkosten über 20 Jahre oder einen selbst gewählten Zeitraum – Monat für Monat, mit Energiepreisen, Förderung, Finanzierung und CO₂-Preis.</p>
+        <p class="static-lead">Lohnt sich der Umstieg von Gas oder Öl auf eine Wärmepumpe? Der kostenlose Rechner vergleicht die Gesamtkosten. Er rechnet Monat für Monat über 20 Jahre oder einen selbst gewählten Zeitraum. Dabei berücksichtigt er Energiepreise, Förderung, Finanzierung und CO₂-Preis.</p>
         <noscript><p class="static-note"><strong>Bitte aktivieren Sie JavaScript.</strong> Der Rechner läuft vollständig in Ihrem Browser; Ihre Eingaben werden nicht an einen Server übertragen.</p></noscript>
         <section aria-labelledby="static-answers">
           <h2 id="static-answers">Was der Rechner beantwortet</h2>
-          <p>Der Rechner rechnet jeden Monat des Betrachtungszeitraums durch. Standardmäßig sind es 20 Jahre, den Zeitraum können Sie ändern. Für jedes Szenario addiert er alle Ausgaben und Einnahmen. Zinsen auf Kredite und ein Opportunitätszins, der berücksichtigt, dass Geld anderswo Rendite bringen könnte, fließen ein.</p>
+          <p>Der Rechner rechnet jeden Monat des Betrachtungszeitraums durch. Standardmäßig sind es 20 Jahre. Sie können den Zeitraum ändern. Für jedes Szenario addiert er alle Ausgaben und Einnahmen. Zinsen auf Kredite fließen ein. Auch ein Opportunitätszins fließt ein. Er berücksichtigt, dass Geld anderswo Rendite bringen könnte.</p>
           <ul>
-            <li><strong>Gesamtkosten:</strong> weiter mit Gas oder Öl, Wärmepumpe mit KfW-Zuschuss oder Wärmepumpe mit Steuerbonus – und welcher Weg am günstigsten ist.</li>
-            <li><strong>Förderung:</strong> KfW-Zuschuss (Programm 458) mit Grundförderung, Klimageschwindigkeitsbonus und Einkommensbonus, Ergänzungskredit 358/359 und Steuerbonus nach § 35c EStG. Die Erklärung steht <a href="./hilfe.html#kfw-zuschuss-steuerbonus-finanzierung" title="Benutzerhandbuch: KfW-Zuschuss, Steuerbonus, Finanzierung">im Benutzerhandbuch</a>.</li>
+            <li><strong>Gesamtkosten:</strong> Sie vergleichen drei Wege. Das sind die bisherige Heizung, die Wärmepumpe mit KfW-Zuschuss und die Wärmepumpe mit Steuerbonus. Der Rechner zeigt, welcher Weg am günstigsten ist.</li>
+            <li><strong>Förderung:</strong> Der Rechner kennt den KfW-Zuschuss (Programm 458) mit Grundförderung, Klimageschwindigkeitsbonus und Einkommensbonus. Dazu kommen der Ergänzungskredit 358/359 und der Steuerbonus nach § 35c EStG. Die Erklärung steht <a href="./hilfe.html#kfw-zuschuss-steuerbonus-finanzierung" title="Benutzerhandbuch: KfW-Zuschuss, Steuerbonus, Finanzierung">im Benutzerhandbuch</a>.</li>
             <li><strong>Energiepreise:</strong> steigender CO₂-Preis, Gas-, Öl- und Strompreise, Wärmepumpentarif und eigene PV-Anlage. <a href="./hilfe.html#energiepreise" title="Benutzerhandbuch: Energiepreise">Alle Preisfelder sind dort beschrieben.</a></li>
             <li><strong>Amortisation:</strong> ab wann sich die Wärmepumpe rechnet und wie viel CO₂ sie spart.</li>
             <li><strong>Umrüstzeitpunkt:</strong> jetzt umsteigen oder später – der Vergleich zeigt, welcher Zeitpunkt am wenigsten kostet. <a href="./hilfe.html#wann-umruesten" title="Benutzerhandbuch: Wann umrüsten?">So lesen Sie den Vergleich.</a></li>
@@ -63,8 +73,8 @@
         <section aria-labelledby="static-how">
           <h2 id="static-how">So funktioniert es</h2>
           <ol>
-            <li><strong>Eingaben machen:</strong> Sie geben Ihren bisherigen Verbrauch, das Angebot für die Wärmepumpe und Ihre Finanzierung ein. Alle anderen Annahmen sind mit Quellen vorbelegt und lassen sich ändern.</li>
-            <li><strong>Ergebnisse ansehen:</strong> Kennzahlen, Diagramme und Jahresübersicht erscheinen sofort. <a href="./hilfe.html#ergebnisse" title="Benutzerhandbuch: Ergebnisse">Was die Kennzahlen bedeuten</a>, steht im Handbuch.</li>
+            <li><strong>Eingaben machen:</strong> Sie geben Ihren bisherigen Verbrauch, das Angebot für die Wärmepumpe und Ihre Finanzierung ein. Alle anderen Annahmen sind vorbelegt. Jede hat eine Quelle und lässt sich ändern.</li>
+            <li><strong>Ergebnisse ansehen:</strong> Kennzahlen, Diagramme und Jahresübersicht erscheinen sofort. Sie aktualisieren sich bei jeder Änderung. <a href="./hilfe.html#ergebnisse" title="Benutzerhandbuch: Ergebnisse">Was die Kennzahlen bedeuten</a>, steht im Handbuch.</li>
             <li><strong>Teilen oder drucken:</strong> Sie können das Ergebnis als <a href="./hilfe.html#bericht-drucken" title="Benutzerhandbuch: Bericht drucken">Bericht</a> drucken, als Datei speichern oder <a href="./hilfe.html#link-mit-werten-teilen" title="Benutzerhandbuch: Link mit Werten teilen">per Link teilen</a>. Mehrere Angebote vergleichen Sie unter <a href="./hilfe.html#varianten-vergleichen" title="Benutzerhandbuch: Varianten vergleichen">Varianten vergleichen</a>.</li>
             <li><strong>Nachrechnen:</strong> Wie jede Zahl zustande kommt, zeigt der <a href="./rechenweg.html" title="Rechenweg mit allen Zwischenwerten">Rechenweg</a>.</li>
           </ol>
@@ -82,9 +92,9 @@
         <section aria-labelledby="static-need">
           <h2 id="static-need">Was Sie brauchen</h2>
           <h3>Für eine erste Rechnung</h3>
-          <p>Ihr Gas- oder Ölverbrauch aus der letzten Jahresabrechnung und ein ungefährer Preis für die Wärmepumpe genügen.</p>
+          <p>Dafür genügen Ihr Gas- oder Ölverbrauch aus der letzten Jahresabrechnung. Ein ungefährer Preis für die Wärmepumpe reicht ebenfalls.</p>
           <h3>Für ein genaues Ergebnis</h3>
-          <p>Ein konkretes Angebot, Ihr Stromtarif und die Zinsen Ihrer Bank machen das Ergebnis genauer. Mehrere Angebote oder Umrüstzeitpunkte lassen sich als Varianten nebeneinander vergleichen.</p>
+          <p>Ein konkretes Angebot, Ihr Stromtarif und die Zinsen Ihrer Bank machen das Ergebnis genauer. Mehrere Angebote lassen sich als Varianten nebeneinander vergleichen.</p>
           <p>Der Rechner ist ein privates, werbefreies Hobbyprojekt. Alle Berechnungen laufen in Ihrem Browser. Er ersetzt keine Energie-, Förder- oder Steuerberatung.</p>
         </section>
         <footer class="static-foot">

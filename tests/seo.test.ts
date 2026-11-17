@@ -190,3 +190,27 @@ describe('F33.8 llms.txt', () => {
     expect(links.filter((l) => l.startsWith(BASE)).length).toBeGreaterThanOrEqual(7);
   });
 });
+
+describe('F33.10 Schrift vorladen, Bild mit Titel, JSON-LD ohne Sonderzeichen', () => {
+  it('preloadFontHtml setzt den Link vor </head>, nur wenn die Schrift im Build liegt', async () => {
+    const { preloadFontHtml } = await import('../prerender');
+    const head = '<html><head><title>x</title></head><body></body></html>';
+    const out = preloadFontHtml(head, ['assets/main.js', 'assets/inter-latin-wght-normal-Dx4kXJAl.woff2']);
+    expect(out).toContain('<link rel="preload" href="./assets/inter-latin-wght-normal-Dx4kXJAl.woff2" as="font" type="font/woff2" crossorigin />');
+    expect(out.indexOf('rel="preload"')).toBeLessThan(out.indexOf('</head>'));
+    expect(preloadFontHtml(head, ['assets/main.js'])).toBe(head);
+  });
+
+  it('Bild der Einführung hat Titel und Alternativtext; JSON-LD nur mit ASCII-Zeichen', () => {
+    const index = read('index.html');
+    expect(index).toMatch(/<img class="static-logo"[^>]*title="Wärmepumpen-Investitionsrechner"/);
+    const ld = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(index)![1];
+    expect(/[^\x00-\x7F]/.test(ld)).toBe(false);
+    expect(JSON.parse(ld).description).toContain('für');
+  });
+
+  it('Cache-Regel für theme-init.js im .htaccess', () => {
+    expect(read('public/.htaccess')).toContain('"^theme-init\\.js$"');
+    expect(read('public/.htaccess')).toContain('Header set Cache-Control "public, max-age=86400"');
+  });
+});
