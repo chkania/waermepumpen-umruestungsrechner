@@ -361,6 +361,29 @@ Unter der Tabelle erklärt **„Warum ist … am günstigsten?“**, wodurch der
 
 Tabelle je Jahr mit allen Kostenarten (Energie, Grundkosten, Wartung, Investition, Kredit, Zinsen, Tilgung, Vorfälligkeitsentschädigung, Zuschuss, Steuerbonus, Restwert), Summe und kumulierter Summe. Über die Auswahl oben rechts wechseln Sie das Szenario. Die Spalte **Ereignisse** nennt wichtige Ereignisse des Jahres.
 
+## Rechenweg
+
+Der [Rechenweg](./rechenweg.html) zeigt auf einer eigenen Seite, wie die Zahlen des Rechners zustande kommen – mit allen Zwischenwerten und den eingesetzten Eingaben. Sie öffnen ihn über den Link **Rechenweg** im Seitenfuß des Rechners; er öffnet sich in einem neuen Tab, sodass Sie Rechner und Rechenweg nebeneinander legen können. Der Rechenweg rechnet nichts selbst nach: Er zeigt die Werte aus derselben Rechnung wie der Rechner und erklärt sie.
+
+- **Ergebnis im Überblick:** Gesamtkosten der drei Szenarien, Summe ohne Verzinsung, CO₂ und Amortisation; wie der Opportunitätszins aus den Monatswerten die Gesamtkosten macht.
+- **Energiebedarf:** vom Verbrauch über Kochen, Warmwasser und Nutzungsgrad zur Nutzwärme, daraus der Strom der Wärmepumpe über die JAZ und der Anteil aus der PV-Anlage.
+- **Energiepreise:** wie der CO₂-Anteil aus dem heutigen Preis herausgerechnet und je Jahr neu aufgeschlagen wird, mit einer Preistabelle je Jahr.
+- **Investition, KfW-Zuschuss, Steuerbonus, Finanzierung:** förderfähige Kosten, Fördersätze und Höchstbetrag, die drei Jahresraten des Steuerbonus, die Kredite mit Zinsen, Zinsbindung und Sondertilgungen.
+- **Kosten je Jahr und Monat:** je Szenario eine Tabelle mit allen Kostenarten. Ein Klick auf die Jahreszahl klappt die zwölf Monate auf. **Monatswerte als CSV herunterladen** speichert alle Monate zum Nachrechnen in einer Tabellenkalkulation (Semikolon getrennt, Dezimalkomma).
+- **Amortisation, CO₂-Bilanz, Restwert** und die **Hinweise der Berechnung**.
+
+Grundlage sind die Eingaben im Rechner: Über den Link im Seitenfuß kommen sie im Link mit. Öffnen Sie den Rechenweg über diese Hilfe, nimmt er die Eingaben, die der Rechner in Ihrem Browser gespeichert hat (nach Änderungen im Rechner die Seite neu laden).
+
+### Rechenweg mit eigenen Werten teilen
+
+Wenn Ihnen ein Ergebnis falsch vorkommt, hilft der Rechenweg mit Ihren Werten am meisten, den Fehler zu finden – etwa in einer [Fehlermeldung](https://github.com/chkania/wpir/issues/new?template=bug_report.yml):
+
+1. Im Rechner im Seitenfuß **Rechenweg** öffnen.
+2. Oben auf der Seite **Link zu diesem Rechenweg kopieren** wählen.
+3. Den Link in die Fehlermeldung oder Nachricht einfügen und dazuschreiben, welcher Wert Ihnen unplausibel erscheint.
+
+> **Achtung, persönliche Daten:** Der Link enthält alle Ihre Eingaben, auch persönliche Angaben wie das zu versteuernde Haushaltseinkommen, die Einkommensteuer, den Energieverbrauch, die Bezeichnung und die Bemerkungen des Szenarios. Jeder, der den Link erhält, sieht diese Werte. Fehlermeldungen auf GitHub sind **öffentlich**. Ersetzen Sie persönliche Angaben, die für den Fehler keine Rolle spielen, vorher im Rechner durch ungefähre Werte – zum Beispiel ein gerundetes Einkommen – und öffnen Sie den Rechenweg danach erneut.
+
 ## Tipps
 
 - **Angebote vergleichen:** Für jedes Angebot exportieren und später per Import vergleichen.
@@ -396,7 +419,7 @@ Wenn Ihnen ein Fehler oder eine veraltete Annahme auffällt, freue ich mich übe
 
 Der Rechner ist ein offenes Projekt auf GitHub: [github.com/chkania/wpir](https://github.com/chkania/wpir). Förderprogramme, Energiepreise und Steuerregeln ändern sich laufend – damit die Ergebnisse verlässlich bleiben, ist deine Hilfe willkommen, auch ohne Programmierkenntnisse:
 
-- **Fehler oder veraltete Werte melden:** Nutze auf GitHub das Formular [Fehler oder veralteter Wert](https://github.com/chkania/wpir/issues/new?template=bug_report.yml) – am besten mit Quelle, z. B. eine geänderte KfW-Regel, ein neuer Preis oder ein Rechenergebnis, das dir unplausibel vorkommt. Ein exportierter Datensatz oder ein Link hilft beim Nachvollziehen (prüf vorher, ob er persönliche Angaben enthält).
+- **Fehler oder veraltete Werte melden:** Nutze auf GitHub das Formular [Fehler oder veralteter Wert](https://github.com/chkania/wpir/issues/new?template=bug_report.yml) – am besten mit Quelle, z. B. eine geänderte KfW-Regel, ein neuer Preis oder ein Rechenergebnis, das dir unplausibel vorkommt. Ein Link zum [Rechenweg mit deinen Werten](#rechenweg-mit-eigenen-werten-teilen) hilft beim Nachvollziehen (prüf vorher, ob er persönliche Angaben enthält – Fehlermeldungen sind öffentlich).
 - **Ideen vorschlagen:** Welche Frage beantwortet der Rechner noch nicht? Welche Erklärung war für dich unklar? Nutze dafür das Formular [Idee oder Frage](https://github.com/chkania/wpir/issues/new?template=feature_request.yml).
 - **Selbst mitentwickeln:** Rechenlogik, Texte, Tests oder Barrierefreiheit – wie Änderungen ablaufen, beschreibt [CONTRIBUTING.md](https://github.com/chkania/wpir/blob/main/CONTRIBUTING.md).
 

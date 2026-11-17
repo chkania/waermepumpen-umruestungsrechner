@@ -38,6 +38,7 @@ import { logoSvg } from '../logo';
 import { BUG_REPORT_URL, BUY_ME_A_COFFEE_URL, CONTRIBUTING_URL, DONATION_ACCOUNT, FEATURE_REQUEST_URL, PAYPAL_URL, REPO_URL } from '../project';
 import { compactIban, epcPayload, formatIban } from './donate';
 import { qrSvg } from './qr';
+import { DERIVATION_PAGE, derivationLink } from './derivation-link';
 
 export const STORAGE_KEY = 'wp-investitionsrechner:v1';
 /** Former design choice (modern/classic, F14); only the modern design remains, the stored value is removed. */
@@ -569,9 +570,17 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       /* Speicher nicht verfügbar */
     }
     if (/^#[sz]=/.test(location.hash)) history.replaceState(null, '', encodeHash(defaults, inputs));
+    updateDerivationLink();
+  }
+
+  /** The footer link to the derivation page (F32) carries the current inputs (in the hash, never sent to the server). */
+  function updateDerivationLink(): void {
+    const a = root.querySelector<HTMLAnchorElement>('#link-derivation');
+    if (a) a.href = derivationLink(DERIVATION_PAGE, defaults, inputs);
   }
 
   function recalc(): void {
+    updateDerivationLink();
     let run: RunResult;
     let cmp: InstallComparison;
     let events: KeyEvents;
@@ -1689,7 +1698,7 @@ function layout(): string {
         <p class="muted small">Quellcode, Fragen und Vorschläge: <a href="${safeHref(REPO_URL)}" target="_blank" rel="noopener">github.com/chkania/wpir</a> – schön, wenn du dabei bist!</p>
       </aside>
       <p class="disclaimer">Keine Finanz-, Steuer- oder Förderberatung. Alle Angaben ohne Gewähr; Förderbedingungen Stand ${FUNDING_SOURCE_DATE.split('-').reverse().join('.')} – bitte vor Antragstellung bei KfW, Energieberatung und Steuerberatung prüfen.</p>
-      <p class="disclaimer license"><a href="./changelog.html">Version ${APP_VERSION}</a> · © 2026 Christoph Kania · Lizenz: <a href="./lizenz.html">PolyForm Noncommercial 1.0.0</a> – kostenfreie Nutzung für nicht-kommerzielle Zwecke; kommerzielle Nutzung nur nach Absprache · <a href="./lizenzen-drittanbieter.html">Lizenzen von Drittanbietern</a> · <a href="./impressum.html">Impressum</a> · <a href="./datenschutz.html">Datenschutz</a> · <a href="${safeHref(REPO_URL)}" target="_blank" rel="noopener">Quellcode auf GitHub</a></p>
+      <p class="disclaimer license"><a href="./changelog.html">Version ${APP_VERSION}</a> · © 2026 Christoph Kania · Lizenz: <a href="./lizenz.html">PolyForm Noncommercial 1.0.0</a> – kostenfreie Nutzung für nicht-kommerzielle Zwecke; kommerzielle Nutzung nur nach Absprache · <a href="./lizenzen-drittanbieter.html">Lizenzen von Drittanbietern</a> · <a href="./impressum.html">Impressum</a> · <a href="./datenschutz.html">Datenschutz</a> · <a id="link-derivation" href="${DERIVATION_PAGE}" target="_blank" rel="noopener" title="Detaillierte Berechnung hinter den Zahlen, in neuem Tab">Rechenweg</a> · <a href="${safeHref(REPO_URL)}" target="_blank" rel="noopener">Quellcode auf GitHub</a></p>
     </section>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
