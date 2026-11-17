@@ -103,6 +103,7 @@ jobs:
             ""|"/"|"~"|"~/"|"."|"./"|*..*) fail "DEPLOY_PATH '$TARGET' ist leer oder zu allgemein – bitte ein eigenes Zielverzeichnis angeben." ;;
           esac
           [ -f dist/index.html ] || fail "Build enthält keine index.html."
+          [ -f dist/.htaccess ] || fail "Build enthält keine .htaccess (Weiterleitung und Header aus public/.htaccess).
 
       - name: SSH einrichten
         env:
@@ -118,10 +119,11 @@ jobs:
       - name: Hochladen (rsync über SSH)
         run: |
           ssh_cmd="ssh -i ~/.ssh/deploy_key -p ${SSH_PORT} -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts"
-          # --delay-updates/--delete-after: new files are switched in at the end, old ones removed last
+          # --delay-updates/--delete-after: new files are switched in at the end, old ones removed last.
+          # .htaccess comes from public/ and is deployed with the release (F33.6); .well-known/ stays server-managed.
           rsync -rlz --checksum --delete-after --delay-updates \
             --chmod=D755,F644 \
-            --exclude='.well-known/' --exclude='.htaccess' \
+            --exclude='.well-known/' \
             -e "$ssh_cmd" \
             dist/ "${SSH_USER}@${SSH_HOST}:${TARGET%/}/"
 

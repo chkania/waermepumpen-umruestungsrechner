@@ -68,7 +68,7 @@ Danach `deploy_key`, `deploy_key.pub` und `host_key.txt` lokal löschen. Geht de
 ### 4. Zielverzeichnis
 
 - `DEPLOY_PATH` muss ein **eigenes Verzeichnis** nur für den Rechner sein: Sein Inhalt wird bei jedem Deployment durch `dist/` ersetzt (`rsync --delete`). Leere oder zu allgemeine Pfade (`/`, `~`, `.`, Pfade mit `..`) lehnt der Workflow ab.
-- Ausgenommen sind `.htaccess` und `.well-known/`. Sie werden weder überschrieben noch gelöscht und können auf dem Server gepflegt werden, z. B. für die Weiterleitung auf die Hauptdomain (siehe unten) oder die Zertifikatsprüfung.
+- Die `.htaccess` des Rechners kommt aus dem Repository (`public/.htaccess`) und wird mit jedem Deployment hochgeladen (F33.6). Änderungen daran also im Repository machen, nicht auf dem Server – Änderungen auf dem Server werden überschrieben. Ausgenommen ist nur `.well-known/`: Sie wird weder überschrieben noch gelöscht und kann auf dem Server gepflegt werden, z. B. für die Zertifikatsprüfung.
 - Der Build nutzt relative Pfade (`base: './'`), funktioniert also auch in einem Unterverzeichnis.
 - Auf dem Webspace muss `rsync` verfügbar sein (bei den meisten Hostern mit SSH-Zugang der Fall).
 
@@ -141,7 +141,7 @@ RewriteCond %{HTTP_HOST} !^waermepumpen-investitionsrechner\.de$ [NC]
 RewriteRule ^ https://waermepumpen-investitionsrechner.de%{REQUEST_URI} [R=301,L,NE]
 ```
 
-- **Ordner des Rechners** (`DEPLOY_PATH`): Hier leitet die Regel nur die Aufrufe über `www.…` weiter; die Hauptdomain wird normal ausgeliefert. Gibt es dort schon eine `.htaccess`, die Zeilen an den Anfang setzen. Das Deployment lässt `.htaccess` unverändert.
+- **Ordner des Rechners** (`DEPLOY_PATH`): Hier steht die Regel bereits in `public/.htaccess` im Repository und wird mit dem Deployment hochgeladen. Eine Anpassung nur dort vornehmen.
 - **Ordner der übrigen Domains** (z. B. `~/www/waermepumpen-umruestungsrechner.de`): Hier leitet die Regel jeden Aufruf weiter. Weitere Dateien braucht der Ordner nicht.
 - **HTTPS** ist nicht Teil der Regel: Uberspace leitet `http://` selbst auf `https://` um. Eine Prüfung von `%{HTTPS}` würde hinter dem TLS-Proxy des Hosters sogar zu einer Endlosschleife führen.
 
@@ -155,7 +155,7 @@ Erwartet wird jeweils `HTTP/… 301` und `location: https://waermepumpen-investi
 
 ### Zwischenspeichern im Browser (Cache)
 
-Ohne eigene Angaben raten Browser, wie lange sie Dateien zwischenspeichern. Nach einem Deployment sieht man dann unter Umständen noch eine Weile die alte Version. Der Build legt JavaScript, CSS und Schriften unter `assets/` mit einem Inhalts-Hash im Dateinamen ab (z. B. `main-Cj4rdn9b.js`). Ändert sich eine Datei, ändert sich also auch ihr Name. Daraus ergeben sich diese Regeln (eingerichtet am 15.11.2026, in der `.htaccess` im Ordner des Rechners unter der Weiterleitung):
+Ohne eigene Angaben raten Browser, wie lange sie Dateien zwischenspeichern. Nach einem Deployment sieht man dann unter Umständen noch eine Weile die alte Version. Der Build legt JavaScript, CSS und Schriften unter `assets/` mit einem Inhalts-Hash im Dateinamen ab (z. B. `main-Cj4rdn9b.js`). Ändert sich eine Datei, ändert sich also auch ihr Name. Daraus ergeben sich diese Regeln (eingerichtet am 15.11.2026; seit F33.6 in `public/.htaccess` im Repository):
 
 ```apache
 <IfModule mod_headers.c>
@@ -190,7 +190,7 @@ Erwartet: `cache-control: no-cache`. Für eine Datei unter `assets/` erwartet: `
 
 ### Sicherheits-Header
 
-Die Content-Security-Policy steht im HTML (`<meta>`-Tag, erzeugt aus `csp.ts`). Einige Schutzmaßnahmen wirken aber nur als HTTP-Header. Diese Header sind gesetzt (eingerichtet am 15.11.2026, ebenfalls in der `.htaccess` im Ordner des Rechners):
+Die Content-Security-Policy steht im HTML (`<meta>`-Tag, erzeugt aus `csp.ts`). Einige Schutzmaßnahmen wirken aber nur als HTTP-Header. Diese Header sind gesetzt (eingerichtet am 15.11.2026; seit F33.6 in `public/.htaccess` im Repository):
 
 ```apache
 <IfModule mod_headers.c>

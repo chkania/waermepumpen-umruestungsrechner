@@ -31,22 +31,11 @@
         "inLanguage": "de",
         "isAccessibleForFree": true,
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
-        "author": { "@type": "Person", "name": "Christoph Kania" },
+        "author": { "@type": "Person", "name": "Christoph Kania", "sameAs": ["https://github.com/chkania"] },
         "image": "https://waermepumpen-investitionsrechner.de/og-image.png"
       }
     </script>
-    <script>
-      // Hell/Dunkel vor dem ersten Zeichnen setzen (kein Aufblitzen)
-      (function () {
-        var t = null;
-        try {
-          t = localStorage.getItem('wp-investitionsrechner:theme');
-        } catch (e) {}
-        var html = document.documentElement;
-        var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        html.dataset.theme = t === 'light' || t === 'dark' ? t : dark ? 'dark' : 'light';
-      })();
-    </script>
+    <script src="./theme-init.js"></script>
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
   </head>
@@ -54,33 +43,63 @@
     <!-- Static content for search engines and visitors without JavaScript (F33.1); the calculator replaces it on start -->
     <div id="app">
       <main class="static-intro">
-        <h1>Wärmepumpen-Investitionsrechner</h1>
+        <header class="static-head">
+          <img class="static-logo" src="./favicon.svg" width="56" height="56" alt="Logo: Haus mit einer Kurve, die von Gas oder Öl zur Wärmepumpe ansteigt" />
+          <h1>Wärmepumpen-Investitionsrechner</h1>
+        </header>
         <p class="static-lead">Lohnt sich der Umstieg von der Gas- oder Ölheizung auf eine Wärmepumpe? Der kostenlose Rechner vergleicht die Gesamtkosten über 20 Jahre oder einen selbst gewählten Zeitraum – Monat für Monat, mit Energiepreisen, Förderung, Finanzierung und CO₂-Preis.</p>
         <noscript><p class="static-note"><strong>Bitte aktivieren Sie JavaScript.</strong> Der Rechner läuft vollständig in Ihrem Browser; Ihre Eingaben werden nicht an einen Server übertragen.</p></noscript>
-        <h2>Was der Rechner beantwortet</h2>
-        <ul>
-          <li><strong>Gesamtkosten:</strong> weiter mit Gas oder Öl, Wärmepumpe mit KfW-Zuschuss oder Wärmepumpe mit Steuerbonus – und welcher Weg am günstigsten ist.</li>
-          <li><strong>Förderung:</strong> KfW-Zuschuss (Programm 458) mit Grundförderung, Klimageschwindigkeitsbonus und Einkommensbonus, Ergänzungskredit 358/359 und Steuerbonus nach § 35c EStG.</li>
-          <li><strong>Energiepreise:</strong> steigender CO₂-Preis, Gas-, Öl- und Strompreise, Wärmepumpentarif und eigene PV-Anlage.</li>
-          <li><strong>Amortisation:</strong> ab wann sich die Wärmepumpe rechnet und wie viel CO₂ sie spart.</li>
-          <li><strong>Umrüstzeitpunkt:</strong> jetzt umsteigen oder später – der Vergleich zeigt, welcher Zeitpunkt am wenigsten kostet.</li>
-        </ul>
-        <h2>So funktioniert es</h2>
-        <p>Sie geben Ihren bisherigen Verbrauch, das Angebot für die Wärmepumpe und Ihre Finanzierung ein. Alle anderen Annahmen sind mit Quellen vorbelegt und lassen sich ändern. Die Ergebnisse erscheinen sofort als Kennzahlen, Diagramme und Jahresübersicht. Sie können sie als Bericht drucken, als Datei speichern oder per Link teilen. Wie jede Zahl zustande kommt, zeigt der Rechenweg.</p>
-        <h2>Was Sie brauchen</h2>
-        <p>Für eine erste Rechnung genügen Ihr Gas- oder Ölverbrauch aus der letzten Jahresabrechnung und ein ungefährer Preis für die Wärmepumpe. Mit einem konkreten Angebot, Ihrem Stromtarif und den Zinsen Ihrer Bank wird das Ergebnis genauer. Mehrere Angebote oder Umrüstzeitpunkte lassen sich als Varianten nebeneinander vergleichen.</p>
-        <p>Der Rechner ist ein privates, werbefreies Hobbyprojekt. Alle Berechnungen laufen in Ihrem Browser. Er ersetzt keine Energie-, Förder- oder Steuerberatung.</p>
-        <nav aria-label="Weitere Seiten">
-          <ul class="static-links">
-            <li><a href="./hilfe.html">Hilfe und Benutzerhandbuch</a></li>
-            <li><a href="./rechenweg.html">Rechenweg</a></li>
-            <li><a href="./changelog.html">Änderungen</a></li>
-            <li><a href="./impressum.html">Impressum</a></li>
-            <li><a href="./datenschutz.html">Datenschutz</a></li>
-            <li><a href="./lizenz.html">Lizenz</a></li>
-            <li><a href="https://github.com/chkania/wpir">Quellcode auf GitHub</a></li>
+        <section aria-labelledby="static-answers">
+          <h2 id="static-answers">Was der Rechner beantwortet</h2>
+          <p>Der Rechner rechnet jeden Monat des Betrachtungszeitraums durch. Standardmäßig sind es 20 Jahre, den Zeitraum können Sie ändern. Für jedes Szenario addiert er alle Ausgaben und Einnahmen. Zinsen auf Kredite und ein Opportunitätszins, der berücksichtigt, dass Geld anderswo Rendite bringen könnte, fließen ein.</p>
+          <ul>
+            <li><strong>Gesamtkosten:</strong> weiter mit Gas oder Öl, Wärmepumpe mit KfW-Zuschuss oder Wärmepumpe mit Steuerbonus – und welcher Weg am günstigsten ist.</li>
+            <li><strong>Förderung:</strong> KfW-Zuschuss (Programm 458) mit Grundförderung, Klimageschwindigkeitsbonus und Einkommensbonus, Ergänzungskredit 358/359 und Steuerbonus nach § 35c EStG. Die Erklärung steht <a href="./hilfe.html#kfw-zuschuss-steuerbonus-finanzierung" title="Benutzerhandbuch: KfW-Zuschuss, Steuerbonus, Finanzierung">im Benutzerhandbuch</a>.</li>
+            <li><strong>Energiepreise:</strong> steigender CO₂-Preis, Gas-, Öl- und Strompreise, Wärmepumpentarif und eigene PV-Anlage. <a href="./hilfe.html#energiepreise" title="Benutzerhandbuch: Energiepreise">Alle Preisfelder sind dort beschrieben.</a></li>
+            <li><strong>Amortisation:</strong> ab wann sich die Wärmepumpe rechnet und wie viel CO₂ sie spart.</li>
+            <li><strong>Umrüstzeitpunkt:</strong> jetzt umsteigen oder später – der Vergleich zeigt, welcher Zeitpunkt am wenigsten kostet. <a href="./hilfe.html#wann-umruesten" title="Benutzerhandbuch: Wann umrüsten?">So lesen Sie den Vergleich.</a></li>
           </ul>
-        </nav>
+        </section>
+        <section aria-labelledby="static-how">
+          <h2 id="static-how">So funktioniert es</h2>
+          <ol>
+            <li><strong>Eingaben machen:</strong> Sie geben Ihren bisherigen Verbrauch, das Angebot für die Wärmepumpe und Ihre Finanzierung ein. Alle anderen Annahmen sind mit Quellen vorbelegt und lassen sich ändern.</li>
+            <li><strong>Ergebnisse ansehen:</strong> Kennzahlen, Diagramme und Jahresübersicht erscheinen sofort. <a href="./hilfe.html#ergebnisse" title="Benutzerhandbuch: Ergebnisse">Was die Kennzahlen bedeuten</a>, steht im Handbuch.</li>
+            <li><strong>Teilen oder drucken:</strong> Sie können das Ergebnis als <a href="./hilfe.html#bericht-drucken" title="Benutzerhandbuch: Bericht drucken">Bericht</a> drucken, als Datei speichern oder <a href="./hilfe.html#link-mit-werten-teilen" title="Benutzerhandbuch: Link mit Werten teilen">per Link teilen</a>. Mehrere Angebote vergleichen Sie unter <a href="./hilfe.html#varianten-vergleichen" title="Benutzerhandbuch: Varianten vergleichen">Varianten vergleichen</a>.</li>
+            <li><strong>Nachrechnen:</strong> Wie jede Zahl zustande kommt, zeigt der <a href="./rechenweg.html" title="Rechenweg mit allen Zwischenwerten">Rechenweg</a>.</li>
+          </ol>
+        </section>
+        <section aria-labelledby="static-rules">
+          <h2 id="static-rules">Wichtige Regeln im Überblick</h2>
+          <ul>
+            <li><strong>KfW-Zuschuss:</strong> Das Programm 458 zahlt einen Prozentsatz der förderfähigen Kosten. Der Satz hängt vom Antragsmonat ab, und der Antrag muss vor dem Auftrag gestellt werden. Die Bedingungen beschreibt das <a href="https://www.kfw.de/PDF/Download-Center/F%C3%B6rderprogramme-(Inlandsf%C3%B6rderung)/PDF-Dokumente/6000005131_M_458.pdf" target="_blank" rel="noopener" title="KfW-Merkblatt zu Programm 458 (öffnet in neuem Tab)">KfW-Merkblatt zu Programm 458</a>.</li>
+            <li><strong>Steuerbonus:</strong> Nach <a href="https://www.gesetze-im-internet.de/estg/__35c.html" target="_blank" rel="noopener" title="§ 35c Einkommensteuergesetz (öffnet in neuem Tab)">§ 35c EStG</a> mindert die Maßnahme die Einkommensteuer über drei Jahre. Das gilt nur für selbst genutztes Wohneigentum. Für dieselben Kosten lässt sich in der Regel nur eine der beiden Förderungen nutzen.</li>
+            <li><strong>CO₂-Preis:</strong> Der Preis steigt nach einem Pfad, den Sie im Rechner anpassen können. Er verteuert Gas und Heizöl und damit die Altheizung.</li>
+            <li><strong>Strommix:</strong> Die Wärmepumpe braucht Strom, der aus dem Netz CO₂-Emissionen verursacht. Laut <a href="https://www.umweltbundesamt.de/themen/co2-emissionen-pro-kilowattstunde-strom-2025-nur" target="_blank" rel="noopener" title="Umweltbundesamt: CO₂-Emissionen je Kilowattstunde Strom (öffnet in neuem Tab)">Umweltbundesamt</a> lag der Emissionsfaktor des deutschen Strommixes 2025 bei 344 Gramm je Kilowattstunde.</li>
+            <li><strong>Lebensdauer:</strong> Läuft eine Anlage am Ende ihrer Lebensdauer, fällt im Betrachtungszeitraum ein Ersatz an. Der Rechner rechnet einen solchen Ersatz ein und zeigt einen Hinweis.</li>
+          </ul>
+        </section>
+        <section aria-labelledby="static-need">
+          <h2 id="static-need">Was Sie brauchen</h2>
+          <h3>Für eine erste Rechnung</h3>
+          <p>Ihr Gas- oder Ölverbrauch aus der letzten Jahresabrechnung und ein ungefährer Preis für die Wärmepumpe genügen.</p>
+          <h3>Für ein genaues Ergebnis</h3>
+          <p>Ein konkretes Angebot, Ihr Stromtarif und die Zinsen Ihrer Bank machen das Ergebnis genauer. Mehrere Angebote oder Umrüstzeitpunkte lassen sich als Varianten nebeneinander vergleichen.</p>
+          <p>Der Rechner ist ein privates, werbefreies Hobbyprojekt. Alle Berechnungen laufen in Ihrem Browser. Er ersetzt keine Energie-, Förder- oder Steuerberatung.</p>
+        </section>
+        <footer class="static-foot">
+          <nav aria-label="Weitere Seiten">
+            <ul class="static-links">
+              <li><a href="./hilfe.html" title="Benutzerhandbuch mit Erklärung aller Eingaben und Ergebnisse">Hilfe und Benutzerhandbuch</a></li>
+              <li><a href="./rechenweg.html" title="Rechenweg mit allen Zwischenwerten">Rechenweg</a></li>
+              <li><a href="./changelog.html" title="Änderungen seit der letzten Version">Änderungen</a></li>
+              <li><a href="./impressum.html" title="Impressum">Impressum</a></li>
+              <li><a href="./datenschutz.html" title="Datenschutzerklärung">Datenschutz</a></li>
+              <li><a href="./lizenz.html" title="Lizenz: PolyForm Noncommercial 1.0.0">Lizenz</a></li>
+              <li><a href="https://github.com/chkania/wpir" target="_blank" rel="noopener" title="Quellcode auf GitHub (öffnet in neuem Tab)">Quellcode auf GitHub</a></li>
+            </ul>
+          </nav>
+        </footer>
       </main>
     </div>
     <script type="module" src="/src/main.ts"></script>
