@@ -103,7 +103,7 @@ jobs:
             ""|"/"|"~"|"~/"|"."|"./"|*..*) fail "DEPLOY_PATH '$TARGET' ist leer oder zu allgemein – bitte ein eigenes Zielverzeichnis angeben." ;;
           esac
           [ -f dist/index.html ] || fail "Build enthält keine index.html."
-          [ -f dist/.htaccess ] || fail "Build enthält keine .htaccess (Weiterleitung und Header aus public/.htaccess).
+          [ -f dist/.htaccess ] || fail "Build enthält keine .htaccess (Weiterleitung und Header aus public/.htaccess)"
 
       - name: SSH einrichten
         env:

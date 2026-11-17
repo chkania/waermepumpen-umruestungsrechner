@@ -1,4 +1,6 @@
-import { readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -30,5 +32,15 @@ describe('F33.6 .htaccess aus dem Repository', () => {
     expect(deploy).not.toMatch(/--exclude='\.htaccess'/);
     expect(deploy).toContain("[ -f dist/.htaccess ]");
     expect(deploy).toContain("--exclude='.well-known/'");
+  });
+
+  it('Shell-Syntax des Prüfschritts „Konfiguration prüfen“ ist gültig (sonst bricht jedes Deployment ab)', () => {
+    const deploy = read('.github/workflows/deploy.yml');
+    const block = /- name: Konfiguration prüfen\n[\s\S]*?run: \|\n((?:[ ]{10}.*\n|\n)+)/.exec(deploy);
+    expect(block, 'Schritt nicht gefunden').not.toBeNull();
+    const script = block![1].split('\n').map((l) => l.replace(/^ {10}/, '')).join('\n');
+    const file = join(mkdtempSync(join(tmpdir(), 'wp-deploy-')), 'check.sh');
+    writeFileSync(file, script);
+    expect(() => execFileSync('bash', ['-n', file])).not.toThrow();
   });
 });
