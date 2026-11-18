@@ -8,6 +8,17 @@ Alle wesentlichen Änderungen am Wärmepumpen-Investitionsrechner. Das Format or
 - **Minor** (1.x.0): neue Funktionen oder Eingaben sowie bewusst geänderte Rechenmodelle oder Standardwerte (Ergebnisse können sich ändern).
 - **Patch** (1.0.x): Fehlerkorrekturen, Texte, Darstellung – ohne neue Funktionen.
 
+## 1.24.0 – 2026-11-18
+
+### Neu
+- Monatliche Belastung je Szenario im Vergleich zu heute
+- Zuschuss und Steuererstattungen tilgen auch den Bankkredit
+- Kostenfreies Sondertilgungsrecht pro Jahr für den Bankkredit
+- KI-Export enthält die monatliche Belastung
+
+### Fehlerkorrekturen
+- Eigenkapital-Felder heißen „Weg mit KfW-Zuschuss“ und „Weg mit Steuerbonus“
+
 ## 1.23.0 – 2026-11-18
 
 ### Neu
