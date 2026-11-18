@@ -97,7 +97,31 @@ Der Bericht wird immer hell gedruckt, auch wenn Sie das dunkle Design nutzen. Al
 
 ### Export
 
-Speichert alle Eingaben als **JSON-Datei**, einschließlich Bezeichnung und Bemerkungen des Szenarios. Ist eine **Bezeichnung des Szenarios** eingetragen, steht sie im Dateinamen, z. B. `waermepumpe-rechner-Angebot-Firma-A-2026-11.json` (Umlaute werden umschrieben, Sonderzeichen durch `-` ersetzt); sonst heißt die Datei `waermepumpe-rechner-2026-11.json`. Geeignet zur Sicherung, zur Übertragung auf ein anderes Gerät oder um mehrere Varianten (z. B. „Angebot A“, „Angebot B“) aufzubewahren. Vorher erscheint ein Hinweis, dass die Datei auch persönliche Angaben wie das Haushaltseinkommen enthält; erst mit **Datei speichern** wird sie heruntergeladen.
+Öffnet ein Fenster mit zwei Formaten:
+
+- **Datei (JSON)** speichert alle Eingaben, einschließlich Bezeichnung und Bemerkungen des Szenarios.
+- **Für KI (Markdown)** speichert die ganze Berechnung für einen KI-Assistenten (siehe unten).
+
+Beide Dateien enthalten auch persönliche Angaben wie das Haushaltseinkommen; darauf weist das Fenster hin. Mit „Diesen Hinweis nicht mehr anzeigen“ entfällt der Hinweistext. Das Fenster mit der Auswahl erscheint aber weiterhin. Die Dateien entstehen nur in Ihrem Browser; der Rechner überträgt sie nirgendwohin.
+
+#### Datei (JSON)
+
+Ist eine **Bezeichnung des Szenarios** eingetragen, steht sie im Dateinamen, z. B. `waermepumpe-rechner-Angebot-Firma-A-2026-11.json` (Umlaute werden umschrieben, Sonderzeichen durch `-` ersetzt); sonst heißt die Datei `waermepumpe-rechner-2026-11.json`. Geeignet zur Sicherung, zur Übertragung auf ein anderes Gerät oder um mehrere Varianten (z. B. „Angebot A“, „Angebot B“) aufzubewahren. Mit **Import** laden Sie die Datei wieder.
+
+#### Für KI (Markdown)
+
+Speichert die ganze Berechnung als **Markdown-Datei** für einen KI-Assistenten (z. B. Claude oder ChatGPT). Laden Sie die Datei dort hoch und lassen Sie sich die Rechnung erklären, prüfen oder Varianten vorschlagen. Die Datei heißt wie die JSON-Datei, endet aber auf `-ki.md`, z. B. `waermepumpe-rechner-Angebot-Firma-A-2026-11-ki.md`. Sie enthält:
+
+- Hinweise für den KI-Assistenten: Aufbau der Datei, Vorzeichen und Einheiten, Grenzen des Modells und Vorschläge für die Auswertung,
+- das Ergebnis, Eckdaten zu Haus und Wärmepumpe, wichtige Ereignisse und Hinweise,
+- den Vergleich der Umrüstzeitpunkte, die Einflussgrößen und den Stromtarifvergleich,
+- den vollständigen **Rechenweg** mit allen Zwischenwerten und den Kosten je Jahr,
+- **alle Eingaben**, auch die Experten-Einstellungen: je Feld den aktuellen Wert, den Standardwert, die Bedeutung, die Herkunft des Standardwerts und die amtlichen Fundstellen,
+- die Eingaben als JSON und im Anhang die Monatswerte.
+
+Schlägt der KI-Assistent geänderte Werte vor, tragen Sie diese im Rechner ein. Oder Sie speichern das geänderte JSON als `.json`-Datei und laden es mit **Import**. Dann rechnet der Rechner selbst nach; Zahlen, die ein KI-Assistent selbst ausrechnet, können falsch sein.
+
+**Achtung:** Wenn Sie die Datei bei einem KI-Dienst hochladen, erhält dessen Anbieter alle Angaben darin. Entfernen Sie vorher, was Sie nicht weitergeben möchten.
 
 ### Import
 
