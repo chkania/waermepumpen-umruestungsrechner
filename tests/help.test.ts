@@ -50,7 +50,7 @@ describe('F15 Benutzerhandbuch – Vollständigkeit', () => {
   });
 
   it('alle Ergebnisbereiche sind beschrieben', () => {
-    for (const t of ['Kennzahlen', 'Wichtige Ereignisse & Hinweise', 'Diagramme', 'Stromkosten: mit oder ohne Wärmepumpentarif', 'Wann umrüsten?', 'Jahresübersicht']) {
+    for (const t of ['Kennzahlen', 'Wichtige Ereignisse & Hinweise', 'Diagramme', 'Stromkosten: mit oder ohne Wärmepumpentarif', 'Wann umrüsten?', 'Jahresübersicht', 'Monatliche Belastung']) {
       expect(handbook, t).toContain(t);
     }
   });

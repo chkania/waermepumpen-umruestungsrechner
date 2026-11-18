@@ -327,6 +327,18 @@ Ordnet Ihr Haus anhand von Verbrauch, Fläche, Baujahr und Sanierung ein:
 - **Heizlast (grob):** Wärmebedarf geteilt durch 2.000 Volllaststunden – ein erster Anhaltspunkt für die Größe der Wärmepumpe, kein Ersatz für eine Heizlastberechnung durch den Fachbetrieb.
 - **Eignung für die Wärmepumpe** nach dem Raumwärmebedarf je m²: bis 100 kWh gute Voraussetzungen, bis 150 kWh geeignet (Vorlauftemperatur prüfen), darüber ist die Wärmepumpe weniger effizient – größere Heizkörper oder einzelne Dämmmaßnahmen helfen.
 
+### Monatliche Belastung
+
+Zeigt, was Sie jeden Monat für Heizung (und ggf. Kochen) zahlen – heute und in Zukunft, getrennt für **Ohne Wärmepumpe**, **WP + KfW-Zuschuss** und **WP + Steuerbonus**.
+
+- **Heute:** Durchschnitt der ersten 12 Monate ohne Wärmepumpe, aufgeteilt in Energie, Grund- und Zählerkosten und Wartung. Weil Preise und Kosten im Lauf dieser 12 Monate schon steigen, liegt der Wert etwas über „Verbrauch × heutiger Preis + Grundpreis + Wartung“. Darauf beziehen sich die Beträge in Klammern, z. B. „(−92 €)“ = 92 € weniger als heute.
+- **Je Zeile ein Zeitraum von 12 Monaten** ab dem Start der Betrachtung (z. B. 11/26–10/27 = 11/2026 bis 10/2027). Der Betrag ist der Durchschnitt je Monat; so zählen Winter- und Sommermonate gleich. Fett ist der niedrigste Betrag des Zeitraums.
+- **Enthalten** sind die laufenden Zahlungen: Energie, Grund- und Zählerkosten, Wartung und die **Kreditrate** (Zinsen und Tilgung). Die Beträge enthalten die angenommenen Preissteigerungen, aber keinen Opportunitätszins. Endet ein Kredit, sinkt die Belastung sichtbar.
+- **Nicht enthalten** sind einmalige Beträge, weil sie einzelne Monate verzerren würden. Sie stehen aufklappbar unter **Einmalige Beträge**: Eigenanteil der Investition, Ersatzkessel bzw. Ersatz-Wärmepumpe, KfW-Zuschuss, Steuererstattungen, Sondertilgungen samt Vorfälligkeitsentschädigung und die Ablösung einer Restschuld am Ende. Der Restwert ist keine Zahlung und fehlt hier.
+- Die letzte Zeile **Durchschnitt** gilt für den ganzen Betrachtungszeitraum.
+
+Wie viel die Wärmepumpe insgesamt spart, zeigen die Kennzahlen – dort zählen auch die einmaligen Beträge und der Opportunitätszins.
+
 ### Hinweis „Annahmen möglicherweise veraltet“
 
 Förderbedingungen, Preise und Zinsen werden regelmäßig geprüft. Liegt die letzte Prüfung mehr als sechs Monate zurück, erscheint über den Ergebnissen ein Hinweis mit dem Datum der Prüfung. Die Rechnung funktioniert weiter – prüfen Sie aber wichtige Werte (z. B. Fördersätze, Gas- und Strompreis) vor einer Entscheidung selbst. Über den Link im Hinweis können Sie einen veralteten Wert melden; mit „Ausblenden“ verschwindet er bis zum nächsten Laden.
