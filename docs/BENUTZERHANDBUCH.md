@@ -113,7 +113,7 @@ Ist eine **Bezeichnung des Szenarios** eingetragen, steht sie im Dateinamen, z. 
 Speichert die ganze Berechnung als **Markdown-Datei** für einen KI-Assistenten (z. B. Claude oder ChatGPT). Laden Sie die Datei dort hoch und lassen Sie sich die Rechnung erklären, prüfen oder Varianten vorschlagen. Die Datei heißt wie die JSON-Datei, endet aber auf `-ki.md`, z. B. `waermepumpe-rechner-Angebot-Firma-A-2026-11-ki.md`. Sie enthält:
 
 - Hinweise für den KI-Assistenten: Aufbau der Datei, Vorzeichen und Einheiten, Grenzen des Modells und Vorschläge für die Auswertung,
-- das Ergebnis, Eckdaten zu Haus und Wärmepumpe, wichtige Ereignisse und Hinweise,
+- das Ergebnis, Eckdaten zu Haus und Wärmepumpe, die monatliche Belastung im Vergleich zu heute, wichtige Ereignisse und Hinweise,
 - den Vergleich der Umrüstzeitpunkte, die Einflussgrößen und den Stromtarifvergleich,
 - den vollständigen **Rechenweg** mit allen Zwischenwerten und den Kosten je Jahr,
 - **alle Eingaben**, auch die Experten-Einstellungen: je Feld den aktuellen Wert, den Standardwert, die Bedeutung, die Herkunft des Standardwerts und die amtlichen Fundstellen,

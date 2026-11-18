@@ -1,3 +1,4 @@
+import { monthlyBurden } from '../core/burden';
 import type { InstallComparison } from '../core/compare';
 import { COST_PART_LABELS, type CostPart } from '../core/compare';
 import { FUNDING_SOURCE_DATE } from '../core/defaults';
@@ -13,6 +14,7 @@ import { DEFAULT_SOURCES, OFFICIAL_REFS, SOURCE_KIND_LABEL } from '../core/sourc
 import { tariffComparison } from '../core/tariff';
 import type { Inputs, ScenarioResult } from '../core/types';
 import { APP_VERSION } from '../version';
+import { diffText, todayPartsText } from './burden';
 import { derivationHtml, derivationLink, monthsCsv } from './derivation';
 import { getPath, SECTIONS, type Field } from './fields';
 import { fmtEur, fmtMonth, fmtNum, fmtPct } from './format';
@@ -212,7 +214,7 @@ const AGENT_NOTES = `## Hinweise für den KI-Assistenten
 Dieses Dokument wurde vom Wärmepumpen-Investitionsrechner erzeugt. Es beschreibt eine Modellrechnung für den Umstieg eines Wohnhauses von einer Gas- oder Ölheizung auf eine Wärmepumpe in Deutschland. Die Person, die es Ihnen gibt, möchte die Berechnung mit Ihrer Hilfe verstehen, prüfen und verbessern. Bitte antworten Sie in der Sprache der Person und siezen Sie sie, wenn sie Deutsch schreibt.
 
 **Aufbau**
-1. Ergebnis, Eckdaten zu Haus und Wärmepumpe, Ereignisse und Hinweise des Rechners.
+1. Ergebnis, Eckdaten zu Haus und Wärmepumpe, monatliche Belastung im Vergleich zu heute, Ereignisse und Hinweise des Rechners.
 2. Vergleich der Umrüstzeitpunkte, Einflussgrößen (Sensitivität) und gegebenenfalls Stromtarifvergleich.
 3. Rechenweg: alle Zwischenwerte mit eingesetzten Zahlen und Jahrestabellen je Szenario.
 4. Eingaben: jedes Feld mit aktuellem Wert, Standardwert, Bedeutung, Herkunft des Standardwerts und amtlichen Fundstellen.
@@ -224,6 +226,8 @@ Dieses Dokument wurde vom Wärmepumpen-Investitionsrechner erzeugt. Es beschreib
 - Beträge brutto in Euro. Positiv = Ausgabe, negativ = Einnahme (Zuschuss, Steuerbonus, Kreditauszahlung, Restwert).
 - Prozentwerte sind im JSON Anteile (0,3 = 30 %), in den Tabellen Prozent. Monate im JSON als JJJJ-MM, im Text als MM/JJJJ.
 - Amortisation = erster Monat, ab dem die kumulierten Kosten mit Wärmepumpe bis zum Ende nie mehr über denen ohne liegen.
+- Kredite sind Annuitätendarlehen. Eine Sondertilgung (Zuschuss, Steuererstattungen, Einmalzahlung – je nach Eingaben) lässt die Monatsrate gleich und verkürzt die Laufzeit; die Rate wird nicht gesenkt. Kosten der Sondertilgung: Regeln der KfW bzw. Vorfälligkeitsentschädigung der Bank, ggf. mit kostenfreiem Kontingent je Kalenderjahr.
+- Monatliche Belastung = laufende Zahlungen (Energie, Grund- und Zählerkosten, Wartung, Kreditrate) je 12-Monats-Zeitraum ab dem Start, ohne Opportunitätszins; einmalige Beträge stehen getrennt.
 
 **Grenzen des Modells**
 - Preise, Preissteigerungen, CO₂-Preise und Förderbedingungen sind Annahmen mit Stand des angegebenen Prüfdatums. Förderprogramme können sich ändern.
@@ -234,6 +238,7 @@ Dieses Dokument wurde vom Wärmepumpen-Investitionsrechner erzeugt. Es beschreib
 - Plausibilität prüfen: Passen Verbrauch, Wohnfläche, Baujahr, Investition und JAZ zueinander (siehe Eckdaten und JAZ-Schätzung)? Welche wichtigen Werte stehen noch auf dem Standard?
 - Förderung prüfen: Sind die Voraussetzungen für Grundförderung, Klimageschwindigkeitsbonus, Einkommensbonus und Steuerbonus erfüllt? Welche Fristen und Termine sind wichtig?
 - Einflussgrößen erklären: Welche Annahmen verändern das Ergebnis am stärksten, und wie sicher sind sie?
+- Monatliche Belastung einordnen: Wie verändert sich die Belastung gegenüber heute, wann sinkt sie (z. B. nach Kreditende), und welche einmaligen Beträge muss die Person vorher aufbringen?
 - Varianten vorschlagen: z. B. anderer Umrüstzeitpunkt, andere Finanzierung, PV, Wärmepumpentarif. Rechnen Sie Varianten nicht selbst nach, sondern geben Sie die geänderten Werte an (Feldname und Wert oder ein geändertes JSON). Die Person kann das JSON als \`.json\`-Datei speichern und im Rechner mit „Import“ laden; dann rechnet der Rechner genau.
 - Unstimmigkeiten oder vermutete Fehler im Rechenmodell bitte konkret benennen (Abschnitt, Wert, erwarteter Wert).
 
@@ -280,6 +285,32 @@ function houseMd(inputs: Inputs): string {
   return `## Haus und Wärmepumpe
 
 ${parts.map((p) => `- ${p}`).join('\n')}`;
+}
+
+/** Monthly burden (F36) in the same form as the card in the calculator. */
+function burdenMd(run: RunResult): string {
+  const b = monthlyBurden(run);
+  const kinds = ['ref', 'kfw', 'tax'] as const;
+  const head = ['Zeitraum', ...kinds.map((k) => SCENARIO_NAMES[k])];
+  const period = (from: number, to: number) => (from === to ? fmtMonth(from) : `${fmtMonth(from)} – ${fmtMonth(to)}`);
+  const cellOf = (v: number | null) => (v === null ? 'nicht möglich' : `${fmtEur(v)} (${diffText(v - b.today)})`);
+  const rows = [
+    ...b.years.map((y) => [`${period(y.from, y.to)}${y.months < 12 ? ` (${y.months} Monate)` : ''}`, ...kinds.map((k) => cellOf(y.perMonth[k]))]),
+    ['Durchschnitt im Zeitraum', ...kinds.map((k) => cellOf(b.average[k]))],
+  ];
+  // one-off amounts from the household's view: expense "−", income "+"
+  const oneOff = (x: number | null) => (x === null ? 'nicht möglich' : Math.round(x) === 0 ? '–' : `${x > 0 ? '−' : '+'}${fmtEur(Math.abs(x))}`);
+  const oneOffs = b.oneOffs.length
+    ? `\n\n### Einmalige Beträge (nicht in den Monatswerten)\n\n− = Ausgabe, + = Einnahme: Eigenanteil der Investition, Ersatzkessel bzw. Ersatz-Wärmepumpe, Zuschuss, Steuererstattungen, Sondertilgungen samt Vorfälligkeitsentschädigung und die Ablösung einer Restschuld am Ende.\n\n${mdTable(
+        head,
+        b.oneOffs.map((o) => [period(o.from, o.to), ...kinds.map((k) => oneOff(o.amount[k]))]),
+      )}`
+    : '';
+  return `## Monatliche Belastung
+
+Heute (Durchschnitt der ersten ${b.todayMonths} Monate ohne Wärmepumpe, mit Preissteigerung): ${fmtEur(b.today)} im Monat – ${todayPartsText(b)}. Je Zeitraum von 12 Monaten ab dem Start die durchschnittliche Belastung pro Monat, in Klammern der Unterschied zu heute. Enthalten: Energie, Grund- und Zählerkosten, Wartung und Kreditrate (Zinsen und Tilgung); nominal mit Preissteigerung, ohne Opportunitätszins.
+
+${mdTable(head, rows)}${oneOffs}`;
 }
 
 function eventsMd(ev: KeyEvents): string {
@@ -450,6 +481,7 @@ export function agentMarkdown(d: AgentExportData): string {
     AGENT_NOTES,
     keyFiguresMd(d.run),
     houseMd(d.inputs),
+    burdenMd(d.run),
     eventsMd(d.events),
     compareMd(d.cmp),
     sensitivityMd(d.sens),
