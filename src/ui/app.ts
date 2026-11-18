@@ -19,7 +19,7 @@ import { sensitivity, type Sensitivity } from '../core/sensitivity';
 import { energySplit } from '../core/prices';
 import { decodeHash, encodeHash, exportFileName, exportJson, importJson, mergeInputs } from '../core/serialize';
 import type { Inputs, ScenarioKind, ScenarioResult } from '../core/types';
-import { cleanDocuments, DOCUMENT_TITLE_MAX, DOCUMENT_URL_MAX, MAX_DOCUMENTS, NUMBER_LIMITS, numberRange, TEXT_LIMITS, validMonth, type InputIssue } from '../core/validate';
+import { cleanDocuments, DOCUMENT_TITLE_MAX, DOCUMENT_URL_MAX, MAX_DOCUMENTS, monthYears, NUMBER_LIMITS, numberRange, TEXT_LIMITS, validMonth, type InputIssue } from '../core/validate';
 import { chartTables, type ChartId } from './charts';
 
 /** Chart.js module, loaded on demand so that it does not delay the first display (N14). */
@@ -383,7 +383,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     }
     if (loadIssues) {
       parts.push(`<div class="notice-issues">
-        <p><strong>${loadIssues.issues.length === 1 ? 'Ein Wert' : `${loadIssues.issues.length} Werte`} aus ${escapeHtml(loadIssues.origin)} ${loadIssues.issues.length === 1 ? 'war' : 'waren'} ungültig und wurde${loadIssues.issues.length === 1 ? '' : 'n'} ersetzt:</strong></p>
+        <p><strong>${loadIssues.issues.length === 1 ? 'Ein Wert' : `${loadIssues.issues.length} Werte`} aus ${escapeHtml(loadIssues.origin)} ${loadIssues.issues.length === 1 ? 'wurde' : 'wurden'} angepasst:</strong></p>
         <ul>${loadIssues.issues
           .slice(0, 12)
           .map((x) => `<li>${escapeHtml(fieldByPath.get(x.path)?.label ?? x.path)}: ${escapeHtml(x.reason)}</li>`)
@@ -1686,7 +1686,10 @@ function windfallHtml(run: RunResult): string {
 /** Error text for invalid inputs (F9.5, WCAG 3.3.1). */
 export function fieldErrorText(f: Field): string {
   const keep = ' Der bisherige Wert wird weiter verwendet.';
-  if (f.type === 'month') return `Bitte einen Monat zwischen 2000 und 2150 angeben (Jahr und Monat).${keep}`;
+  if (f.type === 'month') {
+    const [from, to] = monthYears(f.path);
+    return `Bitte einen Monat zwischen ${from} und ${to} angeben (Jahr und Monat).${keep}`;
+  }
   if (f.type === 'number' || f.type === 'percent') {
     if (!(f.path in NUMBER_LIMITS)) return `Bitte eine gültige Zahl eingeben.${keep}`;
     const k = f.type === 'percent' ? 100 : 1;

@@ -63,7 +63,7 @@ export const DEFAULT_SOURCES: Record<string, DefaultSource> = {
     kind: 'technik',
     text: 'Typischer Jahresnutzungsgrad eines Brennwert- bzw. guten Niedertemperaturkessels (ältere Kessel eher 80–85 %). Bestimmt, wie viel Nutzwärme aus dem Brennstoff entsteht.',
   },
-  'oldHeating.ageYears': { kind: 'beispiel', text: `Beispiel. Steht auf dem Typenschild oder im Schornsteinfeger-Protokoll. ${own}` },
+  'oldHeating.installedMonth': { kind: 'beispiel', text: `Beispiel: 22 Jahre vor dem Start der Betrachtung. Monat der Inbetriebnahme steht auf dem Typenschild oder im Schornsteinfeger-Protokoll; maßgeblich für das Mindestalter beim Klimageschwindigkeitsbonus ist das Datum der Inbetriebnahme. ${own}` },
   'oldHeating.remainingLifeYears': {
     kind: 'beispiel',
     text: `Beispiel. Eigene Einschätzung, wie lange die Anlage noch hält – ggf. mit Heizungsbauer/Schornsteinfeger besprechen. ${own}`,
@@ -275,7 +275,7 @@ const law = (label: string, url: string): OfficialRef => ({ label, url });
 const ESTG = (abs: string) => law(`§ 35c ${abs} EStG`, ESTG_35C);
 
 export const OFFICIAL_REFS: Record<string, OfficialRef[]> = {
-  'oldHeating.ageYears': [rl('8.4.4'), m458('S. 3 „Klimageschwindigkeitsbonus“')],
+  'oldHeating.installedMonth': [rl('8.4.4'), m458('S. 3 „Klimageschwindigkeitsbonus“')],
   'building.ownerOccupied': [m458('S. 5 „Selbstnutzende Eigentümerinnen und Eigentümer“'), rl('8.4.4, 8.4.5'), ESTG('Abs. 1')],
   'building.units': [rl('8.3.1 a'), m458('S. 4 „Wohneinheiten“')],
   'building.constructionYear': [ESTG('Abs. 1'), m458('S. 2 (Bauantrag mind. 5 Jahre zurück)')],

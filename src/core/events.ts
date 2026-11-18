@@ -465,9 +465,10 @@ function kgbReason(inp: Inputs, run: RunResult, start: number, app: number, kgbE
   if (run.kfw.boilerPurchases.some((b) => b.month <= app)) {
     return hint('warning', 'Kein Klimageschwindigkeitsbonus', 'Ersetzt wird dann ein neuer Ersatzkessel, nicht die alte Gasheizung (Mindestalter nicht erfüllt).');
   }
-  const reach = start + Math.ceil((p.kgbMinGasAge - o.ageYears) * 12);
+  const installed = parseMonth(o.installedMonth);
+  const reach = installed + Math.ceil(p.kgbMinGasAge * 12);
   const oldEnd = start + Math.round(o.remainingLifeYears * 12);
-  const ageAtApp = o.ageYears + (app - start) / 12;
+  const ageAtApp = (app - installed) / 12;
   const base = `Gasheizungen erst ab ${p.kgbMinGasAge} Jahren; die Heizung ist bei Antrag ${M(app)} ${fmtYears(ageAtApp)} alt und erreicht ${p.kgbMinGasAge} Jahre ${M(reach)}.`;
   if (kgbEnd !== null && reach >= kgbEnd) {
     return hint(

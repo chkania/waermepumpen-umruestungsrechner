@@ -2,6 +2,7 @@ import type { Inputs } from './types';
 import { deflateSync, Inflate } from 'fflate';
 import { APP_VERSION } from '../version';
 import { DEFAULTS_AS_OF } from './default-history';
+import { formatMonth, formatMonthDe, parseMonth, tryParseMonth } from './dates';
 import { checkValue, cleanDocuments, type InputIssue } from './validate';
 
 type Obj = Record<string, unknown>;
@@ -17,11 +18,31 @@ export function mergeInputs(defaults: Inputs, data: unknown, issues: InputIssue[
   return mergeObj(defaults as unknown as Obj, migrate(defaults, data, issues), '', issues) as unknown as Inputs;
 }
 
+/** Start month (absolute) of a raw data set, else of the defaults. */
+function rawStart(defaults: Inputs, data: Obj): number {
+  const g = isObj(data.general) ? data.general : {};
+  return tryParseMonth(typeof g.startMonth === 'string' ? g.startMonth : null) ?? parseMonth(defaults.general.startMonth);
+}
+
 /**
  * Migrates older data sets: building age (years) → construction year (F17);
+ * age of the heating (years) → commissioning month (Inbetriebnahme, F34), with a notice to check the month;
  * fixed PV share (PV-Anteil) → notice, because PV is now calculated from the PV system (F28).
  */
 function migrate(defaults: Inputs, data: unknown, issues: InputIssue[]): unknown {
+  if (isObj(data) && isObj(data.oldHeating)) {
+    const o = data.oldHeating;
+    if (typeof o.ageYears === 'number' && Number.isFinite(o.ageYears) && o.installedMonth === undefined) {
+      const years = Math.min(Math.max(o.ageYears, 0), 200);
+      const installed = rawStart(defaults, data) - Math.round(years * 12);
+      const installedMonth = formatMonth(installed);
+      data = { ...data, oldHeating: { ...o, installedMonth } };
+      issues.push({
+        path: 'oldHeating.installedMonth',
+        reason: `aus dem früheren „Alter der Heizung“ (${years.toLocaleString('de-DE')} Jahre) auf ${formatMonthDe(installed)} umgerechnet – bitte den genauen Monat der Inbetriebnahme prüfen (Typenschild, Schornsteinfeger-Protokoll)`,
+      });
+    }
+  }
   if (isObj(data) && isObj(data.heatPump)) {
     const share = data.heatPump.pvShare;
     if (typeof share === 'number' && share > 0 && data.heatPump.pvKwp === undefined) {
@@ -34,9 +55,7 @@ function migrate(defaults: Inputs, data: unknown, issues: InputIssue[]): unknown
   if (!isObj(data) || !isObj(data.building)) return data;
   const b = data.building;
   if (typeof b.buildingAgeYears !== 'number' || b.constructionYear !== undefined || !Number.isFinite(b.buildingAgeYears)) return data;
-  const g = isObj(data.general) ? data.general : {};
-  const m = /^(\d{4})-/.exec(typeof g.startMonth === 'string' ? g.startMonth : defaults.general.startMonth);
-  const startYear = m ? Number(m[1]) : Number(defaults.general.startMonth.slice(0, 4));
+  const startYear = Math.floor(rawStart(defaults, data) / 12);
   return { ...data, building: { ...b, constructionYear: Math.round(startYear - b.buildingAgeYears) } };
 }
 
