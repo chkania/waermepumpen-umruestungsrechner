@@ -111,6 +111,15 @@ Setzt **alle Eingaben auf die Standardwerte** zurück. Vorher weist ein Fenster 
 
 Alle Eingaben werden bei jeder Änderung automatisch im Browser gespeichert (`localStorage`) und beim nächsten Besuch wiederhergestellt – nur auf diesem Gerät und in diesem Browser. Im privaten Modus oder nach dem Löschen der Website-Daten gehen sie verloren; nutzen Sie dann Export oder Link.
 
+### Neue Standardwerte
+
+Gespeicherte Eingaben und exportierte Dateien enthalten **alle Werte**, auch die, die Sie nie geändert haben. Aktualisiert der Rechner später Standardwerte (z. B. Preise oder Kosten nach einer Prüfung der Quellen), bleiben Ihre Werte deshalb zunächst unverändert. Steht ein Feld beim Laden oder Importieren noch auf dem **früheren Standardwert**, erscheint über den Ergebnissen der Hinweis „Neue Standardwerte“ mit alter und neuer Zahl je Feld:
+
+- **Neue Standardwerte übernehmen** setzt die neuen Werte für die aufgelisteten Felder. Werte, die Sie selbst geändert haben, bleiben unberührt.
+- **Bisherige Werte behalten** lässt alles, wie es ist; der Hinweis erscheint für diese Änderung nicht wieder.
+
+Solange Sie keine Wahl getroffen haben, erscheint der Hinweis beim nächsten Laden erneut. Ein geteilter Link braucht den Hinweis nicht: Er enthält nur Ihre Abweichungen, alle übrigen Felder erhalten automatisch den aktuellen Standard.
+
 ## Eingaben
 
 Prozentwerte werden als Prozent eingegeben (z. B. `90` für 90 %). Monate werden als Jahr und Monat eingegeben. Ungültige Eingaben werden rot markiert und nicht übernommen – ebenso Werte außerhalb sinnvoller Grenzen (z. B. Betrachtungszeitraum höchstens 50 Jahre, Kreditlaufzeit höchstens 50 Jahre, Zeitpunktvergleich höchstens 40 Zeitpunkte).

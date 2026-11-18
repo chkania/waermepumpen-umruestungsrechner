@@ -193,7 +193,7 @@ describe('UI (Smoke-Test)', () => {
     expect(pop.hidden).toBe(false);
     expect(btn.getAttribute('aria-expanded')).toBe('true');
     expect(pop.textContent).toContain('Marktdaten');
-    expect(pop.textContent).toContain('12.000 €');
+    expect(pop.textContent).toContain('17.500 €');
     // only one popover at a time
     root.querySelector<HTMLButtonElement>('[data-field="funding.kgbRate"] .info-btn')!.click();
     expect(pop.hidden).toBe(true);
@@ -946,7 +946,7 @@ describe('F22 Hinweis auf veraltete Annahmen', () => {
     const root = mountAt(new Date(2027, 5, 1));
     const stale = root.querySelector('.notice-stale')!;
     expect(stale.textContent).toContain('Annahmen möglicherweise veraltet');
-    expect(stale.textContent).toContain('11.11.2026');
+    expect(stale.textContent).toContain('18.11.2026');
     expect(stale.querySelector('a[href$="template=bug_report.yml"]')).not.toBeNull();
     stale.querySelector<HTMLButtonElement>('[data-notice="stale"]')!.click();
     expect(root.querySelector('.notice-stale')).toBeNull();
@@ -1015,5 +1015,80 @@ describe('F16.2 Unterlagen im Szenario: hinzufügen, prüfen, entfernen', () => 
     root.querySelector<HTMLButtonElement>('[data-doc-remove]')!.click();
     expect(root.querySelectorAll('.doc-row').length).toBe(4);
     expect(app.getInputs().scenario.documents.length).toBe(0); // the remaining rows are drafts without a valid address
+  });
+});
+
+describe('F22.4 Neue Standardwerte für gespeicherte Eingaben und Dateien', () => {
+  beforeEach(() => {
+    store.clear();
+    history.replaceState(null, '', '/');
+  });
+
+  /** Inputs as saved before the defaults update of 2026-11-18. */
+  const oldDefaults = () => {
+    const i = defaults();
+    i.oldHeating.maintenance = 200;
+    i.oldHeating.replacementCost = 12000;
+    i.financing.bankRate = 0.075;
+    return i;
+  };
+  const stored = () => JSON.parse(store.getItem(STORAGE_KEY)!);
+
+  it('bietet die neuen Werte für Felder auf dem früheren Standard an; Übernehmen setzt sie', () => {
+    const i = oldDefaults();
+    i.oldHeating.replacementCost = 15000; // own value → not offered
+    store.setItem(STORAGE_KEY, JSON.stringify(i));
+    const { root, app } = mount();
+    const box = root.querySelector('.notice-defaults')!;
+    expect(box.textContent).toContain('Seit Ihre Eingaben gespeichert wurden');
+    const items = [...box.querySelectorAll('li')].map((li) => li.textContent);
+    expect(items).toHaveLength(2);
+    expect(items.join()).toContain('Wartung + Schornsteinfeger: 200 €/Jahr → 300 €/Jahr');
+    expect(items.join()).toContain('Zins Bankkredit: 7,5 % → 6,5 %');
+    // an edit before answering keeps the old defaults version, so the notice comes back
+    setValue(root, 'heatPump.jaz', '3.5');
+    expect(stored().defaultsAsOf).toBe('');
+    root.querySelector<HTMLButtonElement>('[data-notice="defaults-apply"]')!.click();
+    expect(app.getInputs().oldHeating.maintenance).toBe(300);
+    expect(app.getInputs().financing.bankRate).toBe(0.065);
+    expect(app.getInputs().oldHeating.replacementCost).toBe(15000);
+    expect(app.getInputs().heatPump.jaz).toBe(3.5);
+    expect(root.querySelector('.notice-defaults')).toBeNull();
+    expect(root.querySelector<HTMLInputElement>('[data-path="oldHeating.maintenance"]')!.value).toBe('300');
+    expect(stored().oldHeating.maintenance).toBe(300);
+    expect(mount().root.querySelector('.notice-defaults')).toBeNull();
+  });
+
+  it('Bisherige Werte behalten: Werte bleiben, der Hinweis kommt nicht wieder', () => {
+    store.setItem(STORAGE_KEY, JSON.stringify(oldDefaults()));
+    const { root, app } = mount();
+    root.querySelector<HTMLButtonElement>('[data-notice="defaults-keep"]')!.click();
+    expect(app.getInputs().oldHeating.replacementCost).toBe(12000);
+    expect(root.querySelector('.notice-defaults')).toBeNull();
+    expect(stored().oldHeating.replacementCost).toBe(12000);
+    const again = mount();
+    expect(again.root.querySelector('.notice-defaults')).toBeNull();
+    expect(again.app.getInputs().oldHeating.replacementCost).toBe(12000);
+  });
+
+  it('kein Hinweis bei Eingaben mit aktuellem Stand der Standardwerte oder ohne alte Werte', () => {
+    store.setItem(STORAGE_KEY, JSON.stringify(defaults()));
+    expect(mount().root.querySelector('.notice-defaults')).toBeNull();
+    store.setItem(STORAGE_KEY, JSON.stringify({ ...oldDefaults(), defaultsAsOf: '2026-11-18' }));
+    expect(mount().root.querySelector('.notice-defaults')).toBeNull();
+  });
+
+  it('auch nach dem Import einer älteren Datei', async () => {
+    const { root, app } = mount();
+    const input = root.querySelector<HTMLInputElement>('#file-import')!;
+    const file = new File([JSON.stringify(oldDefaults())], 'alt.json', { type: 'application/json' });
+    Object.defineProperty(input, 'files', { value: [file], configurable: true });
+    input.dispatchEvent(new Event('change'));
+    await vi.waitFor(() => expect(root.querySelector('.notice-defaults')).not.toBeNull());
+    expect(root.querySelector('.notice-defaults')!.textContent).toContain('Seit die Datei erstellt wurde');
+    expect(root.querySelectorAll('.notice-defaults li')).toHaveLength(3);
+    expect(root.querySelector('.notice-defaults')!.textContent).toMatch(/12\.000 € → 17\.500 €/);
+    root.querySelector<HTMLButtonElement>('[data-notice="defaults-apply"]')!.click();
+    expect(app.getInputs().oldHeating.replacementCost).toBe(17500);
   });
 });

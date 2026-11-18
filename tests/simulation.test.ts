@@ -31,7 +31,7 @@ describe('F1/F3 Referenzszenario', () => {
     const i = neutral((i) => (i.oldHeating.remainingLifeYears = 2));
     const r = simulate(i, 'ref');
     const repl = r.months[24];
-    expect(repl.investment).toBe(12000);
+    expect(repl.investment).toBe(17500);
     expect(repl.system).toBe('new');
     expect(r.months[23].system).toBe('old');
     // same heat demand (Wärmebedarf), better efficiency → lower fuel costs
@@ -60,7 +60,7 @@ describe('F1/F3 Referenzszenario', () => {
       i.general.residualValue = true;
     });
     const r = simulate(i, 'ref');
-    expect(r.months[239].residual).toBeCloseTo(-12000 * (24 / 240), 6);
+    expect(r.months[239].residual).toBeCloseTo(-17500 * (24 / 240), 6);
   });
 
   it('Heizöl: kein Grundpreis', () => {
@@ -137,7 +137,7 @@ describe('F4 Wärmepumpe (KfW-Weg)', () => {
       }),
       'kfw',
     );
-    expect(r.months[12].investment).toBe(12000);
+    expect(r.months[12].investment).toBe(17500);
     expect(r.warnings.join()).toMatch(/Ersatzkessel/);
     // new gas boiler is young → no climate speed bonus (Klimageschwindigkeitsbonus)
     expect(r.kfw!.kgbRate).toBe(0);

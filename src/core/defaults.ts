@@ -11,10 +11,10 @@ import type { Inputs } from './types';
  *  - Maximum rate (Höchstsatz) 70 % (80 % for the lowest income bracket)
  *  - Eligible costs (förderfähige Kosten) 28,000 € (1st dwelling unit (Wohneinheit)), from 2027-02-01 reduced by 750 € every six months down to 22,000 € from 08/2030; 2nd–6th unit 15,000 €, from 7th unit 8,000 €
  * KfW 358/359: up to 120,000 € per dwelling unit; 358 up to 90,000 € household income. Interest rates from a secondary source (hausvoraus.de, 2026-11-10).
- * Market and price values: researched on 2026-11-11, sources per field in sources.ts.
- * § 35c EStG: 20 % (7/7/6), max. 40,000 €, costs max. 200,000 €, completion by end of 2029.
+ * Market and price values: researched on 2026-11-11, checked again on 2026-11-18 (F22.3 report), sources per field in sources.ts.
+ * § 35c EStG: 20 % (7/7/6), max. 40,000 €, costs max. 200,000 €, completion by end of 2029 (§ 52 (35a) EStG).
  */
-export const FUNDING_SOURCE_DATE = '2026-11-11';
+export const FUNDING_SOURCE_DATE = '2026-11-18';
 
 /** Jan … Dec – share of the annual heat demand (Wärmebedarf) (space heating (Raumwärme) + 15 % hot water (Warmwasser)), sum = 1. */
 export const HEAT_PROFILE: readonly number[] = [
@@ -66,8 +66,8 @@ export function createDefaults(today: Date = new Date()): Inputs {
       cookingAfter: 'electric',
       cookingSwitchCost: 800,
       remainingLifeYears: 5,
-      maintenance: 200,
-      replacementCost: 12000,
+      maintenance: 300,
+      replacementCost: 17500,
       replacementEfficiency: 0.95,
       replacementLifeYears: 20,
     },
@@ -127,7 +127,7 @@ export function createDefaults(today: Date = new Date()): Inputs {
       followUpRate: 0.04,
       useKfwLoan: true,
       subsidyAsSpecialRepayment: true,
-      bankRate: 0.075,
+      bankRate: 0.065,
       bankTermYears: 15,
       bankGraceYears: 0,
       subsidyDelayMonths: 3,

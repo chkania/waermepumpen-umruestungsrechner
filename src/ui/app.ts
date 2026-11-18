@@ -4,6 +4,7 @@ import { tryParseMonth } from '../core/dates';
 import { APP_VERSION } from '../version';
 import { createDefaults, FUNDING_SOURCE_DATE } from '../core/defaults';
 import { assumptionsAgeMonths, assumptionsStale } from '../core/freshness';
+import { applyNewDefaults, DEFAULTS_AS_OF, outdatedDefaults, savedDefaultsAsOf, type OutdatedDefault } from '../core/default-history';
 import { DEFAULT_SOURCES, OFFICIAL_REFS, SOURCE_KIND_LABEL } from '../core/sources';
 import { priceRows, runAll, type RunResult } from '../core/simulation';
 import { tariffComparison } from '../core/tariff';
@@ -141,6 +142,14 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   let loadIssues: { origin: string; issues: InputIssue[] } | null = initial.issues.length
     ? { origin: initial.source === 'hash' ? 'dem Link' : 'den gespeicherten Eingaben', issues: initial.issues }
     : null;
+  /** Fields that still hold a former default (F22.4); until answered, the old defaults version is kept in storage. */
+  let newDefaults: { origin: 'storage' | 'file'; asOf: string; list: OutdatedDefault[] } | null = null;
+  const checkDefaults = (origin: 'storage' | 'file', raw: unknown): void => {
+    const asOf = savedDefaultsAsOf(raw);
+    const list = outdatedDefaults(inputs, defaults, asOf);
+    newDefaults = list.length ? { origin, asOf, list } : null;
+  };
+  if (initial.source === 'storage') checkDefaults('storage', parseJson(initial.storedRaw));
   let last: { run: RunResult; cmp: InstallComparison; events: KeyEvents; sens: Sensitivity } | null = null;
   let tableKind: ScenarioKind = 'kfw';
   let activeChart: ChartId = 'cumulative';
@@ -381,6 +390,24 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
           .join('')}${loadIssues.issues.length > 12 ? `<li>… und ${loadIssues.issues.length - 12} weitere</li>` : ''}</ul>
         <button type="button" data-notice="dismiss" class="ghost">Ausblenden</button></div>`);
     }
+    // F22.4: new defaults since the data was saved
+    if (newDefaults) {
+      const since = newDefaults.origin === 'file' ? 'Seit die Datei erstellt wurde' : 'Seit Ihre Eingaben gespeichert wurden';
+      parts.push(`<div class="notice-defaults">
+        <p><strong>Neue Standardwerte.</strong> ${since}, wurden Standardwerte aktualisiert. Diese Felder stehen noch auf dem früheren Standard:</p>
+        <ul>${newDefaults.list
+          .map((x) => {
+            const f = fieldByPath.get(x.path);
+            const label = f?.label ?? x.path;
+            const fmt = (v: unknown) => (f ? formatValue(f, v, inputs) : String(v));
+            return `<li>${escapeHtml(label)}: ${escapeHtml(fmt(x.previous))} → ${escapeHtml(fmt(x.current))}</li>`;
+          })
+          .join('')}</ul>
+        <div class="notice-actions">
+          <button type="button" data-notice="defaults-apply">Neue Standardwerte übernehmen</button>
+          <button type="button" data-notice="defaults-keep" class="ghost">Bisherige Werte behalten</button>
+        </div></div>`);
+    }
     // F22: assumptions not reviewed for a long time
     const today = env.today ?? new Date();
     if (assumptionsStale(today) && !staleDismissed) {
@@ -403,6 +430,19 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       renderNotice();
       return;
     }
+    if (action === 'defaults-apply' || action === 'defaults-keep') {
+      const apply = action === 'defaults-apply' && newDefaults;
+      if (apply) applyNewDefaults(inputs, newDefaults!.list);
+      newDefaults = null;
+      persist();
+      if (apply) {
+        writeForm();
+        recalc();
+      }
+      renderNotice();
+      toast(apply ? 'Neue Standardwerte übernommen.' : 'Bisherige Werte behalten.');
+      return;
+    }
     if (action === 'adopt') {
       sharedView = false;
       persist();
@@ -416,6 +456,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
         inputs = mergeInputs(defaults, {});
       }
       loadIssues = issues.length ? { origin: 'den gespeicherten Eingaben', issues } : null;
+      checkDefaults('storage', parseJson(initial.storedRaw));
       writeForm();
       recalc();
       toast('Eigene Eingaben geladen.');
@@ -558,9 +599,13 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     if (!file) return;
     try {
       const issues: InputIssue[] = [];
-      const imported = importJson(defaults, await file.text(), issues);
+      const text = await file.text();
+      const imported = importJson(defaults, text, issues);
       leaveShared();
       loadIssues = issues.length ? { origin: 'der Datei', issues } : null;
+      newDefaults = null;
+      const outdated = outdatedDefaults(imported, defaults, savedDefaultsAsOf(parseJson(text)));
+      if (outdated.length) newDefaults = { origin: 'file', asOf: savedDefaultsAsOf(parseJson(text)), list: outdated };
       controller.setInputs(imported);
       renderNotice();
       toast('Eingaben importiert.');
@@ -573,6 +618,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     confirmAction('reset', () => {
       leaveShared();
       loadIssues = null;
+      newDefaults = null;
       controller.setInputs(createDefaults(env.today ?? new Date()));
       renderNotice();
       toast('Auf Standardwerte zurückgesetzt.');
@@ -655,7 +701,8 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
 
   function persist(): void {
     try {
-      if (!sharedView) storage?.setItem(STORAGE_KEY, JSON.stringify(inputs));
+      // defaultsAsOf: version of the defaults (F22.4); kept old while the notice on new defaults is unanswered
+      if (!sharedView) storage?.setItem(STORAGE_KEY, JSON.stringify({ ...inputs, defaultsAsOf: newDefaults?.asOf ?? DEFAULTS_AS_OF }));
     } catch {
       /* Speicher nicht verfügbar */
     }
@@ -1506,6 +1553,15 @@ function loadInitial(defaults: Inputs, storage: Storage | null): InitialLoad {
   return { inputs: mergeInputs(defaults, {}), source: 'default', issues: [], storedRaw };
 }
 
+/** JSON.parse without throwing (raw saved data for the defaults check, F22.4). */
+function parseJson(raw: string | null): unknown {
+  try {
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
 function readTheme(storage: Storage | null): ThemeChoice {
   try {
     const v = storage?.getItem(THEME_KEY);
@@ -1549,8 +1605,12 @@ function kpi(label: string, value: string, tone: string, sub: string, best = fal
 
 /** Formats a default value for display (for the origin popover). */
 export function formatDefault(f: Field, defaults: Inputs): string {
-  const v = getPath(defaults, f.path);
-  const unit = typeof f.unit === 'function' ? f.unit(defaults) : (f.unit ?? '');
+  return formatValue(f, getPath(defaults, f.path), defaults);
+}
+
+/** Formats a value of field f for display (units may depend on the inputs). */
+function formatValue(f: Field, v: unknown, inputs: Inputs): string {
+  const unit = typeof f.unit === 'function' ? f.unit(inputs) : (f.unit ?? '');
   if (f.type === 'checkbox') return v ? 'Ja' : 'Nein';
   if (f.type === 'select') return f.options?.find(([k]) => k === v)?.[1] ?? String(v);
   if (f.type === 'month') return v ? fmtMonth(Number(tryParseMonth(String(v)))) : '(leer)';

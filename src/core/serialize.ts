@@ -1,6 +1,7 @@
 import type { Inputs } from './types';
 import { deflateSync, Inflate } from 'fflate';
 import { APP_VERSION } from '../version';
+import { DEFAULTS_AS_OF } from './default-history';
 import { checkValue, cleanDocuments, type InputIssue } from './validate';
 
 type Obj = Record<string, unknown>;
@@ -170,9 +171,9 @@ export function exportFileName(inputs: Inputs, now: Date): string {
 }
 
 export function exportJson(inputs: Inputs): string {
-  // App version for traceability (N9); ignored on import
+  // App version for traceability (N9); ignored on import. defaultsAsOf: version of the defaults (F22.4)
   const { version, ...rest } = inputs;
-  return JSON.stringify({ version, appVersion: APP_VERSION, ...rest }, null, 2);
+  return JSON.stringify({ version, appVersion: APP_VERSION, defaultsAsOf: DEFAULTS_AS_OF, ...rest }, null, 2);
 }
 
 /** Imports a JSON file; throws on invalid content (F9.3). */
