@@ -58,16 +58,30 @@ export const PRIVACY_ACK_KEY = 'wp-investitionsrechner:personal-data-notice-off'
  * import, reset, taking over a variant).
  * Only the personal data notice can be switched off; the overwrite warning always appears.
  */
-const CONFIRM_NOTICE = {
+const EXPORT_CHOICE =
+  '„Datei (JSON)“ speichert alle Eingaben – zum Sichern, für ein anderes Gerät und zum späteren Import. „Für KI (Markdown)“ speichert zusätzlich Ergebnisse, Standardwerte mit Herkunft und den Rechenweg – zum Auswerten mit einem KI-Assistenten.';
+interface ConfirmNotice {
+  title: string;
+  text: string;
+  ok: string;
+  /** Second action button (e.g. the Markdown export next to the JSON export). */
+  alt?: string;
+  /** Text when the notice is switched off; with it the dialog still opens (it offers a choice). */
+  brief?: string;
+}
+const CONFIRM_NOTICE: Record<'share' | 'export' | 'import' | 'variant' | 'reset', ConfirmNotice> = {
   share: {
     title: 'Link mit Ihren Eingaben teilen?',
     text: 'Der Link enthält Ihre Eingaben – auch persönliche Angaben wie Haushaltseinkommen und Einkommensteuer, Angaben zu Haus und Heizung sowie Bezeichnung und Bemerkungen des Szenarios. Jede Person, die den Link erhält, kann sie sehen. Teilen Sie ihn nur mit Personen, die diese Angaben sehen dürfen.',
     ok: 'Link kopieren',
   },
   export: {
-    title: 'Eingaben als Datei speichern?',
-    text: 'Die Datei enthält alle Eingaben – auch persönliche Angaben wie Haushaltseinkommen und Einkommensteuer, Angaben zu Haus und Heizung sowie Bezeichnung und Bemerkungen des Szenarios. Geben Sie sie nur an Personen weiter, die diese Angaben sehen dürfen.',
-    ok: 'Datei speichern',
+    title: 'Eingaben exportieren',
+    text: `${EXPORT_CHOICE} Beide Dateien enthalten alle Eingaben – auch persönliche Angaben wie Haushaltseinkommen und Einkommensteuer, Angaben zu Haus und Heizung sowie Bezeichnung und Bemerkungen des Szenarios. Geben Sie sie nur an Personen weiter, die diese Angaben sehen dürfen. Wenn Sie die KI-Datei bei einem KI-Dienst hochladen, erhält dessen Anbieter diese Angaben; entfernen Sie vorher, was Sie nicht weitergeben möchten.`,
+    ok: 'Datei (JSON)',
+    alt: 'Für KI (Markdown)',
+    /** Shown instead of `text` when the personal data notice is switched off: the dialog still offers the choice (F35.1). */
+    brief: EXPORT_CHOICE,
   },
   import: {
     title: 'Eingaben aus einer Datei laden?',
@@ -84,10 +98,14 @@ const CONFIRM_NOTICE = {
     text: 'Alle Eingaben werden durch die Standardwerte ersetzt. Ihre bisherigen Eingaben gehen dabei verloren. Sichern Sie sie vorher bei Bedarf per „Export“.',
     ok: 'Zurücksetzen',
   },
-} as const;
+};
 type ConfirmKind = keyof typeof CONFIRM_NOTICE;
 /** Notices that can be switched off with "Diesen Hinweis nicht mehr anzeigen". */
 const SKIPPABLE: readonly ConfirmKind[] = ['share', 'export'];
+type AgentExportLib = typeof import('./agent-export');
+let agentExportLoading: Promise<AgentExportLib> | null = null;
+/** The export for AI agents (F35) is loaded on demand, like the charts (N14). */
+const loadAgentExport = (): Promise<AgentExportLib> => (agentExportLoading ??= import('./agent-export'));
 
 export interface AppEnv {
   storage?: Storage | null;
@@ -524,6 +542,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   const privacyDlg = $<HTMLDialogElement>('#privacy-confirm');
   const privacySkip = $<HTMLInputElement>('#privacy-skip');
   let privacyAction: (() => void) | null = null;
+  let privacyAltAction: (() => void) | null = null;
   let privacySkippable = false;
   const noticeOff = () => {
     try {
@@ -532,26 +551,34 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       return false;
     }
   };
-  /** Runs `action` after the user confirmed the notice (or right away if a skippable notice was switched off). */
-  const confirmAction = (kind: ConfirmKind, action: () => void, name = '') => {
-    privacySkippable = SKIPPABLE.includes(kind);
-    if (privacySkippable && noticeOff()) return action();
+  /**
+   * Runs `action` (or `alt`, the second button) after the user confirmed the notice. A switched-off skippable notice
+   * runs `action` right away – unless the notice offers a choice (`brief`): then the dialog opens with the short text.
+   */
+  const confirmAction = (kind: ConfirmKind, action: () => void, name = '', alt?: () => void) => {
     const t = CONFIRM_NOTICE[kind];
+    const off = SKIPPABLE.includes(kind) && noticeOff();
+    if (off && t.brief === undefined) return action();
+    privacySkippable = SKIPPABLE.includes(kind) && !off;
     $<HTMLElement>('.privacy-skip').hidden = !privacySkippable;
     $<HTMLElement>('#privacy-title').textContent = t.title;
     // textContent: the variant name (file name or scenario name) is never interpreted as HTML
-    $<HTMLElement>('#privacy-text').textContent = t.text.replace('{name}', name);
+    $<HTMLElement>('#privacy-text').textContent = (off ? t.brief! : t.text).replace('{name}', name);
     $<HTMLButtonElement>('#privacy-ok').textContent = t.ok;
+    const altBtn = $<HTMLButtonElement>('#privacy-alt');
+    altBtn.hidden = !(t.alt && alt);
+    altBtn.textContent = t.alt ?? '';
     privacySkip.checked = false;
     privacyAction = action;
+    privacyAltAction = alt ?? null;
     showDialog(privacyDlg);
   };
   const closePrivacy = () => {
     privacyAction = null;
+    privacyAltAction = null;
     if (privacyDlg.open) privacyDlg.close();
   };
-  $<HTMLButtonElement>('#privacy-ok').addEventListener('click', () => {
-    const action = privacyAction;
+  const confirmWith = (action: (() => void) | null) => {
     if (privacySkippable && privacySkip.checked) {
       try {
         storage?.setItem(PRIVACY_ACK_KEY, '1');
@@ -562,10 +589,15 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     closePrivacy();
     // still inside the click: clipboard and download keep their user activation
     action?.();
-  });
+  };
+  $<HTMLButtonElement>('#privacy-ok').addEventListener('click', () => confirmWith(privacyAction));
+  $<HTMLButtonElement>('#privacy-alt').addEventListener('click', () => confirmWith(privacyAltAction));
   $<HTMLButtonElement>('#privacy-cancel').addEventListener('click', closePrivacy);
   $<HTMLButtonElement>('#privacy-close').addEventListener('click', closePrivacy);
-  privacyDlg.addEventListener('cancel', () => (privacyAction = null)); // Esc
+  privacyDlg.addEventListener('cancel', () => {
+    privacyAction = null; // Esc
+    privacyAltAction = null;
+  });
   privacyDlg.addEventListener('click', (e) => {
     if (e.target === privacyDlg) closePrivacy();
   });
@@ -582,16 +614,42 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       toast('Link steht in der Adresszeile.');
     }
   };
-  const exportFile = () => {
-    const blob = new Blob([exportJson(inputs)], { type: 'application/json' });
+  const download = (content: string, type: string, name: string) => {
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = exportFileName(inputs, env.today ?? new Date());
+    a.href = URL.createObjectURL(new Blob([content], { type }));
+    a.download = name;
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   };
+  const exportFile = () => download(exportJson(inputs), 'application/json', exportFileName(inputs, env.today ?? new Date()));
+  /** Markdown file for an AI agent (F35): everything incl. defaults, origins, derivation and monthly values. */
+  const exportAgent = async () => {
+    let lib: AgentExportLib;
+    try {
+      lib = await loadAgentExport();
+    } catch {
+      agentExportLoading = null;
+      toast('Export konnte nicht geladen werden. Bitte die Seite neu laden.');
+      return;
+    }
+    if (!last) return;
+    const today = env.today ?? new Date();
+    const md = lib.agentMarkdown({
+      inputs,
+      defaults,
+      ...last,
+      today,
+      url: calculatorUrl(location.href),
+      shareUrl: shareBaseUrl(location.href),
+    });
+    download(md, 'text/markdown;charset=utf-8', lib.agentFileName(inputs, today));
+    toast('Export für KI-Assistenten gespeichert.');
+  };
   $<HTMLButtonElement>('#btn-share').addEventListener('click', () => confirmAction('share', () => void shareLink()));
-  $<HTMLButtonElement>('#btn-export').addEventListener('click', () => confirmAction('export', exportFile));
+  $<HTMLButtonElement>('#btn-export').addEventListener('click', () => {
+    void loadAgentExport().catch(() => undefined); // starts loading while the dialog is open
+    confirmAction('export', exportFile, '', () => void exportAgent());
+  });
   const fileInput = $<HTMLInputElement>('#file-import');
   // the file picker opens inside the confirming click (user activation)
   $<HTMLButtonElement>('#btn-import').addEventListener('click', () => confirmAction('import', () => fileInput.click()));
@@ -1785,7 +1843,7 @@ function layout(): string {
       <button id="btn-share" type="button" title="Link mit Ihren aktuellen Eingaben kopieren – zum Sichern oder Weitergeben Ihrer Berechnung">Link mit Werten teilen</button>
       <button id="btn-variants" type="button" aria-haspopup="dialog" title="Zwei oder drei Varianten (Export-Dateien oder aktuelle Eingaben) nebeneinander vergleichen">Varianten vergleichen</button>
       <button id="btn-report" type="button" title="Kompakte Zusammenfassung mit Eingaben, Ergebnissen, Diagrammen, Förderung und Finanzierung – drucken oder als PDF speichern">Bericht drucken</button>
-      <button id="btn-export" type="button">Export</button>
+      <button id="btn-export" type="button" aria-haspopup="dialog" title="Eingaben als Datei (JSON) speichern oder als Markdown-Datei für einen KI-Assistenten">Export</button>
       <button id="btn-import" type="button">Import</button>
       <button id="btn-reset" type="button" class="ghost">Zurücksetzen</button>
       <input id="file-import" type="file" accept="application/json,.json" hidden>
@@ -1864,7 +1922,7 @@ function layout(): string {
       <h2 id="privacy-title"></h2>
       <p id="privacy-text"></p>
       <label class="privacy-skip"><input id="privacy-skip" type="checkbox"> Diesen Hinweis nicht mehr anzeigen</label>
-      <div class="intro-actions"><button id="privacy-cancel" type="button">Abbrechen</button><button id="privacy-ok" type="button" class="primary"></button></div>
+      <div class="intro-actions"><button id="privacy-cancel" type="button">Abbrechen</button><span class="privacy-choices"><button id="privacy-alt" type="button" hidden></button><button id="privacy-ok" type="button" class="primary"></button></span></div>
     </form>
   </dialog>
   ${variantsHtml()}`;

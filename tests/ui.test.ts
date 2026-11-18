@@ -886,9 +886,42 @@ describe('F9.7 Hinweis auf persönliche Daten vor Teilen und Export', () => {
   it('Export fragt erst nach und speichert nach Bestätigung die Datei', () => {
     const { root } = mount();
     root.querySelector<HTMLButtonElement>('#btn-export')!.click();
-    expect(root.querySelector('#privacy-title')!.textContent).toBe('Eingaben als Datei speichern?');
-    expect(root.querySelector('#privacy-ok')!.textContent).toBe('Datei speichern');
+    expect(root.querySelector('#privacy-title')!.textContent).toBe('Eingaben exportieren');
+    expect(root.querySelector('#privacy-ok')!.textContent).toBe('Datei (JSON)');
     expect(downloads).toEqual([]);
+    root.querySelector<HTMLButtonElement>('#privacy-ok')!.click();
+    expect(downloads).toHaveLength(1);
+    expect(downloads[0]).toMatch(/\.json$/);
+  });
+
+  it('F35 Export-Dialog bietet auch den Export für KI (Markdown) an, mit Hinweis auf KI-Dienste', async () => {
+    const { root } = mount();
+    expect(root.querySelector('#btn-agent')).toBeNull();
+    root.querySelector<HTMLButtonElement>('#btn-export')!.click();
+    const alt = root.querySelector<HTMLButtonElement>('#privacy-alt')!;
+    expect(alt.hidden).toBe(false);
+    expect(alt.textContent).toBe('Für KI (Markdown)');
+    expect(root.querySelector('#privacy-text')!.textContent).toContain('KI-Dienst');
+    expect(root.querySelector<HTMLElement>('.privacy-skip')!.hidden).toBe(false);
+    expect(downloads).toEqual([]);
+    alt.click();
+    expect(dlg(root).open).toBe(false);
+    await vi.waitFor(() => expect(downloads).toHaveLength(1), { timeout: 5000 });
+    expect(downloads[0]).toMatch(/^waermepumpe-rechner-.*-ki\.md$/);
+    // other notices have no second button
+    root.querySelector<HTMLButtonElement>('#btn-share')!.click();
+    expect(alt.hidden).toBe(true);
+  });
+
+  it('F35 Abgeschalteter Hinweis: Export zeigt weiter die Auswahl, nur mit kurzem Text', () => {
+    store.setItem(PRIVACY_ACK_KEY, '1');
+    const { root } = mount();
+    root.querySelector<HTMLButtonElement>('#btn-export')!.click();
+    expect(dlg(root).open).toBe(true);
+    const text = root.querySelector('#privacy-text')!.textContent!;
+    expect(text).toContain('Für KI (Markdown)');
+    expect(text).not.toContain('Haushaltseinkommen');
+    expect(root.querySelector<HTMLElement>('.privacy-skip')!.hidden).toBe(true);
     root.querySelector<HTMLButtonElement>('#privacy-ok')!.click();
     expect(downloads).toHaveLength(1);
     expect(downloads[0]).toMatch(/\.json$/);

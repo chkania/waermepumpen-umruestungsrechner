@@ -8,6 +8,14 @@ Alle wesentlichen Änderungen am Wärmepumpen-Investitionsrechner. Das Format or
 - **Minor** (1.x.0): neue Funktionen oder Eingaben sowie bewusst geänderte Rechenmodelle oder Standardwerte (Ergebnisse können sich ändern).
 - **Patch** (1.0.x): Fehlerkorrekturen, Texte, Darstellung – ohne neue Funktionen.
 
+## 1.23.0 – 2026-11-18
+
+### Neu
+- Export für KI-Assistenten als Markdown-Datei mit allen Eingaben, Standardwerten und Rechenweg
+
+### Fehlerkorrekturen
+- Potential fix for pull request finding 'CodeQL / Incomplete string escaping or encoding'
+
 ## 1.22.0 – 2026-11-18
 
 ### Neu
