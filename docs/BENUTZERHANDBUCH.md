@@ -240,7 +240,7 @@ Achtung: Die Adressen können persönliche Angaben enthalten (z. B. einen Login-
 | Feld | Bedeutung |
 |---|---|
 | **KfW-Kredit nutzen (358/359)** | Ob Sie den KfW-Ergänzungskredit beantragen. Ohne Haken wird der Teil, den das Eigenkapital nicht deckt, über den Bankkredit finanziert; mit ausreichend Eigenkapital entfällt jeder Kredit. Den Zuschuss gibt es trotzdem, er fließt dann als Einnahme ein (keine Sondertilgung). |
-| **Eigenkapital (KfW-Weg)** | Eigenes Geld im Weg „KfW-Zuschuss + Kredit“. Der Rest wird finanziert. |
+| **Eigenkapital (Weg mit KfW-Zuschuss)** | Eigenes Geld im Szenario „WP + KfW-Zuschuss“ – auch ohne KfW-Kredit. Den Rest finanziert der KfW-Kredit (wenn „KfW-Kredit nutzen“ angehakt ist, höchstens die förderfähigen Kosten), darüber hinaus bzw. ohne KfW-Kredit der Bankkredit. Beispiel: nur Zuschuss, kein KfW-Kredit, Rest über die Bank – „KfW-Kredit nutzen“ abhaken und hier das Eigenkapital eintragen. |
 | **Zins KfW 358 (zinsverbilligt)** | Für Selbstnutzer mit Einkommen bis 90.000 €. Zinsen sind Annahmen – aktuelle Konditionen bei der Hausbank erfragen. |
 | **Zins KfW 359** | Ergänzungskredit ohne Zinsverbilligung. |
 | **Laufzeit KfW-Kredit** | 4 bis 35 Jahre. |
@@ -249,7 +249,7 @@ Achtung: Die Adressen können persönliche Angaben enthalten (z. B. einen Login-
 | **Anschlusszins** | Angenommener Zins nach Ende der Zinsbindung. |
 | **Zuschuss als Sondertilgung verwenden** | Der KfW-Zuschuss tilgt bei Auszahlung den KfW-Kredit (ab 5.000 €). Ohne KfW-Kredit tilgt er den Bankkredit des KfW-Wegs, abzüglich Vorfälligkeitsentschädigung. Die Rate bleibt gleich, der Kredit ist früher abbezahlt. |
 | **Auszahlung Zuschuss nach Inbetriebnahme** | Monate bis zur Auszahlung. |
-| **Eigenkapital (Steuer-Weg)** | Eigenes Geld im Weg „Steuerbonus + Bankkredit“. |
+| **Eigenkapital (Weg mit Steuerbonus)** | Eigenes Geld im Szenario „WP + Steuerbonus“; den Rest finanziert der Bankkredit. Für einen fairen Vergleich meist derselbe Betrag wie beim Weg mit KfW-Zuschuss. |
 | **Zins Bankkredit** | Für den Steuer-Weg und Beträge über den KfW-Kredit hinaus. |
 | **Laufzeit Bankkredit** | Laufzeit des Bankkredits. |
 | **Tilgungsfreie Jahre (Bank)** | Tilgungsfreie Zeit des Bankkredits. |
