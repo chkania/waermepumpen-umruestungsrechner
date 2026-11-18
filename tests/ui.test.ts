@@ -1,6 +1,5 @@
 // @vitest-environment happy-dom
 import { readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SECTIONS, getPath } from '../src/ui/fields';
 import { INTRO_KEY, LEGACY_DESIGN_KEY, mountApp, PRIVACY_ACK_KEY, STORAGE_KEY, THEME_KEY } from '../src/ui/app';
@@ -954,38 +953,35 @@ describe('F22 Hinweis auf veraltete Annahmen', () => {
   });
 });
 
-describe('F20.3 Dialoge öffnen oben, der Fokus liegt auf der Überschrift', () => {
+describe('F20.3 Dialoge öffnen oben, der Schließen-Button hat den Fokus', () => {
   beforeEach(() => {
     store.clear();
     history.replaceState(null, '', '/');
   });
 
-  it('Einführung: Überschrift hat den Fokus, kein Button am Ende wird automatisch fokussiert', () => {
+  it('Einführung: Schließen-Button oben hat den Fokus, kein Button am Ende wird automatisch fokussiert', () => {
     const { root } = mount();
     root.querySelector<HTMLButtonElement>('#btn-intro')!.click();
     const dlg = root.querySelector<HTMLDialogElement>('#intro')!;
     expect(dlg.open).toBe(true);
-    expect(document.activeElement?.id).toBe('intro-title');
+    expect(document.activeElement?.classList.contains('dialog-close')).toBe(true);
     expect(dlg.querySelector('[autofocus]')).toBeNull();
+    expect(dlg.querySelector('.intro-body')!.firstElementChild!.classList.contains('dialog-close')).toBe(true);
   });
 
-  it('Bestätigung vor dem Übernehmen einer Variante: Überschrift hat den Fokus', () => {
-    const { root } = mount();
+  it('Bestätigung vor dem Übernehmen einer Variante: Schließen oben hat den Fokus und bricht ab', () => {
+    const { root, app } = mount();
     root.querySelector<HTMLButtonElement>('#btn-variants')!.click();
     root.querySelector<HTMLButtonElement>('#var-current')!.click();
     root.querySelector<HTMLButtonElement>('[data-var-freeze="0"]')!.click();
     root.querySelector<HTMLButtonElement>('[data-var-open="0"]')!.click();
     const dlg = root.querySelector<HTMLDialogElement>('#privacy-confirm')!;
     expect(dlg.open).toBe(true);
-    expect(document.activeElement?.id).toBe('privacy-title');
-    expect(dlg.querySelector('[autofocus]')).toBeNull();
+    expect(document.activeElement?.id).toBe('privacy-close');
+    const before = app.getInputs().heatPump.installMonth;
+    root.querySelector<HTMLButtonElement>('#privacy-close')!.click();
+    expect(dlg.open).toBe(false);
+    expect(app.getInputs().heatPump.installMonth).toBe(before);
   });
 });
 
-describe('F20.3 Fokusrahmen der Überschrift nur bei Tastaturbedienung', () => {
-  it('die Überschrift bekommt den Rahmen nur, wenn der Fokus sichtbar sein soll (keyboard), nicht nach einem Tippen', () => {
-    const css = readFileSync(join(process.cwd(), 'src/style.css'), 'utf8');
-    expect(css).toContain(":focus:not(:focus-visible)");
-    expect(css).toMatch(/\.intro h2\[tabindex='-1'\]:focus:not\(:focus-visible\) \{ outline-color: transparent; \}/);
-  });
-});
