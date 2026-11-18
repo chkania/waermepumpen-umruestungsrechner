@@ -108,6 +108,6 @@ describe('F16 Szenario-Beschreibung', () => {
     expect(decodeHash(d, encodeHash(d, i))!.scenario).toEqual(i.scenario);
     const old = JSON.parse(exportJson(defaults()));
     delete old.scenario;
-    expect(importJson(d, JSON.stringify(old)).scenario).toEqual({ name: '', notes: '' });
+    expect(importJson(d, JSON.stringify(old)).scenario).toEqual({ name: '', notes: '', documents: [] });
   });
 });

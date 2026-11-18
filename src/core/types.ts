@@ -215,12 +215,22 @@ export interface CompareInputs {
   count: number;
 }
 
+/** Link to a document for the installer or energy adviser (F16.2); the address is only shown and opened, never loaded. */
+export interface DocumentLink {
+  /** Short description, e.g. "Angebot Heizungsbauer". */
+  title: string;
+  /** http:// or https:// address. */
+  url: string;
+}
+
 /** Description of the scenario (F16) – does not affect the calculation. */
 export interface ScenarioInfo {
   /** Name, e.g. "Variante Herbst 2027"; used in the export file name. */
   name: string;
   /** Free text: description, assumptions, quotes … */
   notes: string;
+  /** Links to documents (F16.2), at most MAX_DOCUMENTS. */
+  documents: DocumentLink[];
 }
 
 export interface Inputs {
