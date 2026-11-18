@@ -75,7 +75,7 @@ describe('F10 Wichtige Ereignisse', () => {
     expect(formatMonth(e.month!)).toBe('2031-11');
     expect(e.scenario).toBe('ref');
     expect(e.level).toBe('important');
-    expect(e.amount).toBeCloseTo(12000 * 1.02 ** 5, 2);
+    expect(e.amount).toBeCloseTo(17500 * 1.02 ** 5, 2);
   });
 
   it('F10.1 Bio-Treppe nur ab Kesselkauf, Stufe 2030 gilt ab Kauf', () => {

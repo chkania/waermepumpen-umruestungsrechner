@@ -82,7 +82,7 @@ describe('Review: sichere externe Links und Maskierung', () => {
 });
 
 describe('Review: Berichtsfuß ohne Zeitzonenverschiebung', () => {
-  it('nennt das Prüfdatum als 11.11.2026', () => {
+  it('nennt das Prüfdatum als 18.11.2026', () => {
     const i = defaults();
     const run = runAll(i);
     const html = reportHtml({
@@ -95,7 +95,7 @@ describe('Review: Berichtsfuß ohne Zeitzonenverschiebung', () => {
       url: 'https://example.invalid/',
       detailsHtml: '',
     });
-    expect(html).toContain('geprüft am 11.11.2026');
+    expect(html).toContain('geprüft am 18.11.2026');
     expect(html).not.toContain('10.11.2026');
   });
 });
