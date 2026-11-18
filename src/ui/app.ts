@@ -18,7 +18,7 @@ import { sensitivity, type Sensitivity } from '../core/sensitivity';
 import { energySplit } from '../core/prices';
 import { decodeHash, encodeHash, exportFileName, exportJson, importJson, mergeInputs } from '../core/serialize';
 import type { Inputs, ScenarioKind, ScenarioResult } from '../core/types';
-import { NUMBER_LIMITS, numberRange, TEXT_LIMITS, validMonth, type InputIssue } from '../core/validate';
+import { cleanDocuments, DOCUMENT_TITLE_MAX, DOCUMENT_URL_MAX, MAX_DOCUMENTS, NUMBER_LIMITS, numberRange, TEXT_LIMITS, validMonth, type InputIssue } from '../core/validate';
 import { chartTables, type ChartId } from './charts';
 
 /** Chart.js module, loaded on demand so that it does not delay the first display (N14). */
@@ -169,6 +169,62 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       charts.update(last.run, priceRows(inputs), last.cmp, last.events, last.sens, energyYear(inputs));
     });
 
+  // ---------- Links to documents (F16.2) ----------
+  /**
+   * One row of the list, built from the same parts as the other fields (label row, .control, .field-error);
+   * a row is only stored in the inputs while its address is valid.
+   */
+  let docSeq = 0;
+  const docRowHtml = (d: { title: string; url: string }): string => {
+    const id = `doc-${++docSeq}`;
+    return `<div class="doc-row" role="group" aria-label="Unterlage">
+      <div class="label-row"><label for="${id}-title">Titel</label><button type="button" class="link-btn doc-remove" data-doc-remove>Entfernen</button></div>
+      <div class="control"><input type="text" id="${id}-title" data-doc-title maxlength="${DOCUMENT_TITLE_MAX}" value="${escapeHtml(d.title)}" placeholder="z. B. Angebot Heizungsbau"></div>
+      <label for="${id}-url">Adresse</label>
+      <div class="control"><input type="url" id="${id}-url" data-doc-url maxlength="${DOCUMENT_URL_MAX}" value="${escapeHtml(d.url)}" placeholder="https://…" spellcheck="false" aria-describedby="${id}-err"></div>
+      <small class="field-error doc-error" id="${id}-err" aria-live="polite" hidden></small>
+    </div>`;
+  };
+
+  /** Builds the list as the last field of the scenario section from the stored links (F16.2). */
+  function renderDocLinks(): void {
+    form.querySelector('.doc-links')?.remove();
+    const fields = form.querySelector<HTMLElement>('details.section .fields');
+    if (!fields) return;
+    const wrap = document.createElement('div');
+    wrap.className = 'field doc-links';
+    wrap.innerHTML = `<div class="label-row"><span class="doc-links-title" id="doc-links-title">Unterlagen und Links</span></div>
+      <div class="doc-rows" role="group" aria-labelledby="doc-links-title">${inputs.scenario.documents.map(docRowHtml).join('')}</div>
+      <button type="button" class="doc-add" data-doc-add>+ Unterlage hinzufügen</button>
+      <small class="help">Links zu Angeboten, Datenblättern oder Förderunterlagen, z. B. für Installateur oder Energieberatung. Sie reisen mit dem geteilten Link und der Export-Datei und erscheinen im Bericht mit QR-Code. Bis zu ${MAX_DOCUMENTS} Einträge, nur Adressen mit http:// oder https://.</small>`;
+    fields.appendChild(wrap);
+    updateDocControls();
+  }
+
+  function updateDocControls(): void {
+    const rows = form.querySelectorAll('.doc-row').length;
+    const add = form.querySelector<HTMLButtonElement>('[data-doc-add]');
+    if (add) add.disabled = rows >= MAX_DOCUMENTS;
+  }
+
+  /** Stores all rows with a valid address in the inputs; other rows only show a hint. */
+  function syncDocLinks(): void {
+    const stored: { title: string; url: string }[] = [];
+    for (const row of form.querySelectorAll<HTMLElement>('.doc-row')) {
+      const title = row.querySelector<HTMLInputElement>('[data-doc-title]')!.value.trim();
+      const url = row.querySelector<HTMLInputElement>('[data-doc-url]')!.value.trim();
+      const err = row.querySelector<HTMLElement>('.doc-error')!;
+      const valid = cleanDocuments([{ title, url }]).length === 1;
+      const empty = title === '' && url === '';
+      err.hidden = valid || empty;
+      err.textContent = `Bitte eine Adresse mit http:// oder https:// eintragen (höchstens ${DOCUMENT_URL_MAX} Zeichen).`;
+      if (valid) stored.push({ title, url });
+    }
+    inputs.scenario.documents = stored.slice(0, MAX_DOCUMENTS);
+    persist();
+    updateDocControls();
+  }
+
   // ---------- Form ----------
   const fieldByPath = new Map<string, Field>();
   for (const s of SECTIONS) for (const f of s.fields) fieldByPath.set(f.path, f);
@@ -184,6 +240,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     }
     refreshVisibility();
     renderScenarioName();
+    renderDocLinks();
   }
 
   /** Name above the results and in the window title (F16.1). */
@@ -238,6 +295,26 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     if (section) section.open = true;
     jaz.scrollIntoView({ block: 'center', behavior: 'smooth' });
     jaz.focus({ preventScroll: true });
+  });
+
+  // Links to documents (F16.2): add a row, remove a row, edit a row (delegated, the list is rebuilt on load and reset)
+  form.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement;
+    if (t.closest('[data-doc-add]')) {
+      const rows = form.querySelector<HTMLElement>('.doc-rows');
+      if (!rows || form.querySelectorAll('.doc-row').length >= MAX_DOCUMENTS) return;
+      rows.insertAdjacentHTML('beforeend', docRowHtml({ title: '', url: '' }));
+      rows.lastElementChild!.querySelector<HTMLInputElement>('[data-doc-title]')!.focus();
+      updateDocControls();
+      return;
+    }
+    if (t.closest('[data-doc-remove]')) {
+      t.closest('.doc-row')?.remove();
+      syncDocLinks();
+    }
+  });
+  form.addEventListener('input', (e) => {
+    if ((e.target as HTMLElement).closest('.doc-rows')) syncDocLinks();
   });
 
   /** Mark errors as text and for screen readers (WCAG 3.3.1, 1.4.1). */

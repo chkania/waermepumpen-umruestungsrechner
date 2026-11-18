@@ -124,6 +124,18 @@ Beschreibt das Szenario; beide Felder ändern die Rechnung nicht.
 | **Bezeichnung des Szenarios** | Kurzer Name, um Varianten zu unterscheiden (z. B. „Angebot Firma A, Herbst 2027“). Er erscheint über den Ergebnissen, im Titel des Browser-Tabs und im Dateinamen beim Export. |
 | **Bemerkungen** | Freitext für Beschreibung, Annahmen, Angebotsdaten oder offene Fragen. Wird mit gespeichert, exportiert und importiert. Achtung: Auch Bezeichnung und Bemerkungen stehen im geteilten Link – keine vertraulichen Angaben eintragen, wenn Sie den Link weitergeben. |
 
+### Unterlagen und Links
+
+Im Abschnitt **Szenario** können Sie bis zu **fünf Links** zu Unterlagen hinterlegen, z. B. ein Angebot, ein Datenblatt oder ein Förderblatt. Jeder Eintrag hat einen **Titel** und eine **Adresse** (mit `https://` oder `http://`). So geht es:
+
+1. **Unterlage hinzufügen** wählen, Titel und Adresse eintragen.
+2. Eine Zeile mit ungültiger Adresse wird markiert und nicht gespeichert, bis die Adresse stimmt.
+3. Über **Entfernen** nehmen Sie einen Eintrag wieder heraus.
+
+Die Links reisen mit: Wenn Sie den Rechner per **Link mit Werten teilen** oder über eine Export-Datei weitergeben, sind sie darin enthalten. So können Sie einem Installateur oder einer Energieberatung den Rechner und die Unterlagen gemeinsam schicken. Im **Bericht** erscheinen die Links mit ihrer Adresse und einem eigenen QR-Code für jede Unterlage. Der Rechner lädt die Adressen nicht selbst; sie öffnen sich erst, wenn jemand auf sie klickt.
+
+Achtung: Die Adressen können persönliche Angaben enthalten (z. B. einen Login-Link). Prüfen Sie sie, bevor Sie den Link weitergeben.
+
 ### Bestandsheizung
 
 | Feld | Bedeutung |

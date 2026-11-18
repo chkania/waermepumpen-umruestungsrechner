@@ -11,7 +11,7 @@ import { encodeHash } from '../core/serialize';
 import { logoSvg } from '../logo';
 import { APP_VERSION } from '../version';
 import { getPath, SECTIONS, type Field } from './fields';
-import { escapeHtml, fmtEur, fmtMonth, fmtNum, fmtPct } from './format';
+import { escapeHtml, fmtEur, fmtMonth, fmtNum, fmtPct, safeHref } from './format';
 import { qrSvg } from './qr';
 
 /**
@@ -165,6 +165,25 @@ function qrHtml(d: ReportData): string {
     : `<p class="report-qr muted">Zu viele Eingaben für einen QR-Code. ${link}</p>`;
 }
 
+/** Links to documents (F16.2): title, clickable address (also in the PDF) and a QR code per link. */
+export function documentsHtml(documents: { title: string; url: string }[]): string {
+  if (documents.length === 0) return '';
+  const items = documents.map((doc) => {
+    const qr = qrSvg(doc.url, `QR-Code: ${doc.title || doc.url}`);
+    const code = qr
+      ? `<figure class="report-doc-qr">${qr}</figure>`
+      : '<p class="report-doc-qr muted">Adresse zu lang für einen QR-Code – die Adresse links verwenden.</p>';
+    return `<li class="report-doc">
+      ${code}
+      <div class="report-doc-text">${doc.title ? `<strong>${escapeHtml(doc.title)}</strong>` : ''}
+        <a class="report-doc-link" href="${safeHref(doc.url)}">${escapeHtml(doc.url)}</a></div>
+    </li>`;
+  });
+  return `<section class="report-block report-docs"><h2>Unterlagen und Links</h2>
+    <p class="muted">Die Adressen führen zu den Unterlagen; sie werden beim Öffnen nicht automatisch geladen.</p>
+    <ul class="report-docs-list">${items.join('')}</ul></section>`;
+}
+
 export function reportHtml(d: ReportData): string {
   const { inputs, run } = d;
   const name = inputs.scenario.name.trim();
@@ -191,6 +210,7 @@ export function reportHtml(d: ReportData): string {
   ).join('')}</section>
   <section class="report-block report-details"><h2>Förderung und Finanzierung</h2>${d.detailsHtml}</section>
   <section class="report-block"><h2>Wichtige Ereignisse und Hinweise</h2>${eventsHtml(d.events)}</section>
+  ${documentsHtml(inputs.scenario.documents)}
   <section class="report-block report-inputs"><h2>Eingaben</h2>
     <p class="muted">Alle sichtbaren Eingaben; aus den Experten-Abschnitten nur Werte, die vom Standard abweichen.</p>
     <div class="report-groups">${inputsHtml(inputs, d.defaults)}</div></section>

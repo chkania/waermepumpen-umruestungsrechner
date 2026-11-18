@@ -1,7 +1,7 @@
 import type { Inputs } from './types';
 import { deflateSync, Inflate } from 'fflate';
 import { APP_VERSION } from '../version';
-import { checkValue, type InputIssue } from './validate';
+import { checkValue, cleanDocuments, type InputIssue } from './validate';
 
 type Obj = Record<string, unknown>;
 
@@ -49,6 +49,10 @@ function mergeObj(base: Obj, data: unknown, prefix: string, issues: InputIssue[]
       out[k] = mergeObj(def, v, path, issues);
       continue;
     }
+    if (path === 'scenario.documents') {
+      out[k] = cleanDocuments(v, issues, path);
+      continue;
+    }
     const typeOk = typeof def === 'number' ? typeof v === 'number' && Number.isFinite(v) : v !== undefined && typeof v === typeof def;
     if (!typeOk) {
       if (v !== undefined) issues.push({ path, reason: 'ungültiger Wert, Standardwert verwendet' });
@@ -78,7 +82,8 @@ function diffObj(base: Obj, cur: Obj): Obj {
     if (isObj(def) && isObj(v)) {
       const d = diffObj(def, v);
       if (Object.keys(d).length > 0) out[k] = d;
-    } else if (v !== def) {
+    } else if (Array.isArray(def) ? JSON.stringify(v) !== JSON.stringify(def) : v !== def) {
+      // Lists (document links) are compared by content, not by reference
       out[k] = v;
     }
   }

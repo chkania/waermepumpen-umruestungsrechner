@@ -241,6 +241,8 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 
 - F33.10 Die Haupt-Schrift (Inter, latin, variabel) wird im `<head>` aller HTML-Seiten vorgeladen (`fontPreloadPlugin` in `prerender.ts`), damit Text ohne Schriftwechsel erscheint. Das Bild der Einführung hat Titel und Alternativtext; das JSON-LD enthält nur ASCII-Zeichen (Unicode-Escapes). `theme-init.js` wird einen Tag gecacht, Favicon eine Woche (`public/.htaccess`). *(Test: seo, htaccess)*
 
+- F16.2 Unterlagen und Links: Im Szenario bis zu 5 Einträge (Titel bis 60 Zeichen, Adresse bis 300 Zeichen, nur `http://` oder `https://`) in `scenario.documents`. Die Liste reist mit Link, Export und Bericht mit; fremde Einträge werden geprüft (ungültige entfernt, mit Hinweis). Im Rechner nur im Szenario, nicht im Ergebnis. Der Bericht führt je Eintrag Titel, anklickbare Adresse (im PDF als Link) und einen QR-Code auf (`documentsHtml` in `src/ui/report.ts`); zu lange Adressen erhalten einen Hinweis statt QR-Code. Die Adressen werden nie geladen. *(Test: documents, ui)*
+
 ### F9 – Persistenz
 - F9.1 Eingaben werden automatisch im localStorage gespeichert und beim Laden wiederhergestellt. *(Test: serialize)*
 - F9.2 „Link mit Werten teilen" (bis 1.4: „Link teilen"): Eingaben (nur Abweichungen von den Defaults) als JSON, komprimiert (DEFLATE, `fflate`) und Base64url-kodiert im URL-Hash `#z=…` (bis 1.6: unkomprimiert `#s=…`, wird weiterhin gelesen); entpackt höchstens 256 KB, sonst ungültig (Schutz vor manipulierten Links); ein Link hat Vorrang vor localStorage. Der geteilte Link zeigt auf die kurze Domain `https://wpir.de/` (leitet per 301 auf die Hauptdomain weiter, der Teil nach `#` bleibt erhalten), auf einem lokalen Entwicklungsrechner (localhost, `*.localhost`, `*.test`) auf die eigene Adresse; die Adresszeile behält die aufgerufene Adresse. *(Test: serialize, share)*
@@ -370,5 +372,6 @@ Wichtige Fakten werden zusätzlich zu den Zahlen ausdrücklich ausgewiesen, dami
 | 2026-11-18 | F33.8 `llms.txt` für KI-Assistenten, GitHub-Profil als Autor-Link im strukturierten Datensatz. Ergebnisse unverändert. |
 | 2026-11-18 | F20.3 Einführung und Bestätigungsdialoge öffnen auf dem Smartphone oben statt mit dem Button am Ende. |
 | 2026-11-18 | F33.9 Beim Laden springt die Seite nicht mehr zwischen statischer Einführung und Rechner; mit JavaScript ist die Einführung von Anfang an ausgeblendet. |
+| 2026-11-18 | F16.2 Unterlagen und Links im Szenario (bis 5): reisen mit Link und Export mit, erscheinen im Bericht mit Adresse und QR-Code je Eintrag. Ergebnisse unverändert. |
 | 2026-11-18 | F33.10 Schrift vorgeladen, Einführung lesbarer (kürzere Sätze), Bild mit Titel, JSON-LD mit Unicode-Escapes, Cache-Regel für theme-init.js. Ergebnisse unverändert. |
 | 2026-11-18 | F32.1 Rechenweg öffnet im selben Tab wie die übrigen eigenen Seiten (vorher neuer Tab). Ergebnisse unverändert. |

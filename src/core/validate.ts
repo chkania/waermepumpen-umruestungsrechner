@@ -125,6 +125,57 @@ export const TEXT_LIMITS: Record<string, number> = {
 };
 const GENERIC_TEXT_LIMIT = 2000;
 
+/** Links to documents per scenario (F16.2): at most five, short titles, addresses up to 300 characters. */
+export const MAX_DOCUMENTS = 5;
+export const DOCUMENT_TITLE_MAX = 60;
+export const DOCUMENT_URL_MAX = 300;
+
+/**
+ * Cleans the list of document links from link, file or storage (F16.2). Entries that are not objects with text fields,
+ * or whose address is not http(s) or too long, are dropped; more than MAX_DOCUMENTS are cut off. Findings go to `issues`.
+ */
+export function cleanDocuments(value: unknown, issues: InputIssue[] = [], path = 'scenario.documents'): { title: string; url: string }[] {
+  if (value === undefined) return [];
+  if (!Array.isArray(value)) {
+    issues.push({ path, reason: 'ungültiger Wert, keine Unterlagen übernommen' });
+    return [];
+  }
+  const out: { title: string; url: string }[] = [];
+  for (const item of value) {
+    const rec = typeof item === 'object' && item !== null ? (item as Record<string, unknown>) : null;
+    if (!rec || typeof rec.url !== 'string' || (rec.title !== undefined && typeof rec.title !== 'string')) {
+      issues.push({ path, reason: 'Eintrag ohne gültige Adresse entfernt' });
+      continue;
+    }
+    const url = rec.url.trim();
+    let protocol = '';
+    try {
+      protocol = new URL(url).protocol;
+    } catch {
+      /* not an address */
+    }
+    if (protocol !== 'https:' && protocol !== 'http:') {
+      issues.push({ path, reason: 'Adresse ohne http:// oder https:// entfernt' });
+      continue;
+    }
+    if (url.length > DOCUMENT_URL_MAX) {
+      issues.push({ path, reason: `Adresse länger als ${DOCUMENT_URL_MAX} Zeichen entfernt` });
+      continue;
+    }
+    let title = typeof rec.title === 'string' ? rec.title.trim() : '';
+    if (title.length > DOCUMENT_TITLE_MAX) {
+      title = title.slice(0, DOCUMENT_TITLE_MAX);
+      issues.push({ path, reason: `Titel auf ${DOCUMENT_TITLE_MAX} Zeichen gekürzt` });
+    }
+    out.push({ title, url });
+  }
+  if (out.length > MAX_DOCUMENTS) {
+    issues.push({ path, reason: `auf ${MAX_DOCUMENTS} Unterlagen begrenzt` });
+    return out.slice(0, MAX_DOCUMENTS);
+  }
+  return out;
+}
+
 const fmt = (x: number) => x.toLocaleString('de-DE');
 
 export function numberRange(path: string): [number, number] {

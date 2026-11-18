@@ -331,7 +331,7 @@ describe('UI (Smoke-Test)', () => {
     expect(heading.textContent).toBe('Angebot A');
     expect(document.title).toContain('Angebot A');
     expect(app.lastResult()).toBe(before); // no recalculation
-    expect(JSON.parse(store.getItem(STORAGE_KEY)!).scenario).toEqual({ name: 'Angebot A', notes: 'Zeile 1\nZeile 2' });
+    expect(JSON.parse(store.getItem(STORAGE_KEY)!).scenario).toEqual({ name: 'Angebot A', notes: 'Zeile 1\nZeile 2', documents: [] });
     // no origin popover for free-text fields
     expect(name.closest('.field')!.querySelector('.info-btn')).toBeNull();
     // restored on load
@@ -740,7 +740,7 @@ describe('F21 Weiterempfehlen-Dialog', () => {
 
   it('öffnet sich mit WhatsApp, Threema, E-Mail, Link und Andere – ohne eigene Eingaben in den Links', () => {
     const { root } = mount();
-    history.replaceState(null, '', encodeHash(defaults(), { ...defaults(), scenario: { name: 'Geheim', notes: '' } }));
+    history.replaceState(null, '', encodeHash(defaults(), { ...defaults(), scenario: { name: 'Geheim', notes: '', documents: [] } }));
     root.querySelector<HTMLButtonElement>('#btn-recommend')!.click();
     const dlg = root.querySelector<HTMLDialogElement>('#recommend')!;
     expect(dlg.open).toBe(true);
@@ -985,3 +985,35 @@ describe('F20.3 Dialoge öffnen oben, der Schließen-Button hat den Fokus', () =
   });
 });
 
+
+describe('F16.2 Unterlagen im Szenario: hinzufügen, prüfen, entfernen', () => {
+  beforeEach(() => {
+    store.clear();
+    history.replaceState(null, '', '/');
+  });
+
+  it('gültige Adressen werden gespeichert, ungültige nur angezeigt; höchstens fünf', () => {
+    const { root, app } = mount();
+    const add = () => root.querySelector<HTMLButtonElement>('[data-doc-add]')!;
+    add().click();
+    const row = root.querySelector<HTMLElement>('.doc-row')!;
+    const title = row.querySelector<HTMLInputElement>('[data-doc-title]')!;
+    const url = row.querySelector<HTMLInputElement>('[data-doc-url]')!;
+    title.value = 'Angebot';
+    title.dispatchEvent(new Event('input', { bubbles: true }));
+    url.value = 'javascript:alert(1)';
+    url.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(app.getInputs().scenario.documents).toEqual([]);
+    expect(row.querySelector<HTMLElement>('.doc-error')!.hidden).toBe(false);
+    url.value = 'https://example.invalid/angebot.pdf';
+    url.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(app.getInputs().scenario.documents).toEqual([{ title: 'Angebot', url: 'https://example.invalid/angebot.pdf' }]);
+    expect(row.querySelector<HTMLElement>('.doc-error')!.hidden).toBe(true);
+    for (let n = 0; n < 4; n++) add().click();
+    expect(root.querySelectorAll('.doc-row').length).toBe(5);
+    expect(add().disabled).toBe(true);
+    root.querySelector<HTMLButtonElement>('[data-doc-remove]')!.click();
+    expect(root.querySelectorAll('.doc-row').length).toBe(4);
+    expect(app.getInputs().scenario.documents.length).toBe(0); // the remaining rows are drafts without a valid address
+  });
+});
