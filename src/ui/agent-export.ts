@@ -52,8 +52,12 @@ export function agentFileName(inputs: Inputs, now: Date): string {
 // ---------- Markdown helpers ----------
 
 const oneLine = (s: string) => s.replace(/\s+/g, ' ').trim();
-/** Table cell: one line, pipes escaped. */
-const cell = (s: string) => oneLine(s).replace(/\|/g, '\\|') || ' ';
+/** Table cell: one line, backslashes and pipes escaped. */
+const cell = (s: string) => {
+  const normalized = oneLine(s);
+  const escaped = normalized.replace(/\\/g, '\\\\').replace(/\|/g, '\\|');
+  return escaped || ' ';
+};
 
 export function mdTable(head: string[], rows: string[][]): string {
   return [`| ${head.map(cell).join(' | ')} |`, `|${head.map(() => '---').join('|')}|`, ...rows.map((r) => `| ${r.map(cell).join(' | ')} |`)].join('\n');
