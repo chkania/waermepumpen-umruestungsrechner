@@ -8,6 +8,11 @@ Alle wesentlichen Änderungen am Wärmepumpen-Investitionsrechner. Das Format or
 - **Minor** (1.x.0): neue Funktionen oder Eingaben sowie bewusst geänderte Rechenmodelle oder Standardwerte (Ergebnisse können sich ändern).
 - **Patch** (1.0.x): Fehlerkorrekturen, Texte, Darstellung – ohne neue Funktionen.
 
+## 1.20.1 – 2026-11-18
+
+### Fehlerkorrekturen
+- Hilfe erklärt den offenen Stichtag der neuen Grundförderung und den Vorlauf bei frühem Förderantrag (#55)
+
 ## 1.20.0 – 2026-11-18
 
 ### Neu
