@@ -119,17 +119,14 @@ const CHART_TABS: [ChartId, string][] = [
 ];
 
 /**
- * Opens a modal dialog with its heading focused and the content at the top. Without this the browser focuses the first
- * control, which on small screens can be a button at the bottom of a long dialog, and scrolls down to it.
+ * Opens a modal dialog with the close button at the top focused and the content at the top. Without this the browser
+ * focuses the first control, which on small screens can be a button at the bottom of a long dialog, and scrolls down to it.
  */
 function showDialog(dlg: HTMLDialogElement): void {
   if (typeof dlg.showModal === 'function') dlg.showModal();
   else dlg.setAttribute('open', '');
-  const title = dlg.querySelector<HTMLElement>('h2');
-  if (title) {
-    title.tabIndex = -1;
-    title.focus({ preventScroll: true });
-  }
+  // The close button at the top is focused; a heading would show a focus ring after a tap on some browsers (F20.3)
+  dlg.querySelector<HTMLElement>('[data-dialog-first]')?.focus({ preventScroll: true });
   dlg.scrollTop = 0;
   dlg.querySelector<HTMLElement>('.intro-body')?.scrollTo?.(0, 0);
 }
@@ -448,6 +445,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     action?.();
   });
   $<HTMLButtonElement>('#privacy-cancel').addEventListener('click', closePrivacy);
+  $<HTMLButtonElement>('#privacy-close').addEventListener('click', closePrivacy);
   privacyDlg.addEventListener('cancel', () => (privacyAction = null)); // Esc
   privacyDlg.addEventListener('click', (e) => {
     if (e.target === privacyDlg) closePrivacy();
@@ -1719,6 +1717,7 @@ function layout(): string {
   ${supportHtml()}
   <dialog id="privacy-confirm" class="intro privacy-confirm" aria-labelledby="privacy-title" aria-describedby="privacy-text">
     <form method="dialog" class="intro-body">
+      <button type="button" id="privacy-close" class="dialog-close" data-dialog-first aria-label="Schließen">×</button>
       <h2 id="privacy-title"></h2>
       <p id="privacy-text"></p>
       <label class="privacy-skip"><input id="privacy-skip" type="checkbox"> Diesen Hinweis nicht mehr anzeigen</label>
@@ -1733,6 +1732,7 @@ function variantsHtml(): string {
   return `
   <dialog id="variants" class="intro variants" aria-labelledby="variants-title">
     <form method="dialog" class="intro-body">
+      <button type="submit" value="close" class="dialog-close" data-dialog-first aria-label="Schließen">×</button>
       <h2 id="variants-title">Varianten vergleichen</h2>
       <p class="intro-lead">Laden Sie zwei oder drei Export-Dateien, etwa „Angebot A“ und „Angebot B“ oder „jetzt“ und „2028“, oder übernehmen Sie die aktuellen Eingaben – diese Variante folgt dem Rechner, bis Sie den Stand festhalten. Die Varianten werden nur für diesen Vergleich gerechnet und nicht gespeichert.</p>
       <div class="variants-actions">
@@ -1753,6 +1753,7 @@ function recommendHtml(): string {
   return `
   <dialog id="recommend" class="intro recommend" aria-labelledby="recommend-title" aria-describedby="recommend-lead">
     <form method="dialog" class="intro-body">
+      <button type="submit" value="close" class="dialog-close" data-dialog-first aria-label="Schließen">×</button>
       <h2 id="recommend-title">Rechner weiterempfehlen</h2>
       <p id="recommend-lead">Kennen Sie jemanden, der über eine Wärmepumpe nachdenkt? Empfehlen Sie den Rechner weiter. Geteilt wird nur die Adresse des Rechners – nicht Ihre Eingaben.</p>
       <ul class="share-list">
@@ -1777,6 +1778,7 @@ function supportHtml(): string {
   return `
   <dialog id="support" class="intro recommend support" aria-labelledby="support-title" aria-describedby="support-lead">
     <form method="dialog" class="intro-body">
+      <button type="submit" value="close" class="dialog-close" data-dialog-first aria-label="Schließen">×</button>
       <h2 id="support-title">Projekt unterstützen</h2>
       <p id="support-lead">Der Rechner ist ein privates Hobbyprojekt – kostenlos und ohne Werbung. Wenn er Ihnen geholfen hat, freue ich mich über einen Kaffee. Das ist natürlich freiwillig.</p>
       <ul class="share-list">
@@ -1808,6 +1810,7 @@ function introHtml(): string {
   return `
   <dialog id="intro" class="intro" aria-labelledby="intro-title" aria-describedby="intro-purpose">
     <form method="dialog" class="intro-body">
+      <button type="submit" value="close" class="dialog-close" data-dialog-first aria-label="Schließen">×</button>
       <h2 id="intro-title">Willkommen beim Wärmepumpen-Investitionsrechner</h2>
       <p id="intro-purpose" class="intro-lead">Lohnt sich der Umstieg von Ihrer Gas- oder Ölheizung auf eine Wärmepumpe – und wann ist der beste Zeitpunkt? Der Rechner stellt die Gesamtkosten über viele Jahre gegenüber: <strong>bisherige Heizung weiterbetreiben</strong> oder <strong>auf eine Wärmepumpe umsteigen</strong> – mit KfW-Zuschuss oder Steuerbonus, Kredit, steigenden Energie- und CO₂-Preisen und den Kosten des Wartens.</p>
       <h3>So geht’s</h3>
