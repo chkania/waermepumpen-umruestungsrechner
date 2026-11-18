@@ -406,7 +406,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
       const appMonth = install - inp.heatPump.leadMonths;
       const lastRepl = replacements.filter((b) => b <= appMonth).pop();
       const oldAge =
-        lastRepl !== undefined ? (appMonth - lastRepl) / 12 : o.ageYears + (appMonth - start) / 12;
+        (appMonth - (lastRepl ?? parseMonth(o.installedMonth))) / 12;
       kfwRes = kfwSubsidy(
         {
           eligibleCost: eligibleGross,

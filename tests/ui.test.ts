@@ -151,7 +151,7 @@ describe('UI (Smoke-Test)', () => {
 
   it('F10 zeigt wichtige Ereignisse, Hinweise und Ereignis-Spalte', () => {
     const i = defaults();
-    i.oldHeating.ageYears = 16;
+    i.oldHeating.installedMonth = '2010-11';
     store.setItem(STORAGE_KEY, JSON.stringify(i));
     const { root } = mount();
     const events = root.querySelector('#events')!.textContent!;
@@ -175,7 +175,7 @@ describe('UI (Smoke-Test)', () => {
 
   it('Förderhinweise werden nicht doppelt als Warnung angezeigt', () => {
     const i = defaults();
-    i.oldHeating.ageYears = 16;
+    i.oldHeating.installedMonth = '2010-11';
     store.setItem(STORAGE_KEY, JSON.stringify(i));
     const { root } = mount();
     expect(root.querySelector('#warnings')!.textContent).not.toMatch(/Klimageschwindigkeitsbonus|Ersatzkessel/);
@@ -1090,5 +1090,35 @@ describe('F22.4 Neue Standardwerte für gespeicherte Eingaben und Dateien', () =
     expect(root.querySelector('.notice-defaults')!.textContent).toMatch(/12\.000 € → 17\.500 €/);
     root.querySelector<HTMLButtonElement>('[data-notice="defaults-apply"]')!.click();
     expect(app.getInputs().oldHeating.replacementCost).toBe(17500);
+  });
+});
+
+describe('F34 Inbetriebnahme der Heizung im Formular', () => {
+  beforeEach(() => {
+    store.clear();
+    history.replaceState(null, '', '/');
+  });
+
+  it('Monatsfeld mit Alter und Monat für 20 Jahre; Eingabe vor 2000 möglich', () => {
+    const { root, app } = mount();
+    const note = () => root.querySelector('[data-field="oldHeating.installedMonth"] .field-note')!.textContent;
+    expect(note()).toBe('Alter zum Start der Betrachtung (11/2026): 22 Jahre. 20 Jahre erreicht seit 11/2024.');
+    setValue(root, 'oldHeating.installedMonth', '2007-05');
+    expect(app.getInputs().oldHeating.installedMonth).toBe('2007-05');
+    expect(note()).toContain('20 Jahre erreicht 05/2027');
+    setValue(root, 'oldHeating.installedMonth', '1995-08');
+    expect(app.getInputs().oldHeating.installedMonth).toBe('1995-08');
+  });
+
+  it('gespeicherte Eingaben mit früherem Alter: umgerechnet und gemeldet', () => {
+    const i = defaults() as unknown as { oldHeating: Record<string, unknown> };
+    delete i.oldHeating.installedMonth;
+    i.oldHeating.ageYears = 19;
+    store.setItem(STORAGE_KEY, JSON.stringify(i));
+    const { root, app } = mount();
+    expect(app.getInputs().oldHeating.installedMonth).toBe('2007-11');
+    const box = root.querySelector('.notice-issues')!.textContent!;
+    expect(box).toContain('Ein Wert aus den gespeicherten Eingaben wurde angepasst');
+    expect(box).toContain('Inbetriebnahme der Heizung: aus dem früheren „Alter der Heizung“ (19 Jahre) auf 11/2007 umgerechnet');
   });
 });

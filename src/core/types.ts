@@ -46,7 +46,8 @@ export interface OldHeatingInputs {
   /** Gas: kWh/year, oil: litres/year. */
   consumption: number;
   efficiency: number;
-  ageYears: number;
+  /** Commissioning (Inbetriebnahme) of the existing heating, YYYY-MM – decides the climate speed bonus (Klimageschwindigkeitsbonus) to the month. */
+  installedMonth: MonthString;
   /** Hot water (Warmwasser) is produced by the heating system (F17). */
   dhwViaHeating: boolean;
   /** Share of hot water (Warmwasser) in total consumption (0–1). */

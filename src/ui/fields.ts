@@ -51,6 +51,26 @@ const fuelAmount = (i: Inputs, kWh: number) =>
   i.oldHeating.fuel === 'oil'
     ? `${(Math.round(kWh / i.prices.oilKwhPerLiter / 10) * 10).toLocaleString('de-DE')} l Heizöl (${kwhDe(kWh)})`
     : `${kwhDe(kWh)} Gas`;
+/** Absolute month (year*12 + month-1) of YYYY-MM, null if invalid – inline, see shareFuel why core/dates is not imported. */
+const absMonth = (s: string): number | null => {
+  const m = /^(\d{4})-(\d{2})$/.exec(s);
+  return m ? Number(m[1]) * 12 + Number(m[2]) - 1 : null;
+};
+const deMonth = (abs: number) => `${String((abs % 12) + 1).padStart(2, '0')}/${Math.floor(abs / 12)}`;
+/** Age of the heating at the start of the evaluation and, for gas, the month it reaches the minimum age for the climate speed bonus (Klimageschwindigkeitsbonus) (F34). */
+export function heatingAgeNote(i: Inputs): string {
+  const installed = absMonth(i.oldHeating.installedMonth);
+  const start = absMonth(i.general.startMonth);
+  if (installed === null || start === null) return '';
+  const months = Math.max(0, start - installed);
+  const y = Math.floor(months / 12);
+  const m = months % 12;
+  const age = `${y} ${y === 1 ? 'Jahr' : 'Jahre'}${m ? ` ${m} ${m === 1 ? 'Monat' : 'Monate'}` : ''}`;
+  const text = `Alter zum Start der Betrachtung (${deMonth(start)}): ${age}.`;
+  if (i.oldHeating.fuel !== 'gas') return text;
+  const reach = installed + Math.ceil(i.funding.kgbMinGasAge * 12);
+  return `${text} ${i.funding.kgbMinGasAge} Jahre ${reach <= start ? 'erreicht seit' : 'erreicht'} ${deMonth(reach)}.`;
+}
 const hasPv = (i: Inputs) => i.heatPump.pvKwp > 0;
 const isGas = (i: Inputs) => i.oldHeating.fuel === 'gas';
 const isOil = (i: Inputs) => i.oldHeating.fuel === 'oil';
@@ -133,7 +153,13 @@ export const SECTIONS: Section[] = [
         help: 'Kochfeld inkl. Einbau und ggf. neuer Töpfe; fällt nur beim Umstieg auf Strom an (nicht förderfähig, aus Eigenmitteln).',
       },
       { path: 'oldHeating.efficiency', label: 'Nutzungsgrad Altanlage', type: 'percent', unit: '%', step: 1, min: 1, help: 'Typisch 80–95 %.' },
-      { path: 'oldHeating.ageYears', label: 'Alter der Heizung', type: 'number', unit: 'Jahre', step: 1, min: 0, help: 'Gasheizungen ab 20 Jahren erhalten den Klimageschwindigkeitsbonus.' },
+      {
+        path: 'oldHeating.installedMonth',
+        label: 'Inbetriebnahme der Heizung',
+        type: 'month',
+        help: 'Monat und Jahr, z. B. vom Typenschild oder aus dem Protokoll des Schornsteinfegers. Gasheizungen erhalten den Klimageschwindigkeitsbonus, wenn die Inbetriebnahme bei Antrag mindestens 20 Jahre zurückliegt.',
+        note: heatingAgeNote,
+      },
       { path: 'oldHeating.remainingLifeYears', label: 'Restlebensdauer', type: 'number', unit: 'Jahre', step: 0.5, min: 0, help: 'Danach wird im Szenario ohne Wärmepumpe ein neuer Kessel gekauft.' },
       { path: 'oldHeating.maintenance', label: 'Wartung + Schornsteinfeger', type: 'number', unit: '€/Jahr', step: 10, min: 0 },
       { path: 'oldHeating.replacementCost', label: 'Kosten Ersatzkessel', type: 'number', unit: '€', step: 500, min: 0 },

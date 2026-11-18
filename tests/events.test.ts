@@ -12,7 +12,7 @@ function userCase(mut?: (i: Inputs) => void): Inputs {
   i.building.constructionYear = 1950;
   i.building.householdIncome = 120000;
   i.oldHeating.consumption = 11000;
-  i.oldHeating.ageYears = 16;
+  i.oldHeating.installedMonth = '2010-11'; // 16 years before the start
   i.financing.kfwEquity = 4000;
   mut?.(i);
   return i;
@@ -139,7 +139,7 @@ describe('F10 Wichtige Ereignisse', () => {
   });
 
   it('F10.4 Klimageschwindigkeitsbonus erst später erreichbar', () => {
-    const { hints } = ev(userCase((i) => (i.oldHeating.ageYears = 19)));
+    const { hints } = ev(userCase((i) => (i.oldHeating.installedMonth = '2007-11')));
     const h = find(hints, /Klimageschwindigkeitsbonus/)!;
     expect(h.title).toBe('Klimageschwindigkeitsbonus erst bei Antrag ab 11/2027');
     expect(h.level).toBe('info');
@@ -148,7 +148,7 @@ describe('F10 Wichtige Ereignisse', () => {
 
   it('F10.4 Klimageschwindigkeitsbonus nicht erreichbar wegen Restlebensdauer', () => {
     const { hints } = ev(userCase((i) => {
-      i.oldHeating.ageYears = 19;
+      i.oldHeating.installedMonth = '2007-11';
       i.oldHeating.remainingLifeYears = 0.5;
     }));
     const h = find(hints, /Klimageschwindigkeitsbonus/)!;

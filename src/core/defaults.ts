@@ -58,7 +58,7 @@ export function createDefaults(today: Date = new Date()): Inputs {
       fuel: 'gas',
       consumption: 20000,
       efficiency: 0.9,
-      ageYears: 22,
+      installedMonth: formatMonth(parseMonth(start) - 22 * 12),
       dhwViaHeating: true,
       dhwShare: 0.15,
       cookingWithGas: false,

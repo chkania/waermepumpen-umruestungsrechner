@@ -29,7 +29,6 @@ export const NUMBER_LIMITS: Record<string, [number, number]> = {
   'prices.cookingElecFactor': [0.1, 2],
   'oldHeating.consumption': [0, 1e7],
   'oldHeating.efficiency': [0.1, 1.5],
-  'oldHeating.ageYears': [0, 200],
   'oldHeating.remainingLifeYears': [0, 100],
   'oldHeating.replacementEfficiency': [0.1, 1.5],
   'oldHeating.replacementLifeYears': [1, 100],
@@ -98,6 +97,7 @@ export const GENERIC_LIMIT = 1e9;
 /** Month fields; true = may be empty. */
 export const MONTH_FIELDS: Record<string, boolean> = {
   'general.startMonth': false,
+  'oldHeating.installedMonth': false,
   'heatPump.installMonth': false,
   'financing.windfallMonth': false,
   'financing.windfallRepayMonth': true,
@@ -108,6 +108,13 @@ export const MONTH_FIELDS: Record<string, boolean> = {
   'funding.capDegressionStart': true,
 };
 const MONTH_YEARS: [number, number] = [2000, 2150];
+/** Year range per month field where it differs from MONTH_YEARS (an existing heating can be decades old). */
+const MONTH_YEAR_RANGES: Record<string, [number, number]> = { 'oldHeating.installedMonth': [1900, 2150] };
+
+/** Allowed years of a month field. */
+export function monthYears(path: string): [number, number] {
+  return MONTH_YEAR_RANGES[path] ?? MONTH_YEARS;
+}
 
 export const SELECT_VALUES: Record<string, readonly string[]> = {
   'oldHeating.fuel': ['gas', 'oil'],
@@ -182,13 +189,14 @@ export function numberRange(path: string): [number, number] {
   return NUMBER_LIMITS[path] ?? [-GENERIC_LIMIT, GENERIC_LIMIT];
 }
 
-/** Validates a month value (YYYY-MM, year 2000–2150). */
+/** Validates a month value (YYYY-MM, year range from monthYears, usually 2000–2150). */
 export function validMonth(path: string, v: string): boolean {
   if (v === '') return MONTH_FIELDS[path] === true;
   const m = tryParseMonth(v);
   if (m === null) return false;
   const y = Math.floor(m / 12);
-  return y >= MONTH_YEARS[0] && y <= MONTH_YEARS[1];
+  const [min, max] = monthYears(path);
+  return y >= min && y <= max;
 }
 
 /**
