@@ -17,7 +17,7 @@ SPA (Vite + TypeScript, ohne UI-Framework, Chart.js) zur Wirtschaftlichkeitsrech
   - `prices.ts` (Energiepreise, CO₂-Pfad, Bio-Treppe), `funding.ts` (KfW 458, 358/359), `tax.ts` (§ 35c), `loan.ts` (Annuitätendarlehen)
   - `validate.ts` – Grenzen/Prüfung aller Eingaben aus Link, Datei und Speicher (neues Zahlenfeld mit Schleifen-/Divisionswirkung → Grenze in `NUMBER_LIMITS`, neues Monats-/Auswahlfeld → `MONTH_FIELDS`/`SELECT_VALUES`)
   - `house.ts` – Einordnung des Hauses (F18): kWh/m², Effizienzklasse, Baualter, Sanierung, Heizlast; `prices.ts#energySplit` teilt den Verbrauch in Raumwärme/Warmwasser/Kochen (F17)
-  - `simulation.ts` (Szenarien ref/kfw/tax, Amortisation), `compare.ts` (Installationszeitpunkte), `events.ts` (wichtige Ereignisse & Hinweise, F10), `tariff.ts` (Stromtarifvergleich, F13), `serialize.ts` (localStorage/Link/JSON)
+  - `simulation.ts` (Szenarien ref/kfw/tax, Amortisation), `compare.ts` (Installationszeitpunkte), `burden.ts` (monatliche Belastung, F36; Karte in `src/ui/burden.ts`), `events.ts` (wichtige Ereignisse & Hinweise, F10), `tariff.ts` (Stromtarifvergleich, F13), `serialize.ts` (localStorage/Link/JSON)
 - `src/analytics.ts` – Matomo-Besucherstatistik (N10), nur im Build; neue Seite → `initAnalytics('<fester Titel>')` im Einstieg (kein noscript-Pixel). Widerspruch per `setOptOut` auf der Datenschutzseite. Nie Eingaben, URL-Hash oder Szenario-Bezeichnung an Matomo geben.
 - `impressum.html`, `datenschutz.html` + `docs/IMPRESSUM.md`, `docs/DATENSCHUTZ.md` (N11) – rechtliche Angaben; bei neuer Datenverarbeitung (z. B. weiterer externer Dienst) Datenschutzerklärung und CSP anpassen.
 - `hilfe.html` + `src/help.ts`/`help-main.ts`/`help.css` – Hilfeseite, rendert `docs/BENUTZERHANDBUCH.md`

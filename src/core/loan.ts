@@ -19,6 +19,11 @@ export interface PrepaymentRules {
   feeRateShortRemaining: number;
   /** Cap the charge at the interest forgone (entgangene Sollzinsen) (§ 502 (3) BGB). */
   capFeeAtInterest: boolean;
+  /**
+   * Free special repayment allowance (kostenfreies Sondertilgungsrecht) per calendar year (€, 0 = none): up to this sum
+   * per year, special repayments cost no charge; only the part above it does (F12.9).
+   */
+  freePerYear?: number;
 }
 
 export const NO_RULES: PrepaymentRules = {
@@ -73,6 +78,8 @@ export interface ExtraResult {
   requested: number;
   /** Amount actually repaid. */
   applied: number;
+  /** Of which free of charge within the yearly allowance (kostenfreies Sondertilgungsrecht). */
+  freeAmount?: number;
   fee: number;
   status: ExtraStatus;
   /** Reason for rejection/reduction. */
@@ -121,6 +128,8 @@ export function loanScheduleDetailed(spec: LoanSpec): LoanResult {
   let payment = 0;
   let prevRate = spec.rate;
   let k = 0; // Index of the next special repayment (Sondertilgung)
+  /** Free allowance already used per calendar year. */
+  const usedFree = new Map<number, number>();
   // Special repayments (Sondertilgung) before the first instalment (Rate) are not possible
   while (k < extras.length && extras[k].month <= spec.startMonth) {
     extraResults.push(reject(extras[k], 'Vor der Kreditauszahlung bzw. im Auszahlungsmonat nicht möglich.'));
@@ -156,7 +165,10 @@ export function loanScheduleDetailed(spec: LoanSpec): LoanResult {
         extraResults.push(reject(e, 'Kredit ist bereits getilgt.'));
         continue;
       }
-      const r = applyRules(e, balance, withinFix, lastMonth - month, annualRate, rules);
+      const year = Math.floor(month / 12);
+      const freeLeft = Math.max(0, (rules.freePerYear ?? 0) - (usedFree.get(year) ?? 0));
+      const r = applyRules(e, balance, withinFix, lastMonth - month, annualRate, rules, freeLeft);
+      if (r.freeAmount) usedFree.set(year, (usedFree.get(year) ?? 0) + r.freeAmount);
       extraResults.push(r);
       extra += r.applied;
       fee += r.fee;
@@ -180,6 +192,7 @@ function applyRules(
   remainingMonths: number,
   annualRate: number,
   rules: PrepaymentRules,
+  freeLeft = 0,
 ): ExtraResult {
   const full = e.amount >= balance - 0.005;
   if (!full) {
@@ -192,16 +205,21 @@ function applyRules(
   }
   const applied = Math.min(e.amount, balance);
   let fee = 0;
+  let freeAmount = 0;
   if (!(withinFix && rules.freeWithinFix)) {
+    // Only the part above the yearly free allowance (kostenfreies Sondertilgungsrecht) costs a charge (F12.9)
+    freeAmount = Math.min(applied, freeLeft);
+    const charged = applied - freeAmount;
     const rate = remainingMonths <= 12 ? rules.feeRateShortRemaining : rules.feeRate;
-    fee = applied * rate;
-    if (rules.capFeeAtInterest) fee = Math.min(fee, (applied * annualRate * Math.max(0, remainingMonths)) / 12);
+    fee = charged * rate;
+    if (rules.capFeeAtInterest) fee = Math.min(fee, (charged * annualRate * Math.max(0, remainingMonths)) / 12);
   }
   return {
     month: e.month,
     label: e.label,
     requested: e.amount,
     applied,
+    ...(freeAmount > 0 ? { freeAmount } : {}),
     fee,
     status: applied < e.amount - 0.005 ? 'partial' : 'applied',
     reason: applied < e.amount - 0.005 ? `Nur die Restschuld von ${eur(applied)} konnte getilgt werden.` : undefined,

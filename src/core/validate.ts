@@ -59,6 +59,8 @@ export const NUMBER_LIMITS: Record<string, [number, number]> = {
   'financing.kfwFeeAfterFix': [0, 1],
   'financing.bankPrepayFee': [0, 1],
   'financing.bankPrepayFeeShort': [0, 1],
+  'financing.bankFreePrepayShare': [0, 1],
+  'financing.bankFreePrepayAmount': [0, 1e7],
   // Expert funding/tax parameters: rates are fractions, amounts in €. Without these they would only be
   // clamped to ±1e9, which still allows nonsensical scenarios from a crafted link or import (F9.5).
   'funding.grundRate': [0, 1],

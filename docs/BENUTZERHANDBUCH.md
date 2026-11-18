@@ -113,7 +113,7 @@ Ist eine **Bezeichnung des Szenarios** eingetragen, steht sie im Dateinamen, z. 
 Speichert die ganze Berechnung als **Markdown-Datei** für einen KI-Assistenten (z. B. Claude oder ChatGPT). Laden Sie die Datei dort hoch und lassen Sie sich die Rechnung erklären, prüfen oder Varianten vorschlagen. Die Datei heißt wie die JSON-Datei, endet aber auf `-ki.md`, z. B. `waermepumpe-rechner-Angebot-Firma-A-2026-11-ki.md`. Sie enthält:
 
 - Hinweise für den KI-Assistenten: Aufbau der Datei, Vorzeichen und Einheiten, Grenzen des Modells und Vorschläge für die Auswertung,
-- das Ergebnis, Eckdaten zu Haus und Wärmepumpe, wichtige Ereignisse und Hinweise,
+- das Ergebnis, Eckdaten zu Haus und Wärmepumpe, die monatliche Belastung im Vergleich zu heute, wichtige Ereignisse und Hinweise,
 - den Vergleich der Umrüstzeitpunkte, die Einflussgrößen und den Stromtarifvergleich,
 - den vollständigen **Rechenweg** mit allen Zwischenwerten und den Kosten je Jahr,
 - **alle Eingaben**, auch die Experten-Einstellungen: je Feld den aktuellen Wert, den Standardwert, die Bedeutung, die Herkunft des Standardwerts und die amtlichen Fundstellen,
@@ -264,20 +264,21 @@ Achtung: Die Adressen können persönliche Angaben enthalten (z. B. einen Login-
 | Feld | Bedeutung |
 |---|---|
 | **KfW-Kredit nutzen (358/359)** | Ob Sie den KfW-Ergänzungskredit beantragen. Ohne Haken wird der Teil, den das Eigenkapital nicht deckt, über den Bankkredit finanziert; mit ausreichend Eigenkapital entfällt jeder Kredit. Den Zuschuss gibt es trotzdem, er fließt dann als Einnahme ein (keine Sondertilgung). |
-| **Eigenkapital (KfW-Weg)** | Eigenes Geld im Weg „KfW-Zuschuss + Kredit“. Der Rest wird finanziert. |
+| **Eigenkapital (Weg mit KfW-Zuschuss)** | Eigenes Geld im Szenario „WP + KfW-Zuschuss“ – auch ohne KfW-Kredit. Den Rest finanziert der KfW-Kredit (wenn „KfW-Kredit nutzen“ angehakt ist, höchstens die förderfähigen Kosten), darüber hinaus bzw. ohne KfW-Kredit der Bankkredit. Beispiel: nur Zuschuss, kein KfW-Kredit, Rest über die Bank – „KfW-Kredit nutzen“ abhaken und hier das Eigenkapital eintragen. |
 | **Zins KfW 358 (zinsverbilligt)** | Für Selbstnutzer mit Einkommen bis 90.000 €. Zinsen sind Annahmen – aktuelle Konditionen bei der Hausbank erfragen. |
 | **Zins KfW 359** | Ergänzungskredit ohne Zinsverbilligung. |
 | **Laufzeit KfW-Kredit** | 4 bis 35 Jahre. |
 | **Tilgungsfreie Anlaufjahre** | In dieser Zeit werden nur Zinsen gezahlt. |
 | **Zinsbindung** | Danach gilt der Anschlusszins. |
 | **Anschlusszins** | Angenommener Zins nach Ende der Zinsbindung. |
-| **Zuschuss als Sondertilgung verwenden** | Der KfW-Zuschuss tilgt bei Auszahlung den Kredit (ab 5.000 €). |
+| **Zuschuss als Sondertilgung verwenden** | Der KfW-Zuschuss tilgt bei Auszahlung den KfW-Kredit (ab 5.000 €). Ohne KfW-Kredit tilgt er den Bankkredit des KfW-Wegs, abzüglich Vorfälligkeitsentschädigung. Die Rate bleibt gleich, der Kredit ist früher abbezahlt. |
 | **Auszahlung Zuschuss nach Inbetriebnahme** | Monate bis zur Auszahlung. |
-| **Eigenkapital (Steuer-Weg)** | Eigenes Geld im Weg „Steuerbonus + Bankkredit“. |
+| **Eigenkapital (Weg mit Steuerbonus)** | Eigenes Geld im Szenario „WP + Steuerbonus“; den Rest finanziert der Bankkredit. Für einen fairen Vergleich meist derselbe Betrag wie beim Weg mit KfW-Zuschuss. |
 | **Zins Bankkredit** | Für den Steuer-Weg und Beträge über den KfW-Kredit hinaus. |
 | **Laufzeit Bankkredit** | Laufzeit des Bankkredits. |
 | **Tilgungsfreie Jahre (Bank)** | Tilgungsfreie Zeit des Bankkredits. |
 | **Steuererstattung im Folgejahr, Monat** | Wann die Steuererstattung typischerweise eingeht. |
+| **Steuererstattungen als Sondertilgung verwenden** | Jede Steuererstattung (§ 35c) tilgt im Erstattungsmonat den Bankkredit des Steuer-Wegs, abzüglich Vorfälligkeitsentschädigung. Die Rate bleibt gleich, der Kredit ist früher abbezahlt und Sie zahlen weniger Zinsen. Ohne Haken kommen die Erstattungen als Einnahme an, und der Kredit läuft unverändert weiter. |
 
 ### Sondertilgung aus Einmalzahlung
 
@@ -321,7 +322,15 @@ Diese Abschnitte enthalten die geltenden Förder-, Kredit- und Steuerregeln mit 
 
 **Experten: KfW-Heizungsförderung 458** – Grundförderung, Neue WP-Förderung gilt ab (Antrag), Grundförderung Wärmepumpe ab Stichtag, Wertschöpfungs-Bonus (EU-Ursprung), Klimageschwindigkeitsbonus, KGB-Absenkung je Halbjahr, KGB erste Absenkung, KGB entfällt ab, KGB: Mindestalter Gasheizung, Einkommensbonus Stufe 1 bis, Einkommensbonus Stufe 1, Einkommensbonus Stufe 2 bis, Einkommensbonus Stufe 2, Einkommensbonus Stufe 3 bis, Einkommensbonus Stufe 3, Grenzerhöhung mit Kind, Höchstfördersatz, Höchstfördersatz (Einkommensstufe 1), Förderfähige Kosten 1. WE, Absenkung je Halbjahr, Erste Absenkung, Untergrenze nach Absenkung, Förderfähige Kosten 2.–6. WE, Förderfähige Kosten ab 7. WE, KfW-Kredit max. je WE, KfW 358: Einkommensgrenze.
 
-**Experten: Sondertilgungsregeln** – KfW: Mindestbetrag Sondertilgung, KfW: Vorfälligkeitsentschädigung nach Zinsbindung, Bank: Vorfälligkeitsentschädigung, Bank: Entschädigung bei Restlaufzeit ≤ 1 Jahr.
+**Experten: Sondertilgungsregeln** – KfW: Mindestbetrag Sondertilgung, KfW: Vorfälligkeitsentschädigung nach Zinsbindung, Bank: Vorfälligkeitsentschädigung, Bank: Entschädigung bei Restlaufzeit ≤ 1 Jahr, Bank: kostenfreie Sondertilgung pro Jahr (Anteil am Kreditbetrag), Bank: kostenfreie Sondertilgung pro Jahr (fester Betrag).
+
+So bilden Sie die Kosten von Sondertilgungen des Bankkredits ab (Zuschuss, Steuererstattungen und Einmalzahlung zählen zusammen):
+
+- **Immer kostenfrei:** „Bank: Vorfälligkeitsentschädigung“ und „Bank: Entschädigung bei Restlaufzeit ≤ 1 Jahr“ auf 0 % setzen.
+- **Kostenfrei bis zu einem Kontingent pro Jahr:** z. B. „10 % des Kreditbetrags pro Kalenderjahr kostenfrei“ – „Bank: kostenfreie Sondertilgung pro Jahr (Anteil am Kreditbetrag)“ auf 10 % setzen; oder einen festen Betrag je Jahr eintragen. Sind beide ausgefüllt, gilt der größere Wert. Nur der Teil darüber kostet die Vorfälligkeitsentschädigung. Im Rechenweg steht je Sondertilgung, welcher Teil im kostenfreien Kontingent lag.
+- **Immer kostenpflichtig:** Kontingent 0 lassen und die Vorfälligkeitsentschädigung laut Vertrag eintragen (gesetzlich höchstens 1 %, bei Restlaufzeit ≤ 1 Jahr 0,5 %, und nie mehr als die Zinsen bis zum Laufzeitende).
+
+Für den KfW-Kredit gelten die Regeln der KfW: Innerhalb der Zinsbindung sind Sondertilgungen ab dem Mindestbetrag kostenfrei.
 
 **Experten: Steuerbonus § 35c & Konstanten** – Steuerbonus Jahr 1, Steuerbonus Jahr 2, Steuerbonus Jahr 3, Max. Steuerermäßigung, Max. begünstigte Kosten, Abschluss spätestens, Mindestalter Gebäude, CO₂-Faktor Erdgas, CO₂-Faktor Heizöl, Heizwert Heizöl, Strom je kWh Gas beim Kochen (Induktion), Mehrwertsteuer.
 
@@ -350,6 +359,18 @@ Ordnet Ihr Haus anhand von Verbrauch, Fläche, Baujahr und Sanierung ein:
 - **Vergleich mit dem Baualter:** typischer Verbrauch unsanierter Häuser dieser Baualtersklasse und – abhängig von Ihrer Sanierung – der zu erwartende Bereich. Liegt Ihr Haus darüber, lohnt ein Blick auf Dämmung und Heizungseinstellung. Die Werte sind grobe Schätzungen.
 - **Heizlast (grob):** Wärmebedarf geteilt durch 2.000 Volllaststunden – ein erster Anhaltspunkt für die Größe der Wärmepumpe, kein Ersatz für eine Heizlastberechnung durch den Fachbetrieb.
 - **Eignung für die Wärmepumpe** nach dem Raumwärmebedarf je m²: bis 100 kWh gute Voraussetzungen, bis 150 kWh geeignet (Vorlauftemperatur prüfen), darüber ist die Wärmepumpe weniger effizient – größere Heizkörper oder einzelne Dämmmaßnahmen helfen.
+
+### Monatliche Belastung
+
+Zeigt, was Sie jeden Monat für Heizung (und ggf. Kochen) zahlen – heute und in Zukunft, getrennt für **Ohne Wärmepumpe**, **WP + KfW-Zuschuss** und **WP + Steuerbonus**.
+
+- **Heute:** Durchschnitt der ersten 12 Monate ohne Wärmepumpe, aufgeteilt in Energie, Grund- und Zählerkosten und Wartung. Weil Preise und Kosten im Lauf dieser 12 Monate schon steigen, liegt der Wert etwas über „Verbrauch × heutiger Preis + Grundpreis + Wartung“. Darauf beziehen sich die Beträge in Klammern, z. B. „(−92 €)“ = 92 € weniger als heute.
+- **Je Zeile ein Zeitraum von 12 Monaten** ab dem Start der Betrachtung (z. B. 11/26–10/27 = 11/2026 bis 10/2027). Der Betrag ist der Durchschnitt je Monat; so zählen Winter- und Sommermonate gleich. Fett ist der niedrigste Betrag des Zeitraums.
+- **Enthalten** sind die laufenden Zahlungen: Energie, Grund- und Zählerkosten, Wartung und die **Kreditrate** (Zinsen und Tilgung). Die Beträge enthalten die angenommenen Preissteigerungen, aber keinen Opportunitätszins. Endet ein Kredit, sinkt die Belastung sichtbar.
+- **Nicht enthalten** sind einmalige Beträge, weil sie einzelne Monate verzerren würden. Sie stehen aufklappbar unter **Einmalige Beträge**: Eigenanteil der Investition, Ersatzkessel bzw. Ersatz-Wärmepumpe, KfW-Zuschuss, Steuererstattungen, Sondertilgungen samt Vorfälligkeitsentschädigung und die Ablösung einer Restschuld am Ende. Der Restwert ist keine Zahlung und fehlt hier.
+- Die letzte Zeile **Durchschnitt** gilt für den ganzen Betrachtungszeitraum.
+
+Wie viel die Wärmepumpe insgesamt spart, zeigen die Kennzahlen – dort zählen auch die einmaligen Beträge und der Opportunitätszins.
 
 ### Hinweis „Annahmen möglicherweise veraltet“
 

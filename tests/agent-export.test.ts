@@ -7,6 +7,7 @@ import { importJson } from '../src/core/serialize';
 import { runAll } from '../src/core/simulation';
 import { DEFAULT_SOURCES } from '../src/core/sources';
 import type { Inputs } from '../src/core/types';
+import { monthlyBurden } from '../src/core/burden';
 import { agentFileName, agentMarkdown, htmlToMarkdown, mdTable } from '../src/ui/agent-export';
 import { SECTIONS } from '../src/ui/fields';
 import { fmtEur } from '../src/ui/format';
@@ -45,6 +46,7 @@ describe('F35 Export für KI-Assistenten (Markdown)', () => {
       '## Hinweise für den KI-Assistenten',
       '## Ergebnis',
       '## Haus und Wärmepumpe',
+      '## Monatliche Belastung',
       '## Wichtige Ereignisse und Hinweise des Rechners',
       '## Zeitpunkt der Umrüstung',
       '## Einflussgrößen (Sensitivität)',
@@ -104,6 +106,18 @@ describe('F35 Export für KI-Assistenten (Markdown)', () => {
     // one CSV row per month and scenario (+ header)
     const csv = [...md.matchAll(/```csv\n([\s\S]*?)\n```/g)].map((m) => m[1].split('\n').length);
     expect(csv).toEqual([run.ref.months.length + 1, run.kfw.months.length + 1, run.tax.months.length + 1]);
+  });
+
+  it('F36 Monatliche Belastung: heute mit Aufteilung, eine Zeile je 12-Monats-Zeitraum, einmalige Beträge', () => {
+    const { md, run } = exportMd();
+    const b = monthlyBurden(run);
+    const flat = md.replace(/\u00a0/g, ' ');
+    const section = flat.slice(flat.indexOf('## Monatliche Belastung'), flat.indexOf('## Wichtige Ereignisse'));
+    expect(section).toContain(`${fmtEur(b.today).replace(/\u00a0/g, ' ')} im Monat – Energie`);
+    expect(section.match(/^\| \d\d\/\d{4} – \d\d\/\d{4} /gm)).toHaveLength(b.years.length + b.oneOffs.length);
+    expect(section).toContain('| Durchschnitt im Zeitraum |');
+    expect(section).toContain('### Einmalige Beträge (nicht in den Monatswerten)');
+    expect(md).toContain('verkürzt die Laufzeit; die Rate wird nicht gesenkt');
   });
 
   it('Dateiname wie beim Export, Endung -ki.md', () => {

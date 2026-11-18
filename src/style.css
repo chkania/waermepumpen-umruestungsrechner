@@ -528,6 +528,19 @@ td.ev-cell { white-space: normal; min-width: 220px; }
 .src-refs a { color: var(--accent); }
 
 /* ---------- Tariff comparison ---------- */
+/* Monthly burden (F36) */
+.burden-lead { margin: 0 0 8px; }
+.burden-table td { white-space: nowrap; }
+.burden-table .burden-diff { font-size: 0.75rem; color: var(--c-muted); }
+.burden-period { white-space: nowrap; }
+.burden-table td.is-best .burden-val { font-weight: 700; }
+.burden-table tfoot td { border-top: 2px solid var(--border); font-weight: 600; }
+.burden-oneoffs { margin-top: 8px; }
+@media (max-width: 560px) {
+  .burden-table .burden-diff { display: block; }
+  .burden table.compact th, .burden table.compact td { padding-inline: 3px; }
+}
+.burden-oneoffs summary { cursor: pointer; font-weight: 600; }
 .tariff-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
 .tariff-col { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; background: var(--surface-2); }
 .tariff-col.is-cheaper { border-color: var(--accent); background: var(--accent-soft); }

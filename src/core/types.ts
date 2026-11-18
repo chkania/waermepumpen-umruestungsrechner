@@ -144,7 +144,10 @@ export interface FinancingInputs {
   followUpRate: number;
   /** Apply for KfW supplementary loan (Ergänzungskredit) 358/359; false = external financing via the bank loan only. */
   useKfwLoan: boolean;
+  /** Subsidy (Zuschuss) repays the KfW loan, without one the bank loan of the KfW path. */
   subsidyAsSpecialRepayment: boolean;
+  /** Tax refunds (Steuererstattungen) repay the bank loan of the tax path. */
+  taxRefundAsSpecialRepayment: boolean;
   bankRate: number;
   bankTermYears: number;
   bankGraceYears: number;
@@ -165,6 +168,10 @@ export interface FinancingInputs {
   bankPrepayFee: number;
   /** Bank: early repayment charge (Vorfälligkeitsentschädigung) for a remaining term ≤ 1 year (§ 502 BGB max. 0.5 %). */
   bankPrepayFeeShort: number;
+  /** Bank: free special repayment allowance (kostenfreies Sondertilgungsrecht) per calendar year as share of the loan amount. */
+  bankFreePrepayShare: number;
+  /** Bank: free special repayment allowance per calendar year as fixed amount (€); the larger of both applies. */
+  bankFreePrepayAmount: number;
 }
 
 export interface FundingParams {

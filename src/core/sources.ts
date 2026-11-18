@@ -190,12 +190,17 @@ export const DEFAULT_SOURCES: Record<string, DefaultSource> = {
   'financing.kfwFixYears': kfwLoan('Zinsbindung bei Laufzeiten ab 6 Jahren: 10 Jahre.'),
   'financing.followUpRate': { kind: 'annahme', text: 'Annahme für den Zins nach Ende der Zinsbindung (Prolongationsangebot der KfW ist heute nicht bekannt).' },
   'financing.useKfwLoan': { kind: 'annahme', text: 'Annahme: Der KfW-Ergänzungskredit wird beantragt. Er ist optional – der Zuschuss (458) wird auch ohne Kredit gewährt. Ohne Haken läuft der Finanzierungsbedarf über den Bankkredit.' },
-  'financing.subsidyAsSpecialRepayment': kfwLoan('Während der Zinsbindung sind Sondertilgungen ab 5.000 € ohne Vorfälligkeitsentschädigung möglich; die Laufzeit verkürzt sich.'),
+  'financing.subsidyAsSpecialRepayment': kfwLoan('Während der Zinsbindung sind Sondertilgungen ab 5.000 € ohne Vorfälligkeitsentschädigung möglich; die Laufzeit verkürzt sich. Ohne KfW-Kredit tilgt der Zuschuss den Bankkredit nach den Regeln für Verbraucherdarlehen (§ 500 Abs. 2, § 502 BGB).'),
   'financing.subsidyDelayMonths': { kind: 'annahme', text: 'Annahme: Auszahlung ca. 3 Monate nach Inbetriebnahme (Nachweis im KfW-Portal, Prüfung).' },
   'financing.bankRate': mkt('Verivox: Median-Zins der über das Portal abgeschlossenen Ratenkredite (10.000–30.000 €, 36–84 Monate) im Oktober 2026 6,22 % effektiv; Beispiel Commerzbank (11/2026, 15.000 €, 60 Monate) 6,44 %. Der Durchschnitt aller Banken liegt laut Bundesbank höher (Konsumentenkredite September 2026: 8,91 %), grundschuldbesicherte Modernisierungskredite niedriger (ca. 4,3 %). Default = etwas über dem Portal-Median, weil die Laufzeit hier länger ist. Angebote vergleichen.', 'https://www.verivox.de/kredit/zinsen/', '18.11.2026'),
   'financing.bankTermYears': { kind: 'annahme', text: 'Annahme für die Laufzeit des Bankkredits.' },
   'financing.bankGraceYears': { kind: 'annahme', text: 'Annahme: sofortige Tilgung.' },
   'financing.taxRefundMonth': { kind: 'annahme', text: 'Annahme: Steuerbescheid und Erstattung im Juni des Folgejahres.' },
+  'financing.taxRefundAsSpecialRepayment': {
+    kind: 'annahme',
+    text: 'Annahme: Die Steuererstattungen fließen in die Tilgung des Bankkredits – bei einem Kreditzins über dem Opportunitätszins meist günstiger, als das Geld liegen zu lassen. Verbraucherdarlehen dürfen jederzeit teilweise vorzeitig zurückgezahlt werden; die Vorfälligkeitsentschädigung beträgt höchstens 1 % (§ 500 Abs. 2, § 502 BGB).',
+    url: 'https://www.gesetze-im-internet.de/bgb/__502.html',
+  },
   'financing.windfallAmount': { kind: 'beispiel', text: 'Standard 0 € (keine Einmalzahlung). Hier z. B. die Auszahlung einer fälligen Lebensversicherung eintragen. Eingesetztes Geld zählt als Ausgabe; mit dem Opportunitätszins wird berücksichtigt, dass es sonst Zinsen bringen würde.' },
   'financing.windfallMonth': { kind: 'beispiel', text: 'Beispiel: 5 Jahre nach Start. Fälligkeitstermin laut Versicherungsvertrag eintragen.' },
   'financing.windfallRepayMonth': { kind: 'annahme', text: 'Standard: leer – die Sondertilgung erfolgt im Monat, in dem das Geld verfügbar ist. Ein späterer Termin kann sinnvoll sein (z. B. Zinsbindungsende abwarten oder Bankkredit kurz vor Laufzeitende); früher als verfügbar ist nicht möglich.' },
@@ -204,6 +209,14 @@ export const DEFAULT_SOURCES: Record<string, DefaultSource> = {
   'financing.kfwFeeAfterFix': { kind: 'annahme', text: 'Annahme: Die Höhe der Vorfälligkeitsentschädigung nach Ende der Zinsbindung legt der Finanzierungspartner fest; das Merkblatt nennt keinen Wert. Vor einer vollständigen Rückzahlung bei der Bank erfragen.' },
   'financing.bankPrepayFee': { kind: 'gesetz', text: 'Verbraucherdarlehen dürfen jederzeit ganz oder teilweise vorzeitig zurückgezahlt werden (§ 500 Abs. 2 BGB). Die Vorfälligkeitsentschädigung beträgt höchstens 1 % des vorzeitig zurückgezahlten Betrags und nie mehr als die Sollzinsen bis zum Laufzeitende (§ 502 BGB). Viele Banken erlauben Sondertilgungen kostenfrei – dann 0 % eintragen.', url: 'https://www.gesetze-im-internet.de/bgb/__502.html' },
   'financing.bankPrepayFeeShort': { kind: 'gesetz', text: 'Beträgt die Restlaufzeit höchstens ein Jahr, ist die Entschädigung auf 0,5 % begrenzt (§ 502 Abs. 3 BGB).', url: 'https://www.gesetze-im-internet.de/bgb/__502.html' },
+  'financing.bankFreePrepayShare': {
+    kind: 'annahme',
+    text: 'Standard 0 % (kein kostenfreies Kontingent). Viele Ratenkredite und Modernisierungskredite erlauben kostenfreie Sondertilgungen bis zu einem Anteil des Kreditbetrags je Jahr (z. B. 5 % oder 10 %) oder unbegrenzt – Wert aus dem eigenen Kreditvertrag eintragen. Unbegrenzt kostenfrei: „Bank: Vorfälligkeitsentschädigung“ auf 0 % setzen.',
+  },
+  'financing.bankFreePrepayAmount': {
+    kind: 'annahme',
+    text: 'Standard 0 € (kein festes Kontingent). Manche Kreditverträge nennen statt eines Anteils einen festen Betrag je Jahr, der kostenfrei getilgt werden darf – Wert aus dem eigenen Kreditvertrag eintragen.',
+  },
 
   // ---------- Analysis period (Betrachtungszeitraum) ----------
   'general.startMonth': { kind: 'annahme', text: 'Aktueller Monat beim ersten Öffnen.' },
@@ -306,6 +319,7 @@ export const OFFICIAL_REFS: Record<string, OfficialRef[]> = {
   'financing.windfallTarget': [m358('S. 5 „Tilgung“'), law('§ 500 Abs. 2 BGB', 'https://www.gesetze-im-internet.de/bgb/__500.html')],
   'financing.kfwMinPrepay': [m358('S. 5 „Tilgung“')],
   'financing.kfwFeeAfterFix': [m358('S. 5 „Tilgung“'), rl('8.5.2 b (Prolongation)')],
+  'financing.taxRefundAsSpecialRepayment': [law('§ 500 Abs. 2 BGB', 'https://www.gesetze-im-internet.de/bgb/__500.html'), law('§ 502 BGB', 'https://www.gesetze-im-internet.de/bgb/__502.html')],
   'financing.bankPrepayFee': [law('§ 500 Abs. 2 BGB', 'https://www.gesetze-im-internet.de/bgb/__500.html'), law('§ 502 BGB', 'https://www.gesetze-im-internet.de/bgb/__502.html')],
   'financing.bankPrepayFeeShort': [law('§ 502 Abs. 3 BGB', 'https://www.gesetze-im-internet.de/bgb/__502.html')],
   'financing.subsidyDelayMonths': [m458('S. 7 „Bewilligungszeitraum“, S. 9 „Auszahlung“')],

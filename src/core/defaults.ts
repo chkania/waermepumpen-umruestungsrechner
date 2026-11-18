@@ -127,6 +127,7 @@ export function createDefaults(today: Date = new Date()): Inputs {
       followUpRate: 0.04,
       useKfwLoan: true,
       subsidyAsSpecialRepayment: true,
+      taxRefundAsSpecialRepayment: true,
       bankRate: 0.065,
       bankTermYears: 15,
       bankGraceYears: 0,
@@ -140,6 +141,8 @@ export function createDefaults(today: Date = new Date()): Inputs {
       kfwFeeAfterFix: 0.01,
       bankPrepayFee: 0.01,
       bankPrepayFeeShort: 0.005,
+      bankFreePrepayShare: 0,
+      bankFreePrepayAmount: 0,
     },
     funding: {
       grundRate: 0.3,

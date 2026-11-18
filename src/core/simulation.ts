@@ -17,7 +17,8 @@ import type {
   YearRow,
 } from './types';
 
-const SUBSIDY = 'Zuschuss';
+export const SUBSIDY = 'Zuschuss';
+export const TAX_REFUND = 'Steuererstattung';
 const WINDFALL = 'Einmalzahlung';
 
 /**
@@ -42,8 +43,11 @@ function kfwRules(inp: Inputs): PrepaymentRules {
   };
 }
 
-/** Special repayment (Sondertilgung) rules for consumer loans (§ 500 (2), § 502 BGB). */
-function bankRules(inp: Inputs): PrepaymentRules {
+/**
+ * Special repayment (Sondertilgung) rules for consumer loans (§ 500 (2), § 502 BGB). The yearly free allowance
+ * (kostenfreies Sondertilgungsrecht, F12.9) is the larger of the share of the loan amount and the fixed amount.
+ */
+function bankRules(inp: Inputs, principal: number): PrepaymentRules {
   const f = inp.financing;
   return {
     minAmount: 0,
@@ -52,6 +56,7 @@ function bankRules(inp: Inputs): PrepaymentRules {
     feeRate: f.bankPrepayFee,
     feeRateShortRemaining: f.bankPrepayFeeShort,
     capFeeAtInterest: true,
+    freePerYear: Math.max(0, f.bankFreePrepayShare * principal, f.bankFreePrepayAmount),
   };
 }
 
@@ -323,8 +328,8 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
         );
       }
       for (const x of res.extras) {
-        if (x.label === SUBSIDY && x.status === 'rejected') {
-          warnings.push(`${name}: Zuschuss nicht als Sondertilgung möglich – ${x.reason}`);
+        if ((x.label === SUBSIDY || x.label === TAX_REFUND) && x.status === 'rejected') {
+          warnings.push(`${name}: ${x.label} nicht als Sondertilgung möglich – ${x.reason}`);
         }
       }
       const lastPayment = res.payments.length ? res.payments[res.payments.length - 1].month : spec.startMonth;
@@ -456,6 +461,10 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
           `Finanzierungsbedarf über KfW-Kredit hinaus (${Math.round(bankLoan).toLocaleString('de-DE')} €) wird über den Bankkredit gerechnet.`,
         );
       }
+      // The subsidy (Zuschuss) repays the KfW loan; without one the bank loan of this path (F12.8)
+      const subsidyExtra =
+        fin.subsidyAsSpecialRepayment && subsidyMonth < end ? [{ month: subsidyMonth, amount: kfwRes.subsidy, label: SUBSIDY }] : [];
+      const toKfw = kfwLoan > 0;
       runLoans([
         {
           name: `KfW-Kredit ${variant}`,
@@ -468,13 +477,13 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
             fixMonths: Math.round(fin.kfwFixYears * 12),
             followUpRate: fin.followUpRate,
             rules: kfwRules(inp),
-            extraRepayments:
-              fin.subsidyAsSpecialRepayment && subsidyMonth < end
-                ? [{ month: subsidyMonth, amount: kfwRes.subsidy, label: SUBSIDY }]
-                : [],
+            extraRepayments: toKfw ? subsidyExtra : [],
           },
         },
-        { name: 'Bankkredit', spec: bankSpec(bankLoan, install, inp) },
+        {
+          name: 'Bankkredit',
+          spec: { ...bankSpec(bankLoan, install, inp), extraRepayments: toKfw || kfwRes.subsidy <= 0 ? [] : subsidyExtra },
+        },
       ]);
     } else {
       const ageAtCompletion = install / 12 - inp.building.constructionYear;
@@ -504,7 +513,11 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
         );
       }
       const equity = Math.min(Math.max(0, fin.taxEquity), total);
-      runLoans([{ name: 'Bankkredit', spec: bankSpec(total - equity, install, inp) }]);
+      // Tax refunds (Steuererstattungen) as special repayments (Sondertilgung) of the bank loan (F12.8)
+      const refundExtras = fin.taxRefundAsSpecialRepayment
+        ? taxRefunds.filter((r) => r.amount > 0 && r.month >= start && r.month < end).map((r) => ({ month: r.month, amount: r.amount, label: TAX_REFUND }))
+        : [];
+      runLoans([{ name: 'Bankkredit', spec: { ...bankSpec(total - equity, install, inp), extraRepayments: refundExtras } }]);
     }
   }
 
@@ -575,7 +588,7 @@ function bankSpec(principal: number, install: number, inp: Inputs): LoanSpec {
     graceMonths: Math.round(f.bankGraceYears * 12),
     fixMonths: 0,
     followUpRate: f.bankRate,
-    rules: bankRules(inp),
+    rules: bankRules(inp, Math.max(0, principal)),
   };
 }
 

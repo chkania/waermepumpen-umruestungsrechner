@@ -13,6 +13,7 @@ import { estimateJaz, type JazEstimate } from '../core/jaz';
 import { energyYear, type EnergyYear } from '../core/energy';
 import { pvSummary } from '../core/pv';
 import { reportHtml } from './report';
+import { burdenHtml } from './burden';
 import { MAX_VARIANTS, variantName, variantResult, type Variant } from '../core/variants';
 import { VARIANTS_LIMIT_TEXT, variantCurves, variantCurvesTableHtml, variantDiffsHtml, variantsTableHtml } from './variants';
 import { sensitivity, type Sensitivity } from '../core/sensitivity';
@@ -799,6 +800,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     renderPvEstimate();
     renderDetails(run);
     renderTariff();
+    $<HTMLElement>('#burden').innerHTML = burdenHtml(run);
     renderInstallTable(cmp);
     renderYearTable(run, events);
     const prices = priceRows(inputs);
@@ -1857,6 +1859,7 @@ function layout(): string {
       <div id="warnings"></div>
       <div id="events" class="card events"></div>
       <div id="house" class="card house"></div>
+      <div id="burden" class="card burden"></div>
       <div class="card">
         <h2 class="visually-hidden">Diagramme</h2>
         <div class="tabs" role="tablist" aria-label="Diagramme">

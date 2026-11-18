@@ -147,9 +147,7 @@ export function keyEvents(inp: Inputs, run: RunResult, today?: Date): KeyEvents 
         scenario: 'kfw',
         level: 'important',
         title: 'Auszahlung KfW-Zuschuss',
-        detail: inp.financing.subsidyAsSpecialRepayment && kfw.loans.length
-          ? 'Wird als Sondertilgung für den KfW-Kredit verwendet.'
-          : undefined,
+        detail: repaidLoan(kfw, 'Zuschuss') ? `Wird als Sondertilgung für den ${repaidLoan(kfw, 'Zuschuss')} verwendet.` : undefined,
         amount: -k.subsidy,
       });
     }
@@ -166,14 +164,16 @@ export function keyEvents(inp: Inputs, run: RunResult, today?: Date): KeyEvents 
       const month = (y.year + 1) * 12 + (refundMonth - 1);
       if (month >= end) return;
       const last = i === refunds.length - 1;
+      const loan = repaidLoan(tax, 'Steuererstattung', month);
+      const repay = loan ? ` Wird als Sondertilgung für den ${loan} verwendet.` : '';
       timeline.push({
         month,
         scenario: 'tax',
         level: last ? 'important' : 'info',
         title: last ? 'Letzte Steuererstattung (§ 35c)' : `Steuererstattung für ${y.year}`,
         detail: last
-          ? `Für das Steuerjahr ${y.year}. Danach entfällt die Entlastung${tax.loans.length ? ' – die Kreditraten laufen weiter' : ''}.`
-          : `Für das Steuerjahr ${y.year}.`,
+          ? `Für das Steuerjahr ${y.year}.${repay} Danach entfällt die Entlastung${tax.loans.some((l) => l.payoffMonth === null || l.payoffMonth > month) ? ' – die Kreditraten laufen weiter' : ''}.`
+          : `Für das Steuerjahr ${y.year}.${repay}`,
         amount: -y.amount,
       });
     });
@@ -241,12 +241,18 @@ function order(e: KeyEvent): number {
   return { all: 0, ref: 1, kfw: 2, tax: 3 }[e.scenario];
 }
 
+/** Name of the loan that a subsidy (Zuschuss) or tax refund (Steuererstattung) repaid (in the given month), if any. */
+function repaidLoan(s: ScenarioResult, label: string, month?: number): string | null {
+  const l = s.loans.find((x) => x.extras.some((e) => e.label === label && e.applied > 0 && (month === undefined || e.month === month)));
+  return l ? l.name : null;
+}
+
 function addWindfallEvents(timeline: KeyEvent[], s: ScenarioResult, scenario: 'kfw' | 'tax'): void {
-  // Subsidy (Zuschuss) rejected as special repayment (Sondertilgung) (e.g. below 5,000 €)
+  // Subsidy (Zuschuss) or tax refund (Steuererstattung) rejected as special repayment (Sondertilgung) (e.g. below 5,000 €)
   for (const l of s.loans) {
     for (const x of l.extras) {
-      if (x.label === 'Zuschuss' && x.status === 'rejected') {
-        timeline.push({ month: x.month, scenario, level: 'warning', title: `Zuschuss nicht als Sondertilgung für ${l.name}`, detail: x.reason });
+      if ((x.label === 'Zuschuss' || x.label === 'Steuererstattung') && x.status === 'rejected') {
+        timeline.push({ month: x.month, scenario, level: 'warning', title: `${x.label} nicht als Sondertilgung für ${l.name}`, detail: x.reason });
       }
     }
   }
