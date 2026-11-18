@@ -285,7 +285,7 @@ function loansHtml(inp: Inputs, run: RunResult): string {
       return `<tr><th scope="row">${e(l.name)}</th>${cells.map((c) => `<td class="num">${e(c)}</td>`).join('')}</tr>`;
     });
     const extras = s.loans.flatMap((l) =>
-      l.extras.map((x) => `<li>${e(l.name)}, ${e(x.label ?? "Sondertilgung")} ${e(fmtMonth(x.month))}: ${e(fmtEur(x.applied))} getilgt${x.fee > 0 ? `, Gebühr ${e(fmtEur(x.fee))}` : ''}${x.status === 'rejected' ? ` – nicht möglich: ${e(x.reason ?? '')}` : x.status === 'partial' ? ` – nur teilweise: ${e(x.reason ?? '')}` : ''}</li>`),
+      l.extras.map((x) => `<li>${e(l.name)}, ${e(x.label ?? "Sondertilgung")} ${e(fmtMonth(x.month))}: ${e(fmtEur(x.applied))} getilgt${x.freeAmount ? `, davon ${e(fmtEur(x.freeAmount))} im kostenfreien Kontingent` : ''}${x.fee > 0 ? `, Gebühr ${e(fmtEur(x.fee))}` : ''}${x.status === 'rejected' ? ` – nicht möglich: ${e(x.reason ?? '')}` : x.status === 'partial' ? ` – nur teilweise: ${e(x.reason ?? '')}` : ''}</li>`),
     );
     return `<h3>${SCENARIO_NAMES[s.kind]}</h3>
       <div class="table-wrap"><table class="compact"><caption>Kredite im Szenario ${SCENARIO_NAMES[s.kind]}</caption>

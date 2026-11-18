@@ -43,8 +43,11 @@ function kfwRules(inp: Inputs): PrepaymentRules {
   };
 }
 
-/** Special repayment (Sondertilgung) rules for consumer loans (§ 500 (2), § 502 BGB). */
-function bankRules(inp: Inputs): PrepaymentRules {
+/**
+ * Special repayment (Sondertilgung) rules for consumer loans (§ 500 (2), § 502 BGB). The yearly free allowance
+ * (kostenfreies Sondertilgungsrecht, F12.9) is the larger of the share of the loan amount and the fixed amount.
+ */
+function bankRules(inp: Inputs, principal: number): PrepaymentRules {
   const f = inp.financing;
   return {
     minAmount: 0,
@@ -53,6 +56,7 @@ function bankRules(inp: Inputs): PrepaymentRules {
     feeRate: f.bankPrepayFee,
     feeRateShortRemaining: f.bankPrepayFeeShort,
     capFeeAtInterest: true,
+    freePerYear: Math.max(0, f.bankFreePrepayShare * principal, f.bankFreePrepayAmount),
   };
 }
 
@@ -584,7 +588,7 @@ function bankSpec(principal: number, install: number, inp: Inputs): LoanSpec {
     graceMonths: Math.round(f.bankGraceYears * 12),
     fixMonths: 0,
     followUpRate: f.bankRate,
-    rules: bankRules(inp),
+    rules: bankRules(inp, Math.max(0, principal)),
   };
 }
 

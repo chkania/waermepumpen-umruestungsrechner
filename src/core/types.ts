@@ -168,6 +168,10 @@ export interface FinancingInputs {
   bankPrepayFee: number;
   /** Bank: early repayment charge (Vorfälligkeitsentschädigung) for a remaining term ≤ 1 year (§ 502 BGB max. 0.5 %). */
   bankPrepayFeeShort: number;
+  /** Bank: free special repayment allowance (kostenfreies Sondertilgungsrecht) per calendar year as share of the loan amount. */
+  bankFreePrepayShare: number;
+  /** Bank: free special repayment allowance per calendar year as fixed amount (€); the larger of both applies. */
+  bankFreePrepayAmount: number;
 }
 
 export interface FundingParams {

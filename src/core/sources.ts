@@ -209,6 +209,14 @@ export const DEFAULT_SOURCES: Record<string, DefaultSource> = {
   'financing.kfwFeeAfterFix': { kind: 'annahme', text: 'Annahme: Die Höhe der Vorfälligkeitsentschädigung nach Ende der Zinsbindung legt der Finanzierungspartner fest; das Merkblatt nennt keinen Wert. Vor einer vollständigen Rückzahlung bei der Bank erfragen.' },
   'financing.bankPrepayFee': { kind: 'gesetz', text: 'Verbraucherdarlehen dürfen jederzeit ganz oder teilweise vorzeitig zurückgezahlt werden (§ 500 Abs. 2 BGB). Die Vorfälligkeitsentschädigung beträgt höchstens 1 % des vorzeitig zurückgezahlten Betrags und nie mehr als die Sollzinsen bis zum Laufzeitende (§ 502 BGB). Viele Banken erlauben Sondertilgungen kostenfrei – dann 0 % eintragen.', url: 'https://www.gesetze-im-internet.de/bgb/__502.html' },
   'financing.bankPrepayFeeShort': { kind: 'gesetz', text: 'Beträgt die Restlaufzeit höchstens ein Jahr, ist die Entschädigung auf 0,5 % begrenzt (§ 502 Abs. 3 BGB).', url: 'https://www.gesetze-im-internet.de/bgb/__502.html' },
+  'financing.bankFreePrepayShare': {
+    kind: 'annahme',
+    text: 'Standard 0 % (kein kostenfreies Kontingent). Viele Ratenkredite und Modernisierungskredite erlauben kostenfreie Sondertilgungen bis zu einem Anteil des Kreditbetrags je Jahr (z. B. 5 % oder 10 %) oder unbegrenzt – Wert aus dem eigenen Kreditvertrag eintragen. Unbegrenzt kostenfrei: „Bank: Vorfälligkeitsentschädigung“ auf 0 % setzen.',
+  },
+  'financing.bankFreePrepayAmount': {
+    kind: 'annahme',
+    text: 'Standard 0 € (kein festes Kontingent). Manche Kreditverträge nennen statt eines Anteils einen festen Betrag je Jahr, der kostenfrei getilgt werden darf – Wert aus dem eigenen Kreditvertrag eintragen.',
+  },
 
   // ---------- Analysis period (Betrachtungszeitraum) ----------
   'general.startMonth': { kind: 'annahme', text: 'Aktueller Monat beim ersten Öffnen.' },

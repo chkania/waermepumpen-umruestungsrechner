@@ -279,3 +279,47 @@ describe('F12.8 Zuschuss und Steuererstattungen als Sondertilgung, unabhängig v
     expect(ev.detail).toContain('Wird als Sondertilgung für den Bankkredit verwendet.');
   });
 });
+
+describe('F12.9 Kostenfreies Sondertilgungsrecht je Kalenderjahr (Bankkredit)', () => {
+  const bankSpec = (freePerYear: number, extraRepayments: { month: number; amount: number }[]) =>
+    spec({ principal: 30000, rate: 0.06, termMonths: 120, fixMonths: 0, followUpRate: 0.06, rules: { ...BANK, freePerYear }, extraRepayments });
+
+  it('bis zum Kontingent kostenfrei, darüber 1 %', () => {
+    const r = loanScheduleDetailed(bankSpec(3000, [{ month: 13, amount: 5000 }]));
+    expect(r.extras[0]).toMatchObject({ status: 'applied', applied: 5000, freeAmount: 3000 });
+    expect(r.extras[0].fee).toBeCloseTo(2000 * 0.01, 6);
+  });
+
+  it('mehrere Sondertilgungen im selben Jahr teilen sich das Kontingent; im neuen Jahr gilt es wieder', () => {
+    // month 13 and 14 = same calendar year (year 1), month 24 = next calendar year
+    const r = loanScheduleDetailed(bankSpec(3000, [{ month: 13, amount: 2000 }, { month: 14, amount: 2000 }, { month: 24, amount: 2000 }]));
+    expect(r.extras.map((x) => x.freeAmount ?? 0)).toEqual([2000, 1000, 2000]);
+    expect(r.extras.map((x) => x.fee)).toEqual([0, expect.closeTo(10, 6), 0]);
+  });
+
+  it('ohne Kontingent wie bisher; Kappung auf entgangene Zinsen gilt für den kostenpflichtigen Teil', () => {
+    const r = loanScheduleDetailed(bankSpec(0, [{ month: 13, amount: 5000 }]));
+    expect(r.extras[0].freeAmount).toBeUndefined();
+    expect(r.extras[0].fee).toBeCloseTo(50, 6);
+    // shortly before the end the charge is capped at the interest forgone (§ 502 (3) BGB)
+    const late = loanScheduleDetailed(bankSpec(1000, [{ month: 119, amount: 500 }]));
+    expect(late.extras[0].fee).toBe(0); // within the allowance
+  });
+
+  it('Simulation: 10 % des Kreditbetrags machen die Steuererstattungen kostenfrei', () => {
+    const base = (mut?: (i: Inputs) => void) =>
+      neutral((i) => {
+        i.financing.taxEquity = 0;
+        mut?.(i);
+      });
+    const paid = runAll(base());
+    const free = runAll(base((i) => (i.financing.bankFreePrepayShare = 0.1)));
+    const fees = (r: ReturnType<typeof runAll>) => r.tax.loans[0].extras.filter((x) => x.label === 'Steuererstattung').map((x) => x.fee);
+    expect(fees(paid).every((f) => f > 0)).toBe(true);
+    expect(fees(free).every((f) => f === 0)).toBe(true);
+    expect(free.tax.totalCost).toBeLessThan(paid.tax.totalCost);
+    // fixed amount: the larger of both applies
+    const fixed = runAll(base((i) => (i.financing.bankFreePrepayAmount = 1000)));
+    expect(fixed.tax.loans[0].extras[0].freeAmount).toBe(1000);
+  });
+});

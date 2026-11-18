@@ -298,7 +298,15 @@ Diese Abschnitte enthalten die geltenden Förder-, Kredit- und Steuerregeln mit 
 
 **Experten: KfW-Heizungsförderung 458** – Grundförderung, Neue WP-Förderung gilt ab (Antrag), Grundförderung Wärmepumpe ab Stichtag, Wertschöpfungs-Bonus (EU-Ursprung), Klimageschwindigkeitsbonus, KGB-Absenkung je Halbjahr, KGB erste Absenkung, KGB entfällt ab, KGB: Mindestalter Gasheizung, Einkommensbonus Stufe 1 bis, Einkommensbonus Stufe 1, Einkommensbonus Stufe 2 bis, Einkommensbonus Stufe 2, Einkommensbonus Stufe 3 bis, Einkommensbonus Stufe 3, Grenzerhöhung mit Kind, Höchstfördersatz, Höchstfördersatz (Einkommensstufe 1), Förderfähige Kosten 1. WE, Absenkung je Halbjahr, Erste Absenkung, Untergrenze nach Absenkung, Förderfähige Kosten 2.–6. WE, Förderfähige Kosten ab 7. WE, KfW-Kredit max. je WE, KfW 358: Einkommensgrenze.
 
-**Experten: Sondertilgungsregeln** – KfW: Mindestbetrag Sondertilgung, KfW: Vorfälligkeitsentschädigung nach Zinsbindung, Bank: Vorfälligkeitsentschädigung, Bank: Entschädigung bei Restlaufzeit ≤ 1 Jahr.
+**Experten: Sondertilgungsregeln** – KfW: Mindestbetrag Sondertilgung, KfW: Vorfälligkeitsentschädigung nach Zinsbindung, Bank: Vorfälligkeitsentschädigung, Bank: Entschädigung bei Restlaufzeit ≤ 1 Jahr, Bank: kostenfreie Sondertilgung pro Jahr (Anteil am Kreditbetrag), Bank: kostenfreie Sondertilgung pro Jahr (fester Betrag).
+
+So bilden Sie die Kosten von Sondertilgungen des Bankkredits ab (Zuschuss, Steuererstattungen und Einmalzahlung zählen zusammen):
+
+- **Immer kostenfrei:** „Bank: Vorfälligkeitsentschädigung“ und „Bank: Entschädigung bei Restlaufzeit ≤ 1 Jahr“ auf 0 % setzen.
+- **Kostenfrei bis zu einem Kontingent pro Jahr:** z. B. „10 % des Kreditbetrags pro Kalenderjahr kostenfrei“ – „Bank: kostenfreie Sondertilgung pro Jahr (Anteil am Kreditbetrag)“ auf 10 % setzen; oder einen festen Betrag je Jahr eintragen. Sind beide ausgefüllt, gilt der größere Wert. Nur der Teil darüber kostet die Vorfälligkeitsentschädigung. Im Rechenweg steht je Sondertilgung, welcher Teil im kostenfreien Kontingent lag.
+- **Immer kostenpflichtig:** Kontingent 0 lassen und die Vorfälligkeitsentschädigung laut Vertrag eintragen (gesetzlich höchstens 1 %, bei Restlaufzeit ≤ 1 Jahr 0,5 %, und nie mehr als die Zinsen bis zum Laufzeitende).
+
+Für den KfW-Kredit gelten die Regeln der KfW: Innerhalb der Zinsbindung sind Sondertilgungen ab dem Mindestbetrag kostenfrei.
 
 **Experten: Steuerbonus § 35c & Konstanten** – Steuerbonus Jahr 1, Steuerbonus Jahr 2, Steuerbonus Jahr 3, Max. Steuerermäßigung, Max. begünstigte Kosten, Abschluss spätestens, Mindestalter Gebäude, CO₂-Faktor Erdgas, CO₂-Faktor Heizöl, Heizwert Heizöl, Strom je kWh Gas beim Kochen (Induktion), Mehrwertsteuer.
 
