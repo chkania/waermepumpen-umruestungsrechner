@@ -247,13 +247,14 @@ Achtung: Die Adressen können persönliche Angaben enthalten (z. B. einen Login-
 | **Tilgungsfreie Anlaufjahre** | In dieser Zeit werden nur Zinsen gezahlt. |
 | **Zinsbindung** | Danach gilt der Anschlusszins. |
 | **Anschlusszins** | Angenommener Zins nach Ende der Zinsbindung. |
-| **Zuschuss als Sondertilgung verwenden** | Der KfW-Zuschuss tilgt bei Auszahlung den Kredit (ab 5.000 €). |
+| **Zuschuss als Sondertilgung verwenden** | Der KfW-Zuschuss tilgt bei Auszahlung den KfW-Kredit (ab 5.000 €). Ohne KfW-Kredit tilgt er den Bankkredit des KfW-Wegs, abzüglich Vorfälligkeitsentschädigung. Die Rate bleibt gleich, der Kredit ist früher abbezahlt. |
 | **Auszahlung Zuschuss nach Inbetriebnahme** | Monate bis zur Auszahlung. |
 | **Eigenkapital (Steuer-Weg)** | Eigenes Geld im Weg „Steuerbonus + Bankkredit“. |
 | **Zins Bankkredit** | Für den Steuer-Weg und Beträge über den KfW-Kredit hinaus. |
 | **Laufzeit Bankkredit** | Laufzeit des Bankkredits. |
 | **Tilgungsfreie Jahre (Bank)** | Tilgungsfreie Zeit des Bankkredits. |
 | **Steuererstattung im Folgejahr, Monat** | Wann die Steuererstattung typischerweise eingeht. |
+| **Steuererstattungen als Sondertilgung verwenden** | Jede Steuererstattung (§ 35c) tilgt im Erstattungsmonat den Bankkredit des Steuer-Wegs, abzüglich Vorfälligkeitsentschädigung. Die Rate bleibt gleich, der Kredit ist früher abbezahlt und Sie zahlen weniger Zinsen. Ohne Haken kommen die Erstattungen als Einnahme an, und der Kredit läuft unverändert weiter. |
 
 ### Sondertilgung aus Einmalzahlung
 

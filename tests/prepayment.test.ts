@@ -233,3 +233,49 @@ describe('F12.6 Tilgungstermin der Sondertilgung', () => {
     expect(sond.detail).toMatch(/Zinsen im Betrachtungszeitraum/);
   });
 });
+
+describe('F12.8 Zuschuss und Steuererstattungen als Sondertilgung, unabhängig vom KfW-Kredit', () => {
+  const bank = (r: ReturnType<typeof runAll>, k: 'kfw' | 'tax') => r[k].loans.find((l) => l.name === 'Bankkredit')!;
+  const withBank = (mut?: (i: Inputs) => void) =>
+    neutral((i) => {
+      i.financing.useKfwLoan = false;
+      i.financing.bankRate = 0.07;
+      i.financing.kfwEquity = 0;
+      i.financing.taxEquity = 0;
+      mut?.(i);
+    });
+
+  it('ohne KfW-Kredit tilgt der Zuschuss den Bankkredit des KfW-Wegs', () => {
+    const on = runAll(withBank());
+    const off = runAll(withBank((i) => (i.financing.subsidyAsSpecialRepayment = false)));
+    const x = bank(on, 'kfw').extras.find((e) => e.label === 'Zuschuss')!;
+    expect(x.status).toBe('applied');
+    expect(x.applied).toBeCloseTo(on.kfw.kfw!.subsidy, 6);
+    expect(x.fee).toBeGreaterThan(0); // early repayment charge (Vorfälligkeitsentschädigung) of the bank (§ 502 BGB)
+    expect(bank(off, 'kfw').extras).toEqual([]);
+    expect(bank(on, 'kfw').totalInterest).toBeLessThan(bank(off, 'kfw').totalInterest);
+    const ev = keyEvents(withBank(), on).timeline.find((e) => e.title === 'Auszahlung KfW-Zuschuss')!;
+    expect(ev.detail).toBe('Wird als Sondertilgung für den Bankkredit verwendet.');
+  });
+
+  it('mit KfW-Kredit tilgt der Zuschuss weiterhin den KfW-Kredit', () => {
+    const r = runAll(neutral());
+    expect(r.kfw.loans[0].name).toMatch(/^KfW-Kredit/);
+    expect(r.kfw.loans[0].extras.some((e) => e.label === 'Zuschuss' && e.applied > 0)).toBe(true);
+    expect(r.kfw.loans.filter((l) => l.name === 'Bankkredit').every((l) => l.extras.length === 0)).toBe(true);
+  });
+
+  it('Steuererstattungen tilgen den Bankkredit des Steuer-Wegs im Erstattungsmonat', () => {
+    const on = runAll(withBank());
+    const off = runAll(withBank((i) => (i.financing.taxRefundAsSpecialRepayment = false)));
+    const extras = bank(on, 'tax').extras.filter((e) => e.label === 'Steuererstattung');
+    expect(extras.map((e) => e.month)).toEqual(on.tax.taxRefunds!.map((t) => t.month));
+    extras.forEach((e, i) => expect(e.applied).toBeCloseTo(on.tax.taxRefunds![i].amount, 6));
+    expect(bank(off, 'tax').extras).toEqual([]);
+    expect(bank(on, 'tax').totalInterest).toBeLessThan(bank(off, 'tax').totalInterest);
+    expect(bank(on, 'tax').payoffMonth!).toBeLessThan(bank(off, 'tax').payoffMonth!);
+    expect(on.tax.totalCost).toBeLessThan(off.tax.totalCost);
+    const ev = keyEvents(withBank(), on).timeline.find((e) => e.title === 'Letzte Steuererstattung (§ 35c)')!;
+    expect(ev.detail).toContain('Wird als Sondertilgung für den Bankkredit verwendet.');
+  });
+});

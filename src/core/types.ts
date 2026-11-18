@@ -144,7 +144,10 @@ export interface FinancingInputs {
   followUpRate: number;
   /** Apply for KfW supplementary loan (Ergänzungskredit) 358/359; false = external financing via the bank loan only. */
   useKfwLoan: boolean;
+  /** Subsidy (Zuschuss) repays the KfW loan, without one the bank loan of the KfW path. */
   subsidyAsSpecialRepayment: boolean;
+  /** Tax refunds (Steuererstattungen) repay the bank loan of the tax path. */
+  taxRefundAsSpecialRepayment: boolean;
   bankRate: number;
   bankTermYears: number;
   bankGraceYears: number;

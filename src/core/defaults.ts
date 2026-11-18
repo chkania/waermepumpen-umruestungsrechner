@@ -127,6 +127,7 @@ export function createDefaults(today: Date = new Date()): Inputs {
       followUpRate: 0.04,
       useKfwLoan: true,
       subsidyAsSpecialRepayment: true,
+      taxRefundAsSpecialRepayment: true,
       bankRate: 0.065,
       bankTermYears: 15,
       bankGraceYears: 0,

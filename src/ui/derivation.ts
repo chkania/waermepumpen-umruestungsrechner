@@ -241,7 +241,8 @@ function kfwHtml(inp: Inputs, run: RunResult): string {
     rows.push(['Zuschuss', `${pct(k.ownerUnitRate)} × ${fmtEur(k.eligibleCosts)}`, fmtEur(k.subsidy)]);
   }
   if (run.kfw.subsidyMonth !== undefined) {
-    rows.push(['Auszahlung', `Inbetriebnahme + ${Math.round(inp.financing.subsidyDelayMonths)} Monate${inp.financing.subsidyAsSpecialRepayment ? ', als Sondertilgung des KfW-Kredits vorgesehen' : ''}`, fmtMonth(run.kfw.subsidyMonth)]);
+    const loan = run.kfw.loans.find((l) => l.extras.some((x) => x.label === 'Zuschuss' && x.applied > 0));
+    rows.push(['Auszahlung', `Inbetriebnahme + ${Math.round(inp.financing.subsidyDelayMonths)} Monate${loan ? `, als Sondertilgung des ${loan.name.replace(/^(KfW-Kredit|Bankkredit)/, '$1s')}` : ''}`, fmtMonth(run.kfw.subsidyMonth)]);
   }
   return `<p>Der Zuschuss der KfW (Programm 458) ist ein Prozentsatz der förderfähigen Kosten. Die Sätze hängen vom Antragsmonat ab – der Antrag muss vor dem Vertrag gestellt werden, deshalb rechnet der Rechner mit dem Vorlauf vor der Inbetriebnahme.${inp.building.ownerOccupied ? '' : ' Boni gibt es nur bei Selbstnutzung.'} Grenzwerte: Höchstsatz ${pct(f.maxRate)}, bei niedrigem Einkommen ${pct(f.maxRateLowIncome)}.</p>
     ${calcTable('KfW-Zuschuss', rows)}
