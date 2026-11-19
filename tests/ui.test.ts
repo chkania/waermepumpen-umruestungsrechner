@@ -5,6 +5,7 @@ import { SECTIONS, getPath } from '../src/ui/fields';
 import { INTRO_KEY, LEGACY_DESIGN_KEY, mountApp, PRIVACY_ACK_KEY, STORAGE_KEY, THEME_KEY } from '../src/ui/app';
 import { decodeHash, encodeHash } from '../src/core/serialize';
 import { APP_VERSION } from '../src/version';
+import { renderDocPage } from '../src/doc-page';
 import { defaults, TODAY } from './helpers';
 
 class MemoryStorage implements Storage {
@@ -993,7 +994,10 @@ describe('F20.3 Dialoge öffnen oben, der Schließen-Button hat den Fokus', () =
   });
 
   it('Einführung: Schließen-Button oben hat den Fokus, kein Button am Ende wird automatisch fokussiert', () => {
+    // no automatic introduction on the first visit (F20.1): it is opened from the menu "Mehr" (F38.5)
+    store.setItem(INTRO_KEY, '1');
     const { root } = mount();
+    root.querySelector<HTMLButtonElement>('#menu-more-button')!.click();
     root.querySelector<HTMLButtonElement>('#btn-intro')!.click();
     const dlg = root.querySelector<HTMLDialogElement>('#intro')!;
     expect(dlg.open).toBe(true);
@@ -1153,5 +1157,290 @@ describe('F34 Inbetriebnahme der Heizung im Formular', () => {
     const box = root.querySelector('.notice-issues')!.textContent!;
     expect(box).toContain('Ein Wert aus den gespeicherten Eingaben wurde angepasst');
     expect(box).toContain('Inbetriebnahme der Heizung: aus dem früheren „Alter der Heizung“ (19 Jahre) auf 11/2007 umgerechnet');
+  });
+});
+
+describe('F38 Werkzeugleiste mit Menüs', () => {
+  beforeEach(() => {
+    store.clear();
+    store.setItem(INTRO_KEY, '1'); // no automatic introduction on the first visit (F20.1); opened from "Mehr" (F38.5)
+    history.replaceState(null, '', '/');
+  });
+
+  const ids = { scenarios: 'menu-scenarios-button', share: 'menu-share-button', more: 'menu-more-button' };
+  const trigger = (root: HTMLElement, id: string) => root.querySelector<HTMLButtonElement>(`#${id}`)!;
+  const panelOf = (root: HTMLElement, btn: HTMLElement) => root.querySelector<HTMLElement>(`#${btn.getAttribute('aria-controls')}`)!;
+  const focused = () => document.activeElement as HTMLElement;
+  const press = (el: Element, key: string, shiftKey = false) =>
+    el.dispatchEvent(new KeyboardEvent('keydown', { key, shiftKey, bubbles: true, cancelable: true }));
+
+  it('A1 Bei geschlossenen Menüs: Panels hidden, aria-expanded false, Reihenfolge und Inhalte, Umschalter in der Kopfzeile', () => {
+    const { root } = mount();
+    for (const id of Object.values(ids)) {
+      const t = trigger(root, id);
+      expect(t.getAttribute('aria-haspopup')).toBe('menu');
+      expect(t.getAttribute('aria-expanded')).toBe('false');
+      expect(panelOf(root, t).hidden).toBe(true);
+      expect(panelOf(root, t).getAttribute('role')).toBe('menu');
+    }
+    const direct = [...root.querySelector('.toolbar')!.children].map((el) => el.id || el.querySelector('button')!.id);
+    expect(direct).toEqual(['btn-help', ids.scenarios, ids.share, 'btn-variants', 'btn-report', ids.more]);
+    const items = (id: string) =>
+      [...panelOf(root, trigger(root, id)).querySelectorAll('button, [role="separator"]')].map((el) => el.id || el.getAttribute('role'));
+    expect(items(ids.scenarios)).toEqual(['btn-scenarios', 'btn-import', 'separator', 'btn-reset']);
+    expect(items(ids.share)).toEqual(['btn-share', 'btn-export', 'btn-recommend']);
+    expect(items(ids.more)).toEqual(['btn-intro', 'btn-support']);
+    for (const b of root.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')) {
+      expect(b.tabIndex).toBe(-1);
+    }
+    // theme switch (F38.7) directly in the header, not in the toolbar
+    const sw = root.querySelector<HTMLElement>('.design-switch')!;
+    expect(sw.parentElement!.matches('header.top')).toBe(true);
+    expect(sw.closest('.toolbar')).toBeNull();
+    expect(sw.getAttribute('role')).toBe('group');
+    expect(sw.getAttribute('aria-label')).toBe('Hell oder dunkel');
+    // F38.9: no inline styles or event handlers in the header (CSP)
+    expect(root.querySelector('header.top')!.querySelectorAll('[style], [onclick]')).toHaveLength(0);
+  });
+
+  it('A2 Öffnen per Klick; ↓ ↑ Pos1 Ende Esc; die Trennlinie wird übersprungen', () => {
+    const { root } = mount();
+    const sc = trigger(root, ids.scenarios);
+    sc.focus();
+    sc.click(); // Enter und Leertaste lösen einen Klick aus
+    expect(sc.getAttribute('aria-expanded')).toBe('true');
+    expect(panelOf(root, sc).hidden).toBe(false);
+    expect(focused().id).toBe('btn-scenarios');
+    press(focused(), 'ArrowDown');
+    press(focused(), 'ArrowDown');
+    expect(focused().id).toBe('btn-reset');
+    press(focused(), 'ArrowDown');
+    expect(focused().id).toBe('btn-scenarios');
+    press(focused(), 'ArrowUp');
+    expect(focused().id).toBe('btn-reset');
+    press(focused(), 'Home');
+    expect(focused().id).toBe('btn-scenarios');
+    press(focused(), 'End');
+    expect(focused().id).toBe('btn-reset');
+    press(focused(), 'Escape');
+    expect(panelOf(root, sc).hidden).toBe(true);
+    expect(sc.getAttribute('aria-expanded')).toBe('false');
+    expect(focused()).toBe(sc);
+    // ↓ on the closed button opens the menu as well
+    press(sc, 'ArrowDown');
+    expect(panelOf(root, sc).hidden).toBe(false);
+    expect(focused().id).toBe('btn-scenarios');
+  });
+
+  it('A3 Aktivierter Punkt schließt das Menü; nach Dialog, Warnfenster und Abbrechen liegt der Fokus auf der Menüschaltfläche', () => {
+    const { root } = mount();
+    const more = trigger(root, ids.more);
+    more.click();
+    root.querySelector<HTMLButtonElement>('#btn-support')!.click();
+    const support = root.querySelector<HTMLDialogElement>('#support')!;
+    expect(support.open).toBe(true);
+    expect(panelOf(root, more).hidden).toBe(true);
+    support.close();
+    expect(focused()).toBe(more);
+
+    more.click();
+    root.querySelector<HTMLButtonElement>('#btn-intro')!.click();
+    const intro = root.querySelector<HTMLDialogElement>('#intro')!;
+    expect(intro.open).toBe(true);
+    intro.close();
+    expect(focused()).toBe(more);
+
+    // „Import“ → Warnfenster → Abbrechen: the focus goes to „Szenarien“
+    const sc = trigger(root, ids.scenarios);
+    sc.click();
+    root.querySelector<HTMLButtonElement>('#btn-import')!.click();
+    const warn = root.querySelector<HTMLDialogElement>('#privacy-confirm')!;
+    expect(warn.open).toBe(true);
+    root.querySelector<HTMLButtonElement>('#privacy-cancel')!.click();
+    expect(warn.open).toBe(false);
+    expect(focused()).toBe(sc);
+    // „Zurücksetzen“ → Abbrechen
+    sc.click();
+    root.querySelector<HTMLButtonElement>('#btn-reset')!.click();
+    root.querySelector<HTMLButtonElement>('#privacy-cancel')!.click();
+    expect(focused()).toBe(sc);
+    // Dateiauswahl nach „Datei wählen“: nach der Auswahl liegt der Fokus wieder auf „Szenarien“
+    focused().blur();
+    root.querySelector<HTMLInputElement>('#file-import')!.dispatchEvent(new Event('change'));
+    expect(focused()).toBe(sc);
+
+    // with the notice switched off (F9.7) the link is copied directly and the focus stays on „Teilen & Export“
+    store.setItem(PRIVACY_ACK_KEY, '1');
+    const share = trigger(root, ids.share);
+    share.click();
+    root.querySelector<HTMLButtonElement>('#btn-share')!.click();
+    expect(panelOf(root, share).hidden).toBe(true);
+    expect(focused()).toBe(share);
+  });
+
+  it('A4 Ein zweites Menü schließt das erste; zweiter Klick schließt; Klick auf main schließt alle; Tab schließt', () => {
+    const { root } = mount();
+    const sc = trigger(root, ids.scenarios);
+    const share = trigger(root, ids.share);
+    const more = trigger(root, ids.more);
+    sc.click();
+    share.click();
+    expect(panelOf(root, sc).hidden).toBe(true);
+    expect(panelOf(root, share).hidden).toBe(false);
+    share.click();
+    expect(panelOf(root, share).hidden).toBe(true);
+    expect(share.getAttribute('aria-expanded')).toBe('false');
+    more.click();
+    root.querySelector<HTMLElement>('main')!.click();
+    for (const b of [sc, share, more]) expect(panelOf(root, b).hidden).toBe(true);
+    // Tab closes the menu; the focus goes to the next element after the menu button
+    sc.click();
+    press(focused(), 'Tab');
+    expect(panelOf(root, sc).hidden).toBe(true);
+    expect(focused()).toBe(share);
+    // Shift+Tab: the previous element
+    share.click();
+    press(focused(), 'Tab', true);
+    expect(panelOf(root, share).hidden).toBe(true);
+    expect(focused()).toBe(sc);
+  });
+
+  it('A5 „Hilfe“ ist das erste Kind der Werkzeugleiste, Link ohne Ziel, in keinem Panel', () => {
+    const { root } = mount();
+    const help = root.querySelector<HTMLAnchorElement>('#btn-help')!;
+    expect(root.querySelector('.toolbar')!.firstElementChild).toBe(help);
+    expect(help.getAttribute('href')).toBe('./hilfe.html');
+    expect(help.hasAttribute('target')).toBe(false);
+    expect(help.closest('.menu-panel')).toBeNull();
+  });
+
+  it('A12 Texte mit dem neuen Ort: Einführung über „Mehr“, Variantenvergleich über „Szenarien“', () => {
+    const { root } = mount();
+    expect(root.querySelector('.intro-again')!.textContent).toBe('Diese Einführung können Sie jederzeit über „Mehr“ › „Einführung“ wieder öffnen.');
+    expect(root.querySelector('#variants .intro-lead')!.textContent).toContain('(„Gespeicherte Szenarien“ im Menü „Szenarien“)');
+  });
+
+  it('F38.6 Jede Funktion gibt es genau einmal im DOM; die bestehenden IDs bleiben erhalten', () => {
+    const { root } = mount();
+    for (const id of ['btn-help', 'btn-intro', 'btn-recommend', 'btn-support', 'btn-share', 'btn-export', 'btn-import', 'btn-reset', 'btn-variants', 'btn-report', 'btn-scenarios']) {
+      expect(root.querySelectorAll(`#${id}`), id).toHaveLength(1);
+    }
+  });
+
+  it('F38.7 Umschalter Hell/Dunkel/Auto: aria-pressed und Speicherung unter dem bisherigen Schlüssel', () => {
+    const { root } = mount();
+    const dark = root.querySelector<HTMLButtonElement>('[data-theme-choice="dark"]')!;
+    dark.click();
+    expect(dark.getAttribute('aria-pressed')).toBe('true');
+    expect(store.getItem(THEME_KEY)).toBe('dark');
+  });
+
+  it('F38.11 „Vergleichen“ und „Bericht“ mit vollem Namen als aria-label; „▾“ ist ausgeblendet', () => {
+    const { root } = mount();
+    const v = root.querySelector<HTMLButtonElement>('#btn-variants')!;
+    expect(v.textContent).toBe('Vergleichen');
+    expect(v.getAttribute('aria-label')).toBe('Varianten vergleichen');
+    const r = root.querySelector<HTMLButtonElement>('#btn-report')!;
+    expect(r.textContent).toBe('Bericht');
+    expect(r.getAttribute('aria-label')).toBe('Bericht drucken');
+    for (const id of Object.values(ids)) {
+      expect(trigger(root, id).querySelector('[aria-hidden="true"]')!.textContent!.trim()).toBe('▾');
+    }
+    expect(trigger(root, ids.scenarios).textContent).toBe('Szenarien ▾');
+    expect(trigger(root, ids.share).textContent).toBe('Teilen & Export ▾');
+  });
+
+  it('A6 (Regelprüfung; Umbruch und Breite bei 400 px sind manuell geprüft): Werkzeugleiste umbricht, Panels bleiben im Bildschirm', () => {
+    const base = readFileSync('src/style.css', 'utf8');
+    const rule = (sel: string) => {
+      const i = base.indexOf(`${sel} {`);
+      expect(i, sel).toBeGreaterThanOrEqual(0);
+      return base.slice(i, base.indexOf('}', i));
+    };
+    expect(rule('.toolbar')).toMatch(/flex-wrap: wrap/);
+    expect(rule('.app-toolbar')).toMatch(/min-width: 0/);
+    expect(rule('.app-toolbar')).toMatch(/flex: 1 1 100%/);
+    expect(rule('.menu-panel')).toMatch(/max-width: calc\(100vw - 2rem\)/);
+    expect(rule('.menu-more .menu-panel')).toMatch(/right: 0/);
+    expect(base).not.toMatch(/\.menu-more \{[^}]*margin-left/); // "Mehr" stands directly after "Bericht" (F38.1)
+    expect(base).toMatch(/@media \(max-width: 600px\) \{ \.menu-share \.menu-panel \{ left: auto; right: 0; \} \}/);
+  });
+
+  it('A3 Fokusrückgabe nach „OK“ im Warnfenster, nach Export und Weiterempfehlen, bei Abbruch der Dateiauswahl (F38.5)', () => {
+    const { root } = mount();
+    const share = trigger(root, ids.share);
+    // Teilen → Warnfenster → OK
+    share.click();
+    root.querySelector<HTMLButtonElement>('#btn-share')!.click();
+    root.querySelector<HTMLButtonElement>('#privacy-ok')!.click();
+    expect(root.querySelector<HTMLDialogElement>('#privacy-confirm')!.open).toBe(false);
+    expect(focused()).toBe(share);
+    // Export → Warnfenster → „Datei (JSON)“ (Download mit Stubs für Blob-URLs)
+    const { createObjectURL, revokeObjectURL } = URL;
+    URL.createObjectURL = () => 'blob:test';
+    URL.revokeObjectURL = () => undefined;
+    try {
+      share.click();
+      root.querySelector<HTMLButtonElement>('#btn-export')!.click();
+      root.querySelector<HTMLButtonElement>('#privacy-ok')!.click();
+      expect(focused()).toBe(share);
+    } finally {
+      URL.createObjectURL = createObjectURL;
+      URL.revokeObjectURL = revokeObjectURL;
+    }
+    // Weiterempfehlen → Dialog schließen
+    share.click();
+    root.querySelector<HTMLButtonElement>('#btn-recommend')!.click();
+    const rec = root.querySelector<HTMLDialogElement>('#recommend')!;
+    expect(rec.open).toBe(true);
+    rec.close();
+    expect(focused()).toBe(share);
+    // Import → Warnfenster → OK (Dateiauswahl öffnet sich) → Fokus auf „Szenarien“
+    const sc = trigger(root, ids.scenarios);
+    sc.click();
+    root.querySelector<HTMLButtonElement>('#btn-import')!.click();
+    root.querySelector<HTMLButtonElement>('#privacy-ok')!.click();
+    expect(focused()).toBe(sc);
+    // Dateiauswahl abgebrochen (Ereignis cancel) → Fokus wieder auf „Szenarien“
+    focused().blur();
+    root.querySelector<HTMLInputElement>('#file-import')!.dispatchEvent(new Event('cancel'));
+    expect(focused()).toBe(sc);
+  });
+
+  it('F38.8 Die Panels haben keinen Schatten (Abgrenzung durch Linien, F14.4) – in Hell und Dunkel', () => {
+    const base = readFileSync('src/style.css', 'utf8');
+    const modern = readFileSync('src/style-modern.css', 'utf8');
+    const block = (css: string, sel: string) => {
+      const i = css.indexOf(`${sel} {`);
+      expect(i, sel).toBeGreaterThanOrEqual(0);
+      return css.slice(i, css.indexOf('}', i));
+    };
+    expect(block(base, '.menu-panel')).not.toMatch(/box-shadow/);
+    expect(block(modern, ":root[data-design='modern'] .menu-panel")).not.toMatch(/box-shadow/);
+  });
+
+  it('F38.10 Dokumentseiten (help-top, src/doc-page.ts) bleiben unverändert: ihr Markup trifft keine App-Regel', () => {
+    const host = document.createElement('div');
+    host.innerHTML = renderDocPage({ markdown: '# Titel\n\n## Abschnitt\n\nText', subtitle: 'Untertitel' }).html;
+    const header = host.querySelector('header.help-top')!;
+    expect(header.querySelector('.brand')!.matches('.top:not(.help-top) > .brand')).toBe(false);
+    const tb = header.querySelector('.toolbar')!;
+    expect(tb.matches('.app-toolbar')).toBe(false);
+    expect(tb.querySelector('.menu')).toBeNull();
+    const back = tb.querySelector('a')!;
+    expect(back.className).toBe('tool-link');
+    expect(back.textContent).toBe('← Zum Rechner');
+    // the app rules that the new layout added are scoped to the calculator
+    const base = readFileSync('src/style.css', 'utf8');
+    expect(base).toMatch(/\.top:not\(\.help-top\) > \.brand \{/);
+    expect(base).toMatch(/\.app-toolbar \{/);
+  });
+
+  it('F38.10 Selektoren sind an die Verschachtelung angepasst: keine Nachfahren-Selektoren mehr, die Menüpunkte treffen', () => {
+    for (const f of ['style.css', 'style-modern.css']) {
+      const css = readFileSync(`src/${f}`, 'utf8');
+      expect(css, f).not.toMatch(/\.toolbar button/);
+      expect(css, f).not.toMatch(/\.toolbar \.design-switch/);
+    }
   });
 });

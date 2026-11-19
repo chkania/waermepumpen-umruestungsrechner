@@ -45,6 +45,17 @@ describe('N7 Kontraste (WCAG 1.4.3, ≥ 4,5:1)', () => {
   }
 });
 
+describe('A7 Kontrast von --accent als Textfarbe (F38.2, WCAG 1.4.3)', () => {
+  // "Hilfe" in the toolbar and the links of the help use --accent as text colour
+  for (const [name, t] of Object.entries(themes)) {
+    it(`A7 ${name}: accent auf bg, surface und surface-2 ≥ 4,5 : 1`, () => {
+      for (const bg of ['bg', 'surface', 'surface-2']) {
+        expect(ratio(t.accent, t[bg]), `accent auf ${bg}`).toBeGreaterThanOrEqual(4.5);
+      }
+    });
+  }
+});
+
 describe('N7 Fokus sichtbar (WCAG 2.4.7)', () => {
   it('kein outline: none ohne Ersatz', () => {
     for (const text of [base, modern, css('help.css')]) expect(text).not.toMatch(/outline:\s*(none|0)\b/);

@@ -17,7 +17,7 @@ Jedes Eingabefeld hat einen kleinen **„i“-Knopf**. Er zeigt den Standardwert
 
 ## Aufbau der Oberfläche
 
-- **Kopfbereich:** Titel mit Version und dem Link **„Über diesen Rechner“** (Entstehung des Rechners) sowie die Werkzeugleiste (Hell/Dunkel, Hilfe, Teilen, Export, Import, Zurücksetzen).
+- **Kopfbereich:** Oben links Titel mit Version und dem Link **„Über diesen Rechner“** (Entstehung des Rechners), oben rechts der Umschalter **Hell | Dunkel | Auto**. Darunter die Werkzeugleiste mit **Hilfe**, den Menüs „Szenarien“, „Teilen & Export“ und „Mehr“ sowie den Schaltflächen „Vergleichen“ und „Bericht“.
 - **Links – Eingaben:** in aufklappbare Abschnitte gegliedert. Ein Klick auf die Überschrift klappt einen Abschnitt auf oder zu; **„Alle aufklappen“** und **„Alle zuklappen“** oberhalb der Abschnitte öffnen bzw. schließen alle auf einmal. Abschnitte mit „Experten“ enthalten die Förder- und Steuerregeln; sie müssen normalerweise nicht geändert werden.
 - **Rechts – Ergebnisse:** Kennzahlen, wichtige Ereignisse und Hinweise, Diagramme, Förderdetails, Stromtarifvergleich, Vergleich der Umrüstzeitpunkte und Jahresübersicht.
 
@@ -25,24 +25,32 @@ Auf dem Smartphone stehen die Eingaben oben und die Ergebnisse darunter.
 
 ## Werkzeugleiste
 
+Die Werkzeugleiste steht über die volle Breite unter dem Titel und umbricht auf dem Smartphone auf höchstens zwei Zeilen. „Hilfe“, „Vergleichen“ und „Bericht“ sind direkt sichtbar. Die übrigen Funktionen liegen in drei Menüs, die Sie mit einem Klick öffnen:
+
+- **„Szenarien ▾“**: Gespeicherte Szenarien, Import und – durch eine Linie abgesetzt – Zurücksetzen.
+- **„Teilen & Export ▾“**: Link mit Werten teilen, Export und Weiterempfehlen.
+- **„Mehr ▾“**: Einführung und Unterstützen.
+
+Im offenen Menü wechseln Sie mit ↓ und ↑ zwischen den Punkten; Pos1 und Ende springen zum ersten bzw. letzten Punkt. Esc oder Tab schließt das Menü, ebenso ein Klick daneben. Nach einem Fenster oder einer Aktion liegt der Fokus wieder auf dem Menüknopf, von dem aus Sie den Punkt gewählt haben. Es ist immer nur ein Menü offen.
+
 ### Hell | Dunkel | Auto
 
 - **Auto** folgt der Einstellung von Browser bzw. Betriebssystem.
 - **Hell** und **Dunkel** legen das Farbschema fest – unabhängig vom Browser. Das ist hilfreich, wenn ein Browser (z. B. Brave mit dunklem Browser-Design) immer „dunkel“ meldet.
 
-Die Wahl wird im Browser gespeichert.
+Der Umschalter steht rechts oben im Kopfbereich. Die Wahl wird im Browser gespeichert.
 
 ### Einführung
 
-Öffnet die kurze Einführung: wozu der Rechner dient, wie Sie in drei Schritten zu einem Ergebnis kommen, wie der Rechner entstanden ist (Link „Wie und warum er entstanden ist“ führt zum Kasten „Über diesen Rechner“) und wo es ausführlichere Hilfe gibt. Beim ersten Besuch erscheint sie automatisch; nach dem Schließen („Los geht’s“, Esc oder Klick neben das Fenster) nur noch über diesen Knopf. Wer schon Eingaben gespeichert hat, sieht sie nicht automatisch.
+Öffnet im Menü „Mehr“ die kurze Einführung: wozu der Rechner dient, wie Sie in drei Schritten zu einem Ergebnis kommen, wie der Rechner entstanden ist (Link „Wie und warum er entstanden ist“ führt zum Kasten „Über diesen Rechner“) und wo es ausführlichere Hilfe gibt. Beim ersten Besuch erscheint sie automatisch; nach dem Schließen („Los geht’s“, Esc oder Klick neben das Fenster) nur noch über „Mehr“ › „Einführung“. Wer schon Eingaben gespeichert hat, sieht sie nicht automatisch.
 
 ### Hilfe
 
-Öffnet dieses Handbuch. Mit „← Zum Rechner“ oben oder der Zurück-Taste des Browsers kommen Sie zu Ihren Eingaben zurück; sie bleiben gespeichert. Es ist auch direkt unter der Adresse **hilfe.html** neben dem Rechner erreichbar.
+Öffnet dieses Handbuch. Die Schaltfläche steht ganz links in der Werkzeugleiste und ist hervorgehoben. Mit „← Zum Rechner“ oben oder der Zurück-Taste des Browsers kommen Sie zu Ihren Eingaben zurück; sie bleiben gespeichert. Es ist auch direkt unter der Adresse **hilfe.html** neben dem Rechner erreichbar.
 
 ### Weiterempfehlen
 
-Öffnet ein Fenster, mit dem Sie den Rechner an andere empfehlen können. Geteilt wird nur die **Adresse des Rechners** mit einem kurzen Empfehlungstext – **nicht** Ihre Eingaben (dafür gibt es „Link mit Werten teilen“).
+Im Menü „Teilen & Export“ öffnet sich ein Fenster, mit dem Sie den Rechner an andere empfehlen können. Geteilt wird nur die **Adresse des Rechners** mit einem kurzen Empfehlungstext – **nicht** Ihre Eingaben (dafür gibt es „Link mit Werten teilen“).
 
 - **WhatsApp** öffnet die installierte WhatsApp-App (Smartphone oder Desktop) mit vorbereiteter Nachricht; Sie wählen dort nur noch den Kontakt. Ohne installierte App passiert nichts – nutzen Sie dann „Link kopieren“.
 - **Threema** öffnet die Threema-App mit vorbereiteter Nachricht.
@@ -52,7 +60,7 @@ Die Wahl wird im Browser gespeichert.
 
 ### Unterstützen
 
-Öffnet ein Fenster, über das Sie das Hobbyprojekt freiwillig unterstützen können:
+Im Menü „Mehr“ öffnet sich ein Fenster, über das Sie das Hobbyprojekt freiwillig unterstützen können:
 
 - **Buy me a coffee** und **PayPal** öffnen die Seite des Anbieters in einem neuen Tab.
 - **Per Überweisung:** Den **GiroCode** (QR-Code) scannen Sie mit Ihrer Banking-App; Empfänger, IBAN und Verwendungszweck sind dann ausgefüllt, den Betrag wählen Sie selbst. Auf dem Smartphone kopieren Sie stattdessen mit **IBAN kopieren** die IBAN.
@@ -61,7 +69,7 @@ Der Rechner bleibt kostenlos und ohne Werbung, eine Unterstützung ist keine Vor
 
 ### Link mit Werten teilen
 
-Erzeugt einen Link, der alle **vom Standard abweichenden Eingaben** enthält, und kopiert ihn in die Zwischenablage (sonst steht er in der Adresszeile). Wer den Link öffnet, sieht den Rechner mit genau Ihren Eingaben.
+Im Menü „Teilen & Export“ erzeugt der Rechner einen Link, der alle **vom Standard abweichenden Eingaben** enthält, und kopiert ihn in die Zwischenablage (sonst steht er in der Adresszeile). Wer den Link öffnet, sieht den Rechner mit genau Ihren Eingaben.
 
 - Der Link beginnt mit der kurzen Adresse **wpir.de** und führt von dort zum Rechner.
 - Der Link enthält die Eingaben selbst, komprimiert im Teil nach `#z=`. Es wird **nichts auf einem Server gespeichert**. Ältere Links (mit `#s=`) funktionieren weiterhin.
@@ -72,7 +80,7 @@ Erzeugt einen Link, der alle **vom Standard abweichenden Eingaben** enthält, un
 
 ### Varianten vergleichen
 
-Vergleicht zwei oder drei Varianten nebeneinander, etwa „Angebot A“ und „Angebot B“ oder Umrüsten „jetzt“ und „2028“. So gehen Sie vor:
+Die Schaltfläche „Vergleichen“ öffnet den Vergleich von zwei oder drei Varianten nebeneinander, etwa „Angebot A“ und „Angebot B“ oder Umrüsten „jetzt“ und „2028“. So gehen Sie vor:
 
 1. Jede Variante im Rechner eingeben, eine **Bezeichnung des Szenarios** vergeben und mit **Export** als Datei speichern.
 2. **Varianten vergleichen** öffnen und mit **Export-Dateien laden …** zwei oder drei Dateien auswählen (auch mehrere auf einmal). **Aktuelle Eingaben hinzufügen** nimmt den Stand im Rechner als Variante auf. Diese Variante **folgt dem Rechner**: Ändern Sie danach Eingaben, zeigt sie beim nächsten Öffnen die neuen Werte. Mit **Stand festhalten** bleibt der jetzige Stand als feste Variante stehen – so vergleichen Sie zwei Stände ohne Export: festhalten, Eingaben ändern, aktuelle Eingaben erneut hinzufügen.
@@ -82,7 +90,7 @@ Jede Variante wird für sich gerechnet, mit ihrer eigenen Referenz „ohne Wärm
 
 ### Bericht drucken
 
-Erstellt eine **kompakte Zusammenfassung** für das Gespräch mit Energieberatung, Handwerksbetrieb oder Bank und öffnet den Druckdialog des Browsers. Dort wählen Sie einen Drucker oder **„Als PDF speichern“**. Der Bericht enthält:
+Die Schaltfläche „Bericht“ erstellt eine **kompakte Zusammenfassung** für das Gespräch mit Energieberatung, Handwerksbetrieb oder Bank und öffnet den Druckdialog des Browsers. Dort wählen Sie einen Drucker oder **„Als PDF speichern“**. Der Bericht enthält:
 
 - Bezeichnung und Bemerkungen des Szenarios, Datum, Version und Betrachtungszeitraum,
 - oben rechts einen **QR-Code**: Mit dem Handy gescannt, öffnet er den Rechner (über die kurze Adresse wpir.de) mit genau diesen Eingaben – so kann z. B. die Energieberatung direkt weiterrechnen. Der Text darunter ist mit demselben Link hinterlegt: In der PDF-Datei öffnet ein Klick darauf den Rechner mit diesen Eingaben. Die Bemerkungen sind darin nicht enthalten (sie stehen im Bericht),
@@ -97,7 +105,7 @@ Der Bericht wird immer hell gedruckt, auch wenn Sie das dunkle Design nutzen. Al
 
 ### Gespeicherte Szenarien
 
-Speichert die aktuellen Eingaben unter einer Bezeichnung im Browser – so wechseln Sie zwischen Angeboten, ohne jedes Mal eine Datei zu exportieren. Die Bezeichnung ist der Name des Szenarios aus dem Abschnitt **Szenario**; ohne Bezeichnung wird nichts gespeichert. Groß- und Kleinschreibung zählen, Leerzeichen am Rand werden entfernt.
+Im Menü „Szenarien“ öffnet sich die Verwaltung. Sie speichert die aktuellen Eingaben unter einer Bezeichnung im Browser – so wechseln Sie zwischen Angeboten, ohne jedes Mal eine Datei zu exportieren. Die Bezeichnung ist der Name des Szenarios aus dem Abschnitt **Szenario**; ohne Bezeichnung wird nichts gespeichert. Groß- und Kleinschreibung zählen, Leerzeichen am Rand werden entfernt.
 
 - **Aktuelle Eingaben speichern** legt einen Eintrag an. Gibt es den Namen schon, fragt der Rechner, ob der gespeicherte Stand überschrieben werden soll.
 - **Abrufen** übernimmt ein gespeichertes Szenario in den Rechner, wie ein Import. Vorher erscheint ein Hinweis, dass Ihre bisherigen Eingaben ersetzt werden. Die Werte werden geprüft wie beim Import. Angepasste Werte werden über den Ergebnissen gemeldet. Die Link-Ansicht endet dabei.
@@ -112,7 +120,7 @@ Ist der Browser-Speicher voll oder nicht verfügbar (z. B. im privaten Modus), m
 
 ### Export
 
-Öffnet ein Fenster mit zwei Formaten:
+Im Menü „Teilen & Export“ öffnet sich ein Fenster mit zwei Formaten:
 
 - **Datei (JSON)** speichert alle Eingaben, einschließlich Bezeichnung und Bemerkungen des Szenarios.
 - **Für KI (Markdown)** speichert die ganze Berechnung für einen KI-Assistenten (siehe unten).
@@ -140,11 +148,11 @@ Schlägt der KI-Assistent geänderte Werte vor, tragen Sie diese im Rechner ein.
 
 ### Import
 
-Lädt eine zuvor exportierte JSON-Datei. Felder, die in der Datei fehlen oder ungültig sind, erhalten den Standardwert; Zahlen außerhalb sinnvoller Grenzen werden begrenzt, unbekannte Felder ignoriert. Ersetzte Werte werden über den Ergebnissen aufgelistet. Dateien, die nicht von diesem Rechner stammen, werden mit einer Meldung abgelehnt. Vorher weist ein Fenster darauf hin, dass der Import Ihre aktuellen Eingaben ersetzt; erst mit **Datei wählen** öffnet sich die Dateiauswahl.
+Im Menü „Szenarien“ lädt der Rechner eine zuvor exportierte JSON-Datei. Felder, die in der Datei fehlen oder ungültig sind, erhalten den Standardwert; Zahlen außerhalb sinnvoller Grenzen werden begrenzt, unbekannte Felder ignoriert. Ersetzte Werte werden über den Ergebnissen aufgelistet. Dateien, die nicht von diesem Rechner stammen, werden mit einer Meldung abgelehnt. Vorher weist ein Fenster darauf hin, dass der Import Ihre aktuellen Eingaben ersetzt; erst mit **Datei wählen** öffnet sich die Dateiauswahl.
 
 ### Zurücksetzen
 
-Setzt **alle Eingaben auf die Standardwerte** zurück. Vorher weist ein Fenster darauf hin, dass Ihre bisherigen Eingaben verloren gehen; erst mit **Zurücksetzen** werden sie ersetzt. Tipp: Vorher exportieren, wenn Sie den Stand behalten möchten. Die Einstellung Hell/Dunkel und die [gespeicherten Szenarien](#gespeicherte-szenarien) bleiben erhalten.
+Im Menü „Szenarien“ (unter der Linie) setzt der Rechner **alle Eingaben auf die Standardwerte** zurück. Vorher weist ein Fenster darauf hin, dass Ihre bisherigen Eingaben verloren gehen; erst mit **Zurücksetzen** werden sie ersetzt. Tipp: Vorher exportieren, wenn Sie den Stand behalten möchten. Die Einstellung Hell/Dunkel und die [gespeicherten Szenarien](#gespeicherte-szenarien) bleiben erhalten.
 
 ### Automatisches Speichern
 

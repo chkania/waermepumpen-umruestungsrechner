@@ -96,11 +96,14 @@ function entryFor(name: string, mut?: (i: ReturnType<typeof defaults>) => void, 
 const seed = (entries: unknown[]) => store.setItem(SCENARIOS_KEY, serializeScenarioFile(entries));
 
 describe('F37 Gespeicherte Szenarien im Browser', () => {
-  it('F37.1 Schaltfläche vor „Export“ öffnet den Dialog; die Liste wird bei jedem Öffnen neu gelesen; Schließen hat den Fokus', () => {
+  it('A9 (F37.1) Schaltfläche ist der erste Punkt im Menü „Szenarien“; öffnet den Dialog; die Liste wird bei jedem Öffnen neu gelesen; Schließen hat den Fokus', () => {
     const { root } = mount();
     const b = btn(root, '#btn-scenarios');
     expect(b.textContent).toBe('Gespeicherte Szenarien');
-    expect(b.nextElementSibling!.id).toBe('btn-export');
+    // F38.1: first item of the "Szenarien" menu panel
+    expect(b.parentElement!.getAttribute('role')).toBe('menu');
+    expect(b.parentElement!.id).toBe('menu-scenarios');
+    expect(b.parentElement!.firstElementChild).toBe(b);
     expect(b.getAttribute('aria-haspopup')).toBe('dialog');
     b.click();
     expect(scDlg(root).open).toBe(true);

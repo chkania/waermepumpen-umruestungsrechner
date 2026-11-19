@@ -556,6 +556,120 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     if (el.dataset.path) readField(el);
   });
 
+  // ---------- Toolbar menus (F38, ARIA pattern "Menu Button") ----------
+  /** The three menus of the toolbar: button and panel per menu. */
+  const toolMenus = [...root.querySelectorAll<HTMLButtonElement>('[data-menu-button]')].map((btn) => ({
+    btn,
+    panel: root.querySelector<HTMLElement>(`#${btn.getAttribute('aria-controls')}`)!,
+  }));
+  type ToolMenu = (typeof toolMenus)[number];
+  const menuItemsOf = (m: ToolMenu) => [...m.panel.querySelectorAll<HTMLElement>('[role="menuitem"]')];
+  const menuOpen = (m: ToolMenu) => !m.panel.hidden;
+  const dialogOpen = () => document.querySelector('dialog[open]') !== null;
+  /** Button of the menu whose item was activated; the focus returns there after the action (F38.5). */
+  let menuOrigin: HTMLElement | null = null;
+  /** Elements of the tab order; items with tabindex="-1" (menu items) are left out. */
+  const FOCUSABLE =
+    'a[href]:not([tabindex="-1"]), button:not([tabindex="-1"]), input:not([tabindex="-1"]), select:not([tabindex="-1"]), textarea:not([tabindex="-1"]), summary:not([tabindex="-1"]), [tabindex]:not([tabindex="-1"])';
+
+  function closeMenu(m: ToolMenu): void {
+    m.panel.hidden = true;
+    m.btn.setAttribute('aria-expanded', 'false');
+  }
+  /** At most one menu is open (F38.4). */
+  function closeAllMenus(except?: ToolMenu): void {
+    for (const m of toolMenus) if (m !== except && menuOpen(m)) closeMenu(m);
+  }
+  function openMenu(m: ToolMenu): void {
+    closeAllMenus(m);
+    m.panel.hidden = false;
+    m.btn.setAttribute('aria-expanded', 'true');
+    menuItemsOf(m)[0]?.focus();
+  }
+  /** The next (or previous) focusable element after an element, used by Tab in an open menu (F38.4). */
+  function focusNeighbour(el: HTMLElement, backwards: boolean): void {
+    const all = [...document.querySelectorAll<HTMLElement>(FOCUSABLE)].filter(
+      // hidden parts (menu panels, closed dialogs) and aria-hidden ancestors are not part of the tab order
+      (x) => !x.closest('[hidden], [aria-hidden="true"], dialog:not([open])') && !(x as HTMLButtonElement).disabled,
+    );
+    const i = all.indexOf(el);
+    (all[backwards ? i - 1 : i + 1] ?? el).focus();
+  }
+  /** Focus back to the menu button after an action that has ended (F38.5). */
+  function returnFocusToMenu(): void {
+    const btn = menuOrigin;
+    menuOrigin = null;
+    btn?.focus();
+  }
+  for (const dlg of root.querySelectorAll('dialog')) {
+    dlg.addEventListener('close', () => {
+      if (menuOrigin && !dialogOpen()) returnFocusToMenu();
+    });
+  }
+  for (const m of toolMenus) {
+    m.btn.addEventListener('click', () => (menuOpen(m) ? closeMenu(m) : openMenu(m)));
+    m.btn.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowDown') return;
+      e.preventDefault();
+      openMenu(m);
+    });
+    // Activating an item closes the menu and moves the focus to its button before the action runs (F38.5)
+    m.panel.addEventListener(
+      'click',
+      (e) => {
+        if (!(e.target as HTMLElement).closest('[role="menuitem"]')) return;
+        closeMenu(m);
+        menuOrigin = m.btn;
+        m.btn.focus();
+        // Without a dialog or file picker the focus stays on the button. The check runs after the timer: every action
+        // of the menu opens its dialog synchronously (dialog.showModal, scenarios, variants, notices). An action that
+        // opened its window later would lose the focus return – keep this in mind for new menu items.
+        setTimeout(() => {
+          if (!dialogOpen()) menuOrigin = null;
+        }, 0);
+      },
+      true,
+    );
+    m.panel.addEventListener('keydown', (e) => {
+      const items = menuItemsOf(m);
+      const n = items.length;
+      const i = items.indexOf(document.activeElement as HTMLElement);
+      let target: HTMLElement | undefined;
+      switch (e.key) {
+        case 'ArrowDown':
+          target = items[i < 0 ? 0 : (i + 1) % n];
+          break;
+        case 'ArrowUp':
+          target = items[i <= 0 ? n - 1 : i - 1];
+          break;
+        case 'Home':
+          target = items[0];
+          break;
+        case 'End':
+          target = items[n - 1];
+          break;
+        case 'Escape':
+          e.preventDefault();
+          closeMenu(m);
+          m.btn.focus();
+          return;
+        case 'Tab':
+          e.preventDefault();
+          closeMenu(m);
+          focusNeighbour(m.btn, e.shiftKey);
+          return;
+        default:
+          return;
+      }
+      e.preventDefault();
+      target?.focus();
+    });
+  }
+  // A click outside closes the open menu (F38.4); clicks on the menu buttons and items are handled above
+  document.addEventListener('click', (e) => {
+    if (!(e.target as HTMLElement).closest?.('.menu')) closeAllMenus();
+  });
+
   // ---------- Toolbar ----------
   const toast = (msg: string) => {
     const t = $<HTMLElement>('#toast');
@@ -680,7 +794,11 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
   const fileInput = $<HTMLInputElement>('#file-import');
   // the file picker opens inside the confirming click (user activation)
   $<HTMLButtonElement>('#btn-import').addEventListener('click', () => confirmAction('import', () => fileInput.click()));
+  // After the file picker (F38.5) the focus is on the menu button "Szenarien" again
+  const focusScenariosMenu = () => root.querySelector<HTMLElement>('#menu-scenarios-button')?.focus();
+  fileInput.addEventListener('cancel', focusScenariosMenu);
   fileInput.addEventListener('change', async () => {
+    focusScenariosMenu();
     const file = fileInput.files?.[0];
     if (!file) return;
     try {
@@ -2073,25 +2191,41 @@ function layout(): string {
         <a id="app-version" class="version-link" href="./changelog.html" title="Änderungen dieser und früherer Versionen (Changelog)">Version ${APP_VERSION}</a>
         <a class="version-link" href="#ueber" data-about-link title="Wie und warum dieser Rechner entstanden ist">Über diesen Rechner</a></p>
     </div>
-    <div class="toolbar">
-      <div class="design-switch theme-switch" role="group" aria-label="Hell oder dunkel">
-        <button type="button" data-theme-choice="light" aria-pressed="false" title="Helles Design">Hell</button>
-        <button type="button" data-theme-choice="dark" aria-pressed="false" title="Dunkles Design">Dunkel</button>
-        <button type="button" data-theme-choice="auto" aria-pressed="false" title="Wie Browser bzw. System">Auto</button>
-      </div>
-      <button id="btn-intro" type="button" aria-haspopup="dialog" title="Kurze Einführung: Wozu dient der Rechner, wie bedient man ihn?">Einführung</button>
-      <a id="btn-help" class="tool-link" href="./hilfe.html" title="Benutzerhandbuch öffnen">Hilfe</a>
-      <button id="btn-recommend" type="button" aria-haspopup="dialog" title="Den Rechner per WhatsApp, Threema, E-Mail, Link oder einer anderen App (z. B. Signal) weiterempfehlen">Weiterempfehlen</button>
-      <button id="btn-support" type="button" aria-haspopup="dialog" title="Das Hobbyprojekt freiwillig unterstützen – per Buy Me a Coffee oder PayPal">Unterstützen</button>
-      <button id="btn-share" type="button" title="Link mit Ihren aktuellen Eingaben kopieren – zum Sichern oder Weitergeben Ihrer Berechnung">Link mit Werten teilen</button>
-      <button id="btn-variants" type="button" aria-haspopup="dialog" title="Zwei oder drei Varianten (Export-Dateien, gespeicherte Szenarien oder aktuelle Eingaben) nebeneinander vergleichen">Varianten vergleichen</button>
-      <button id="btn-report" type="button" title="Kompakte Zusammenfassung mit Eingaben, Ergebnissen, Diagrammen, Förderung und Finanzierung – drucken oder als PDF speichern">Bericht drucken</button>
-      <button id="btn-scenarios" type="button" aria-haspopup="dialog" title="Eingaben unter einer Bezeichnung im Browser speichern, abrufen, aktualisieren oder löschen">Gespeicherte Szenarien</button>
-      <button id="btn-export" type="button" aria-haspopup="dialog" title="Eingaben als Datei (JSON) speichern oder als Markdown-Datei für einen KI-Assistenten">Export</button>
-      <button id="btn-import" type="button">Import</button>
-      <button id="btn-reset" type="button" class="ghost">Zurücksetzen</button>
-      <input id="file-import" type="file" accept="application/json,.json" hidden>
+    <div class="design-switch theme-switch" role="group" aria-label="Hell oder dunkel">
+      <button type="button" data-theme-choice="light" aria-pressed="false" title="Helles Design">Hell</button>
+      <button type="button" data-theme-choice="dark" aria-pressed="false" title="Dunkles Design">Dunkel</button>
+      <button type="button" data-theme-choice="auto" aria-pressed="false" title="Wie Browser bzw. System">Auto</button>
     </div>
+    <div class="toolbar app-toolbar">
+      <a id="btn-help" class="tool-link" href="./hilfe.html" title="Benutzerhandbuch öffnen">Hilfe</a>
+      <div class="menu menu-scenarios">
+        <button id="menu-scenarios-button" type="button" class="menu-button" data-menu-button aria-haspopup="menu" aria-expanded="false" aria-controls="menu-scenarios">Szenarien<span aria-hidden="true"> ▾</span></button>
+        <div id="menu-scenarios" class="menu-panel" role="menu" aria-labelledby="menu-scenarios-button" hidden>
+          <button id="btn-scenarios" type="button" role="menuitem" tabindex="-1" aria-haspopup="dialog" title="Eingaben unter einer Bezeichnung im Browser speichern, abrufen, aktualisieren oder löschen">Gespeicherte Szenarien</button>
+          <button id="btn-import" type="button" role="menuitem" tabindex="-1">Import</button>
+          <div class="menu-separator" role="separator"></div>
+          <button id="btn-reset" type="button" role="menuitem" tabindex="-1" class="ghost">Zurücksetzen</button>
+        </div>
+      </div>
+      <div class="menu menu-share">
+        <button id="menu-share-button" type="button" class="menu-button" data-menu-button aria-haspopup="menu" aria-expanded="false" aria-controls="menu-share">Teilen &amp; Export<span aria-hidden="true"> ▾</span></button>
+        <div id="menu-share" class="menu-panel" role="menu" aria-labelledby="menu-share-button" hidden>
+          <button id="btn-share" type="button" role="menuitem" tabindex="-1" title="Link mit Ihren aktuellen Eingaben kopieren – zum Sichern oder Weitergeben Ihrer Berechnung">Link mit Werten teilen</button>
+          <button id="btn-export" type="button" role="menuitem" tabindex="-1" aria-haspopup="dialog" title="Eingaben als Datei (JSON) speichern oder als Markdown-Datei für einen KI-Assistenten">Export</button>
+          <button id="btn-recommend" type="button" role="menuitem" tabindex="-1" aria-haspopup="dialog" title="Den Rechner per WhatsApp, Threema, E-Mail, Link oder einer anderen App (z. B. Signal) weiterempfehlen">Weiterempfehlen</button>
+        </div>
+      </div>
+      <button id="btn-variants" type="button" aria-haspopup="dialog" aria-label="Varianten vergleichen" title="Zwei oder drei Varianten (Export-Dateien, gespeicherte Szenarien oder aktuelle Eingaben) nebeneinander vergleichen">Vergleichen</button>
+      <button id="btn-report" type="button" aria-label="Bericht drucken" title="Kompakte Zusammenfassung mit Eingaben, Ergebnissen, Diagrammen, Förderung und Finanzierung – drucken oder als PDF speichern">Bericht</button>
+      <div class="menu menu-more">
+        <button id="menu-more-button" type="button" class="menu-button" data-menu-button aria-haspopup="menu" aria-expanded="false" aria-controls="menu-more">Mehr<span aria-hidden="true"> ▾</span></button>
+        <div id="menu-more" class="menu-panel" role="menu" aria-labelledby="menu-more-button" hidden>
+          <button id="btn-intro" type="button" role="menuitem" tabindex="-1" aria-haspopup="dialog" title="Kurze Einführung: Wozu dient der Rechner, wie bedient man ihn?">Einführung</button>
+          <button id="btn-support" type="button" role="menuitem" tabindex="-1" aria-haspopup="dialog" title="Das Hobbyprojekt freiwillig unterstützen – per Buy Me a Coffee oder PayPal">Unterstützen</button>
+        </div>
+      </div>
+    </div>
+    <input id="file-import" type="file" accept="application/json,.json" hidden>
   </header>
   <main class="layout">
     <aside id="inputs" class="inputs" aria-label="Eingaben"></aside>
@@ -2199,7 +2333,7 @@ function variantsHtml(): string {
     <form method="dialog" class="intro-body">
       <button type="submit" value="close" class="dialog-close" data-dialog-first aria-label="Schließen">×</button>
       <h2 id="variants-title">Varianten vergleichen</h2>
-      <p class="intro-lead">Laden Sie zwei oder drei Export-Dateien, etwa „Angebot A“ und „Angebot B“ oder „jetzt“ und „2028“, übernehmen Sie gespeicherte Szenarien oder die aktuellen Eingaben – diese Variante folgt dem Rechner, bis Sie den Stand festhalten. Die Varianten selbst werden nicht gespeichert; gespeicherte Szenarien („Gespeicherte Szenarien“ in der Werkzeugleiste) sind eine zusätzliche Quelle.</p>
+      <p class="intro-lead">Laden Sie zwei oder drei Export-Dateien, etwa „Angebot A“ und „Angebot B“ oder „jetzt“ und „2028“, übernehmen Sie gespeicherte Szenarien oder die aktuellen Eingaben – diese Variante folgt dem Rechner, bis Sie den Stand festhalten. Die Varianten selbst werden nicht gespeichert; gespeicherte Szenarien („Gespeicherte Szenarien“ im Menü „Szenarien“) sind eine zusätzliche Quelle.</p>
       <div class="variants-actions">
         <button type="button" id="var-current">Aktuelle Eingaben hinzufügen</button>
         <button type="button" id="var-saved-btn" aria-expanded="false" aria-controls="var-saved">Aus gespeicherten Szenarien hinzufügen</button>
@@ -2295,7 +2429,7 @@ function introHtml(): string {
         <a href="./hilfe.html">Ausführliche Anleitung in der Hilfe</a>
         <button type="submit" value="close" class="primary">Los geht’s</button>
       </div>
-      <p class="muted small intro-again">Diese Einführung können Sie jederzeit über „Einführung“ oben wieder öffnen.</p>
+      <p class="muted small intro-again">Diese Einführung können Sie jederzeit über „Mehr“ › „Einführung“ wieder öffnen.</p>
     </form>
   </dialog>`;
 }

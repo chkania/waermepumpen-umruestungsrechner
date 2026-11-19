@@ -61,6 +61,7 @@ inklusive steigender Energiepreise, Bundesförderung (KfW 458), Kreditfinanzieru
 | [F35](F35-export-fuer-ki-assistenten.md) | Export für KI-Assistenten |
 | [F36](F36-monatliche-belastung.md) | Monatliche Belastung |
 | [F37](F37-szenarien-im-browser-speichern.md) | Szenarien im Browser speichern und vergleichen |
+| [F38](F38-werkzeugleiste-mit-menues.md) | Werkzeugleiste mit Menüs |
 
 ## Nicht-funktionale Anforderungen
 
