@@ -3,11 +3,11 @@
 SPA (Vite + TypeScript, ohne UI-Framework, Chart.js) zur Wirtschaftlichkeitsrechnung Gas/Öl → Wärmepumpe.
 
 ## Vor jeder Änderung
-1. `docs/ANFORDERUNGEN.md` lesen – verbindliche Anforderungen (IDs E*, F*, N*), Annahmen (A*) und Änderungsprotokoll.
+1. `docs/anforderungen/README.md` (Index) und die betroffenen Anforderungsdateien lesen – eine Datei je Anforderung (`F13-….md`, `N7-….md`, Unterpunkte F13.1… darin); dazu `entscheidungen.md` (E*), `annahmen.md` (A*), `quellen.md`, `aenderungsprotokoll.md`.
 2. `npm test` muss vorher und nachher grün sein (Regressionsschutz).
-3. Neue/geänderte Anforderung → Dokument aktualisieren (ID, Test-Verweis, Änderungsprotokoll) und Test ergänzen.
+3. Neue Anforderung → neue Datei `docs/anforderungen/<ID>-<kurztitel>.md` + Zeile im Index; neuer Unterpunkt/geänderter Text → in der Datei der Anforderung (Test-Verweis); immer Eintrag in `aenderungsprotokoll.md`; Test ergänzen.
    Neue Felder oder Bedienfunktionen auch im Benutzerhandbuch `docs/BENUTZERHANDBUCH.md` beschreiben (`tests/help.test.ts` prüft das).
-4. Ändert sich ein Ergebnis bewusst, schlägt `tests/regression.test.ts` fehl → prüfen, dann `npm test -- -u` und im Änderungsprotokoll begründen.
+4. Ändert sich ein Ergebnis bewusst, schlägt `tests/regression.test.ts` fehl → prüfen, dann `npm test -- -u` und in `docs/anforderungen/aenderungsprotokoll.md` begründen.
 
 ## Struktur
 - `src/core/` – reiner Rechenkern ohne DOM (monatliche Simulation):

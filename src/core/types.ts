@@ -225,7 +225,7 @@ export interface CompareInputs {
   count: number;
 }
 
-/** Link to a document for the installer or energy adviser (F16.2); the address is only shown and opened, never loaded. */
+/** Link to a document for the installer or energy adviser (F16.4); the address is only shown and opened, never loaded. */
 export interface DocumentLink {
   /** Short description, e.g. "Angebot Heizungsbauer". */
   title: string;
@@ -239,7 +239,7 @@ export interface ScenarioInfo {
   name: string;
   /** Free text: description, assumptions, quotes … */
   notes: string;
-  /** Links to documents (F16.2), at most MAX_DOCUMENTS. */
+  /** Links to documents (F16.4), at most MAX_DOCUMENTS. */
   documents: DocumentLink[];
 }
 

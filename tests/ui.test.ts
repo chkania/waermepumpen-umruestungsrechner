@@ -1019,7 +1019,7 @@ describe('F20.3 Dialoge öffnen oben, der Schließen-Button hat den Fokus', () =
 });
 
 
-describe('F16.2 Unterlagen im Szenario: hinzufügen, prüfen, entfernen', () => {
+describe('F16.4 Unterlagen im Szenario: hinzufügen, prüfen, entfernen', () => {
   beforeEach(() => {
     store.clear();
     history.replaceState(null, '', '/');

@@ -1,0 +1,3 @@
+# N10 – Besucherstatistik
+
+- N10 Besucherstatistik mit der eigenen Matomo-Instanz (`analytics.chkania.net`, Site-ID 2), nur im Produktions-Build, auf allen Seiten (`src/analytics.ts`, ohne Inline-Skript; kein noscript-Pixel, weil es den Widerspruch nicht beachten könnte). Widerspruch auf der Datenschutzseite, gespeichert im `localStorage` statt in einem Cookie. Datenschutz: keine Cookies, Do Not Track wird beachtet, sensible Query-Parameter ausgeschlossen, der URL-Hash wird nie übertragen (geteilte Links enthalten dort alle Eingaben, F9.2) und Matomo erhält einen festen Seitentitel statt des Fenstertitels mit der Szenario-Bezeichnung (F16.1). Eingaben und Ergebnisse werden nicht übertragen. Die CSP (N6) erlaubt zusätzlich nur diese Instanz. *(Test: analytics)*

@@ -2,7 +2,7 @@ import { formatMonth, monthFromDate, parseMonth } from './dates';
 import type { Inputs } from './types';
 
 /**
- * Central default assumptions. Sources and dates: see docs/ANFORDERUNGEN.md (sections 5/6).
+ * Central default assumptions. Sources and dates: see docs/anforderungen/quellen.md and annahmen.md.
  *
  * KfW 458 funding – as stated on the KfW website, retrieved 2026-11-11:
  *  - Base funding (Grundförderung) 30 %; from Q1/2027 for heat pumps 15 % + 15 % value-added bonus (Wertschöpfungs-Bonus) for EU origin (guideline (Richtlinie) no. 8.4.1 c, 8.4.6)

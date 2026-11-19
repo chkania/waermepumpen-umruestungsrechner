@@ -64,7 +64,7 @@ Der Bericht hat diese Abschnitte, in dieser Reihenfolge:
 
 Jede Zeile enthält den Wert im Rechner, den Wert laut Quelle, die Textstelle und einen Link zur Quelle.
 
-- **Abweichung:** Quelle selbst öffnen und den Wert prüfen. Bei Marktpreisen ist nicht jede Schwankung ein Grund zur Änderung. Bestätigt sich die Abweichung, änderst du `defaults.ts` und `sources.ts` wie im Prüf-Issue beschrieben, samt Regressions-Snapshots und Änderungsprotokoll.
+- **Abweichung:** Quelle selbst öffnen und den Wert prüfen. Bei Marktpreisen ist nicht jede Schwankung ein Grund zur Änderung. Bestätigt sich die Abweichung, änderst du `defaults.ts` und `sources.ts` wie im Prüf-Issue beschrieben, samt Regressions-Snapshots und [Änderungsprotokoll](anforderungen/aenderungsprotokoll.md).
 - **Unklar:** Diesen Wert wie bisher von Hand prüfen. Häufige Ursachen: Die Seite nennt den Wert nur in einem verlinkten Merkblatt, oder ein Teil der Seite wird erst per JavaScript nachgeladen.
 - **Bestätigt:** Diesen Punkt kannst du in der Checkliste abhaken. Ein Blick auf die Textstelle reicht.
 

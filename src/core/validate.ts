@@ -134,13 +134,13 @@ export const TEXT_LIMITS: Record<string, number> = {
 };
 const GENERIC_TEXT_LIMIT = 2000;
 
-/** Links to documents per scenario (F16.2): at most five, short titles, addresses up to 300 characters. */
+/** Links to documents per scenario (F16.4): at most five, short titles, addresses up to 300 characters. */
 export const MAX_DOCUMENTS = 5;
 export const DOCUMENT_TITLE_MAX = 60;
 export const DOCUMENT_URL_MAX = 300;
 
 /**
- * Cleans the list of document links from link, file or storage (F16.2). Entries that are not objects with text fields,
+ * Cleans the list of document links from link, file or storage (F16.4). Entries that are not objects with text fields,
  * or whose address is not http(s) or too long, are dropped; more than MAX_DOCUMENTS are cut off. Findings go to `issues`.
  */
 export function cleanDocuments(value: unknown, issues: InputIssue[] = [], path = 'scenario.documents'): { title: string; url: string }[] {

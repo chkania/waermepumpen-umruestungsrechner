@@ -197,7 +197,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       charts.update(last.run, priceRows(inputs), last.cmp, last.events, last.sens, energyYear(inputs));
     });
 
-  // ---------- Links to documents (F16.2) ----------
+  // ---------- Links to documents (F16.4) ----------
   /**
    * One row of the list, built from the same parts as the other fields (label row, .control, .field-error);
    * a row is only stored in the inputs while its address is valid.
@@ -214,7 +214,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     </div>`;
   };
 
-  /** Builds the list as the last field of the scenario section from the stored links (F16.2). */
+  /** Builds the list as the last field of the scenario section from the stored links (F16.4). */
   function renderDocLinks(): void {
     form.querySelector('.doc-links')?.remove();
     const fields = form.querySelector<HTMLElement>('details.section .fields');
@@ -325,7 +325,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     jaz.focus({ preventScroll: true });
   });
 
-  // Links to documents (F16.2): add a row, remove a row, edit a row (delegated, the list is rebuilt on load and reset)
+  // Links to documents (F16.4): add a row, remove a row, edit a row (delegated, the list is rebuilt on load and reset)
   form.addEventListener('click', (e) => {
     const t = e.target as HTMLElement;
     if (t.closest('[data-doc-add]')) {

@@ -1,0 +1,3 @@
+# F18 – Einordnung des Hauses
+
+- F18.1 Karte „Einordnung des Hauses“: Verbrauchskennwert Endenergie Heizung + Warmwasser (ohne Kochen) je m² beheizter Wohnfläche, Effizienzklasse A+…H nach GEG Anlage 10, Baualtersklasse mit typischem Verbrauch unsaniert (Schätzung), erwarteter Bereich nach Sanierung (Einzelmaßnahmen −10…25 %, umfassend −40…60 %), Vergleich besser/typisch/höher, Aufteilung des Verbrauchs, grobe Heizlast (Wärmebedarf ÷ 2.000 h), Eignung für die WP nach Raumwärme je m² (≤ 100 gut, ≤ 150 geeignet, darüber prüfen). Hinweise: keine Witterungsbereinigung, Bezug Wohnfläche statt Nutzfläche. *(Test: house, ui)*

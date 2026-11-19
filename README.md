@@ -24,7 +24,7 @@ Veröffentlichung auf einem Webspace per SSH: [docs/DEPLOYMENT.md](docs/DEPLOYME
 
 Bedienung: [docs/BENUTZERHANDBUCH.md](docs/BENUTZERHANDBUCH.md) – im Browser unter `hilfe.html` bzw. über „Hilfe“ im Rechner.
 
-Anforderungen, Annahmen und Quellen: [docs/ANFORDERUNGEN.md](docs/ANFORDERUNGEN.md).
+Anforderungen, Annahmen und Quellen: [docs/anforderungen/](docs/anforderungen/README.md) (eine Datei je Anforderung).
 
 Die aktuelle Version und alle Änderungen stehen in [CHANGELOG.md](CHANGELOG.md) (im Browser: `changelog.html`). Versionierung nach [Semantic Versioning](https://semver.org/lang/de/), automatisch aus den Commit-Nachrichten – Ablauf und Commit-Format in [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -34,7 +34,7 @@ Keine Finanz-, Steuer- oder Förderberatung; alle Angaben ohne Gewähr.
 
 Am Anfang stand eine persönliche Frage: Lohnt sich der Umstieg auf eine Wärmepumpe auch finanziell? Die Antworten, die ich fand, waren oft sehr allgemein oder beruhten auf Annahmen, die nicht zum eigenen Haus passten. Also habe ich selbst nachgerechnet – Förderrichtlinien, Energie- und CO₂-Preise, Steuerbonus, Kredite –, und aus dieser Recherche ist Schritt für Schritt dieser Rechner entstanden.
 
-Er ist ein rein privates Hobbyprojekt, ohne Auftraggeber, Werbung oder kommerzielles Interesse. Ich bin kein Fachmann für Heizungstechnik oder Energieberatung, sondern habe mich gründlich eingelesen; deshalb ist jede Annahme mit ihrer Herkunft offengelegt (`src/core/sources.ts`, [docs/ANFORDERUNGEN.md](docs/ANFORDERUNGEN.md)). Hinweise auf Fehler oder veraltete Werte sind herzlich willkommen. – Christoph Kania
+Er ist ein rein privates Hobbyprojekt, ohne Auftraggeber, Werbung oder kommerzielles Interesse. Ich bin kein Fachmann für Heizungstechnik oder Energieberatung, sondern habe mich gründlich eingelesen; deshalb ist jede Annahme mit ihrer Herkunft offengelegt (`src/core/sources.ts`, [docs/anforderungen/](docs/anforderungen/README.md)). Hinweise auf Fehler oder veraltete Werte sind herzlich willkommen. – Christoph Kania
 
 ## Mitmachen
 
@@ -42,7 +42,7 @@ Förderprogramme, Energiepreise und Steuerregeln ändern sich laufend – der Re
 
 - **Melde Fehler oder veraltete Annahmen** – über das Formular [Fehler oder veralteter Wert](https://github.com/chkania/wpir/issues/new?template=bug_report.yml), am besten mit Quelle.
 - **Bring deine Ideen ein** – fehlende Szenarien, unklare Erklärungen, bessere Darstellungen.
-- **Entwickle mit** – Rechenlogik, Texte, Tests, Barrierefreiheit. Ablauf, Commit-Format und Konventionen findest du in [CONTRIBUTING.md](CONTRIBUTING.md); `CLAUDE.md` und `docs/ANFORDERUNGEN.md` beschreiben Struktur und Anforderungen.
+- **Entwickle mit** – Rechenlogik, Texte, Tests, Barrierefreiheit. Ablauf, Commit-Format und Konventionen findest du in [CONTRIBUTING.md](CONTRIBUTING.md); `CLAUDE.md` und `docs/anforderungen/` beschreiben Struktur und Anforderungen.
 
 Auch kleine Beiträge wie ein korrigierter Tippfehler oder eine geprüfte Quelle helfen – schön, wenn du dabei bist!
 

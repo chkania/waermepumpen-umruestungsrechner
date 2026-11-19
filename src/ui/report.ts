@@ -165,7 +165,7 @@ function qrHtml(d: ReportData): string {
     : `<p class="report-qr muted">Zu viele Eingaben für einen QR-Code. ${link}</p>`;
 }
 
-/** Links to documents (F16.2): title, clickable address (also in the PDF) and a QR code per link. */
+/** Links to documents (F16.4): title, clickable address (also in the PDF) and a QR code per link. */
 export function documentsHtml(documents: { title: string; url: string }[]): string {
   if (documents.length === 0) return '';
   const items = documents.map((doc) => {
