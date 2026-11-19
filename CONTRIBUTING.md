@@ -35,9 +35,13 @@ Beschreib die Idee so, wie du sie einem Menschen erklären würdest – was du e
 |---|---|---|---|
 | 1. Anforderung | `requirements-author` | Haiku | Leitet aus deiner Beschreibung eine Anforderung mit IDs, prüfbaren Akzeptanzkriterien und betroffenen Bereichen ab. Was nur du entscheiden kannst, fragt er dich (Auswahlfragen). Prüft die Anforderung dann in zwei Runden selbst. |
 | 2. Anforderungs-Review | `requirements-reviewer` | Opus | Prüft die Anforderung in höchstens zwei Runden erneut auf Vollständigkeit und Widersprüche zu bestehenden Anforderungen und verbessert sie. Du siehst die geprüfte Fassung. |
-| 3. Umsetzung | `implementer` | Haiku | Schreibt Code, Tests und Dokumentation (Anforderungsdatei, Änderungsprotokoll, Benutzerhandbuch). |
-| 4. Code-Review | `code-reviewer` | Opus | Prüft, ob der Code korrekt, performant und sinnvoll umgesetzt ist. Befunde gehen zurück an die Umsetzung. |
-| 5. QA | `qa` | Opus | Prüft Tests, Testabdeckung, Build, Performance (Bundle-Größe, Rechenzeit) und Barrierefreiheit. Mängel gehen zurück an die Umsetzung, danach folgen erneut Code-Review und QA. |
+| 3. Umsetzung | `implementer` | Haiku | Schreibt Code, Tests und Dokumentation (Anforderungsdatei, Änderungsprotokoll, Benutzerhandbuch). Führt während der Arbeit nur die betroffenen Tests aus, die ganze Suite und den Build einmal am Ende. |
+| 4. Code-Review | `code-reviewer` | Sonnet | Prüft am Diff, ob der Code korrekt, performant und sinnvoll umgesetzt ist (ohne eigene Testläufe). Hohe und mittlere Befunde gehen zurück an die Umsetzung, danach wird nur das Delta erneut geprüft. |
+| 5. QA | `qa` | Sonnet | Prüft Tests und Testabdeckung (ein Lauf), Build, Performance (Bundle-Größe gegenüber dem Ausgangsstand) und Barrierefreiheit, bei neuen Bedienelementen auch im echten Browser. Mängel gehen zurück an die Umsetzung, danach folgen erneut Code-Review und QA für das Geänderte. |
+
+Geringe Befunde sammelt die Kette und lässt sie nach der Freigabe in einem Rutsch beheben. Zwischenstände landen als lokale Commits und werden vor dem Push zu einem Commit zusammengefasst.
+
+**Prozess verbessern:** Jeder Lauf hinterlässt ein paar Zeilen im Laufbuch [.claude/feature-log.md](.claude/feature-log.md) – Aufwand je Stufe und welche Befunde erst spät auffielen. `/feature-retro` wertet es aus (Agent `process-retro`, Sonnet) und schlägt höchstens drei Änderungen an Agenten oder Skill vor; du entscheidest, welche übernommen werden. Die Kette empfiehlt eine Retro nach fünf Läufen oder wenn eine Stufe drei Durchgänge brauchte.
 
 Die Agenten 1 und 2 schreiben keinen Code; die Reviewer und die QA ändern keine Dateien. Beide Anforderungsagenten arbeiten mit derselben Prüfliste ([.claude/requirements-checklist.md](.claude/requirements-checklist.md)), die auch beschreibt, wie eine Anforderung aufgebaut ist.
 
