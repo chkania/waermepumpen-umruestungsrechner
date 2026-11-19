@@ -141,3 +141,35 @@ describe('F13.6 § 14a je Zähler (Wallbox am Haushaltszähler)', () => {
   });
 });
 
+
+describe('F13.7 Laufende Kosten intelligentes Messsystem', () => {
+  const kwh = 18000 / 3.3;
+  const withFee = (sep: boolean) => base((i) => {
+    i.heatPump.smartMeterFee = 100;
+    i.heatPump.separateTariff = sep;
+  });
+
+  it('fällt in der Hauptrechnung mit und ohne eigenen WP-Zähler an, ohne Preissteigerung', () => {
+    const fixed = (sep: boolean, year: number) => simulate(withFee(sep), 'kfw').years.find((y) => y.year === year)!.fixed;
+    expect(fixed(false, 2027)).toBeCloseTo(100 - 130, 6);
+    expect(fixed(true, 2027)).toBeCloseTo(100 + 100 - 130, 6);
+    const grow = withFee(false);
+    grow.heatPump.elecIncrease = 0.05;
+    expect(simulate(grow, 'kfw').years.find((y) => y.year === 2035)!.fixed).toBeCloseTo(100 - 130, 6);
+  });
+
+  it('wirkt in beiden WP-Szenarien, nicht ohne Wärmepumpe', () => {
+    const delta = (kind: 'ref' | 'kfw' | 'tax') => simulate(withFee(true), kind).totalCost - simulate(base(), kind).totalCost;
+    expect(delta('ref')).toBeCloseTo(0, 6);
+    expect(delta('kfw')).toBeCloseTo(20 * 100, 4);
+    expect(delta('tax')).toBeCloseTo(20 * 100, 4);
+  });
+
+  it('ändert im Tarifvergleich die Ersparnis nicht', () => {
+    const t = tariffComparison(withFee(true))!;
+    expect(t.firstFullYear!.withTariff).toBeCloseTo(kwh * 0.26 + 100 + 100 - 130, 6);
+    expect(t.firstFullYear!.withoutTariff).toBeCloseTo(kwh * 0.34 + 100 - 130, 6);
+    expect(t.saving).toBeCloseTo(tariffComparison(base())!.saving, 4);
+    expect(t.breakEvenKWh).toBeCloseTo(1250, 6);
+  });
+});

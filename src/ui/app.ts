@@ -1064,14 +1064,14 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
         <div class="tariff-col${t.cheaper === 'with' ? ' is-cheaper' : ''}">
           <div class="tariff-head">Mit Wärmepumpentarif${t.cheaper === 'with' ? ' <span class="badge">günstiger</span>' : ''}</div>
           <div class="tariff-val">${fmtEur(y.withTariff)}<small>/Jahr (${y.year})</small></div>
-          <div class="tariff-sub">${fmtNum(hp.elecPriceCt, 1)} ct/kWh + ${fmtEur(hp.meterFee)} Zähler − ${fmtEur(hp.para14aReduction)} § 14a</div>
+          <div class="tariff-sub">${fmtNum(hp.elecPriceCt, 1)} ct/kWh + ${fmtEur(hp.meterFee)} Zähler${hp.smartMeterFee ? ` + ${fmtEur(hp.smartMeterFee)} Messsystem` : ''} − ${fmtEur(hp.para14aReduction)} § 14a</div>
           ${t.setupCost > 0 ? `<div class="tariff-sub">einmalig ${fmtEur(t.setupCost)} Zählerschrank-Umbau${t.setupSubsidy > 0 ? ` − ${fmtEur(t.setupSubsidy)} Zuschuss` : ''}</div>` : ''}
           <div class="tariff-total">${fmtEur(t.totalWith)} im Zeitraum${t.setupCost > 0 ? ' inkl. Umbau' : ''}</div>
         </div>
         <div class="tariff-col${t.cheaper === 'without' ? ' is-cheaper' : ''}">
           <div class="tariff-head">Ohne (Haushaltsstrom)${t.cheaper === 'without' ? ' <span class="badge">günstiger</span>' : ''}</div>
           <div class="tariff-val">${fmtEur(y.withoutTariff)}<small>/Jahr (${y.year})</small></div>
-          <div class="tariff-sub">${fmtNum(hp.householdPriceCt, 1)} ct/kWh, kein Zusatzzähler${hp.existing14aOnHousehold ? ', § 14a schon für andere Einrichtung genutzt' : ` − ${fmtEur(hp.para14aReduction)} § 14a`}</div>
+          <div class="tariff-sub">${fmtNum(hp.householdPriceCt, 1)} ct/kWh, kein Zusatzzähler${hp.smartMeterFee ? `, + ${fmtEur(hp.smartMeterFee)} Messsystem` : ''}${hp.existing14aOnHousehold ? ', § 14a schon für andere Einrichtung genutzt' : ` − ${fmtEur(hp.para14aReduction)} § 14a`}</div>
           <div class="tariff-total">${fmtEur(t.totalWithout)} im Zeitraum</div>
         </div>
       </div>

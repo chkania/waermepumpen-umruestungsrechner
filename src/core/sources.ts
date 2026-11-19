@@ -136,7 +136,13 @@ export const DEFAULT_SOURCES: Record<string, DefaultSource> = {
   // ---------- Electricity ----------
   'heatPump.separateTariff': { kind: 'annahme', text: 'Annahme: eigener Zähler mit Wärmepumpentarif. Ohne separaten Tarif läuft die WP über den Haushaltsstrom.' },
   'heatPump.elecPriceCt': mkt('Verivox: günstigste Wärmepumpentarife für Neukunden um 20,7 ct/kWh (7.500 kWh/Jahr); Ratgeber nennen für übliche WP-Tarife 22–28 ct/kWh, Bestandsverträge oft mehr. Default = typischer Neuvertrag. Tarife vergleichen.', 'https://www.verivox.de/heizstrom/waermepumpenstrom-preisentwicklung/'),
-  'heatPump.meterFee': { kind: 'schaetzung', text: 'Schätzung für Grundpreis und Messstellenbetrieb des zweiten Zählers pro Jahr.' },
+  'heatPump.meterFee': { kind: 'schaetzung', text: 'Schätzung für den Grundpreis des Wärmepumpentarifs pro Jahr. Das intelligente Messsystem steht in einem eigenen Feld.' },
+  'heatPump.smartMeterFee': {
+    kind: 'gesetz',
+    text: 'Für die KfW-Förderung muss ein intelligentes Messsystem (iMSys) mit Steuerungseinrichtung bestellt werden (Infoblatt Nr. 4.1.3.2; Ausnahme: bis 4,2 kW elektrisch nur iMSys, oder am Hausanschluss ist schon eines vorhanden). Preisobergrenzen § 30 MsbG für den Anschlussnutzer: iMSys bei steuerbarer Verbrauchseinrichtung nach § 14a EnWG 50 € brutto pro Jahr, Steuerungseinrichtung zusätzlich 50 €. Default = 100 €/Jahr, ohne Preissteigerung. Das einmalige Einbauentgelt ist förderfähig und gehört zur Investition. Ist am Haushaltszähler schon ein iMSys mit Steuerung vorhanden und bezahlt, 0 eintragen.',
+    url: 'https://www.gesetze-im-internet.de/messbg/__30.html',
+    asOf: ASOF,
+  },
   'heatPump.meterSetupCost': { kind: 'beispiel', text: 'Standard 0 €. Hier die Mehrkosten für den zweiten Zählerplatz eintragen (z. B. Erweiterung oder Neuaufbau des Zählerschranks). Die Kosten hängen stark vom Zustand des Zählerschranks ab – Angebot vom Elektriker einholen. Ein Teil des Umbaus kann ohnehin nötig sein: Für die Förderung muss ein intelligentes Messsystem mit Steuerungseinrichtung bestellt werden; dessen Einbauentgelt ist förderfähig und gehört nicht hierher.' },
   'heatPump.meterSetupEligible': { kind: 'annahme', text: 'Annahme: nicht förderfähig. Das Infoblatt nennt als förderfähig die „notwendigen Netzanschlüsse“ der Wärmepumpe sowie das intelligente Messsystem mit Steuerungseinrichtung, aber nicht ausdrücklich einen zweiten Zählerplatz für einen günstigeren Tarif. Ob der Umbau anerkannt wird, klärt der Fachbetrieb bzw. Energieeffizienz-Experte bei der Bestätigung zum Antrag.' },
   'heatPump.householdPriceCt': mkt('BDEW-Strompreisanalyse: durchschnittlicher Haushaltsstrompreis 2026 bisher 37,3 ct/kWh (brutto). Eigene Stromrechnung verwenden.', 'https://www.bdew.de/service/daten-und-grafiken/bdew-strompreisanalyse/'),
@@ -302,6 +308,7 @@ export const OFFICIAL_REFS: Record<string, OfficialRef[]> = {
   'heatPump.leadMonths': [m458('S. 3 „In 6 Schritten zum Zuschuss“, S. 6 „Vorhabenbeginn“')],
   'heatPump.euOrigin': [rl('8.4.1 c, 8.4.6'), info('1.8 „Förderung von Wärmepumpen mit lokaler Wertschöpfung“')],
   'heatPump.meterSetupCost': [info('4.1.3 (notwendige Netzanschlüsse, intelligentes Messsystem)'), info('4.1.3.2 „iMSys-Bestellpflicht“')],
+  'heatPump.smartMeterFee': [law('§ 30 MsbG (Preisobergrenzen)', 'https://www.gesetze-im-internet.de/messbg/__30.html'), info('4.1.3.2 „iMSys-Bestellpflicht“')],
   'heatPump.meterSetupEligible': [info('4.1.3 „Elektrisch angetriebene Wärmepumpen“'), info('4.1.3.2 „iMSys-Bestellpflicht“')],
   'heatPump.para14aReduction': [law('§ 14a EnWG', 'https://www.gesetze-im-internet.de/enwg_2005/__14a.html'), law('Bundesnetzagentur: Reduzierung des Netzentgelts (Module 1–3)', 'https://www.bundesnetzagentur.de/DE/Vportal/Energie/SteuerbareVBE/Netzentgelt_table.html')],
   'heatPump.existing14aOnHousehold': [law('Bundesnetzagentur: Reduzierung des Netzentgelts – Pauschale je Marktlokation', 'https://www.bundesnetzagentur.de/DE/Vportal/Energie/SteuerbareVBE/Netzentgelt_table.html'), law('§ 14a EnWG', 'https://www.gesetze-im-internet.de/enwg_2005/__14a.html')],

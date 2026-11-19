@@ -113,6 +113,8 @@ export interface HeatPumpInputs {
   householdPriceCt: number;
   elecIncrease: number;
   meterFee: number;
+  /** Running cost of the smart metering system (intelligentes Messsystem, iMSys) incl. control unit (Steuerungseinrichtung), €/year, fixed (price cap (Preisobergrenze) § 30 MsbG). */
+  smartMeterFee: number;
   /** One-off cost of the second meter (meter cabinet conversion (Zählerschrank-Umbau)), only with a separate heat pump tariff (Wärmepumpentarif). */
   meterSetupCost: number;
   /** Meter cabinet conversion (Zählerschrank-Umbau) recognised as eligible (to be confirmed by the installer). */

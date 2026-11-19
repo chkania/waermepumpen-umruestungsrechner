@@ -162,8 +162,8 @@ function pricesHtml(inp: Inputs, run: RunResult): string {
     ],
     [
       'Grund- und Zählerkosten WP im Jahr',
-      `${hp.separateTariff ? `Zählergrundpreis ${fmtEur(hp.meterFee)} (steigt wie der Strompreis)` : 'kein eigener Zähler'} − § 14a-Pauschale ${fmtEur(para14aFor(hp))}`,
-      signed((hp.separateTariff ? hp.meterFee : 0) - para14aFor(hp)),
+      `${hp.separateTariff ? `Zählergrundpreis ${fmtEur(hp.meterFee)} (steigt wie der Strompreis)` : 'kein eigener Zähler'} + intelligentes Messsystem ${fmtEur(hp.smartMeterFee)} (fest) − § 14a-Pauschale ${fmtEur(para14aFor(hp))}`,
+      signed((hp.separateTariff ? hp.meterFee : 0) + hp.smartMeterFee - para14aFor(hp)),
     ],
   ];
   if (p.bioEnabled) rows.push(['Bio-Aufpreis neuer Kessel', `(Pflichtanteil Bio − heutiger Bio-Anteil ${pct(pm.currentBioShare)}) × ${ct(p.bioPremiumCt)}`, 'siehe Tabelle']);
