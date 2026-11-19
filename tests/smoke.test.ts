@@ -87,6 +87,15 @@ describe('N15 Prüfung nach dem Deployment', () => {
     expect(documented).toEqual(REQUIRED_SECURITY_HEADERS.map((h) => ({ name: h.name, value: h.value })));
   });
 
+  it('A8 (F38) Der Rauchtest nutzt weder Werkzeugleiste noch Umschalter; seine Selektoren bleiben gleich', () => {
+    const src = readFileSync('scripts/smoke-test.ts', 'utf8');
+    expect(src).not.toMatch(/btn-|toolbar|design-switch|theme-switch|menu-/);
+    expect(src).toMatch(/#kpis/);
+    expect(src).toMatch(/canvas\[data-chart\]/);
+    expect(src).toMatch(/#f-oldHeating-consumption/);
+    expect(src).toMatch(/\.info-btn/);
+  });
+
   it('nur die Besucherstatistik wird ignoriert (blockiert)', () => {
     expect(isIgnoredUrl('https://analytics.chkania.net/matomo.js')).toBe(true);
     expect(isIgnoredUrl('https://waermepumpen-investitionsrechner.de/assets/main.js')).toBe(false);

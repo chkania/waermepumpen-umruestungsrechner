@@ -20,11 +20,19 @@ Starte ihn mit der Eingabe des Nutzers im Wortlaut. Bei `STATUS: RÜCKFRAGEN`: d
 
 ## 3. Anforderungs-Review – `requirements-reviewer`
 
-Übergib die fertige Anforderung samt „Hinweise für das Review“ und den Entscheidungen des Nutzers. Rückfragen wie in Schritt 2 behandeln, danach per SendMessage an den Reviewer zurück. Ergebnis ist die **geprüfte Anforderung**: als Datei ablegen, dem Nutzer kurz zusammenfassen, weitermachen.
+Übergib die fertige Anforderung samt „Hinweise für das Review“ und den Entscheidungen des Nutzers. Rückfragen wie in Schritt 2 behandeln, danach per SendMessage an den Reviewer zurück. Ergebnis ist die **geprüfte Anforderung**.
+
+### Freigabe durch den Nutzer
+
+Lege die geprüfte Anforderung als Datei im Scratchpad ab und nenne dem Nutzer den vollständigen Pfad (er soll sie dort lesen können). Fasse sie in wenigen Zeilen zusammen: Ziel, IDs, Kernpunkte, Annahmen, was ausdrücklich nicht dazugehört. Frage per AskUserQuestion: „Anforderung freigeben?“ (Optionen: freigeben / Änderungen nötig).
+- **Freigabe:** weiter mit Schritt 4.
+- **Änderungen:** Wünsche des Nutzers per SendMessage an den `requirements-reviewer` (bei inhaltlicher Neuformulierung an den `requirements-author`), geänderte Fassung wieder als Datei ablegen und erneut zur Freigabe vorlegen.
+
+Ohne ausdrückliche Freigabe beginnt die Implementierung nicht.
 
 ## 4. Implementierung – `implementer`
 
-Übergib die geprüfte Anforderung. Nach jeder Runde des Implementierers einen lokalen **Zwischenstand** anlegen (`git add -A && git commit -q -m "chore: wip"`) und den Commit merken. So bekommen Code-Review und QA in späteren Durchgängen nur das Delta.
+Nur nach der Freigabe aus Schritt 3. Übergib die freigegebene Anforderung. Nach jeder Runde des Implementierers einen lokalen **Zwischenstand** anlegen (`git add -A && git commit -q -m "chore: wip"`) und den Commit merken. So bekommen Code-Review und QA in späteren Durchgängen nur das Delta.
 
 ## 5. Code-Review – `code-reviewer`
 

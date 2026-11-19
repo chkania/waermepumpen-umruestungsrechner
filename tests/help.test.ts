@@ -22,6 +22,12 @@ describe('F15 Benutzerhandbuch – Vollständigkeit', () => {
     }
   });
 
+  it('A10 Handbuch beschreibt die Menüs „Szenarien“, „Teilen & Export“ und „Mehr“, die Kurzbeschriftungen und den Umschalter oben rechts', () => {
+    for (const t of ['„Szenarien“', '„Teilen & Export“', '„Mehr“', '„Vergleichen“', '„Bericht“', 'rechts oben', '„Mehr“ › „Einführung“']) {
+      expect(handbook, t).toContain(t);
+    }
+  });
+
   it('F24 Alle auf-/zuklappen ist beschrieben', () => {
     expect(handbook).toContain('„Alle aufklappen“');
     expect(handbook).toContain('„Alle zuklappen“');
