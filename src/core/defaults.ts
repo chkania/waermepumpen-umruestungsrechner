@@ -105,6 +105,7 @@ export function createDefaults(today: Date = new Date()): Inputs {
       householdPriceCt: 37,
       elecIncrease: 0.02,
       meterFee: 100,
+      smartMeterFee: 100,
       meterSetupCost: 0,
       meterSetupEligible: false,
       para14aReduction: 130,

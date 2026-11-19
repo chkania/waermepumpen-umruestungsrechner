@@ -221,7 +221,8 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
       r.energy = ((elec - fromPv) * gridCt + fromPv * hp.feedInCt) / 100;
       // CO2 (F25): grid electricity with the electricity mix (Strommix), own PV electricity counts as emission-free
       r.co2Kg = (elec - fromPv) * pm.gridCo2Kg(year);
-      r.fixed = ((hp.separateTariff ? hp.meterFee * pm.elecGrowth(abs) : 0) - para14aFor(hp)) / 12;
+      // Smart metering system (iMSys) required for the KfW subsidy: fixed price cap, needed with and without own meter
+      r.fixed = ((hp.separateTariff ? hp.meterFee * pm.elecGrowth(abs) : 0) + hp.smartMeterFee - para14aFor(hp)) / 12;
       r.maintenance = (hp.maintenance * maintGrowth) / 12;
       if (cookM > 0) {
         // Cooking: stays on gas (connection incl. standing charge (Grundpreis) remains) or induction on the household meter (Haushaltszähler)

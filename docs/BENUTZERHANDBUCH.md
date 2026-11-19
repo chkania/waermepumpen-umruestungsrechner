@@ -227,7 +227,8 @@ Achtung: Die Adressen können persönliche Angaben enthalten (z. B. einen Login-
 |---|---|
 | **Separater Wärmepumpentarif** | Ob die Hauptrechnung mit eigenem WP-Zähler und WP-Tarif rechnet. Der Stromtarifvergleich zeigt immer beide Varianten. |
 | **WP-Strompreis (eigener Zähler)** | Arbeitspreis des Wärmepumpentarifs. |
-| **Grundpreis WP-Zähler** | Jährliche Kosten des zweiten Zählers. |
+| **Grundpreis WP-Zähler** | Jährlicher Grundpreis des Wärmepumpentarifs für den zweiten Zähler. |
+| **Laufende Kosten intelligentes Messsystem** | Jährliche Kosten für das intelligente Messsystem (iMSys) mit Steuerungseinrichtung. Für die KfW-Förderung müssen Sie es beim Messstellenbetreiber bestellen; es fällt mit und ohne eigenen WP-Zähler an. Gesetzliche Obergrenze: 50 € für das Messsystem + 50 € für die Steuerung pro Jahr. Ist schon ein Messsystem mit Steuerung vorhanden und bezahlt, tragen Sie 0 ein. |
 | **Einmalig: zweiter Zähler / Zählerschrank-Umbau** | Mehrkosten für den zweiten Zählerplatz; nur mit WP-Tarif. |
 | **Umbau als förderfähig angesetzt** | Nur ankreuzen, wenn der Fachbetrieb die Förderfähigkeit bestätigt. |
 | **Haushaltsstrompreis (ohne WP-Tarif)** | Arbeitspreis des normalen Haushaltsstroms. |

@@ -228,6 +228,7 @@ export const SECTIONS: Section[] = [
       { path: 'heatPump.separateTariff', label: 'Separater Wärmepumpentarif', type: 'checkbox', help: 'Gilt für die Berechnung. Beide Varianten werden zusätzlich im Tarifvergleich gegenübergestellt.' },
       { path: 'heatPump.elecPriceCt', label: 'WP-Strompreis (eigener Zähler)', type: 'number', unit: 'ct/kWh', step: 0.5, min: 0 },
       { path: 'heatPump.meterFee', label: 'Grundpreis WP-Zähler', type: 'number', unit: '€/Jahr', step: 10, min: 0 },
+      { path: 'heatPump.smartMeterFee', label: 'Laufende Kosten intelligentes Messsystem', type: 'number', unit: '€/Jahr', step: 10, min: 0, help: 'Messsystem (iMSys) mit Steuerungseinrichtung: Für die KfW-Förderung muss es bestellt werden. Fällt mit und ohne eigenen WP-Zähler an. 0 eintragen, wenn schon eines mit Steuerungseinrichtung vorhanden ist und bezahlt wird.' },
       { path: 'heatPump.meterSetupCost', label: 'Einmalig: zweiter Zähler / Zählerschrank-Umbau', type: 'number', unit: '€', step: 100, min: 0, help: 'Nur die Mehrkosten für den zweiten Zählerplatz. Fällt nur mit separatem WP-Tarif an.' },
       { path: 'heatPump.meterSetupEligible', label: 'Umbau als förderfähig angesetzt', type: 'checkbox', show: (i) => i.heatPump.meterSetupCost > 0, help: 'Nur ankreuzen, wenn der Fachbetrieb bzw. Energieeffizienz-Experte das bestätigt.' },
       { path: 'heatPump.householdPriceCt', label: 'Haushaltsstrompreis (ohne WP-Tarif)', type: 'number', unit: 'ct/kWh', step: 0.5, min: 0 },

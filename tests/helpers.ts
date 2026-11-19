@@ -32,6 +32,7 @@ export function pinPrices(i: Inputs): Inputs {
   i.prices.bioPremiumCt = 4;
   i.oldHeating.maintenance = 300;
   i.heatPump.maintenance = 200;
+  i.heatPump.smartMeterFee = 0; // hand-computed expectations without smart metering system (F13.7 has its own tests)
   i.heatPump.elecPriceCt = 26;
   i.heatPump.householdPriceCt = 34;
   i.heatPump.feedInCt = 7.8;
