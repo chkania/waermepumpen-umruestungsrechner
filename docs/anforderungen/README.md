@@ -60,6 +60,7 @@ inklusive steigender Energiepreise, Bundesförderung (KfW 458), Kreditfinanzieru
 | [F34](F34-inbetriebnahme-der-bestandsheizung.md) | Inbetriebnahme der Bestandsheizung |
 | [F35](F35-export-fuer-ki-assistenten.md) | Export für KI-Assistenten |
 | [F36](F36-monatliche-belastung.md) | Monatliche Belastung |
+| [F37](F37-szenarien-im-browser-speichern.md) | Szenarien im Browser speichern und vergleichen |
 
 ## Nicht-funktionale Anforderungen
 

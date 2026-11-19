@@ -621,6 +621,20 @@ td.ev-cell { white-space: normal; min-width: 220px; }
 .variants-table th[scope='row'] small { display: block; font-weight: 400; }
 /* Long option texts and names wrap instead of forcing horizontal scrolling */
 .variants-table th, .variants-table td { white-space: normal; overflow-wrap: break-word; hyphens: auto; vertical-align: top; }
+
+/* Saved scenarios (F37): long names wrap inside the dialog, also at 400 px */
+.intro.scenarios { width: min(760px, calc(100vw - 32px)); }
+.scenarios-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 8px; }
+.scenarios-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.scenario-item { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm, 4px); }
+.scenario-item.is-unreadable { border-style: dashed; }
+.scenario-info { flex: 1 1 12em; min-width: 0; overflow-wrap: anywhere; }
+.scenario-name { font-weight: 600; }
+.scenario-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.scenario-actions button, .scenarios-actions button, .variants-saved button { font-size: 0.85rem; padding: 4px 10px; }
+.sc-notice { margin: 8px 0; font-weight: 600; overflow-wrap: anywhere; }
+.variants-saved { margin: 0 0 8px; }
+.privacy-confirm #privacy-text:empty { display: none; }
 #var-result h3 { margin-top: 18px; }
 .intro-body { position: relative; padding: 22px 24px 18px; overflow-y: auto; }
 /* Close button at the top right of every modal dialog; also the control that gets the focus when a dialog opens (F20.3) */

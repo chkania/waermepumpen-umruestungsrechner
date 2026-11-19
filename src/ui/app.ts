@@ -18,7 +18,21 @@ import { MAX_VARIANTS, variantName, variantResult, type Variant } from '../core/
 import { VARIANTS_LIMIT_TEXT, variantCurves, variantCurvesTableHtml, variantDiffsHtml, variantsTableHtml } from './variants';
 import { sensitivity, type Sensitivity } from '../core/sensitivity';
 import { energySplit } from '../core/prices';
-import { decodeHash, encodeHash, exportFileName, exportJson, importJson, mergeInputs } from '../core/serialize';
+import { cleanScenarioName, decodeHash, encodeHash, exportFileName, exportJson, importJson, mergeInputs } from '../core/serialize';
+import {
+  findScenario,
+  parseScenarioFile,
+  putScenario,
+  removeScenarioAt,
+  scenarioEntry,
+  scenarioViews,
+  SCENARIOS_KEY,
+  serializeScenarioFile,
+  setScenarioAt,
+  viewScenario,
+  type ScenarioView,
+} from '../core/scenario-store';
+import { SCENARIO_TEXT, UNNAMED, savedPickHtml, scenarioListHtml } from './scenarios';
 import type { Inputs, ScenarioKind, ScenarioResult } from '../core/types';
 import { cleanDocuments, DOCUMENT_TITLE_MAX, DOCUMENT_URL_MAX, MAX_DOCUMENTS, monthYears, NUMBER_LIMITS, numberRange, TEXT_LIMITS, validMonth, type InputIssue } from '../core/validate';
 import { chartTables, type ChartId } from './charts';
@@ -69,7 +83,7 @@ interface ConfirmNotice {
   /** Text when the notice is switched off; with it the dialog still opens (it offers a choice). */
   brief?: string;
 }
-const CONFIRM_NOTICE: Record<'share' | 'export' | 'import' | 'variant' | 'reset', ConfirmNotice> = {
+const CONFIRM_NOTICE: Record<'share' | 'export' | 'import' | 'variant' | 'reset' | 'recall' | 'overwrite' | 'delete' | 'clear', ConfirmNotice> = {
   share: {
     title: 'Link mit Ihren Eingaben teilen?',
     text: 'Der Link enthält Ihre Eingaben – auch persönliche Angaben wie Haushaltseinkommen und Einkommensteuer, Angaben zu Haus und Heizung sowie Bezeichnung und Bemerkungen des Szenarios. Jede Person, die den Link erhält, kann sie sehen. Teilen Sie ihn nur mit Personen, die diese Angaben sehen dürfen.',
@@ -98,6 +112,15 @@ const CONFIRM_NOTICE: Record<'share' | 'export' | 'import' | 'variant' | 'reset'
     text: 'Alle Eingaben werden durch die Standardwerte ersetzt. Ihre bisherigen Eingaben gehen dabei verloren. Sichern Sie sie vorher bei Bedarf per „Export“.',
     ok: 'Zurücksetzen',
   },
+  // Saved scenarios (F37.6–F37.8, F37.11): never switched off (F37.9); an empty text is hidden
+  recall: {
+    title: 'Gespeichertes Szenario abrufen?',
+    text: 'Die Eingaben im Rechner werden durch „{name}“ ersetzt. Ihre bisherigen Eingaben gehen dabei verloren. Sichern Sie sie vorher bei Bedarf per „Gespeicherte Szenarien“ oder „Export“.',
+    ok: 'Abrufen',
+  },
+  overwrite: { title: 'Gespeicherten Stand „{name}“ mit den aktuellen Eingaben überschreiben?', text: '', ok: 'Überschreiben' },
+  delete: { title: '„{name}“ endgültig löschen?', text: '', ok: 'Löschen' },
+  clear: { title: 'Alle gespeicherten Szenarien endgültig löschen?', text: '', ok: 'Leeren' },
 };
 type ConfirmKind = keyof typeof CONFIRM_NOTICE;
 /** Notices that can be switched off with "Diesen Hinweis nicht mehr anzeigen". */
@@ -162,7 +185,7 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     ? { origin: initial.source === 'hash' ? 'dem Link' : 'den gespeicherten Eingaben', issues: initial.issues }
     : null;
   /** Fields that still hold a former default (F22.4); until answered, the old defaults version is kept in storage. */
-  let newDefaults: { origin: 'storage' | 'file'; asOf: string; list: OutdatedDefault[] } | null = null;
+  let newDefaults: { origin: 'storage' | 'file' | 'scenario'; asOf: string; list: OutdatedDefault[] } | null = null;
   const checkDefaults = (origin: 'storage' | 'file', raw: unknown): void => {
     const asOf = savedDefaultsAsOf(raw);
     const list = outdatedDefaults(inputs, defaults, asOf);
@@ -411,7 +434,10 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     }
     // F22.4: new defaults since the data was saved
     if (newDefaults) {
-      const since = newDefaults.origin === 'file' ? 'Seit die Datei erstellt wurde' : 'Seit Ihre Eingaben gespeichert wurden';
+      const since =
+        newDefaults.origin === 'file' ? 'Seit die Datei erstellt wurde'
+        : newDefaults.origin === 'scenario' ? 'Seit das Szenario gespeichert wurde'
+        : 'Seit Ihre Eingaben gespeichert wurden';
       parts.push(`<div class="notice-defaults">
         <p><strong>Neue Standardwerte.</strong> ${since}, wurden Standardwerte aktualisiert. Diese Felder stehen noch auf dem früheren Standard:</p>
         <ul>${newDefaults.list
@@ -561,9 +587,10 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     if (off && t.brief === undefined) return action();
     privacySkippable = SKIPPABLE.includes(kind) && !off;
     $<HTMLElement>('.privacy-skip').hidden = !privacySkippable;
-    $<HTMLElement>('#privacy-title').textContent = t.title;
-    // textContent: the variant name (file name or scenario name) is never interpreted as HTML
-    $<HTMLElement>('#privacy-text').textContent = (off ? t.brief! : t.text).replace('{name}', name);
+    // textContent: the variant name (file name or scenario name) is never interpreted as HTML; a function
+    // as replacement keeps "$&"-like sequences in a name as they are
+    $<HTMLElement>('#privacy-title').textContent = t.title.replace('{name}', () => name);
+    $<HTMLElement>('#privacy-text').textContent = (off ? t.brief! : t.text).replace('{name}', () => name);
     $<HTMLButtonElement>('#privacy-ok').textContent = t.ok;
     const altBtn = $<HTMLButtonElement>('#privacy-alt');
     altBtn.hidden = !(t.alt && alt);
@@ -1350,6 +1377,172 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
     getVariants: () => getVariants(),
   };
 
+  // ---------- Saved scenarios in the browser (F37) ----------
+  type ScenarioStore = { state: 'ok'; entries: unknown[] } | { state: 'unreadable' } | { state: 'unavailable' };
+  /** Reads the list anew from the storage (F37.1); nothing is cached between two actions. */
+  function readScenarios(): ScenarioStore {
+    if (!storage) return { state: 'unavailable' };
+    let raw: string | null;
+    try {
+      raw = storage.getItem(SCENARIOS_KEY);
+    } catch {
+      return { state: 'unavailable' };
+    }
+    const parsed = parseScenarioFile(raw);
+    return parsed.readable ? { state: 'ok', entries: parsed.entries } : { state: 'unreadable' };
+  }
+  /** Writes the list; false if the storage is full or refuses (F37.10). Only called after a successful read, so the storage is present. */
+  function writeScenarios(entries: unknown[]): boolean {
+    try {
+      storage!.setItem(SCENARIOS_KEY, serializeScenarioFile(entries));
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  const scDlg = $<HTMLDialogElement>('#scenarios');
+  const scList = $<HTMLElement>('#sc-list');
+  const scStatus = $<HTMLElement>('#sc-status');
+  const scNotice = $<HTMLElement>('#sc-notice');
+  const scSave = $<HTMLButtonElement>('#sc-save');
+  const scClear = $<HTMLButtonElement>('#sc-clear');
+  const setScStatus = (text: string, isError = false) => {
+    scStatus.textContent = text;
+    scStatus.classList.toggle('is-error', isError);
+  };
+  /** Draws the dialog from a fresh read: list, unreadable or unavailable notice, save and clear buttons. */
+  function renderScenarios(): void {
+    const s = readScenarios();
+    scSave.disabled = s.state === 'unreadable'; // F37.11
+    scClear.hidden = s.state !== 'unreadable';
+    scNotice.textContent = s.state === 'unavailable' ? SCENARIO_TEXT.unavailable : s.state === 'unreadable' ? SCENARIO_TEXT.unreadable : '';
+    scNotice.hidden = scNotice.textContent === '';
+    if (s.state !== 'ok') {
+      scList.innerHTML = '';
+      return;
+    }
+    const views = scenarioViews(s.entries);
+    scList.innerHTML = views.length ? scenarioListHtml(views) : `<p class="muted">${SCENARIO_TEXT.empty}</p>`;
+  }
+  /** Writes the current inputs under the name (F37.2); the list is read anew right before writing. */
+  function saveCurrent(name: string): void {
+    const s = readScenarios();
+    if (s.state === 'unreadable') {
+      renderScenarios();
+      setScStatus(SCENARIO_TEXT.unreadable, true);
+      return;
+    }
+    // Unreadable storage: nothing is written, so no saved entry can be replaced (F37.10)
+    if (s.state === 'unavailable') {
+      renderScenarios();
+      setScStatus(SCENARIO_TEXT.saveFailed, true);
+      return;
+    }
+    const entry = scenarioEntry(inputs, name, newDefaults?.asOf ?? DEFAULTS_AS_OF, new Date());
+    const ok = writeScenarios(putScenario(s.entries, name, entry));
+    renderScenarios();
+    setScStatus(ok ? `„${name}“ gespeichert.` : SCENARIO_TEXT.saveFailed, !ok);
+  }
+  /**
+   * The entry at this position if it is still the one that was shown (F37.1: another tab may have changed the list).
+   * Otherwise the dialog is redrawn and null returned.
+   */
+  function currentScenario(index: number, name: string, needReadable: boolean, failText: string): { entries: unknown[]; view: ScenarioView } | null {
+    const s = readScenarios();
+    if (s.state === 'unavailable') {
+      renderScenarios();
+      setScStatus(failText, true);
+      return null;
+    }
+    if (s.state === 'ok' && index < s.entries.length) {
+      const view = viewScenario(s.entries[index], index);
+      // Abrufen and Aktualisieren need readable inputs (F37.12); Löschen also works for unreadable entries
+      if (view.name === name && (view.readable || !needReadable)) return { entries: s.entries, view };
+    }
+    renderScenarios();
+    setScStatus(SCENARIO_TEXT.changed, true);
+    return null;
+  }
+  function updateScenario(index: number, name: string): void {
+    const cur = currentScenario(index, name, true, SCENARIO_TEXT.saveFailed);
+    if (!cur) return;
+    const entry = scenarioEntry(inputs, name, newDefaults?.asOf ?? DEFAULTS_AS_OF, new Date());
+    const ok = writeScenarios(setScenarioAt(cur.entries, index, entry));
+    renderScenarios();
+    setScStatus(ok ? `„${name}“ aktualisiert.` : SCENARIO_TEXT.saveFailed, !ok);
+  }
+  function deleteScenario(index: number, name: string): void {
+    const cur = currentScenario(index, name, false, SCENARIO_TEXT.deleteFailed);
+    if (!cur) return;
+    const ok = writeScenarios(removeScenarioAt(cur.entries, index));
+    renderScenarios();
+    setScStatus(ok ? `„${name || UNNAMED}“ gelöscht.` : SCENARIO_TEXT.deleteFailed, !ok);
+  }
+  /** Loads a saved scenario like an import (F37.6): checked as F9.5, link view ends, new defaults as F22.4. */
+  function recallScenario(index: number, name: string): void {
+    const cur = currentScenario(index, name, true, SCENARIO_TEXT.unavailable);
+    if (!cur) return;
+    const issues: InputIssue[] = [];
+    // readable entries always pass importJson (same check: an object with version 1), see viewScenario
+    const imported = importJson(defaults, JSON.stringify(cur.view.inputs), issues);
+    imported.scenario.name = name;
+    leaveShared();
+    loadIssues = issues.length ? { origin: 'dem gespeicherten Szenario', issues } : null;
+    const asOf = savedDefaultsAsOf(cur.view.inputs);
+    const outdated = outdatedDefaults(imported, defaults, asOf);
+    newDefaults = outdated.length ? { origin: 'scenario', asOf, list: outdated } : null;
+    controller.setInputs(imported);
+    renderNotice();
+    scDlg.close();
+    toast(`„${name}“ abgerufen.`);
+  }
+  function clearScenarios(): void {
+    let ok = false;
+    try {
+      storage!.removeItem(SCENARIOS_KEY); // only offered when the list was read (F37.11)
+      ok = true;
+    } catch {
+      ok = false;
+    }
+    renderScenarios();
+    setScStatus(ok ? SCENARIO_TEXT.cleared : SCENARIO_TEXT.clearFailed, !ok);
+  }
+
+  $<HTMLButtonElement>('#btn-scenarios').addEventListener('click', () => {
+    setScStatus('');
+    renderScenarios();
+    showDialog(scDlg);
+  });
+  scSave.addEventListener('click', () => {
+    const name = cleanScenarioName(inputs.scenario.name);
+    if (name === '') {
+      setScStatus(SCENARIO_TEXT.noName, true);
+      return;
+    }
+    const s = readScenarios();
+    // F37.4: the same name is asked for before it is overwritten
+    if (s.state === 'ok' && findScenario(s.entries, name) >= 0) confirmAction('overwrite', () => saveCurrent(name), name);
+    else saveCurrent(name);
+  });
+  scClear.addEventListener('click', () => confirmAction('clear', clearScenarios));
+  scList.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('button');
+    if (!btn) return;
+    const name = btn.closest<HTMLElement>('li')!.dataset.scName!;
+    const label = name || UNNAMED;
+    if (btn.dataset.scRecall !== undefined) {
+      const i = Number(btn.dataset.scRecall);
+      confirmAction('recall', () => recallScenario(i, name), name);
+    } else if (btn.dataset.scUpdate !== undefined) {
+      const i = Number(btn.dataset.scUpdate);
+      confirmAction('overwrite', () => updateScenario(i, name), name);
+    } else if (btn.dataset.scDelete !== undefined) {
+      const i = Number(btn.dataset.scDelete);
+      confirmAction('delete', () => deleteScenario(i, name), label);
+    }
+  });
+
   // ---------- Compare variants (F31) ----------
   const varDialog = $<HTMLDialogElement>('#variants');
   const varList = $<HTMLElement>('#var-list');
@@ -1413,8 +1606,58 @@ export function mountApp(root: HTMLElement, env: AppEnv = {}): AppController {
       varChart = lib.variantsChart(canvas, curves);
     });
   }
+  // Adding from the saved scenarios (F31.4): the list is only drawn while it is open
+  const varSavedBtn = $<HTMLButtonElement>('#var-saved-btn');
+  const varSaved = $<HTMLElement>('#var-saved');
+  const varSavedNote = $<HTMLElement>('#var-saved-note');
+  const varSavedList = $<HTMLElement>('#var-saved-list');
+  const setVarSavedOpen = (open: boolean) => {
+    varSaved.hidden = !open;
+    varSavedBtn.setAttribute('aria-expanded', String(open));
+    if (open) renderVarSaved();
+  };
+  function renderVarSaved(): void {
+    const s = readScenarios();
+    let note = '';
+    let views: ScenarioView[] = [];
+    if (s.state === 'unavailable') note = SCENARIO_TEXT.unavailable;
+    else if (s.state === 'unreadable') note = SCENARIO_TEXT.unreadableVariants;
+    else {
+      views = scenarioViews(s.entries);
+      if (!views.some((v) => v.readable)) note = SCENARIO_TEXT.empty;
+    }
+    varSavedNote.textContent = note;
+    varSavedNote.hidden = note === '';
+    varSavedList.innerHTML = savedPickHtml(views);
+  }
+  varSavedBtn.addEventListener('click', () => setVarSavedOpen(varSavedBtn.getAttribute('aria-expanded') !== 'true'));
+  varSavedList.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-var-saved]');
+    if (!btn) return;
+    const index = Number(btn.dataset.varSaved);
+    const s = readScenarios();
+    // The position and the name shown must still match (another tab may have deleted an entry before it)
+    const view = s.state === 'ok' && index < s.entries.length ? viewScenario(s.entries[index], index) : null;
+    if (!view?.readable || !view.inputs || view.name !== btn.dataset.varSavedName) {
+      renderVarSaved();
+      setVarStatus(SCENARIO_TEXT.changed, true);
+      return;
+    }
+    const issues: InputIssue[] = [];
+    // readable entries always pass importJson (same check: an object with version 1), see viewScenario
+    const imported = importJson(defaults, JSON.stringify(view.inputs), issues);
+    imported.scenario.name = view.name;
+    // The limit of three variants is reported by addVariant (VARIANTS_LIMIT_TEXT)
+    if (addVariant(imported, view.name)) {
+      const added = variants[variants.length - 1].name;
+      setVarStatus(`„${added}“ hinzugefügt.${issues.length ? ` (${issues.length} Wert(e) korrigiert)` : ''}`);
+      renderVariants();
+    }
+  });
+
   $<HTMLButtonElement>('#btn-variants').addEventListener('click', () => {
     setVarStatus('');
+    setVarSavedOpen(false);
     renderVariants();
     showDialog(varDialog);
   });
@@ -1841,8 +2084,9 @@ function layout(): string {
       <button id="btn-recommend" type="button" aria-haspopup="dialog" title="Den Rechner per WhatsApp, Threema, E-Mail, Link oder einer anderen App (z. B. Signal) weiterempfehlen">Weiterempfehlen</button>
       <button id="btn-support" type="button" aria-haspopup="dialog" title="Das Hobbyprojekt freiwillig unterstützen – per Buy Me a Coffee oder PayPal">Unterstützen</button>
       <button id="btn-share" type="button" title="Link mit Ihren aktuellen Eingaben kopieren – zum Sichern oder Weitergeben Ihrer Berechnung">Link mit Werten teilen</button>
-      <button id="btn-variants" type="button" aria-haspopup="dialog" title="Zwei oder drei Varianten (Export-Dateien oder aktuelle Eingaben) nebeneinander vergleichen">Varianten vergleichen</button>
+      <button id="btn-variants" type="button" aria-haspopup="dialog" title="Zwei oder drei Varianten (Export-Dateien, gespeicherte Szenarien oder aktuelle Eingaben) nebeneinander vergleichen">Varianten vergleichen</button>
       <button id="btn-report" type="button" title="Kompakte Zusammenfassung mit Eingaben, Ergebnissen, Diagrammen, Förderung und Finanzierung – drucken oder als PDF speichern">Bericht drucken</button>
+      <button id="btn-scenarios" type="button" aria-haspopup="dialog" title="Eingaben unter einer Bezeichnung im Browser speichern, abrufen, aktualisieren oder löschen">Gespeicherte Szenarien</button>
       <button id="btn-export" type="button" aria-haspopup="dialog" title="Eingaben als Datei (JSON) speichern oder als Markdown-Datei für einen KI-Assistenten">Export</button>
       <button id="btn-import" type="button">Import</button>
       <button id="btn-reset" type="button" class="ghost">Zurücksetzen</button>
@@ -1925,7 +2169,27 @@ function layout(): string {
       <div class="intro-actions"><button id="privacy-cancel" type="button">Abbrechen</button><span class="privacy-choices"><button id="privacy-alt" type="button" hidden></button><button id="privacy-ok" type="button" class="primary"></button></span></div>
     </form>
   </dialog>
-  ${variantsHtml()}`;
+  ${variantsHtml()}${scenariosHtml()}`;
+}
+
+/** Dialog for saved scenarios in the browser (F37); the list is drawn when it opens. */
+function scenariosHtml(): string {
+  return `
+  <dialog id="scenarios" class="intro scenarios" aria-labelledby="scenarios-title" aria-describedby="scenarios-lead">
+    <form method="dialog" class="intro-body">
+      <button type="submit" value="close" class="dialog-close" data-dialog-first aria-label="Schließen">×</button>
+      <h2 id="scenarios-title">Gespeicherte Szenarien</h2>
+      <p id="scenarios-lead" class="intro-lead">Speichern Sie die aktuellen Eingaben unter der Bezeichnung aus dem Abschnitt „Szenario“ im Browser – so wechseln Sie zwischen Angeboten, ohne Dateien zu exportieren. Die Liste bleibt in diesem Browser auf diesem Gerät; sie wird nicht übertragen.</p>
+      <div class="scenarios-actions">
+        <button type="button" id="sc-save">Aktuelle Eingaben speichern</button>
+        <button type="button" id="sc-clear" class="ghost" hidden>Gespeicherte Szenarien leeren</button>
+      </div>
+      <p id="sc-notice" class="sc-notice" hidden></p>
+      <p id="sc-status" class="rec-status" role="status" aria-live="polite"></p>
+      <div id="sc-list" class="scenarios-body"></div>
+      <div class="intro-actions"><span></span><button type="submit" value="close" class="primary">Schließen</button></div>
+    </form>
+  </dialog>`;
 }
 
 /** Dialog for comparing variants (F31). */
@@ -1935,11 +2199,16 @@ function variantsHtml(): string {
     <form method="dialog" class="intro-body">
       <button type="submit" value="close" class="dialog-close" data-dialog-first aria-label="Schließen">×</button>
       <h2 id="variants-title">Varianten vergleichen</h2>
-      <p class="intro-lead">Laden Sie zwei oder drei Export-Dateien, etwa „Angebot A“ und „Angebot B“ oder „jetzt“ und „2028“, oder übernehmen Sie die aktuellen Eingaben – diese Variante folgt dem Rechner, bis Sie den Stand festhalten. Die Varianten werden nur für diesen Vergleich gerechnet und nicht gespeichert.</p>
+      <p class="intro-lead">Laden Sie zwei oder drei Export-Dateien, etwa „Angebot A“ und „Angebot B“ oder „jetzt“ und „2028“, übernehmen Sie gespeicherte Szenarien oder die aktuellen Eingaben – diese Variante folgt dem Rechner, bis Sie den Stand festhalten. Die Varianten selbst werden nicht gespeichert; gespeicherte Szenarien („Gespeicherte Szenarien“ in der Werkzeugleiste) sind eine zusätzliche Quelle.</p>
       <div class="variants-actions">
         <button type="button" id="var-current">Aktuelle Eingaben hinzufügen</button>
+        <button type="button" id="var-saved-btn" aria-expanded="false" aria-controls="var-saved">Aus gespeicherten Szenarien hinzufügen</button>
         <button type="button" id="var-files">Export-Dateien laden …</button>
         <input id="var-file-input" type="file" accept="application/json,.json" multiple hidden>
+      </div>
+      <div id="var-saved" class="variants-saved" hidden>
+        <p id="var-saved-note" class="muted small" hidden></p>
+        <ul id="var-saved-list" class="variants-list" aria-label="Gespeicherte Szenarien zum Hinzufügen"></ul>
       </div>
       <ul id="var-list" class="variants-list" aria-label="Geladene Varianten"></ul>
       <p id="var-status" class="rec-status" role="status" aria-live="polite"></p>

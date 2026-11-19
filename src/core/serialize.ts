@@ -3,7 +3,7 @@ import { deflateSync, Inflate } from 'fflate';
 import { APP_VERSION } from '../version';
 import { DEFAULTS_AS_OF } from './default-history';
 import { formatMonth, formatMonthDe, parseMonth, tryParseMonth } from './dates';
-import { checkValue, cleanDocuments, type InputIssue } from './validate';
+import { checkValue, cleanDocuments, TEXT_LIMITS, type InputIssue } from './validate';
 
 type Obj = Record<string, unknown>;
 
@@ -189,10 +189,23 @@ export function exportFileName(inputs: Inputs, now: Date): string {
   return `waermepumpe-rechner-${slug ? slug + '-' : ''}${month}.json`;
 }
 
-export function exportJson(inputs: Inputs): string {
-  // App version for traceability (N9); ignored on import. defaultsAsOf: version of the defaults (F22.4)
+/**
+ * Scenario name (F37.3, F9.5): without spaces at the edges, at most 200 characters. Not a string → '' (no name).
+ * Used for saved scenarios (F37).
+ */
+export function cleanScenarioName(value: unknown): string {
+  if (typeof value !== 'string') return '';
+  return value.trim().slice(0, TEXT_LIMITS['scenario.name']).trim();
+}
+
+/**
+ * Export format (F9.3). `defaultsAsOf` is the version of the defaults (F22.4); saved scenarios pass the
+ * version of the stored data while the notice on new defaults is still open.
+ */
+export function exportJson(inputs: Inputs, defaultsAsOf: string = DEFAULTS_AS_OF): string {
+  // App version for traceability (N9); ignored on import.
   const { version, ...rest } = inputs;
-  return JSON.stringify({ version, appVersion: APP_VERSION, defaultsAsOf: DEFAULTS_AS_OF, ...rest }, null, 2);
+  return JSON.stringify({ version, appVersion: APP_VERSION, defaultsAsOf, ...rest }, null, 2);
 }
 
 /** Imports a JSON file; throws on invalid content (F9.3). */

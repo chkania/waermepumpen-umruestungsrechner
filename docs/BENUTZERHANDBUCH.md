@@ -78,7 +78,7 @@ Vergleicht zwei oder drei Varianten nebeneinander, etwa „Angebot A“ und „A
 2. **Varianten vergleichen** öffnen und mit **Export-Dateien laden …** zwei oder drei Dateien auswählen (auch mehrere auf einmal). **Aktuelle Eingaben hinzufügen** nimmt den Stand im Rechner als Variante auf. Diese Variante **folgt dem Rechner**: Ändern Sie danach Eingaben, zeigt sie beim nächsten Öffnen die neuen Werte. Mit **Stand festhalten** bleibt der jetzige Stand als feste Variante stehen – so vergleichen Sie zwei Stände ohne Export: festhalten, Eingaben ändern, aktuelle Eingaben erneut hinzufügen.
 3. Der Dialog zeigt die **Kennzahlen** nebeneinander (Gesamtkosten, bester Weg, Ersparnis, Amortisation, CO₂-Einsparung, Inbetriebnahme, Investition, Förderung, JAZ, Zeitraum) – die höchste Ersparnis ist mit ★ markiert –, die **kumulierten Kosten** aller Varianten in einem Diagramm (durchgezogen mit Wärmepumpe, gestrichelt ohne) und die **Unterschiede in den Eingaben**. Eingaben, die für keine Variante gelten (z. B. der Heizölpreis bei einer Gasheizung), bleiben dabei weg.
 
-Jede Variante wird für sich gerechnet, mit ihrer eigenen Referenz „ohne Wärmepumpe“. Als Name dient die Bezeichnung des Szenarios, sonst der Dateiname. **Im Rechner öffnen** übernimmt eine Variante in den Rechner (nach Rückfrage; die bisherigen Eingaben werden ersetzt). Die Varianten werden nicht gespeichert – nach dem Neuladen der Seite laden Sie die Dateien erneut.
+Jede Variante wird für sich gerechnet, mit ihrer eigenen Referenz „ohne Wärmepumpe“. Als Name dient die Bezeichnung des Szenarios, sonst der Dateiname. **Im Rechner öffnen** übernimmt eine Variante in den Rechner (nach Rückfrage; die bisherigen Eingaben werden ersetzt). Die Varianten selbst werden nicht gespeichert – nach dem Neuladen der Seite laden Sie die Dateien erneut oder fügen gespeicherte Szenarien erneut hinzu. Unter **Aus gespeicherten Szenarien hinzufügen** übernehmen Sie einen Eintrag aus den [gespeicherten Szenarien](#gespeicherte-szenarien) als feste Variante.
 
 ### Bericht drucken
 
@@ -94,6 +94,21 @@ Erstellt eine **kompakte Zusammenfassung** für das Gespräch mit Energieberatun
 - alle sichtbaren Eingaben; aus den Experten-Abschnitten nur die Werte, die Sie geändert haben.
 
 Der Bericht wird immer hell gedruckt, auch wenn Sie das dunkle Design nutzen. Als Dateiname für das PDF schlägt der Browser „Wärmepumpen-Bericht – Bezeichnung – Datum“ vor. Tipp: Schalten Sie im Druckdialog unter „Weitere Einstellungen“ die **Kopf- und Fußzeilen** aus – dann fehlen Datum, Seitentitel und Adresse am Seitenrand. Auch der Druckbefehl des Browsers (Strg+P bzw. ⌘+P) druckt den Bericht statt der Bildschirmansicht. Der Bericht entsteht nur in Ihrem Browser und wird nirgendwohin übertragen.
+
+### Gespeicherte Szenarien
+
+Speichert die aktuellen Eingaben unter einer Bezeichnung im Browser – so wechseln Sie zwischen Angeboten, ohne jedes Mal eine Datei zu exportieren. Die Bezeichnung ist der Name des Szenarios aus dem Abschnitt **Szenario**; ohne Bezeichnung wird nichts gespeichert. Groß- und Kleinschreibung zählen, Leerzeichen am Rand werden entfernt.
+
+- **Aktuelle Eingaben speichern** legt einen Eintrag an. Gibt es den Namen schon, fragt der Rechner, ob der gespeicherte Stand überschrieben werden soll.
+- **Abrufen** übernimmt ein gespeichertes Szenario in den Rechner, wie ein Import. Vorher erscheint ein Hinweis, dass Ihre bisherigen Eingaben ersetzt werden. Die Werte werden geprüft wie beim Import. Angepasste Werte werden über den Ergebnissen gemeldet. Die Link-Ansicht endet dabei.
+- **Aktualisieren** ersetzt den gespeicherten Stand durch die aktuellen Eingaben; der Name bleibt.
+- **Löschen** entfernt einen Eintrag nach einer Rückfrage.
+
+Die Liste ist nach Name sortiert und zeigt je Eintrag den Zeitpunkt der letzten Änderung. Gespeichert werden nur Eingaben, keine Ergebnisse – beim Abruf rechnet der Rechner neu. Zurücksetzen und Varianten lassen die gespeicherten Szenarien unverändert. Sie gelten nur für diesen Browser; für ein anderes Gerät nutzen Sie Export oder Link.
+
+Ist die Liste nicht lesbar, etwa weil der Browser-Speicher von außen verändert wurde, zeigt der Dialog die Meldung „Die gespeicherten Szenarien sind nicht lesbar und bleiben unverändert.“ Speichern ist dann gesperrt. Mit **Gespeicherte Szenarien leeren** entfernen Sie nur diese Liste; alle anderen Einstellungen bleiben. Einzelne Einträge, die nicht lesbar sind, kennzeichnet die Liste mit „nicht lesbar“; sie lassen sich nur löschen.
+
+Ist der Browser-Speicher voll oder nicht verfügbar (z. B. im privaten Modus), meldet der Dialog das. Verwenden Sie dann **Export**.
 
 ### Export
 
@@ -129,11 +144,11 @@ Lädt eine zuvor exportierte JSON-Datei. Felder, die in der Datei fehlen oder un
 
 ### Zurücksetzen
 
-Setzt **alle Eingaben auf die Standardwerte** zurück. Vorher weist ein Fenster darauf hin, dass Ihre bisherigen Eingaben verloren gehen; erst mit **Zurücksetzen** werden sie ersetzt. Tipp: Vorher exportieren, wenn Sie den Stand behalten möchten. Die Einstellung Hell/Dunkel bleibt erhalten.
+Setzt **alle Eingaben auf die Standardwerte** zurück. Vorher weist ein Fenster darauf hin, dass Ihre bisherigen Eingaben verloren gehen; erst mit **Zurücksetzen** werden sie ersetzt. Tipp: Vorher exportieren, wenn Sie den Stand behalten möchten. Die Einstellung Hell/Dunkel und die [gespeicherten Szenarien](#gespeicherte-szenarien) bleiben erhalten.
 
 ### Automatisches Speichern
 
-Alle Eingaben werden bei jeder Änderung automatisch im Browser gespeichert (`localStorage`) und beim nächsten Besuch wiederhergestellt – nur auf diesem Gerät und in diesem Browser. Im privaten Modus oder nach dem Löschen der Website-Daten gehen sie verloren; nutzen Sie dann Export oder Link.
+Alle Eingaben werden bei jeder Änderung automatisch im Browser gespeichert (`localStorage`) und beim nächsten Besuch wiederhergestellt – nur auf diesem Gerät und in diesem Browser. Im privaten Modus oder nach dem Löschen der Website-Daten gehen sie verloren; nutzen Sie dann Export oder Link. Eigene Stände unter einer Bezeichnung speichern Sie zusätzlich unter [Gespeicherte Szenarien](#gespeicherte-szenarien).
 
 ### Neue Standardwerte
 
@@ -516,7 +531,7 @@ Der Lizenztext und die Lizenzen der enthaltenen Bibliotheken und Schriften (Char
 
 ## Datenschutz
 
-Der Rechner läuft vollständig in Ihrem Browser. Ihre Eingaben und Ergebnisse werden nicht an einen Server übertragen. Gespeichert wird nur lokal im Browser; geteilt wird nur, was Sie per Link oder Export selbst weitergeben.
+Der Rechner läuft vollständig in Ihrem Browser. Ihre Eingaben und Ergebnisse werden nicht an einen Server übertragen. Gespeichert wird nur lokal im Browser; geteilt wird nur, was Sie per Link oder Export selbst weitergeben. Dazu gehören die **gespeicherten Szenarien** (Abschnitt „Gespeicherte Szenarien“), die Sie nur auf Wunsch anlegen und jederzeit löschen können.
 
 **Besucherstatistik:** Die veröffentlichte Fassung zählt Seitenaufrufe mit Matomo auf einem eigenen Server (analytics.chkania.net), nicht bei Dritten. Dabei werden **keine Cookies** gesetzt, und ist in Ihrem Browser „Do Not Track“ eingeschaltet, wird gar nichts erfasst. Übertragen werden nur allgemeine Angaben wie die aufgerufene Seite (z. B. „Rechner“ oder „Hilfe“), Browser und Bildschirmgröße – **nicht** der Teil der Adresse nach `#`, in dem geteilte Links Ihre Eingaben enthalten, und nicht die Bezeichnung Ihres Szenarios.
 
