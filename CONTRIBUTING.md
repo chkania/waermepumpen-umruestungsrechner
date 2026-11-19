@@ -34,7 +34,7 @@ Beschreib die Idee so, wie du sie einem Menschen erklären würdest – was du e
 | Stufe | Agent | Modell | Was passiert |
 |---|---|---|---|
 | 1. Anforderung | `requirements-author` | Haiku | Leitet aus deiner Beschreibung eine Anforderung mit IDs, prüfbaren Akzeptanzkriterien und betroffenen Bereichen ab. Was nur du entscheiden kannst, fragt er dich (Auswahlfragen). Prüft die Anforderung dann in zwei Runden selbst. |
-| 2. Anforderungs-Review | `requirements-reviewer` | Opus | Prüft die Anforderung in höchstens zwei Runden erneut auf Vollständigkeit und Widersprüche zu bestehenden Anforderungen und verbessert sie. Du siehst die geprüfte Fassung. |
+| 2. Anforderungs-Review | `requirements-reviewer` | Opus | Prüft die Anforderung in höchstens zwei Runden erneut auf Vollständigkeit und Widersprüche zu bestehenden Anforderungen und verbessert sie. Die geprüfte Fassung liegt als Datei bereit, du liest sie und gibst sie frei; erst dann beginnt die Umsetzung. |
 | 3. Umsetzung | `implementer` | Haiku | Schreibt Code, Tests und Dokumentation (Anforderungsdatei, Änderungsprotokoll, Benutzerhandbuch). Führt während der Arbeit nur die betroffenen Tests aus, die ganze Suite und den Build einmal am Ende. |
 | 4. Code-Review | `code-reviewer` | Sonnet | Prüft am Diff, ob der Code korrekt, performant und sinnvoll umgesetzt ist (ohne eigene Testläufe). Hohe und mittlere Befunde gehen zurück an die Umsetzung, danach wird nur das Delta erneut geprüft. |
 | 5. QA | `qa` | Sonnet | Prüft Tests und Testabdeckung (ein Lauf), Build, Performance (Bundle-Größe gegenüber dem Ausgangsstand) und Barrierefreiheit, bei neuen Bedienelementen auch im echten Browser. Mängel gehen zurück an die Umsetzung, danach folgen erneut Code-Review und QA für das Geänderte. |
@@ -47,6 +47,7 @@ Die Agenten 1 und 2 schreiben keinen Code; die Reviewer und die QA ändern keine
 
 **Wo du gefragt wirst:**
 - bei Rückfragen zur Anforderung (Stufe 1 und 2),
+- zur **Freigabe der geprüften Anforderung**: Du bekommst die Datei samt Kurzfassung und entscheidest, ob die Umsetzung beginnt oder die Anforderung geändert wird,
 - wenn sich Code-Review und Umsetzung nach zwei Durchgängen nicht einig werden oder die QA nach drei Durchgängen noch Mängel findet – dann hält die Kette an und legt dir die offenen Punkte vor,
 - vor dem Push: Erst nach der Freigabe durch die QA wird committet (Commit-Format wie unten), und erst auf deine Bestätigung gepusht und der Pull Request erstellt.
 
