@@ -220,7 +220,7 @@
   background: var(--surface);
 }
 :root[data-design='modern'] .field.check input { accent-color: var(--accent); }
-/* Links to documents (F16.2): group title like a field label */
+/* Links to documents (F16.4): group title like a field label */
 :root[data-design='modern'] .doc-links-title { color: var(--c-text-2); font-size: 0.84rem; font-weight: 500; }
 
 :root[data-design='modern'] .info-btn {

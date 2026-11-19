@@ -1,0 +1,6 @@
+# F16 – Szenario-Beschreibung
+
+- F16.1 Abschnitt „Szenario“ (oben, geöffnet) mit „Bezeichnung des Szenarios“ (einzeilig) und „Bemerkungen“ (mehrzeilig). Beide ohne Einfluss auf die Rechnung (keine Neuberechnung), ohne Herkunfts-Popover; gespeichert wie alle Eingaben (localStorage, Link, JSON). Die Bezeichnung erscheint über den Ergebnissen und im Fenstertitel. *(Test: serialize, ui)*
+- F16.2 Export-Dateiname `waermepumpe-rechner-<Bezeichnung>-JJJJ-MM.json`; Bezeichnung dateinamentauglich (Umlaute umschreiben, andere Zeichen → `-`, max. 60 Zeichen); ohne Bezeichnung `waermepumpe-rechner-JJJJ-MM.json`. *(Test: serialize)*
+- F16.3 Ältere Exporte ohne diese Felder lassen sich weiter importieren (leere Werte). *(Test: serialize)*
+- F16.4 Unterlagen und Links: Im Szenario bis zu 5 Einträge (Titel bis 60 Zeichen, Adresse bis 300 Zeichen, nur `http://` oder `https://`) in `scenario.documents`. Die Liste reist mit Link, Export und Bericht mit; fremde Einträge werden geprüft (ungültige entfernt, mit Hinweis). Im Rechner nur im Szenario, nicht im Ergebnis. Der Bericht führt je Eintrag Titel, anklickbare Adresse (im PDF als Link) und einen QR-Code auf (`documentsHtml` in `src/ui/report.ts`); zu lange Adressen erhalten einen Hinweis statt QR-Code. Die Adressen werden nie geladen. *(Test: documents, ui)*

@@ -31,7 +31,7 @@ export function buildChecklist(inp: ChecklistInput): { title: string; body: stri
   const parts: string[] = [
     `Förderregeln, Preise und Gesetze ändern sich laufend. Bitte die folgenden Standardwerte gegen ihre Quellen prüfen – zuletzt geprüft am **${de(inp.lastReview)}**.`,
     '',
-    '**So geht’s:** Quelle öffnen, Wert vergleichen, abhaken. Geänderte Werte in `src/core/defaults.ts` und `src/core/sources.ts` anpassen (Abrufdatum aktualisieren), danach `FUNDING_SOURCE_DATE` in `defaults.ts` auf das Prüfdatum setzen – das setzt auch den Hinweis „Annahmen älter als 6 Monate“ im Rechner zurück. Regressions-Snapshots mit `npm test -- -u` aktualisieren und im Änderungsprotokoll begründen. Commit als `fix:` (Korrektur) bzw. `feat:` (geänderte Annahmen, siehe CONTRIBUTING.md).',
+    '**So geht’s:** Quelle öffnen, Wert vergleichen, abhaken. Geänderte Werte in `src/core/defaults.ts` und `src/core/sources.ts` anpassen (Abrufdatum aktualisieren), danach `FUNDING_SOURCE_DATE` in `defaults.ts` auf das Prüfdatum setzen – das setzt auch den Hinweis „Annahmen älter als 6 Monate“ im Rechner zurück. Regressions-Snapshots mit `npm test -- -u` aktualisieren und im Änderungsprotokoll (`docs/anforderungen/aenderungsprotokoll.md`) begründen. Commit als `fix:` (Korrektur) bzw. `feat:` (geänderte Annahmen, siehe CONTRIBUTING.md).',
     '',
     'Hinweise von Nutzerinnen und Nutzern: offene Issues mit dem Label `bug` prüfen.',
   ];

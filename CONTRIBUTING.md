@@ -8,7 +8,7 @@ Schön, dass du mithelfen möchtest! Der Wärmepumpen-Investitionsrechner soll M
 ## Ablauf
 
 1. Kurzlebigen Branch von `main` anlegen, z. B. `feat/pv-vergleich` oder `fix/export-dateiname`.
-2. Änderung umsetzen; `npm test` und `npm run build` müssen grün sein (siehe `CLAUDE.md` und `docs/ANFORDERUNGEN.md`). Die CI misst außerdem die Testabdeckung (`npm run test:coverage`): Neue Rechenlogik braucht Tests, sonst kann die Mindestabdeckung des Rechenkerns (95 % der Zeilen, 85 % der Verzweigungen) unterschritten werden.
+2. Änderung umsetzen; `npm test` und `npm run build` müssen grün sein (siehe `CLAUDE.md` und `docs/anforderungen/`). Die CI misst außerdem die Testabdeckung (`npm run test:coverage`): Neue Rechenlogik braucht Tests, sonst kann die Mindestabdeckung des Rechenkerns (95 % der Zeilen, 85 % der Verzweigungen) unterschritten werden.
 3. Pull Request auf `main` öffnen. Der **PR-Titel** muss dem Format unten entsprechen (Workflow „PR-Titel“ prüft das).
 4. Nach grüner CI per **Squash-Merge** zusammenführen – der PR-Titel wird zur Commit-Nachricht auf `main`.
    GitHub übernimmt dabei die Nachrichten aller Commits des PRs in den Squash-Commit (`* feat: …`). Enthält der PR mehrere Commits im Commit-Format, bekommt jeder einen eigenen Eintrag im Changelog, und der PR-Titel selbst erscheint dort nicht. Bei nur einem Commit oder ohne solche Commits wird der PR-Titel zum einzigen Eintrag.
@@ -18,6 +18,37 @@ Schön, dass du mithelfen möchtest! Der Wärmepumpen-Investitionsrechner soll M
 **Version und Changelog nie von Hand ändern.** Dadurch gibt es bei paralleler Arbeit keine Konflikte um Versionsnummern: Die Nummer entsteht erst auf `main`, nacheinander für jeden Merge.
 
 Direkte Commits auf `main` sind möglich; dann zählt jede einzelne Commit-Nachricht.
+
+## Mit Claude Code: die Agentenkette `/feature`
+
+Wenn du mit [Claude Code](https://claude.com/claude-code) arbeitest, kannst du eine Änderung von der Idee bis zum Pull Request von einer Kette spezialisierter Agenten erledigen lassen. Das ist ein Angebot, keine Pflicht: Der Ablauf oben gilt genauso, wenn du von Hand arbeitest, und das Ergebnis der Kette ist ein ganz normaler Pull Request.
+
+**Starten:** im Projektverzeichnis in Claude Code
+
+```
+/feature Mehrere Szenarien im Browser speichern und vergleichen
+```
+
+Beschreib die Idee so, wie du sie einem Menschen erklären würdest – was du erreichen willst und warum. Die Kette legt einen Branch von `main` an und durchläuft diese Stufen:
+
+| Stufe | Agent | Modell | Was passiert |
+|---|---|---|---|
+| 1. Anforderung | `requirements-author` | Haiku | Leitet aus deiner Beschreibung eine Anforderung mit IDs, prüfbaren Akzeptanzkriterien und betroffenen Bereichen ab. Was nur du entscheiden kannst, fragt er dich (Auswahlfragen). Prüft die Anforderung dann in zwei Runden selbst. |
+| 2. Anforderungs-Review | `requirements-reviewer` | Opus | Prüft die Anforderung in höchstens zwei Runden erneut auf Vollständigkeit und Widersprüche zu bestehenden Anforderungen und verbessert sie. Du siehst die geprüfte Fassung. |
+| 3. Umsetzung | `implementer` | Haiku | Schreibt Code, Tests und Dokumentation (Anforderungsdatei, Änderungsprotokoll, Benutzerhandbuch). |
+| 4. Code-Review | `code-reviewer` | Opus | Prüft, ob der Code korrekt, performant und sinnvoll umgesetzt ist. Befunde gehen zurück an die Umsetzung. |
+| 5. QA | `qa` | Opus | Prüft Tests, Testabdeckung, Build, Performance (Bundle-Größe, Rechenzeit) und Barrierefreiheit. Mängel gehen zurück an die Umsetzung, danach folgen erneut Code-Review und QA. |
+
+Die Agenten 1 und 2 schreiben keinen Code; die Reviewer und die QA ändern keine Dateien. Beide Anforderungsagenten arbeiten mit derselben Prüfliste ([.claude/requirements-checklist.md](.claude/requirements-checklist.md)), die auch beschreibt, wie eine Anforderung aufgebaut ist.
+
+**Wo du gefragt wirst:**
+- bei Rückfragen zur Anforderung (Stufe 1 und 2),
+- wenn sich Code-Review und Umsetzung nach zwei Durchgängen nicht einig werden oder die QA nach drei Durchgängen noch Mängel findet – dann hält die Kette an und legt dir die offenen Punkte vor,
+- vor dem Push: Erst nach der Freigabe durch die QA wird committet (Commit-Format wie unten), und erst auf deine Bestätigung gepusht und der Pull Request erstellt.
+
+**Danach:** Der Pull Request durchläuft dieselbe CI und dasselbe Review wie jeder andere. Prüf die Anforderung und den Code selbst, bevor du ihn zur Zusammenführung freigibst – du bleibst die Autorin bzw. der Autor.
+
+Die Agenten liegen in [.claude/agents/](.claude/agents/), der Ablauf in [.claude/skills/feature/SKILL.md](.claude/skills/feature/SKILL.md). Du kannst einzelne Agenten auch direkt nutzen, z. B. „Lass den Agenten `qa` meine Änderungen prüfen“.
 
 ## Sprache
 

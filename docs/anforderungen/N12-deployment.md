@@ -1,0 +1,4 @@
+# N12 – Deployment
+
+- N12 Deployment per SSH auf einen Webspace (`.github/workflows/deploy.yml`, Anleitung `docs/DEPLOYMENT.md`): automatisch nach erfolgreichem Release-Workflow auf `main` und manuell. Build und Tests ohne Zugriff auf den SSH-Schlüssel; Upload mit `rsync` über SSH nur mit festem Host-Key (`SSH_KNOWN_HOSTS`), Zielverzeichnis wird ersetzt (Schutz gegen leere/zu allgemeine Pfade, `.htaccess` und `.well-known/` bleiben). Zugangsdaten als Secrets/Variablen der GitHub-Umgebung `production`.
+- N12.1 Vor der Freigabe sichtbar: Der Build-Job zeigt in der Zusammenfassung des Laufs die Changelog-Einträge, die das Deployment online bringt – alle Versionen nach der Live-Version (aus `version.json` der Seite) bis zur gebauten Version (`scripts/deploy-changelog.ts`). Ist die Live-Version unbekannt, nur der Eintrag der neuen Version; gleiche Version: Hinweis „Keine neuen Versionen“. Lässt den Build nie scheitern. *(Test: deploy-changelog)*

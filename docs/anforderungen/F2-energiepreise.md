@@ -1,0 +1,9 @@
+# F2 – Energiepreise
+
+- F2.1 Gas: Eingabe des **aktuellen Gesamtpreises** (ct/kWh brutto, inkl. CO₂). Der Preis ohne CO₂ wird daraus für das Startjahr abgeleitet und steigt mit eigener Rate p. a., stetig ab dem Startmonat ((1 + Rate)^(Monate/12), wie Wartung und Investitionen); der CO₂-Aufschlag folgt dem Pfad je Kalenderjahr. Gilt ebenso für Heizöl, Gas-Grundpreis, Strompreise und Zählergrundpreis. *(Test: prices)*
+- F2.2 CO₂-Aufschlag = CO₂-Preis(Jahr) × Emissionsfaktor × (1 + MwSt.). Emissionsfaktoren: Erdgas 0,201 kg/kWh, Heizöl 0,266 kg/kWh (editierbar). *(Test: prices)*
+- F2.3 CO₂-Preispfad als Stützstellen „Jahr:€/t", linear interpoliert; vor der ersten/nach der letzten Stützstelle konstant. Default: 2026: 55, 2027: 65, 2028: 80, 2030: 110, 2035: 160, 2040: 200, 2045: 220 (Annahme: BEHG-Korridor 55–65 €/t bis 2027, danach EU-ETS2). *(Test: prices)*
+- F2.4 Heizöl: aktueller Gesamtpreis in €/Liter (inkl. CO₂), Heizwert 10 kWh/l. *(Test: prices)*
+- F2.5 Strom (WP-Tarif): Arbeitspreis ct/kWh brutto mit Steigerung p. a., Grundpreis Zähler €/Jahr, § 14a-EnWG-Netzentgeltreduzierung €/Jahr (Abzug). Option „kein separater WP-Tarif" → Haushaltsstrompreis, kein Zusatz-Grundpreis/-Zähler. *(Test: simulation)*
+- F2.6 PV-Eigenverbrauch: WP-Strom aus eigener PV, bewertet mit der entgangenen Einspeisevergütung (ct/kWh, konstant). Seit F28 je Monat aus der PV-Anlage berechnet statt fester Anteil. *(Test: simulation)*
+- F2.7 Bio-Treppe (Gebäudemodernisierungsgesetz): Für einen **neu eingebauten** fossilen Kessel (Ersatzkessel im Referenzszenario) muss ab 2029 ein steigender Bio-Anteil bezogen werden. Mehrkosten = Bio-Anteil(Jahr) × Bio-Aufpreis (ct/kWh). Default-Stufen: 2029: 10 %, 2030: 15 %, 2035: 30 %, 2040: 60 %; Aufpreis 3 ct/kWh (Markt-Update 2026-11-11, vorher 4 ct – siehe Änderungsprotokoll). Abschaltbar. *(Test: prices, simulation)*

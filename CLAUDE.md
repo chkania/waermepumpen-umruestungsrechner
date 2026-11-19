@@ -3,11 +3,11 @@
 SPA (Vite + TypeScript, ohne UI-Framework, Chart.js) zur Wirtschaftlichkeitsrechnung Gas/Öl → Wärmepumpe.
 
 ## Vor jeder Änderung
-1. `docs/ANFORDERUNGEN.md` lesen – verbindliche Anforderungen (IDs E*, F*, N*), Annahmen (A*) und Änderungsprotokoll.
+1. `docs/anforderungen/README.md` (Index) und die betroffenen Anforderungsdateien lesen – eine Datei je Anforderung (`F13-….md`, `N7-….md`, Unterpunkte F13.1… darin); dazu `entscheidungen.md` (E*), `annahmen.md` (A*), `quellen.md`, `aenderungsprotokoll.md`.
 2. `npm test` muss vorher und nachher grün sein (Regressionsschutz).
-3. Neue/geänderte Anforderung → Dokument aktualisieren (ID, Test-Verweis, Änderungsprotokoll) und Test ergänzen.
+3. Neue Anforderung → neue Datei `docs/anforderungen/<ID>-<kurztitel>.md` + Zeile im Index; neuer Unterpunkt/geänderter Text → in der Datei der Anforderung (Test-Verweis); immer Eintrag in `aenderungsprotokoll.md`; Test ergänzen.
    Neue Felder oder Bedienfunktionen auch im Benutzerhandbuch `docs/BENUTZERHANDBUCH.md` beschreiben (`tests/help.test.ts` prüft das).
-4. Ändert sich ein Ergebnis bewusst, schlägt `tests/regression.test.ts` fehl → prüfen, dann `npm test -- -u` und im Änderungsprotokoll begründen.
+4. Ändert sich ein Ergebnis bewusst, schlägt `tests/regression.test.ts` fehl → prüfen, dann `npm test -- -u` und in `docs/anforderungen/aenderungsprotokoll.md` begründen.
 
 ## Struktur
 - `src/core/` – reiner Rechenkern ohne DOM (monatliche Simulation):
@@ -45,6 +45,7 @@ PolyForm Noncommercial 1.0.0 (`LICENSE.md`). Neue/aktualisierte Laufzeit-Abhäng
 - `.github/workflows/dependabot.yml` – prüft Dependabot-PRs ohne Schreibrechte, committet aktualisierte `THIRD-PARTY-NOTICES.md` und merged Patch/Minor automatisch (Squash); Major bleibt zur manuellen Prüfung offen. Abhängigkeits-Updates erhöhen die App-Version nicht.
 
 ## Befehle
+- `/feature <Beschreibung>` – Agentenkette Anforderung → Review → Implementierung → Code-Review → QA (`.claude/skills/feature`, Agenten in `.claude/agents/`, Prüfliste `.claude/requirements-checklist.md`)
 - `npm run smoke [-- <url>]` – Rauchtest gegen die Live-Seite oder die lokale Vorschau (N15)
 - `npm run dev` – Entwicklungsserver (Port 5173, siehe `.claude/launch.json`)
 - `npm test` – alle Tests · `npm run test:coverage` – Tests mit Testabdeckung (Bericht in `coverage/`, HTML unter `coverage/index.html`; in der CI als Zusammenfassung). Mindestwerte in `vite.config.ts`: gesamt 90 % Zeilen / 78 % Verzweigungen, `src/core` 95 / 85, `src/ui` 80 / 65 – Unterschreiten lässt die CI fehlschlagen; nach oben nachziehen, nie senken · `npm run build` – Typecheck + statischer Build nach `dist/`

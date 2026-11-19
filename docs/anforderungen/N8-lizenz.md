@@ -1,0 +1,3 @@
+# N8 – Lizenz
+
+- N8 Lizenz: PolyForm Noncommercial 1.0.0 (`LICENSE.md` mit `Required Notice`, SPDX in `package.json`); Drittanbieter-Lizenzen der Laufzeit-Abhängigkeiten in `THIRD-PARTY-NOTICES.md` (erzeugt mit `npm run notices`). Beide bleiben als Markdown im Repo und werden zusätzlich als HTML-Seiten `lizenz.html` (mit unverbindlicher deutscher Kurzfassung über dem maßgeblichen englischen Text) und `lizenzen-drittanbieter.html` (Inhaltsverzeichnis je Paket) gerendert – gleicher Aufbau wie die Hilfeseite (`src/doc-page.ts`), Fußzeile mit Rechner, Hilfe, Lizenz und Drittanbietern; im Seitenfuß des Rechners verlinkt; Hinweis auch in README und Handbuch. *(Test: license)*

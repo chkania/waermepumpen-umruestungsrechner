@@ -4,7 +4,7 @@ import { decodeHash, encodeHash } from '../src/core/serialize';
 import { documentsHtml } from '../src/ui/report';
 import { defaults } from './helpers';
 
-describe('F16.2 Prüfung der Links zu Unterlagen', () => {
+describe('F16.4 Prüfung der Links zu Unterlagen', () => {
   it('übernimmt https- und http-Adressen mit Titel', () => {
     const issues: { path: string; reason: string }[] = [];
     const out = cleanDocuments([{ title: ' Angebot ', url: ' https://example.invalid/angebot.pdf ' }, { title: '', url: 'http://example.invalid/' }], issues);
@@ -49,7 +49,7 @@ describe('F16.2 Prüfung der Links zu Unterlagen', () => {
   });
 });
 
-describe('F16.2 Links reisen mit den Eingaben (Link, Export)', () => {
+describe('F16.4 Links reisen mit den Eingaben (Link, Export)', () => {
   it('Unterlagen stehen im Link und kommen beim Öffnen wieder', () => {
     const d = defaults();
     const i = defaults();
@@ -76,7 +76,7 @@ describe('F16.2 Links reisen mit den Eingaben (Link, Export)', () => {
   });
 });
 
-describe('F16.2 Bericht: Liste mit anklickbarer Adresse und QR-Code je Link', () => {
+describe('F16.4 Bericht: Liste mit anklickbarer Adresse und QR-Code je Link', () => {
   it('jeder Link mit Titel, anklickbarer Adresse und QR-Code', () => {
     const html = documentsHtml([
       { title: 'Angebot', url: 'https://example.invalid/a.pdf' },
