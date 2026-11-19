@@ -4,36 +4,44 @@ description: Neue Funktion von der Anforderung bis zum PR über die Agentenkette
 disable-model-invocation: true
 ---
 
-Du steuerst die Agentenkette für die Eingabe des Nutzers (Argumente dieses Aufrufs). Subagenten können keine weiteren Agenten starten; jede Übergabe läuft über dich. Gib jedem Agenten die vollständigen Texte mit, die er braucht – er kennt diese Unterhaltung nicht. Melde dem Nutzer nach jeder Stufe in ein bis zwei Sätzen, wo die Kette steht.
+Du steuerst die Agentenkette für die Eingabe des Nutzers (Argumente dieses Aufrufs). Subagenten können keine weiteren Agenten starten; jede Übergabe läuft über dich. Melde dem Nutzer nach jeder Stufe in ein bis zwei Sätzen, wo die Kette steht.
 
-## 1. Branch
+**Übergaben schlank halten:** Längere Texte (Anforderung, Berichte) legst du als Datei im Scratchpad ab und gibst dem Agenten den Pfad sowie Basis bzw. Zwischenstand mit – er kennt diese Unterhaltung nicht. Agenten mit mehreren Durchgängen setzt du per SendMessage fort, damit sie ihren Kontext behalten.
+
+## 1. Branch und Basis
 
 `git fetch origin`. Ist das Arbeitsverzeichnis sauber, neuen Branch `feat/<kurzname>` von `origin/main` anlegen. Sonst den Nutzer fragen, ob die offenen Änderungen dazugehören.
+- Den Commit als **Basis** merken (`git rev-parse HEAD`).
+- Basis-Messung für die QA: `npm run build`, dann die Dateigrößen in `dist/assets` in eine Datei im Scratchpad schreiben.
 
-## 2. Anforderung – `requirements-author` (Haiku)
+## 2. Anforderung – `requirements-author`
 
 Starte ihn mit der Eingabe des Nutzers im Wortlaut. Bei `STATUS: RÜCKFRAGEN`: die offenen Punkte per AskUserQuestion stellen und die Antworten per SendMessage an denselben Agenten geben. Wiederholen bis `STATUS: FERTIG`.
 
-## 3. Anforderungs-Review – `requirements-reviewer` (Opus)
+## 3. Anforderungs-Review – `requirements-reviewer`
 
-Übergib die fertige Anforderung samt „Hinweise für das Review“. Rückfragen wie in Schritt 2 behandeln, danach per SendMessage an den Reviewer zurück. Ergebnis ist die **geprüfte Anforderung**; zeige sie dem Nutzer und mach weiter.
+Übergib die fertige Anforderung samt „Hinweise für das Review“ und den Entscheidungen des Nutzers. Rückfragen wie in Schritt 2 behandeln, danach per SendMessage an den Reviewer zurück. Ergebnis ist die **geprüfte Anforderung**: als Datei ablegen, dem Nutzer kurz zusammenfassen, weitermachen.
 
-## 4. Implementierung – `implementer` (Opus)
+## 4. Implementierung – `implementer`
 
-Übergib die geprüfte Anforderung. Den Agenten für die Schleifen unten per SendMessage fortsetzen, damit er seinen Kontext behält.
+Übergib die geprüfte Anforderung. Nach jeder Runde des Implementierers einen lokalen **Zwischenstand** anlegen (`git add -A && git commit -q -m "chore: wip"`) und den Commit merken. So bekommen Code-Review und QA in späteren Durchgängen nur das Delta.
 
-## 5. Code-Review – `code-reviewer` (Opus)
+## 5. Code-Review – `code-reviewer`
 
-Übergib die geprüfte Anforderung und den Bericht des Implementierers. Bei `STATUS: ÄNDERUNGEN`: Befunde an den `implementer`, danach neues Code-Review. Nach zwei Durchgängen mit weiterhin hohen Befunden: anhalten und dem Nutzer die Befunde vorlegen.
+Übergib die geprüfte Anforderung, den Bericht des Implementierers und die Basis (erster Durchgang) bzw. den zuletzt geprüften Zwischenstand (weitere Durchgänge).
+- `STATUS: ÄNDERUNGEN` (hohe oder mittlere Befunde): an den `implementer`, Zwischenstand, neues Code-Review auf dem Delta. Nach zwei Durchgängen mit weiterhin hohen Befunden: anhalten und dem Nutzer die Befunde vorlegen.
+- `STATUS: OK`: geringe Befunde **sammeln** und weiter zur QA.
 
-## 6. QA – `qa` (Opus)
+## 6. QA – `qa`
 
-Übergib die geprüfte Anforderung. Bei `STATUS: MÄNGEL`: Mängel an den `implementer`, dann Schritt 5 und 6 erneut. Nach drei Durchgängen ohne Freigabe: anhalten und dem Nutzer die Mängel vorlegen.
+Übergib die geprüfte Anforderung, die Basis, die Datei mit der Basis-Messung und in weiteren Durchgängen den zuletzt geprüften Zwischenstand.
+- `STATUS: MÄNGEL`: Mängel an den `implementer`, Zwischenstand, dann Schritt 5 (Delta) und 6 erneut. Nach drei Durchgängen ohne Freigabe: anhalten und dem Nutzer die Mängel vorlegen.
+- `STATUS: FREIGABE`: gesammelte geringe Befunde (aus Code-Review und QA) einmal gebündelt an den `implementer`, ohne erneutes Review; sein Abschluss muss `npm test` und `npm run build` grün melden.
 
 ## 7. Nach der Freigabe
 
-Erst bei `STATUS: FREIGABE`:
-1. Commit nach Conventional Commits, Beschreibung deutsch aus Nutzersicht (`CONTRIBUTING.md`).
-2. Den Nutzer fragen, ob jetzt gepusht und der PR erstellt werden soll (Push nur auf seinen Wunsch, Workflow in der Memory „evening-push-workflow“). Bei Ja: Zeitstempel der ungepushten Commits auf jetzt setzen, pushen, PR mit Zusammenfassung, Ergebnisänderungen und QA-Tabelle erstellen.
+1. **Laufbuch:** einen Abschnitt nach dem Muster in `.claude/feature-log.md` anhängen (Stufen mit Modell, Durchgängen, Tokens und Dauer aus den Abschluss-Meldungen; spät gefundene Befunde mit der Stufe, die sie hätte verhindern können; Rückfragen), höchstens 15 Zeilen.
+2. Zwischenstände zusammenfassen: `git reset --soft <Basis>`, dann ein Commit nach Conventional Commits (inkl. Laufbuch), Beschreibung deutsch aus Nutzersicht (`CONTRIBUTING.md`).
+3. Den Nutzer fragen, ob jetzt gepusht und der PR erstellt werden soll (Push nur auf seinen Wunsch). Bei Ja: pushen, PR mit Zusammenfassung, Ergebnisänderungen und QA-Tabelle erstellen.
 
-Abschlussbericht an den Nutzer: geprüfte Anforderung (IDs), Durchgänge je Stufe, QA-Ergebnis, Commit bzw. PR-Link.
+Abschlussbericht an den Nutzer: geprüfte Anforderung (IDs), Durchgänge je Stufe, QA-Ergebnis, Commit bzw. PR-Link. Empfiehl `/feature-retro`, wenn eine Stufe in diesem Lauf drei oder mehr Durchgänge brauchte oder seit der letzten Retro im Laufbuch fünf Läufe vergangen sind.

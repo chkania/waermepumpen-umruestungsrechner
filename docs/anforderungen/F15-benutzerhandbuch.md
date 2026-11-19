@@ -1,6 +1,6 @@
 # F15 – Benutzerhandbuch
 
-- F15.1 Benutzerhandbuch in `docs/BENUTZERHANDBUCH.md`: Schnellstart, Aufbau der Oberfläche, Werkzeugleiste (Hell/Dunkel, Hilfe, Link mit Werten teilen inkl. Datenschutzhinweis, Export, Import, Zurücksetzen, automatisches Speichern), alle Eingabe-Abschnitte und Felder, Ergebnisbereiche, Tipps, Datenschutz. *(Test: help)*
+- F15.1 Benutzerhandbuch in `docs/BENUTZERHANDBUCH.md`: Schnellstart, Aufbau der Oberfläche, Werkzeugleiste (Hell/Dunkel, Hilfe, Link mit Werten teilen inkl. Datenschutzhinweis, Varianten vergleichen, Gespeicherte Szenarien (F37, geändert), Export, Import, Zurücksetzen, automatisches Speichern), alle Eingabe-Abschnitte und Felder, Ergebnisbereiche, Tipps, Datenschutz. *(Test: help)*
 - F15.2 Im Browser aufrufbar als eigene Seite `hilfe.html` (Vite-Mehrseiten-Build): gerendert aus dem Markdown, Inhaltsverzeichnis mit Sprungmarken (`hilfe.html#link-mit-werten-teilen`), gleiches Design und Hell/Dunkel wie der Rechner (folgt Änderungen im anderen Tab), mobil ohne Überlauf. Im Rechner öffnet „Hilfe“ in der Werkzeugleiste die Seite im selben Tab (bis 1.11.0: neuer Tab). *(Test: help, ui)*
 - F15.3 Das Handbuch muss jeden Eingabe-Abschnitt, jedes Feld (Beschriftung wie in `fields.ts`), jede Werkzeugleisten-Funktion und jeden Ergebnisbereich nennen – neue Felder/Funktionen erfordern eine Ergänzung (Test schlägt sonst fehl). *(Test: help)*
 

@@ -1,6 +1,6 @@
 import { deflateSync } from 'fflate';
 import { describe, expect, it } from 'vitest';
-import { decodeHash, diffInputs, encodeHash, exportFileName, exportJson, fileSlug, importJson, mergeInputs } from '../src/core/serialize';
+import { cleanScenarioName, decodeHash, diffInputs, encodeHash, exportFileName, exportJson, fileSlug, importJson, mergeInputs } from '../src/core/serialize';
 import { defaults } from './helpers';
 
 describe('F9 Persistenz', () => {
@@ -109,5 +109,20 @@ describe('F16 Szenario-Beschreibung', () => {
     const old = JSON.parse(exportJson(defaults()));
     delete old.scenario;
     expect(importJson(d, JSON.stringify(old)).scenario).toEqual({ name: '', notes: '', documents: [] });
+  });
+});
+
+describe('F37 Gespeicherte Szenarien – Bezeichnung', () => {
+  it('A14 Name mit 201 Zeichen und Leerzeichen am Rand wird bereinigt und auf 200 Zeichen gekürzt; Nicht-Text ergibt leer', () => {
+    expect(cleanScenarioName(` ${'a'.repeat(201)} `)).toBe('a'.repeat(200));
+    expect(cleanScenarioName('   ')).toBe('');
+    expect(cleanScenarioName('  Angebot A  ')).toBe('Angebot A');
+    expect(cleanScenarioName(42)).toBe('');
+    expect(cleanScenarioName(undefined)).toBe('');
+  });
+
+  it('F37.2 exportJson übernimmt den Stand der Standardwerte, wenn er angegeben wird', () => {
+    expect(JSON.parse(exportJson(defaults(), '2026-11-17')).defaultsAsOf).toBe('2026-11-17');
+    expect(JSON.parse(exportJson(defaults())).defaultsAsOf).toBe('2026-11-18');
   });
 });
