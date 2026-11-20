@@ -44,6 +44,7 @@ Nur nach der Freigabe aus Schritt 3. Übergib die freigegebene Anforderung. Nach
 
 Übergib die geprüfte Anforderung, die Basis, die Datei mit der Basis-Messung und in weiteren Durchgängen den zuletzt geprüften Zwischenstand.
 - `STATUS: MÄNGEL`: Mängel an den `implementer`, Zwischenstand, dann Schritt 5 (Delta) und 6 erneut. Nach drei Durchgängen ohne Freigabe: anhalten und dem Nutzer die Mängel vorlegen.
+  - **Tests passen nicht zur Anforderung** (Kriterium 7): Beanstandet die QA Tests auch im zweiten Durchgang noch, halte sofort an. Lege dem Nutzer die beanstandeten Tests (`Datei:Name`), das betroffene Akzeptanzkriterium und die Begründung der QA vor und frage per AskUserQuestion, wie es weitergehen soll (z. B. Test anpassen lassen, Anforderung präzisieren, Test so akzeptieren, Abbruch). Warte auf seine Antwort, bevor du weitermachst.
 - `STATUS: FREIGABE`: gesammelte geringe Befunde (aus Code-Review und QA) einmal gebündelt an den `implementer`, ohne erneutes Review; sein Abschluss muss `npm test` und `npm run build` grün melden.
 
 ## 7. Nach der Freigabe

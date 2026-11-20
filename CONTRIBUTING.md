@@ -31,13 +31,13 @@ Wenn du mit [Claude Code](https://claude.com/claude-code) arbeitest, kannst du e
 
 Beschreib die Idee so, wie du sie einem Menschen erklären würdest – was du erreichen willst und warum. Die Kette legt einen Branch von `main` an und durchläuft diese Stufen:
 
-| Stufe | Agent | Modell | Was passiert |
-|---|---|---|---|
-| 1. Anforderung | `requirements-author` | Haiku | Leitet aus deiner Beschreibung eine Anforderung mit IDs, prüfbaren Akzeptanzkriterien und betroffenen Bereichen ab. Was nur du entscheiden kannst, fragt er dich (Auswahlfragen). Prüft die Anforderung dann in zwei Runden selbst. |
-| 2. Anforderungs-Review | `requirements-reviewer` | Opus | Prüft die Anforderung in höchstens zwei Runden erneut auf Vollständigkeit und Widersprüche zu bestehenden Anforderungen und verbessert sie. Die geprüfte Fassung liegt als Datei bereit, du liest sie und gibst sie frei; erst dann beginnt die Umsetzung. |
-| 3. Umsetzung | `implementer` | Haiku | Schreibt Code, Tests und Dokumentation (Anforderungsdatei, Änderungsprotokoll, Benutzerhandbuch). Führt während der Arbeit nur die betroffenen Tests aus, die ganze Suite und den Build einmal am Ende. |
-| 4. Code-Review | `code-reviewer` | Sonnet | Prüft am Diff, ob der Code korrekt, performant und sinnvoll umgesetzt ist (ohne eigene Testläufe). Hohe und mittlere Befunde gehen zurück an die Umsetzung, danach wird nur das Delta erneut geprüft. |
-| 5. QA | `qa` | Sonnet | Prüft Tests und Testabdeckung (ein Lauf), Build, Performance (Bundle-Größe gegenüber dem Ausgangsstand) und Barrierefreiheit, bei neuen Bedienelementen auch im echten Browser. Mängel gehen zurück an die Umsetzung, danach folgen erneut Code-Review und QA für das Geänderte. |
+| Stufe | Agent | Was passiert |
+|---|---|---|
+| 1. Anforderung | `requirements-author` | Leitet aus deiner Beschreibung eine Anforderung mit IDs, prüfbaren Akzeptanzkriterien und betroffenen Bereichen ab. Was nur du entscheiden kannst, fragt er dich (Auswahlfragen). Prüft die Anforderung dann in zwei Runden selbst. |
+| 2. Anforderungs-Review | `requirements-reviewer` | Prüft die Anforderung in höchstens zwei Runden erneut auf Vollständigkeit und Widersprüche zu bestehenden Anforderungen und verbessert sie. Die geprüfte Fassung liegt als Datei bereit, du liest sie und gibst sie frei; erst dann beginnt die Umsetzung. |
+| 3. Umsetzung | `implementer` | Schreibt Code, Tests und Dokumentation (Anforderungsdatei, Änderungsprotokoll, Benutzerhandbuch). Führt während der Arbeit nur die betroffenen Tests aus, die ganze Suite und den Build einmal am Ende. |
+| 4. Code-Review | `code-reviewer` | Prüft am Diff, ob der Code korrekt, performant und sinnvoll umgesetzt ist (ohne eigene Testläufe). Hohe und mittlere Befunde gehen zurück an die Umsetzung, danach wird nur das Delta erneut geprüft. |
+| 5. QA | `qa` | Prüft Tests und Testabdeckung (ein Lauf), ob die neuen bzw. geänderten Tests fachlich zur Anforderung passen (richtig, vollständig, aussagekräftig; nur diese Tests), Build, Performance (Bundle-Größe gegenüber dem Ausgangsstand) und Barrierefreiheit, bei neuen Bedienelementen auch im echten Browser. Mängel gehen zurück an die Umsetzung, danach folgen erneut Code-Review und QA für das Geänderte. |
 
 Geringe Befunde sammelt die Kette und lässt sie nach der Freigabe in einem Rutsch beheben. Zwischenstände landen als lokale Commits und werden vor dem Push zu einem Commit zusammengefasst.
 
@@ -48,12 +48,12 @@ Die Agenten 1 und 2 schreiben keinen Code; die Reviewer und die QA ändern keine
 **Wo du gefragt wirst:**
 - bei Rückfragen zur Anforderung (Stufe 1 und 2),
 - zur **Freigabe der geprüften Anforderung**: Du bekommst die Datei samt Kurzfassung und entscheidest, ob die Umsetzung beginnt oder die Anforderung geändert wird,
-- wenn sich Code-Review und Umsetzung nach zwei Durchgängen nicht einig werden oder die QA nach drei Durchgängen noch Mängel findet – dann hält die Kette an und legt dir die offenen Punkte vor,
+- wenn sich Code-Review und Umsetzung nach zwei Durchgängen nicht einig werden oder die QA nach drei Durchgängen noch Mängel findet – dann hält die Kette an und legt dir die offenen Punkte vor; passen die Tests auch nach dem zweiten QA-Durchgang nicht zur Anforderung, fragt sie dich sofort, wie sie weiter vorgehen soll,
 - vor dem Push: Erst nach der Freigabe durch die QA wird committet (Commit-Format wie unten), und erst auf deine Bestätigung gepusht und der Pull Request erstellt.
 
 **Danach:** Der Pull Request durchläuft dieselbe CI und dasselbe Review wie jeder andere. Prüf die Anforderung und den Code selbst, bevor du ihn zur Zusammenführung freigibst – du bleibst die Autorin bzw. der Autor.
 
-Die Agenten liegen in [.claude/agents/](.claude/agents/), der Ablauf in [.claude/skills/feature/SKILL.md](.claude/skills/feature/SKILL.md). Du kannst einzelne Agenten auch direkt nutzen, z. B. „Lass den Agenten `qa` meine Änderungen prüfen“.
+Die Agenten mit ihren Modellen liegen in [.claude/agents/](.claude/agents/), der Ablauf in [.claude/skills/feature/SKILL.md](.claude/skills/feature/SKILL.md). Du kannst einzelne Agenten auch direkt nutzen, z. B. „Lass den Agenten `qa` meine Änderungen prüfen“.
 
 ## Sprache
 
@@ -73,7 +73,7 @@ Format nach [Conventional Commits 1.0.0](https://www.conventionalcommits.org/de/
 ```
 
 | Typ | Wann | Version | Rubrik im Changelog |
-|---|---|---|---|
+|---|---|---|
 | `feat` | neue Funktion oder Eingabe, bewusst geändertes Rechenmodell oder Standardwerte | MINOR (1.**x**.0) | Neu |
 | `fix` | Fehlerkorrektur, korrigierte Texte oder Darstellung | PATCH (1.0.**x**) | Fehlerkorrekturen |
 | `perf` | spürbare Verbesserung ohne neue Funktion (z. B. schneller) | PATCH | Verbessert |

@@ -12,7 +12,7 @@ describe('Anforderungen – eine Datei je Anforderung', () => {
     expect(files).toContain('F13-stromkosten-mit-oder-ohne-waermepumpentarif.md');
     expect(files).toContain('N7-barrierefreiheit.md');
     expect(readdirSync(dir).filter((f) => f.endsWith('.md') && !files.includes(f)).sort()).toEqual(
-      ['README.md', 'aenderungsprotokoll.md', 'annahmen.md', 'entscheidungen.md', 'quellen.md'],
+      ['README.md', 'aenderungsprotokoll.md', 'annahmen.md', 'entscheidungen.md', 'produktbeschreibung.md', 'quellen.md'],
     );
   });
 

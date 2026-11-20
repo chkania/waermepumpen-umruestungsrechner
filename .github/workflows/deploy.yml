@@ -1,6 +1,6 @@
 name: Deploy
 
-# Deploys the static build (dist/) to the webspace via SSH/rsync (N12).
+# Deploys the static build (dist/) to the webspace via SSH/rsync (N12), but only if dist/ differs from the live site (N12.2).
 # - Runs after the "Release" workflow on main, so the deployed build already carries the new version
 #   (the release commit is pushed with GITHUB_TOKEN and therefore triggers no push workflows itself).
 # - build: installs, tests and builds WITHOUT access to the SSH key (third-party package code never sees it).
@@ -48,6 +48,14 @@ jobs:
         run: npm test
       - name: Typecheck und Build
         run: npm run build
+      # N12.2: deploy only if dist/ differs from the live site (content hash in version.json, without the commit).
+      # A manual run always deploys. Never fails: if anything is unclear, it deploys.
+      - name: Hat sich dist/ gegenüber der Live-Seite geändert?
+        id: changed
+        env:
+          URL: ${{ vars.DEPLOY_URL || 'https://waermepumpen-investitionsrechner.de/' }}
+          FORCE: ${{ github.event_name == 'workflow_dispatch' }}
+        run: node scripts/deploy-needed.ts "$URL"
       - name: Version und Commit für Zusammenfassung und Prüfung
         id: meta
         run: |
@@ -55,11 +63,13 @@ jobs:
           echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       # Shown on the run page while the deployment waits for approval: what goes live compared with the live version
       - name: Änderungen gegenüber der Live-Seite
+        if: steps.changed.outputs.changed == 'true'
         env:
           URL: ${{ vars.DEPLOY_URL || 'https://waermepumpen-investitionsrechner.de/' }}
           VERSION: ${{ steps.meta.outputs.version }}
         run: node scripts/deploy-changelog.ts "$URL" "$VERSION" | tee -a "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v7
+        if: steps.changed.outputs.changed == 'true'
         with:
           name: dist
           path: dist/
@@ -70,9 +80,12 @@ jobs:
     outputs:
       version: ${{ steps.meta.outputs.version }}
       commit: ${{ steps.meta.outputs.commit }}
+      changed: ${{ steps.changed.outputs.changed }}
 
   deploy:
     needs: build
+    # N12.2: nothing to upload if dist/ equals the live site
+    if: needs.build.outputs.changed == 'true'
     runs-on: ubuntu-latest
     environment:
       name: production
@@ -143,6 +156,7 @@ jobs:
 
   verify:
     needs: [build, deploy]
+    if: needs.build.outputs.changed == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

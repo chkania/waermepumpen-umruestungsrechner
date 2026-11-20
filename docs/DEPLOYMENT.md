@@ -6,7 +6,7 @@ Der Workflow `.github/workflows/deploy.yml` veröffentlicht den Rechner per SSH 
 
 1. Ein Pull Request wird per Squash-Merge in `main` übernommen.
 2. Der Workflow **Release** leitet die Version ab und committet ggf. `chore(release): x.y.z`.
-3. Danach startet **Deploy** automatisch:
+3. Danach startet **Deploy** automatisch. Bereitgestellt wird nur, wenn sich der Inhalt von `dist/` gegenüber der Live-Seite geändert hat (Inhalts-Hash in `version.json`); bei reinen Dokumentations-Änderungen steht in der Zusammenfassung „Kein Deployment“, und `deploy` und `verify` entfallen. Ein manueller Lauf (Schritt 4) stellt immer bereit.
    - **build** – `npm ci`, Tests, `npm run build` auf dem neuesten `main` (inkl. Release-Commit), ohne Zugriff auf den SSH-Schlüssel. Die Zusammenfassung des Laufs zeigt danach unter **„Änderungen … → …“** die Changelog-Einträge, die online gehen: alle Versionen nach der Live-Version (aus `version.json` der Seite) bis zur neuen. So siehst du vor der Freigabe in „Review deployments“, was deployt wird. Lokal: `node scripts/deploy-changelog.ts [url] [version]`.
    - **deploy** – lädt nur das fertige `dist/` herunter und überträgt es mit `rsync` über SSH. Neue Dateien werden erst am Ende umgeschaltet, alte zuletzt gelöscht.
    - **verify** – prüft danach die ausgelieferte Seite, ohne Zugriff auf Secrets (siehe [Prüfung nach dem Deployment](#prüfung-nach-dem-deployment)). Schlägt sie fehl, ist der Lauf rot.
@@ -97,7 +97,7 @@ Der Job **verify** startet `scripts/smoke-test.ts` gegen die veröffentlichte Ad
 
 | Prüfung | Was genau |
 |---|---|
-| Version | `version.json` (vom Build geschrieben) enthält die gebaute Version und den Commit. Abgerufen ohne Cache, bis zu sechs Versuche im Abstand von 10 Sekunden. |
+| Version | `version.json` (vom Build geschrieben) enthält die gebaute Version, den Commit und den Inhalts-Hash. Abgerufen ohne Cache, bis zu sechs Versuche im Abstand von 10 Sekunden. |
 | Versionsanzeige | Der Rechner zeigt „Version x.y.z“ in der Kopfzeile. |
 | Rechnen | Die Kennzahlen erscheinen; nach einer geänderten Eingabe (Verbrauch) ändern sie sich. |
 | Diagramme | Chart.js wird nachgeladen, mindestens ein Diagramm ist gezeichnet. |

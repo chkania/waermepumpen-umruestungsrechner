@@ -8,13 +8,11 @@ Verbindliche Sammlung der Anforderungen, eine Datei je Anforderung (mit ihren Un
 
 ## Ziel
 
-Single Page Application (SPA), mit der Eigentümer:innen die Umrüstung einer
-Gas- oder Ölheizung auf eine Wärmepumpe (WP) wirtschaftlich kalkulieren können –
-inklusive steigender Energiepreise, Bundesförderung (KfW 458), Kreditfinanzierung
-(KfW 358/359, Bankkredit) und Steuerbonus (§ 35c EStG).
+Zweck, Benutzer, Grundentscheidungen und Abgrenzung stehen in der [Produktbeschreibung](produktbeschreibung.md).
 
 ## Weitere Dokumente
 
+- [Produktbeschreibung](produktbeschreibung.md): Zweck, Benutzer, Hauptfunktionen, Grundentscheidungen, Abgrenzung – der Rahmen für jede neue Anforderung
 - [Entscheidungen aus der Anforderungsaufnahme](entscheidungen.md) (E1–E12)
 - [Offene Punkte und Annahmen](annahmen.md) (A*)
 - [Quellen](quellen.md)
