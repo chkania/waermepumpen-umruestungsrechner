@@ -17,7 +17,8 @@
     "notices": "node scripts/third-party-notices.mjs",
     "release": "node scripts/release.ts",
     "release:preview": "node scripts/release.ts --dry-run",
-    "verify:assumptions": "tsx scripts/verify-assumptions.ts"
+    "verify:assumptions": "tsx scripts/verify-assumptions.ts",
+    "check:mcp": "node scripts/mcp-check.ts"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",

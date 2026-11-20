@@ -4,6 +4,10 @@
 
 Das Werkzeug **schreibt nur einen Bericht**. Werte änderst du weiterhin von Hand. Wie das geht, steht im Prüf-Issue und in [CONTRIBUTING.md](../CONTRIBUTING.md#annahmen-aktuell-halten).
 
+## Alternative: Abgleich mit dem MCP-Server
+
+Ohne API-Schlüssel: Förder- und Rechtswerte lassen sich in Claude Code gegen die Wissensbasis des MCP-Servers `wpir-mcp` prüfen (F22.5, eigenes Repo [chkania/wpir-mcp](https://github.com/chkania/wpir-mcp)). `/annahmen-mcp` startet den Agenten `assumptions-checker`, der die Standardwerte mit `check_value` vergleicht und nur berichtet. `npm run check:mcp` prüft vorab, dass der Server erreichbar ist und seine Feldpfade zum Rechner passen. Der Server enthält Regeln mit Quelle und Prüfdatum, keine Marktpreise; die bleiben bei `verify:assumptions`.
+
 ## Was geprüft wird
 
 Das Werkzeug prüft dieselben Werte wie die Checkliste. Dazu gehört jedes Eingabefeld, dessen Standardwert in `src/core/sources.ts` als „Offizielle Quelle“, „Gesetz / Regelung“ oder „Marktdaten“ eingetragen ist und einen Link hat. Neue Felder mit Quelle kommen also automatisch dazu.

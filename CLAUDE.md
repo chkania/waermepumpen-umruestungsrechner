@@ -46,6 +46,7 @@ PolyForm Noncommercial 1.0.0 (`LICENSE.md`). Neue/aktualisierte Laufzeit-Abhäng
 
 ## Befehle
 - `/feature <Beschreibung>` – Agentenkette Anforderung → Review → Implementierung → Code-Review → QA (`.claude/skills/feature`, Agenten in `.claude/agents/`, Prüfliste `.claude/requirements-checklist.md`); `/feature-retro` – Auswertung des Laufbuchs `.claude/feature-log.md`, Verbesserungsvorschläge für die Kette
+- `npm run check:mcp [-- <url>]` – Verbindung und Vertrag mit dem MCP-Server `wpir-mcp` (F22.5, `.mcp.json`); `/annahmen-mcp` prüft die Förder- und Rechtswerte damit (Agent `assumptions-checker`)
 - `npm run smoke [-- <url>]` – Smoketest gegen die Live-Seite oder die lokale Vorschau (N15)
 - `npm run dev` – Entwicklungsserver (Port 5173, siehe `.claude/launch.json`)
 - `npm test` – alle Tests · `npm run test:coverage` – Tests mit Testabdeckung (Bericht in `coverage/`, HTML unter `coverage/index.html`; in der CI als Zusammenfassung). Mindestwerte in `vite.config.ts`: gesamt 90 % Zeilen / 78 % Verzweigungen, `src/core` 95 / 85, `src/ui` 80 / 65 – Unterschreiten lässt die CI fehlschlagen; nach oben nachziehen, nie senken · `npm run build` – Typecheck + statischer Build nach `dist/`
