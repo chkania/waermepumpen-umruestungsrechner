@@ -279,8 +279,8 @@ Achtung: Die Adressen können persönliche Angaben enthalten (z. B. einen Login-
 | **Beheizte Wohnfläche** | Für den Verbrauchskennwert in kWh je m² und Jahr. |
 | **Letzte energetische Sanierung** | Jahr der letzten Maßnahme an der Gebäudehülle (Dämmung, Fenster, Dach); 0 = keine. |
 | **Umfang der Sanierung** | Einzelne Maßnahmen oder umfassende Sanierung – bestimmt, welcher Verbrauch für Ihr Haus zu erwarten wäre. |
-| **Zu versteuerndes Haushaltseinkommen** | Durchschnitt des 2. und 3. Jahres vor Antragstellung laut Steuerbescheid. Maßgeblich für Einkommensbonus und KfW 358. |
-| **Kindergeldberechtigtes Kind unter 18** | Familienzuschlag: Die Einkommensgrenzen steigen um 10.000 €. |
+| **Zu versteuerndes Haushaltseinkommen** | Auswahl eines Einkommensbereichs statt eines genauen Betrags: Wählen Sie den Bereich, der zum Durchschnitt des 2. und 3. Jahres vor Antragstellung laut Steuerbescheid passt. Die Grenzen sind einschließlich. Maßgeblich für Einkommensbonus und KfW 358. Im Expertenbereich geänderte Einkommensgrenzen ändern die Berechnung nicht genau mit: Der Rechner rechnet dann mit der oberen Grenze des gewählten Bereichs (bewusste Vereinfachung). |
+| **Kindergeldberechtigtes Kind unter 18** | Familienzuschlag: Die Grenzen des Einkommensbonus steigen um 10.000 € (nicht beim KfW-Kredit 358). |
 | **Einkommensteuerschuld** | Begrenzt den Steuerbonus pro Jahr. 0 = keine Begrenzung. |
 
 ### Finanzierung

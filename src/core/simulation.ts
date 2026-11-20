@@ -1,5 +1,6 @@
 import { DHW_PROFILE, SPACE_PROFILE } from './defaults';
 import { formatMonthDe, monthOf, parseMonth, tryParseMonth, yearOf } from './dates';
+import { incomeRangeValue } from './income-range';
 import { kfwLoanVariant, kfwSubsidy } from './funding';
 import { loanScheduleDetailed, type LoanResult, type LoanSpec, type PrepaymentRules } from './loan';
 import { createPriceModel, energySplit, type EnergySplit, type PriceModel } from './prices';
@@ -421,7 +422,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
           oldHeatingAge: oldAge,
           ownerOccupied: inp.building.ownerOccupied,
           units: inp.building.units,
-          householdIncome: inp.building.householdIncome,
+          householdIncome: incomeRangeValue(inp.building.incomeRange),
           hasChild: inp.building.hasChild,
           euOrigin: inp.heatPump.euOrigin,
         },
@@ -445,7 +446,7 @@ export function simulate(inp: Inputs, kind: ScenarioKind, installOverride?: numb
       const variant = kfwLoanVariant(
         inp.building.ownerOccupied,
         inp.building.units,
-        inp.building.householdIncome,
+        incomeRangeValue(inp.building.incomeRange),
         inp.funding,
       );
       const kfwMax = inp.funding.loanMaxPerUnit * Math.max(1, inp.building.units);

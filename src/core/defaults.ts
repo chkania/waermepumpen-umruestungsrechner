@@ -50,7 +50,7 @@ export function createDefaults(today: Date = new Date()): Inputs {
       heatedArea: 140,
       renovationYear: 0,
       renovationScope: 'partial',
-      householdIncome: 60000,
+      incomeRange: '50001-60000',
       hasChild: false,
       incomeTax: 0,
     },

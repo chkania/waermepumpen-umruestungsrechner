@@ -48,7 +48,7 @@ describe('Regression: Default-Szenario', () => {
     const i = defaults();
     i.oldHeating.fuel = 'oil';
     i.oldHeating.consumption = 2200;
-    i.building.householdIncome = 45000;
+    i.building.incomeRange = '40001-50000';
     i.building.hasChild = true;
     const r = runAll(i);
     expect([r2(r.ref.totalCost), r2(r.kfw.totalCost), r.kfw.kfw?.subsidy, r.best]).toMatchSnapshot();

@@ -1,4 +1,5 @@
 import { formatMonthDe, halfYearSteps, monthFromDate, parseMonth, tryParseMonth, yearOf } from './dates';
+import { incomeRangeLabel, incomeRangeValue } from './income-range';
 import { cap1At, incomeBonusRate, kfwLoanVariant, kgbRateAt } from './funding';
 import { annualHeatDemand, createPriceModel, energySplit, parsePath } from './prices';
 import { estimateJaz } from './jaz';
@@ -409,11 +410,12 @@ function fundingHints(inp: Inputs, run: RunResult, start: number): KeyEvent[] {
   // Income bonus (Einkommensbonus)
   if (b.ownerOccupied) {
     const shift = b.hasChild ? p.incomeChildShift : 0;
-    const rate = incomeBonusRate(b.householdIncome, b.hasChild, p);
+    const income = incomeRangeValue(b.incomeRange);
+    const rate = incomeBonusRate(income, b.hasChild, p);
     if (rate > 0) {
-      out.push(hint('important', `Einkommensbonus ${pct(rate)}`, `Zu versteuerndes Haushaltseinkommen ${eur(b.householdIncome)}. Nachweis über die Steuerbescheide des 2. und 3. Jahres vor Antragstellung.`));
+      out.push(hint('important', `Einkommensbonus ${pct(rate)}`, `Einkommensbereich ${incomeRangeLabel(b.incomeRange)}. Nachweis über die Steuerbescheide des 2. und 3. Jahres vor Antragstellung.`));
     } else {
-      out.push(hint('info', 'Kein Einkommensbonus', `Grenze ${eur(p.incomeLimit3 + shift)} zu versteuerndes Haushaltseinkommen, angegeben sind ${eur(b.householdIncome)}.`));
+      out.push(hint('info', 'Kein Einkommensbonus', `Grenze ${eur(p.incomeLimit3 + shift)} zu versteuerndes Haushaltseinkommen, gewählter Bereich: ${incomeRangeLabel(b.incomeRange)}.`));
     }
   }
 
@@ -432,13 +434,14 @@ function fundingHints(inp: Inputs, run: RunResult, start: number): KeyEvent[] {
 
   // Loan variant
   const kfwLoan = run.kfw.loans.find((l) => l.name.startsWith('KfW'));
-  if (kfwLoan && kfwLoanVariant(b.ownerOccupied, b.units, b.householdIncome, p) === '359') {
+  const loanIncome = incomeRangeValue(b.incomeRange);
+  if (kfwLoan && kfwLoanVariant(b.ownerOccupied, b.units, loanIncome, p) === '359') {
     out.push(
       hint(
         'info',
         'KfW-Kredit 359 statt zinsverbilligtem 358',
-        b.householdIncome > p.loan358IncomeLimit
-          ? `Haushaltseinkommen über ${eur(p.loan358IncomeLimit)}.`
+        loanIncome > p.loan358IncomeLimit
+          ? `Einkommensbereich ${incomeRangeLabel(b.incomeRange)}, Grenze ${eur(p.loan358IncomeLimit)}.`
           : 'Zinsverbilligung nur für selbstgenutzte Ein-Wohneinheit-Gebäude.',
       ),
     );

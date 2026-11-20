@@ -10,7 +10,7 @@ import { defaults } from './helpers';
 function userCase(mut?: (i: Inputs) => void): Inputs {
   const i = defaults();
   i.building.constructionYear = 1950;
-  i.building.householdIncome = 120000;
+  i.building.incomeRange = '90001+';
   i.oldHeating.consumption = 11000;
   i.oldHeating.installedMonth = '2010-11'; // 16 years before the start
   i.financing.kfwEquity = 4000;

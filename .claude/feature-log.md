@@ -57,3 +57,19 @@ Felder:
   - Code-Review: Druckfix im Dunkelmodus erzeugte neuen hohen Fehler (geerbte Textfarbe) → Umsetzung; nur im echten Browser nachprüfbar.
 - Nutzer: 4 Rückfragen (Anforderung), 2 Zwischenfreigaben, 0 im Review.
 - Notiz: Neue Freigaben (Kurzfassung, geprüfte Anforderung) vor Umsetzung eingehalten. Bash-Sperren behinderten den Implementierer; Muster zum Prüfen für die Retro: Haiku-Umsetzer ohne eigenen Testlauf.
+
+## 2026-11-20 – Haushaltseinkommen als Auswahl von Einkommensbereichen (F5.4)
+
+- Stufen:
+  - Anforderung (Haiku): 2 Durchgänge, 121 k, 12 min
+  - Anforderungs-Review (Opus): 1 Durchgang (2 Runden), 106 k, 5 min
+  - Umsetzung (Haiku): 2 Runden, 261 k, 11 min
+  - Code-Review (Sonnet): 1 Durchgang (OK), 50 k, 1 min
+  - QA (Sonnet): 2 Durchgänge (1. Mangel: Test fehlte), 80 k, 6 min (mit Browser: Altdaten aus Speicher, Link, Datei)
+- Spät gefunden:
+  - Anforderungs-Review: Lücke in den Bereichen (Durchschnitt mit 50 Cent, „30.001–40.000“ ließ 30.000,50 € unzugeordnet) → Anforderung.
+  - Anforderungs-Review: Handbuchzeile „Grenzen steigen um 10.000 €“ galt nach Quelle nur für den Einkommensbonus, nicht für KfW 358 → Anforderung (Familienzuschlag-Frage im Original geklärt).
+  - Anforderungs-Review: Beispieldateien beispiele/*.json fehlten in den betroffenen Bereichen → Anforderung.
+  - QA: Test zu „Expertengrenzen“ (F5.4) fehlte, obwohl in der Anforderung gefordert → Umsetzung.
+- Nutzer: 3 Rückfragen (Anforderung), 2 Freigaben, 0 im Review.
+- Notiz: Wie bei F39 führte die Hauptsitzung Tests/Build aus; der Umsetzer konnte sie diesmal selbst ausführen. Keine Snapshot-Änderung (Kernvorgabe).

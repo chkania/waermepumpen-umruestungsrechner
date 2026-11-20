@@ -1,4 +1,5 @@
 import { tryParseMonth } from './dates';
+import { INCOME_RANGES } from './income-range';
 
 /**
  * Validation of inputs from link, file and browser storage (F9.5).
@@ -125,6 +126,7 @@ export const SELECT_VALUES: Record<string, readonly string[]> = {
   'heatPump.emitter': ['floor', 'largeRadiators', 'radiators'],
   'building.renovationScope': ['partial', 'full'],
   'financing.windfallTarget': ['auto', 'kfw', 'bank'],
+  'building.incomeRange': INCOME_RANGES.map((r) => r.code),
 };
 
 /** Maximum length for free text; other texts: 2,000 characters. */
