@@ -1,5 +1,7 @@
 # Entscheidungen aus der Anforderungsaufnahme
 
+Historisch (Stand 2026-11-11). Maßgeblich sind die Anforderungen F* und N* sowie die [Produktbeschreibung](produktbeschreibung.md); diese Tabelle wird nicht fortgeschrieben.
+
 | # | Thema | Entscheidung |
 |---|---|---|
 | E1 | Technik | Vite + TypeScript ohne UI-Framework, Tests mit Vitest, statischer Build |

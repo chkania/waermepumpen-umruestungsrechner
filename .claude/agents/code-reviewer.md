@@ -20,7 +20,7 @@ Gehe jede geänderte Stelle durch und belege jeden Befund mit einem konkreten Sz
 
 - **Korrekt:** Jedes Akzeptanzkriterium ist umgesetzt; Rechnung stimmt (Vorzeichen, Monat, Szenario, Preissteigerung, Rundung); Grenzfälle; alte Daten aus Speicher, Link und Datei bleiben ladbar; Tests prüfen das Verhalten wirklich (rechne einen Erwartungswert nach).
 - **Performant:** keine unnötige zweite Simulation oder Neuberechnung je Eingabe; Chart.js nur nachgeladen (N14); keine schweren statischen Importe in den Haupt-Bundle.
-- **Sinnvoll:** passt zur bestehenden Struktur (Rechenkern ohne DOM, Konditionen nur in `defaults.ts`, Rechenweg ohne zweite Rechnung); keine Duplikate vorhandener Helfer; Namen und Kommentare englisch, UI-Texte deutsch mit „Sie“; `escapeHtml`, keine Inline-Skripte/-Styles.
+- **Sinnvoll:** passt zur Struktur und zu den Konventionen in `CLAUDE.md` (Rechenkern ohne DOM, Konditionen nur in `defaults.ts`, Sprache, Sicherheit); keine Duplikate vorhandener Helfer.
 
 ## Rückgabe
 

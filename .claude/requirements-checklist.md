@@ -24,6 +24,7 @@ IDs: <neue/geänderte IDs, nächste freie Nummer aus dem Index docs/anforderunge
 
 ## Prüfpunkte
 
+0. **Rahmen:** Die Anforderung ist durch die „Leitplanken für neue Anforderungen“ in `docs/anforderungen/produktbeschreibung.md` gedeckt.
 1. **Prüfbarkeit:** Jedes Akzeptanzkriterium ist ohne Interpretation als erfüllt/nicht erfüllt entscheidbar (Werte, Grenzfälle, Beispiel).
 2. **Konsistenz mit dem Bestand:** keine Doppelung oder Widerspruch zu bestehenden IDs; betroffene bestehende IDs genannt; Begriffe wie in UI und Handbuch.
 3. **Rechenkern:** Wirkung je Szenario (ref/kfw/tax), Vorzeichen (positiv = Ausgabe), Zeitpunkt (Monat), Preissteigerung ja/nein, Wirkung auf Amortisation, Vergleich der Installationszeitpunkte, monatliche Belastung (F36). Ergebnisänderung beim Default-Szenario benannt (Regressions-Snapshots).
@@ -31,7 +32,7 @@ IDs: <neue/geänderte IDs, nächste freie Nummer aus dem Index docs/anforderunge
 5. **Daten & Formate:** localStorage, Link (`#z=`), JSON-Export/-Import; ältere Daten bleiben lesbar oder Breaking Change ist benannt (Major).
 6. **Ausgaben:** Ergebnisbereiche, Rechenweg (F32), KI-Export (F35), Bericht/Druck, Ereignisse & Hinweise (F10).
 7. **Grenzfälle & Fehler:** leer, 0, Maximalwerte, ungültige/fehlende Daten, Speicher voll oder nicht verfügbar; Fehlermeldung als Text.
-8. **Barrierefreiheit & Darstellung:** Tastatur, Beschriftungen, Kontrast über Tokens, Hell/Dunkel, Breite 400 px.
-9. **Datenschutz & Sicherheit:** neue Datenverarbeitung → Datenschutzerklärung/CSP; dynamische Texte escaped; nichts an Matomo.
-10. **Dokumentation:** Handbuch-Abschnitt, Änderungsprotokoll, Commit-Typ (`feat`/`fix`, `!` bei inkompatiblem Format).
-11. **Sprache:** UI-Texte Deutsch mit „Sie“; Beträge brutto in €.
+8. **Barrierefreiheit & Darstellung:** Vorgaben aus N7 und `CLAUDE.md` (Konventionen) erfüllt; Hell und Dunkel, Breite 400 px.
+9. **Datenschutz & Sicherheit:** Vorgaben aus N6, N10, N11 und `CLAUDE.md` (Sicherheit); neue Datenverarbeitung → Datenschutzerklärung und CSP.
+10. **Dokumentation:** Pflegeregeln in `docs/anforderungen/README.md`, Handbuch-Abschnitt, Commit-Typ nach `CONTRIBUTING.md`.
+11. **Sprache:** Konventionen in `CLAUDE.md` (Sprache, Ansprache, Beträge).
