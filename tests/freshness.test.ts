@@ -34,7 +34,9 @@ describe('F22 Checkliste „Annahmen prüfen“', () => {
       const src = DEFAULT_SOURCES[f.path];
       return src && REVIEW_KINDS.includes(src.kind);
     });
-    expect(count).toBe(expected.length);
+    // F22.1: the fixed line for the guide to the offer (docs/ANGEBOT.md) is a checkbox as well
+    expect(count).toBe(expected.length + 1);
+    expect(body).toContain('(`docs/ANGEBOT.md`)');
     expect(body.match(/^- \[ \] /gm)).toHaveLength(count);
     for (const f of expected) expect(body).toContain(`**${f.label}**`);
     // estimates and examples are the user's own values – not part of the review

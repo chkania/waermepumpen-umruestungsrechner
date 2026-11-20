@@ -25,6 +25,7 @@ export interface DocPage {
 export const DOC_LINKS: [string, string][] = [
   ['./index.html', 'Rechner'],
   ['./hilfe.html', 'Hilfe'],
+  ['./angebot.html', 'Weg zum Angebot'],
   ['./lizenz.html', 'Lizenz'],
   ['./lizenzen-drittanbieter.html', 'Lizenzen von Drittanbietern'],
   ['./changelog.html', `Änderungen (Version ${APP_VERSION})`],

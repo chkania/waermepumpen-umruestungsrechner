@@ -40,6 +40,14 @@ describe('F15 Benutzerhandbuch – Vollständigkeit', () => {
     }
   });
 
+  it('F39.5 Handbuch: Abschnitt „Angebot und Förderung“ mit Link und Kasten „Nächste Schritte“', () => {
+    expect(handbook).toMatch(/^## Angebot und Förderung$/m);
+    expect(handbook).toContain('[Weg zum Angebot und zur Förderung](./angebot.html)');
+    expect(handbook).toContain('**Nächste Schritte**');
+    const { html } = renderHelp(handbook);
+    expect(html).toContain('<a href="./angebot.html">');
+  });
+
   it('F19.3 Entstehung des Rechners ist beschrieben', () => {
     expect(handbook).toContain('## Über diesen Rechner');
     expect(handbook).toContain('rein privates Hobbyprojekt');

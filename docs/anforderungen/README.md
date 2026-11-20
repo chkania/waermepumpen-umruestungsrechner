@@ -60,6 +60,7 @@ Zweck, Benutzer, Grundentscheidungen und Abgrenzung stehen in der [Produktbeschr
 | [F36](F36-monatliche-belastung.md) | Monatliche Belastung |
 | [F37](F37-szenarien-im-browser-speichern.md) | Szenarien im Browser speichern und vergleichen |
 | [F38](F38-werkzeugleiste-mit-menues.md) | Werkzeugleiste mit Menüs |
+| [F39](F39-weg-zum-angebot.md) | Weg zum Angebot und zur Förderung |
 
 ## Nicht-funktionale Anforderungen
 

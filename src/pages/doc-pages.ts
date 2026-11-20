@@ -1,4 +1,5 @@
 import type { DocPage } from '../doc-page';
+import { FUNDING_SOURCE_DATE } from '../core/defaults';
 import { APP_VERSION } from '../version';
 
 /**
@@ -26,8 +27,15 @@ const LICENSE_INTRO = `
   <p class="muted small">Maßgeblich ist allein der folgende englische Originaltext. Das ist eine „Source available“-Lizenz, keine Open-Source-Lizenz im Sinne der OSI.</p>
 </section>`;
 
+/** Notice before the first step of the guide to the offer (F39.7): no advice, funding date in the same form as in the calculator. */
+const ANGEBOT_INTRO = `
+<section class="doc-intro">
+  <p>Diese Seite bietet keine Finanz-, Steuer- oder Förderberatung und keine Energieberatung. Sie prüft keine Angebote und keine Förderanträge. Alle Angaben ohne Gewähr; Förderbedingungen Stand ${FUNDING_SOURCE_DATE.split('-').reverse().join('.')}. Für verlinkte fremde Seiten gelten deren eigene Datenschutzbestimmungen.</p>
+</section>`;
+
 export const DOC_PAGES: Record<string, DocPageConfig> = {
   'hilfe.html': { source: 'docs/BENUTZERHANDBUCH.md', element: 'help', page: { subtitle: 'Wärmepumpen-Investitionsrechner' } },
+  'angebot.html': { source: 'docs/ANGEBOT.md', element: 'doc', page: { subtitle: 'Wärmepumpen-Investitionsrechner', intro: ANGEBOT_INTRO } },
   'changelog.html': { source: 'CHANGELOG.md', element: 'doc', page: { subtitle: `Wärmepumpen-Investitionsrechner · aktuelle Version ${APP_VERSION}` } },
   'datenschutz.html': { source: 'docs/DATENSCHUTZ.md', element: 'doc', page: { subtitle: 'Wärmepumpen-Investitionsrechner' } },
   'impressum.html': { source: 'docs/IMPRESSUM.md', element: 'doc', page: { subtitle: 'Wärmepumpen-Investitionsrechner', toc: false } },

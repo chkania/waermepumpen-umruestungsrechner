@@ -2269,6 +2269,11 @@ function layout(): string {
         <div id="year-table" class="table-wrap"></div>
         <p class="muted small">Positive Werte = Ausgaben, negative = Einnahmen. „Kumuliert" enthält den Opportunitätszins.</p>
       </div>
+      <aside class="card next-steps" aria-labelledby="next-steps-title">
+        <h2 id="next-steps-title">Nächste Schritte</h2>
+        <p>Die Seite zeigt die Schritte von der Berechnung bis zur Abnahme und ersetzt keine Beratung.</p>
+        <p><a href="./angebot.html">Weg zum Angebot und zur Förderung</a></p>
+      </aside>
       <aside id="ueber" class="card about" aria-labelledby="about-title">
         <h2 id="about-title" tabindex="-1">Über diesen Rechner</h2>
         <p>Am Anfang stand eine ganz persönliche Frage: Lohnt sich der Umstieg auf eine Wärmepumpe auch finanziell? Die Antworten, die ich fand, waren oft sehr allgemein – oder beruhten auf Annahmen, die nicht zum eigenen Haus passten. Also habe ich angefangen, selbst nachzurechnen: Förderrichtlinien gelesen, Energie- und CO₂-Preise recherchiert, Steuerbonus und Kredite verglichen. Aus dieser Recherche ist Schritt für Schritt dieser Rechner entstanden.</p>
@@ -2287,7 +2292,7 @@ function layout(): string {
         <p class="muted small">Quellcode, Fragen und Vorschläge: <a href="${safeHref(REPO_URL)}" target="_blank" rel="noopener">github.com/chkania/wpir</a> – schön, wenn du dabei bist!</p>
       </aside>
       <p class="disclaimer">Keine Finanz-, Steuer- oder Förderberatung. Alle Angaben ohne Gewähr; Förderbedingungen Stand ${FUNDING_SOURCE_DATE.split('-').reverse().join('.')} – bitte vor Antragstellung bei KfW, Energieberatung und Steuerberatung prüfen.</p>
-      <p class="disclaimer license"><a href="./changelog.html">Version ${APP_VERSION}</a> · © 2026 Christoph Kania · Lizenz: <a href="./lizenz.html">PolyForm Noncommercial 1.0.0</a> – kostenfreie Nutzung für nicht-kommerzielle Zwecke; kommerzielle Nutzung nur nach Absprache · <a href="./lizenzen-drittanbieter.html">Lizenzen von Drittanbietern</a> · <a href="./impressum.html">Impressum</a> · <a href="./datenschutz.html">Datenschutz</a> · <a id="link-derivation" href="${DERIVATION_PAGE}" title="Detaillierte Berechnung hinter den Zahlen">Rechenweg</a> · <a href="${safeHref(REPO_URL)}" target="_blank" rel="noopener">Quellcode auf GitHub</a></p>
+      <p class="disclaimer license"><a href="./changelog.html">Version ${APP_VERSION}</a> · © 2026 Christoph Kania · Lizenz: <a href="./lizenz.html">PolyForm Noncommercial 1.0.0</a> – kostenfreie Nutzung für nicht-kommerzielle Zwecke; kommerzielle Nutzung nur nach Absprache · <a href="./lizenzen-drittanbieter.html">Lizenzen von Drittanbietern</a> · <a href="./impressum.html">Impressum</a> · <a href="./datenschutz.html">Datenschutz</a> · <a id="link-derivation" href="${DERIVATION_PAGE}" title="Detaillierte Berechnung hinter den Zahlen">Rechenweg</a> · <a href="./angebot.html">Weg zum Angebot</a> · <a href="${safeHref(REPO_URL)}" target="_blank" rel="noopener">Quellcode auf GitHub</a></p>
     </section>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>

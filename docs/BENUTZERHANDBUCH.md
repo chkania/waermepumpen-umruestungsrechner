@@ -474,6 +474,16 @@ Wenn Ihnen ein Ergebnis falsch vorkommt, hilft der Rechenweg mit Ihren Werten am
 
 > **Achtung, persönliche Daten:** Der Link enthält alle Ihre Eingaben, auch persönliche Angaben wie das zu versteuernde Haushaltseinkommen, die Einkommensteuer, den Energieverbrauch, die Bezeichnung und die Bemerkungen des Szenarios. Jeder, der den Link erhält, sieht diese Werte. Fehlermeldungen auf GitHub sind **öffentlich**. Ersetzen Sie persönliche Angaben, die für den Fehler keine Rolle spielen, vorher im Rechner durch ungefähre Werte – zum Beispiel ein gerundetes Einkommen – und öffnen Sie den Rechenweg danach erneut.
 
+## Angebot und Förderung
+
+Die Seite [Weg zum Angebot und zur Förderung](./angebot.html) zeigt in sechs Schritten, wie es nach der Berechnung weitergeht: Ergebnis sichern, Unterlagen für den Termin, Angebote einholen und prüfen, die Förderung beantragen, die Installation begleiten und die Anlage abnehmen. Jeder Schritt ist eine Checkliste zum Lesen und Drucken. Sie öffnen die Seite über den Kasten **Nächste Schritte** unter den Ergebnissen, über den Link **Weg zum Angebot** im Seitenfuß des Rechners oder über das Benutzerhandbuch.
+
+- Die Seite berät nicht und prüft keine Angebote oder Förderanträge. Sie enthält keine Eingabefelder und speichert nichts.
+- Für Förderdetails, Beträge und Fristen verweist sie auf die KfW und das Merkblatt zum Programm 458. Angaben dazu stehen dort nur, soweit sie auch im Rechner belegt sind.
+- Verwiesen wird auf neutrale Stellen: die KfW, die Energieberatung der Verbraucherzentrale mit ihrem Angebotsvergleich und die Energieeffizienz-Experten. Die Links öffnen in einem neuen Tab.
+
+Der Kasten **Nächste Schritte** steht im Ergebnisbereich nach der Jahresübersicht. Er enthält nur den Hinweis, dass die Seite keine Beratung ersetzt, und den Link auf die Seite; er ändert sich nicht mit dem Ergebnis.
+
 ## Tipps
 
 - **Angebote vergleichen:** Für jedes Angebot exportieren und später per Import vergleichen.

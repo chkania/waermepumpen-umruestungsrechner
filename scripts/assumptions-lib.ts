@@ -34,8 +34,12 @@ export function buildChecklist(inp: ChecklistInput): { title: string; body: stri
     '**So geht’s:** Quelle öffnen, Wert vergleichen, abhaken. Geänderte Werte in `src/core/defaults.ts` und `src/core/sources.ts` anpassen (Abrufdatum aktualisieren), danach `FUNDING_SOURCE_DATE` in `defaults.ts` auf das Prüfdatum setzen – das setzt auch den Hinweis „Annahmen älter als 6 Monate“ im Rechner zurück. Regressions-Snapshots mit `npm test -- -u` aktualisieren und im Änderungsprotokoll (`docs/anforderungen/aenderungsprotokoll.md`) begründen. Commit als `fix:` (Korrektur) bzw. `feat:` (geänderte Annahmen, siehe CONTRIBUTING.md).',
     '',
     'Hinweise von Nutzerinnen und Nutzern: offene Issues mit dem Label `bug` prüfen.',
+    '',
+    '### Seiten',
+    '- [ ] **Seite „Weg zum Angebot“** (`docs/ANGEBOT.md`) gegen das KfW-Merkblatt 458 und die verlinkten Seiten prüfen: Förderaussagen nach Annahme A8 und den Linkzielen.',
   ];
-  let count = 0;
+  // The fixed page line above is a checkbox as well (F22.1)
+  let count = 1;
   for (const section of inp.sections) {
     const items: string[] = [];
     for (const f of section.fields) {

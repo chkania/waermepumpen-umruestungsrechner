@@ -1,7 +1,7 @@
 # F33 – Auffindbarkeit und Linkvorschau
 
 - F33.1 Inhalt ohne JavaScript: `index.html` enthält im Container des Rechners eine statische Einführung (H1, Zwischenüberschriften, mindestens 250 Wörter, Links zu allen eigenen Seiten, `<noscript>`-Hinweis); `rechenweg.html` eine kurze Einleitung. Der Rechner bzw. die Seite ersetzt sie beim Start; sie ist nicht versteckt (kein Cloaking). *(Test: seo)*
-- F33.2 Die Markdown-Dokumentseiten (Handbuch, Änderungen, Impressum, Datenschutz, Lizenz, Drittanbieter) werden beim Build vorgerendert (`prerender.ts`, Einstellungen gemeinsam mit den Seiteneinstiegen in `src/pages/doc-pages.ts`); im Browser rendert der Einstieg denselben Inhalt erneut. *(Test: seo)*
+- F33.2 Die Markdown-Dokumentseiten (Handbuch, Weg zum Angebot (F39), Änderungen, Impressum, Datenschutz, Lizenz, Drittanbieter) werden beim Build vorgerendert (`prerender.ts`, Einstellungen gemeinsam mit den Seiteneinstiegen in `src/pages/doc-pages.ts`); im Browser rendert der Einstieg denselben Inhalt erneut. *(Test: seo)*
 - F33.3 Titel und Beschreibung mit Suchbegriffen: Titel des Rechners „Wärmepumpe: Lohnt sich der Umstieg? Rechner mit KfW-Förderung“ (auch im Fenstertitel ohne Szenario-Bezeichnung, `PAGE_TITLE`), Beschreibung je Seite höchstens 160 Zeichen, Titel je Seite verschieden. *(Test: seo)*
 - F33.4 Linkvorschau: Open-Graph- und Twitter-Angaben mit eigenem Vorschaubild `public/og-image.png` (1200 × 630, Quelle `docs/logo/og-image.svg`); strukturierte Daten `WebApplication` (JSON-LD, wird nicht ausgeführt, daher ohne Auswirkung auf die CSP). Nichts wird von fremden Servern geladen. *(Test: seo, logo)*
 

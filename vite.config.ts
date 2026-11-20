@@ -43,6 +43,8 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         hilfe: resolve(__dirname, 'hilfe.html'),
+        // Way to the offer and the funding (F39): checklists with neutral references
+        angebot: resolve(__dirname, 'angebot.html'),
         // License pages (N8): render LICENSE.md and THIRD-PARTY-NOTICES.md
         lizenz: resolve(__dirname, 'lizenz.html'),
         drittanbieter: resolve(__dirname, 'lizenzen-drittanbieter.html'),
