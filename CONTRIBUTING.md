@@ -47,6 +47,7 @@ Die Agenten 1 und 2 schreiben keinen Code; die Reviewer und die QA ändern keine
 
 **Wo du gefragt wirst:**
 - bei Rückfragen zur Anforderung (Stufe 1 und 2),
+- zur **Zwischenfreigabe der Anforderung** nach Stufe 1: Du bekommst eine kurze Zusammenfassung und entscheidest, ob sie so an den Review geht,
 - zur **Freigabe der geprüften Anforderung**: Du bekommst die Datei samt Kurzfassung und entscheidest, ob die Umsetzung beginnt oder die Anforderung geändert wird,
 - wenn sich Code-Review und Umsetzung nach zwei Durchgängen nicht einig werden oder die QA nach drei Durchgängen noch Mängel findet – dann hält die Kette an und legt dir die offenen Punkte vor; passen die Tests auch nach dem zweiten QA-Durchgang nicht zur Anforderung, fragt sie dich sofort, wie sie weiter vorgehen soll,
 - vor dem Push: Erst nach der Freigabe durch die QA wird committet (Commit-Format wie unten), und erst auf deine Bestätigung gepusht und der Pull Request erstellt.

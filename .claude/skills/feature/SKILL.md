@@ -18,6 +18,14 @@ Du steuerst die Agentenkette für die Eingabe des Nutzers (Argumente dieses Aufr
 
 Starte ihn mit der Eingabe des Nutzers im Wortlaut. Bei `STATUS: RÜCKFRAGEN`: die offenen Punkte per AskUserQuestion stellen und die Antworten per SendMessage an denselben Agenten geben. Wiederholen bis `STATUS: FERTIG`.
 
+### Zwischenfreigabe durch den Nutzer
+
+Bevor die Anforderung an den Reviewer geht, zeigst du dem Nutzer die „Kurzfassung“ des Autors (unverändert) und fragst per AskUserQuestion: „Anforderung so akzeptieren?“ (Optionen: akzeptieren / Änderungen nötig).
+- **Akzeptiert:** weiter mit Schritt 3.
+- **Änderungen:** Wünsche des Nutzers per SendMessage an denselben `requirements-author`; wieder bis `STATUS: FERTIG`, neue Kurzfassung, erneut fragen.
+
+Ohne Zustimmung geht die Anforderung nicht an den Reviewer.
+
 ## 3. Anforderungs-Review – `requirements-reviewer`
 
 Übergib die fertige Anforderung samt „Hinweise für das Review“ und den Entscheidungen des Nutzers. Rückfragen wie in Schritt 2 behandeln, danach per SendMessage an den Reviewer zurück. Ergebnis ist die **geprüfte Anforderung**.

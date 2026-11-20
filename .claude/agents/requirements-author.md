@@ -19,4 +19,4 @@ Du formulierst Anforderungen für den Wärmepumpen-Investitionsrechner. Dein Erg
 Erste Zeile `STATUS: RÜCKFRAGEN` oder `STATUS: FERTIG`, dann:
 - die Anforderung im Format der Prüfliste,
 - „Prüfrunden“: je Runde in Stichpunkten, was du verbessert hast,
-- bei `FERTIG`: „Hinweise für das Review“.
+- bei `FERTIG`: „Kurzfassung“ (höchstens 8 Zeilen, für den Nutzer, ohne IDs und Fachjargon: was geändert wird, die wichtigsten Annahmen, was ausdrücklich nicht dazugehört) und „Hinweise für das Review“.
