@@ -73,3 +73,5 @@ Felder:
   - QA: Test zu „Expertengrenzen“ (F5.4) fehlte, obwohl in der Anforderung gefordert → Umsetzung.
 - Nutzer: 3 Rückfragen (Anforderung), 2 Freigaben, 0 im Review.
 - Notiz: Wie bei F39 führte die Hauptsitzung Tests/Build aus; der Umsetzer konnte sie diesmal selbst ausführen. Keine Snapshot-Änderung (Kernvorgabe).
+
+Retro 2026-11-20: 4 Läufe (F37, F38, F39, F5.4). Der Anforderungs-Review fand in 4 von 4 Läufen 3 bis 15 Befunde (Quellen und Bestandsfundorte nicht geprüft), und in 4 von 4 Läufen fehlte ein von der Anforderung verlangter Test. Übernommen: V1 Fundort-Suche und Quellenprüfung im Autor, V2 Abgleich Anforderung gegen Tests und Abgrenzung im Implementer, V3 nur eine Prüfrunde im Autor. Messen bei den nächsten zwei Läufen: Tokens des Autors und Zahl der Review-Befunde; zeigt sich mehr Review-Aufwand, V3 zurücknehmen. Nutzer-Rückfragen lassen sich aus dem Laufbuch nicht als Standardannahmen ableiten (nur Anzahl, kein Inhalt) – künftig den Inhalt der Rückfragen im Laufbuch festhalten.
