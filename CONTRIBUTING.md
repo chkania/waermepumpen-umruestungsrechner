@@ -33,7 +33,7 @@ Beschreib die Idee so, wie du sie einem Menschen erklären würdest – was du e
 
 | Stufe | Agent | Was passiert |
 |---|---|---|
-| 1. Anforderung | `requirements-author` | Leitet aus deiner Beschreibung eine Anforderung mit IDs, prüfbaren Akzeptanzkriterien und betroffenen Bereichen ab. Was nur du entscheiden kannst, fragt er dich (Auswahlfragen). Prüft die Anforderung dann in zwei Runden selbst. |
+| 1. Anforderung | `requirements-author` | Leitet aus deiner Beschreibung eine Anforderung mit IDs, prüfbaren Akzeptanzkriterien und betroffenen Bereichen ab. Was nur du entscheiden kannst, fragt er dich (Auswahlfragen). Prüft die Anforderung dann in einer Runde selbst. |
 | 2. Anforderungs-Review | `requirements-reviewer` | Prüft die Anforderung in höchstens zwei Runden erneut auf Vollständigkeit und Widersprüche zu bestehenden Anforderungen und verbessert sie. Die geprüfte Fassung liegt als Datei bereit, du liest sie und gibst sie frei; erst dann beginnt die Umsetzung. |
 | 3. Umsetzung | `implementer` | Schreibt Code, Tests und Dokumentation (Anforderungsdatei, Änderungsprotokoll, Benutzerhandbuch). Führt während der Arbeit nur die betroffenen Tests aus, die ganze Suite und den Build einmal am Ende. |
 | 4. Code-Review | `code-reviewer` | Prüft am Diff, ob der Code korrekt, performant und sinnvoll umgesetzt ist (ohne eigene Testläufe). Hohe und mittlere Befunde gehen zurück an die Umsetzung, danach wird nur das Delta erneut geprüft. |

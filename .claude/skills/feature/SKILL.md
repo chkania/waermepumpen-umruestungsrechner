@@ -57,7 +57,7 @@ Nur nach der Freigabe aus Schritt 3. Übergib die freigegebene Anforderung. Nach
 
 ## 7. Nach der Freigabe
 
-1. **Laufbuch:** einen Abschnitt nach dem Muster in `.claude/feature-log.md` anhängen (Stufen mit Modell, Durchgängen, Tokens und Dauer aus den Abschluss-Meldungen; spät gefundene Befunde mit der Stufe, die sie hätte verhindern können; Rückfragen), höchstens 15 Zeilen.
+1. **Laufbuch:** einen Abschnitt nach dem Muster in `.claude/feature-log.md` anhängen (Stufen mit Modell, Durchgängen, Tokens und Dauer aus den Abschluss-Meldungen; spät gefundene Befunde mit der Stufe, die sie hätte verhindern können; Rückfragen an den Nutzer mit Thema und Antwort in Stichworten, damit die Retro Standardannahmen erkennen kann), höchstens 15 Zeilen.
 2. Zwischenstände zusammenfassen: `git reset --soft <Basis>`, dann ein Commit nach Conventional Commits (inkl. Laufbuch), Beschreibung deutsch aus Nutzersicht (`CONTRIBUTING.md`).
 3. Den Nutzer fragen, ob jetzt gepusht und der PR erstellt werden soll (Push nur auf seinen Wunsch). Bei Ja: pushen, PR mit Zusammenfassung, Ergebnisänderungen und QA-Tabelle erstellen.
 
