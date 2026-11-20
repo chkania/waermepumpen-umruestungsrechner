@@ -12,4 +12,6 @@ Stand: abgerufen 2026-11-11
 - KfW 358/359: https://www.kfw.de/inlandsfoerderung/Privatpersonen/Bestehende-Immobilie/F%C3%B6rderprodukte/Einzelma%C3%9Fnahmen-Erg%C3%A4nzungskredit-Wohngeb%C3%A4ude-(358-359)/ (Zinsen auf der Seite nicht verfügbar → Annahmen)
 - co2online BAFA/Steuer/GModG: https://www.co2online.de/foerdermittel/bafa-foerderung/
 - Methodische Inspiration: https://akkudoktor.net/pub/waermepumpen-rechner (Inhalt nicht maschinenlesbar)
+- Energieberatung der Verbraucherzentrale, Angebotsvergleich Wärmepumpe (abgerufen 2026-11-20; laut Seite kostenfrei): https://verbraucherzentrale-energieberatung.de/beratung/waermepumpen-angebote/ (Weg zum Angebot, F39)
+- dena-Expertenliste „Energieeffizienz-Experten“ (abgerufen 2026-11-20): https://www.energie-effizienz-experten.de/ (Weg zum Angebot, F39)
 - Marktdaten (recherchiert 2026-11-11): BDEW Gas-/Strompreisanalyse, Destatis, esyoil, Verivox, co2online (Wartung), Schwäbisch Hall (Kesselkosten), Fraunhofer ISE (JAZ-Feldtest), DGS (EEG-Vergütung), hausvoraus.de (KfW-Zinsen), 42watt (Modernisierungskredit), Finanztip (Biogas) – Links im Info-Popover des jeweiligen Felds.

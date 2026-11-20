@@ -222,3 +222,130 @@ describe('F33.10 Schrift vorladen, Bild mit Titel, JSON-LD ohne Sonderzeichen', 
     expect(read('public/.htaccess')).toContain('Header set Cache-Control "public, max-age=86400"');
   });
 });
+
+describe('F39 Weg zum Angebot und zur Förderung', () => {
+  const md = read('docs/ANGEBOT.md');
+  // Plain text of an HTML fragment (tags removed until none are left)
+  const plainText = (html: string) => {
+    let t = html;
+    let previous: string;
+    do {
+      previous = t;
+      t = t.replace(/<[^<>]*>/g, ' ');
+    } while (t !== previous);
+    return t.replace(/[<>]/g, ' ').replace(/\s+/g, ' ').trim();
+  };
+  const allowedHosts = ['www.kfw.de', 'verbraucherzentrale-energieberatung.de', 'www.energie-effizienz-experten.de'];
+  const allowedNumbers = ['1', '2', '3', '4', '5', '6', '20', '458'];
+
+  it('F39.1 Quelltext: mindestens 600 Wörter, Ansprache mit „Sie“', () => {
+    const words = md.replace(/<[^>]+>/g, ' ').split(/\s+/).filter((w) => /[\p{L}\d]/u.test(w));
+    expect(words.length).toBeGreaterThanOrEqual(600);
+    expect(md).not.toMatch(/\b(du|dein|deine|dir|dich|euch)\b/i);
+  });
+
+  it('F39.1/F33.2 angebot.html ist eine Dokumentseite mit Titel, Canonical und Beschreibung; Container enthält kein Formular', async () => {
+    const html = read('angebot.html');
+    expect(html).toContain('<title>Weg zum Angebot und zur Förderung – Wärmepumpen-Investitionsrechner</title>');
+    expect(html).toContain('<link rel="canonical" href="https://waermepumpen-investitionsrechner.de/angebot.html" />');
+    expect(html).toContain('<div id="doc"></div>');
+    expect(html).toContain('<script src="./theme-init.js"></script>');
+    const { prerenderDocPage } = await import('../prerender');
+    const { DOC_PAGES } = await import('../src/pages/doc-pages');
+    expect(DOC_PAGES['angebot.html'].element).toBe('doc');
+    const out = prerenderDocPage(html, 'angebot.html', read);
+    const container = /<div id="doc">([\s\S]*)<\/div>\s*<script/.exec(out)![1];
+    expect(container).not.toMatch(/<(input|select|textarea|form)[\s>]/);
+  });
+
+  it('F39.2 genau ein h1 und sechs h2 in der Reihenfolge der Anforderung; Hinweis vor dem ersten h2', async () => {
+    const { prerenderDocPage } = await import('../prerender');
+    const out = prerenderDocPage(read('angebot.html'), 'angebot.html', read);
+    const container = /<div id="doc">([\s\S]*)<\/div>\s*<script/.exec(out)![1];
+    expect((container.match(/<h1[ >]/g) ?? []).length).toBe(1);
+    expect(container).toMatch(/<h1>Weg zum Angebot und zur Förderung<\/h1>/);
+    const main = /<main class="help-content">([\s\S]*?)<\/main>/.exec(container)![1];
+    expect((main.match(/<h2[ >]/g) ?? []).length).toBe(6);
+    const titles = [...main.matchAll(/<h2 id="[^"]+"><a[^>]*>#<\/a>([^<]+)<\/h2>/g)].map((m) => m[1]);
+    expect(titles).toEqual([
+      'Ergebnis sichern',
+      'Unterlagen für den Termin',
+      'Angebote einholen und prüfen',
+      'Förderung beantragen',
+      'Installation',
+      'Abnahme',
+    ]);
+    // every step is a list
+    for (const part of main.split(/<h2[ >]/).slice(1)) expect(part.split('</ul>')[0], 'Checkliste').toMatch(/<ul>\s*<li>/);
+  });
+
+  it('F39.7 Hinweis vor dem ersten Schritt, ohne Überschrift, mit Stand der Förderbedingungen', async () => {
+    const { DOC_PAGES } = await import('../src/pages/doc-pages');
+    const { FUNDING_SOURCE_DATE } = await import('../src/core/defaults');
+    const intro = DOC_PAGES['angebot.html'].page.intro!;
+    expect(intro).not.toMatch(/<h[1-6][ >]/);
+    const text = plainText(intro);
+    expect(text).toContain('keine Finanz-, Steuer- oder Förderberatung');
+    expect(text).toContain('Sie prüft keine Angebote und keine Förderanträge');
+    expect(text).toContain('Angaben ohne Gewähr');
+    expect(text).toContain(`Förderbedingungen Stand ${FUNDING_SOURCE_DATE.split('-').reverse().join('.')}`);
+    expect(text).toMatch(/Stand \d{2}\.\d{2}\.\d{4}/);
+    expect(text).toContain('Datenschutzbestimmungen');
+  });
+
+  it('F39.4 externe Links: nur erlaubte Hosts, target, rel und Titel nach F33.7; keine weiteren Adressen', async () => {
+    const { prerenderDocPage } = await import('../prerender');
+    const out = prerenderDocPage(read('angebot.html'), 'angebot.html', read);
+    const main = /<main class="help-content">([\s\S]*?)<\/main>/.exec(out)![1];
+    const links = [...main.matchAll(/<a href="(https:\/\/[^"]+)"([^>]*)>/g)];
+    expect(links.length).toBeGreaterThanOrEqual(4);
+    for (const [, href, attrs] of links) {
+      expect(allowedHosts, href).toContain(new URL(href).hostname);
+      expect(attrs, href).toContain('target="_blank"');
+      expect(attrs, href).toContain('rel="noopener"');
+      expect(attrs, href).toMatch(/title="[^"]*\(öffnet in neuem Tab\)"/);
+    }
+    // nothing else is loaded or linked (no embeds, no private guides)
+    expect([...main.matchAll(/https?:\/\/[^"\s<]+/g)].length).toBe(links.length);
+    expect(md).not.toMatch(/src=|<iframe|<img|<script/);
+  });
+
+  it('F39.3/F39.2 Ziffern im Quelltext nur aus der erlaubten Liste (A8), außerhalb von href', () => {
+    const body = md.replace(/href="[^"]*"/g, '');
+    const numbers = body.match(/\d+/g) ?? [];
+    expect(numbers.length).toBeGreaterThan(0);
+    expect(numbers.filter((n) => !allowedNumbers.includes(n))).toEqual([]);
+  });
+
+  it('F39.6 Druck: Druckregel gilt nur für den Rechner; Dokumentseiten (#doc, #help) setzen im Druck helle Tokens, der Bericht-Block bleibt unverändert', () => {
+    const css = read('src/style.css');
+    expect(css).toContain('body > :not(.report):not(#doc):not(#help) { display: none !important; }');
+    expect(css).not.toContain('body > :not(.report) { display: none !important; }');
+    const print = /@media print \{([\s\S]*?)\n\}\n/.exec(css)![1];
+    // light tokens only for the document pages, not for the root (so the report keeps its look)
+    const docBlock = /#doc, #help \{([^}]*)\}/.exec(print)![1];
+    expect(docBlock).toMatch(/--bg: [^;]+ !important;/);
+    expect(docBlock).toMatch(/--c-text: [^;]+ !important;/);
+    // text and background of the document pages are set on the container itself (inherited colour of body is dark)
+    expect(docBlock).toMatch(/(^|\s)color: var\(--c-text\) !important;/);
+    expect(docBlock).toMatch(/(^|\s)background: var\(--bg\) !important;/);
+    expect(print).not.toMatch(/(^|\s):root \{\s*--bg/);
+    expect(print).toMatch(/\.report \{\s*display: block;/);
+    expect(print).toContain('.help-toc, .help-top .toolbar { display: none !important; }');
+  });
+
+  it('F39.2 Förderung beantragen: Reihenfolge BzA → Liefervertrag → Antrag → Umsetzung nach der Zusage', () => {
+    const section = /## Förderung beantragen([\s\S]*?)## Installation/.exec(md)![1];
+    const at = (s: string) => section.indexOf(s);
+    expect(at('Bestätigung zum Antrag')).toBeGreaterThanOrEqual(0);
+    expect(at('Bestätigung zum Antrag')).toBeLessThan(at('Leistungsvertrag'));
+    expect(at('Leistungsvertrag')).toBeLessThan(at('Meine KfW'));
+    expect(at('Meine KfW')).toBeLessThan(at('nach der Zusage'));
+  });
+
+  it('F39.5/F33 Auffindbarkeit: Sitemap, llms.txt und statische Einführung verlinken die Seite', () => {
+    expect(read('public/sitemap.xml')).toContain('https://waermepumpen-investitionsrechner.de/angebot.html');
+    expect(read('public/llms.txt')).toContain('(https://waermepumpen-investitionsrechner.de/angebot.html)');
+    expect(read('index.html')).toMatch(/<a href="\.\/angebot\.html" title="[^"]+">/);
+  });
+});

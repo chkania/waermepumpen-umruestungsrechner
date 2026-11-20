@@ -8,6 +8,7 @@ Quellcode und Lizenz: PolyForm Noncommercial 1.0.0 (nicht-kommerzielle Nutzung).
 
 - [Rechner](https://waermepumpen-investitionsrechner.de/): Eingaben, Kennzahlen, Diagramme, Vergleich der Installationszeitpunkte und Varianten.
 - [Benutzerhandbuch](https://waermepumpen-investitionsrechner.de/hilfe.html): Erklärung aller Eingaben, Ergebnisse und Funktionen.
+- [Weg zum Angebot und zur Förderung](https://waermepumpen-investitionsrechner.de/angebot.html): Schritte von der Berechnung bis zur Abnahme mit Checklisten für Angebot, Förderantrag und Installation; verweist auf neutrale Stellen, berät aber nicht.
 - [Rechenweg](https://waermepumpen-investitionsrechner.de/rechenweg.html): Herleitung aller Kennzahlen mit den eingesetzten Werten, Kosten je Jahr und Monat als CSV.
 - [Änderungen](https://waermepumpen-investitionsrechner.de/changelog.html): Versionsverlauf.
 - [Impressum](https://waermepumpen-investitionsrechner.de/impressum.html)

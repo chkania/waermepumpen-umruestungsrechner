@@ -21,6 +21,7 @@ Anspruch: eine **transparente Überschlagsrechnung** mit offengelegten Annahmen,
 - Ergebnisse: Gesamtkosten, Amortisation, monatliche Belastung, Diagramme und Tabellen, wichtige Ereignisse und Hinweise, CO₂-Bilanz, Vergleich der Installationszeitpunkte, Einflussgrößen (Sensitivität), Rechenweg.
 - Szenarien sichern, teilen und vergleichen: automatisch im Browser, mehrere benannte Szenarien im Browser, Link mit Werten, Datei-Export und -Import (JSON), Export für KI-Assistenten, Bericht zum Drucken oder als PDF, Vergleich mehrerer Varianten.
 - Benutzerhandbuch und kurze Einführung; Herkunft jedes Standardwerts per Info-Popover.
+- Die Seite „Weg zum Angebot und zur Förderung“ (Checklisten, Verweise auf neutrale Stellen; keine Beratung).
 
 ## Grundentscheidungen
 

@@ -81,6 +81,7 @@ describe('N10 Besucherstatistik (Matomo)', () => {
       ['lizenzen-drittanbieter.html', 'src/pages/drittanbieter-main.ts'],
       ['changelog.html', 'src/pages/changelog-main.ts'],
       ['impressum.html', 'src/pages/impressum-main.ts'],
+      ['angebot.html', 'src/pages/angebot-main.ts'],
       ['datenschutz.html', 'src/pages/datenschutz-main.ts'],
     ];
     for (const [html, entry] of pages) {
