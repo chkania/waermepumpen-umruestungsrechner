@@ -21,7 +21,7 @@
     "heatedArea": 210,
     "renovationYear": 1998,
     "renovationScope": "full",
-    "householdIncome": 55000,
+    "incomeRange": "50001-60000",
     "hasChild": false,
     "incomeTax": 7000
   },

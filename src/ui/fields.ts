@@ -262,7 +262,23 @@ export const SECTIONS: Section[] = [
         ],
         show: (i) => i.building.renovationYear > 0,
       },
-      { path: 'building.householdIncome', label: 'Zu versteuerndes Haushaltseinkommen', type: 'number', unit: '€/Jahr', step: 1000, min: 0, help: 'Durchschnitt des 2. und 3. Jahres vor Antragstellung. Maßgeblich für Einkommensbonus und KfW 358.' },
+      {
+        path: 'building.incomeRange',
+        label: 'Zu versteuerndes Haushaltseinkommen',
+        type: 'select',
+        // Deliberately duplicated from INCOME_RANGES in core/income-range.ts: scripts/assumptions-checklist.ts runs
+        // with plain Node type stripping, which cannot resolve the extensionless import. tests/income-range-ui.test.ts
+        // asserts that these codes and labels equal INCOME_RANGES.
+        options: [
+          ['0-30000', 'bis 30.000 €'],
+          ['30001-40000', 'über 30.000 bis 40.000 €'],
+          ['40001-50000', 'über 40.000 bis 50.000 €'],
+          ['50001-60000', 'über 50.000 bis 60.000 €'],
+          ['60001-90000', 'über 60.000 bis 90.000 €'],
+          ['90001+', 'über 90.000 €'],
+        ],
+        help: 'Durchschnitt des 2. und 3. Jahres vor Antragstellung laut Steuerbescheid. Grenzen einschließlich. Maßgeblich für Einkommensbonus und KfW 358.',
+      },
       { path: 'building.hasChild', label: 'Kindergeldberechtigtes Kind unter 18', type: 'checkbox' },
       { path: 'building.incomeTax', label: 'Einkommensteuerschuld', type: 'number', unit: '€/Jahr', step: 500, min: 0, help: 'Begrenzt den Steuerbonus (0 = keine Begrenzung).' },
     ],

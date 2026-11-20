@@ -63,6 +63,14 @@ describe('F15 Benutzerhandbuch – Vollständigkeit', () => {
     expect(html).toContain('<a href="./rechenweg.html">');
   });
 
+  it('F5.4/F15 Handbuch beschreibt Einkommensbereiche, Grenzen einschließlich, Vereinfachung und den Kind-Zuschlag ohne KfW 358', () => {
+    const row = (label: string) => handbook.split('\n').find((l) => l.startsWith(`| **${label}**`)) ?? '';
+    expect(row('Zu versteuerndes Haushaltseinkommen')).toMatch(/Auswahl eines Einkommensbereichs/);
+    expect(row('Zu versteuerndes Haushaltseinkommen')).toMatch(/Grenzen sind einschließlich/);
+    expect(row('Zu versteuerndes Haushaltseinkommen')).toMatch(/obere[n]? Grenze des gewählten Bereichs/);
+    expect(row('Kindergeldberechtigtes Kind unter 18')).toContain('Die Grenzen des Einkommensbonus steigen um 10.000 € (nicht beim KfW-Kredit 358).');
+  });
+
   it('alle Ergebnisbereiche sind beschrieben', () => {
     for (const t of ['Kennzahlen', 'Wichtige Ereignisse & Hinweise', 'Diagramme', 'Stromkosten: mit oder ohne Wärmepumpentarif', 'Wann umrüsten?', 'Jahresübersicht', 'Monatliche Belastung']) {
       expect(handbook, t).toContain(t);

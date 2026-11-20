@@ -232,7 +232,7 @@ Dieses Dokument wurde vom Wärmepumpen-Investitionsrechner erzeugt. Es beschreib
 **Grenzen des Modells**
 - Preise, Preissteigerungen, CO₂-Preise und Förderbedingungen sind Annahmen mit Stand des angegebenen Prüfdatums. Förderprogramme können sich ändern.
 - Die Rechnung ersetzt keine Heizlastberechnung, keine Energieberatung, kein Angebot und keine Steuerberatung. Weisen Sie bei steuerlichen oder rechtlichen Fragen auf eine fachkundige Prüfung hin.
-- Werte, die als „Standard“ gekennzeichnet sind, hat die Person nicht selbst eingegeben. Vor allem Verbrauch, Investition, Jahresarbeitszahl (JAZ), Haushaltseinkommen und Steuerschuld sollten eigene Werte sein.
+- Werte, die als „Standard“ gekennzeichnet sind, hat die Person nicht selbst eingegeben. Vor allem Verbrauch, Investition, Jahresarbeitszahl (JAZ), Haushaltseinkommen (Einkommensbereich) und Steuerschuld sollten eigene Werte sein.
 
 **Vorschläge für die Auswertung**
 - Plausibilität prüfen: Passen Verbrauch, Wohnfläche, Baujahr, Investition und JAZ zueinander (siehe Eckdaten und JAZ-Schätzung)? Welche wichtigen Werte stehen noch auf dem Standard?

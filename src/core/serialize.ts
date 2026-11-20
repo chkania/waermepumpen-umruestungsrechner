@@ -3,6 +3,7 @@ import { deflateSync, Inflate } from 'fflate';
 import { APP_VERSION } from '../version';
 import { DEFAULTS_AS_OF } from './default-history';
 import { formatMonth, formatMonthDe, parseMonth, tryParseMonth } from './dates';
+import { incomeRangeOfAmount } from './income-range';
 import { checkValue, cleanDocuments, TEXT_LIMITS, type InputIssue } from './validate';
 
 type Obj = Record<string, unknown>;
@@ -30,6 +31,7 @@ function rawStart(defaults: Inputs, data: Obj): number {
  * fixed PV share (PV-Anteil) → notice, because PV is now calculated from the PV system (F28).
  */
 function migrate(defaults: Inputs, data: unknown, issues: InputIssue[]): unknown {
+  data = migrateIncomeRange(defaults, data, issues);
   if (isObj(data) && isObj(data.oldHeating)) {
     const o = data.oldHeating;
     if (typeof o.ageYears === 'number' && Number.isFinite(o.ageYears) && o.installedMonth === undefined) {
@@ -57,6 +59,26 @@ function migrate(defaults: Inputs, data: unknown, issues: InputIssue[]): unknown
   if (typeof b.buildingAgeYears !== 'number' || b.constructionYear !== undefined || !Number.isFinite(b.buildingAgeYears)) return data;
   const startYear = Math.floor(rawStart(defaults, data) / 12);
   return { ...data, building: { ...b, constructionYear: Math.round(startYear - b.buildingAgeYears) } };
+}
+
+/**
+ * Migrates the former exact household income (building.householdIncome, F9.5) to an income range code (F5.4).
+ * A finite number without `incomeRange` is assigned to the range that contains it, without a notice; a negative
+ * value is noted. Any other value (text, object, null, boolean) gives the default with a notice. An existing
+ * `incomeRange` takes precedence and `householdIncome` is ignored.
+ */
+function migrateIncomeRange(defaults: Inputs, data: unknown, issues: InputIssue[]): unknown {
+  if (!isObj(data) || !isObj(data.building)) return data;
+  const b = data.building;
+  if (b.incomeRange !== undefined || b.householdIncome === undefined) return data;
+  const path = 'building.incomeRange';
+  const old = b.householdIncome;
+  if (typeof old !== 'number' || !Number.isFinite(old)) {
+    issues.push({ path, reason: 'ungültiger Wert, Standardwert verwendet' });
+    return { ...data, building: { ...b, incomeRange: defaults.building.incomeRange } };
+  }
+  if (old < 0) issues.push({ path, reason: 'unter 0, dem ersten Bereich zugeordnet' });
+  return { ...data, building: { ...b, incomeRange: incomeRangeOfAmount(old) } };
 }
 
 function mergeObj(base: Obj, data: unknown, prefix: string, issues: InputIssue[]): Obj {

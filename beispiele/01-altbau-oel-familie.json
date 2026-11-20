@@ -21,7 +21,7 @@
     "heatedArea": 150,
     "renovationYear": 0,
     "renovationScope": "partial",
-    "householdIncome": 38000,
+    "incomeRange": "30001-40000",
     "hasChild": true,
     "incomeTax": 2500
   },

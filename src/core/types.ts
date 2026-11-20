@@ -34,8 +34,8 @@ export interface BuildingInputs {
   renovationYear: number;
   /** Scope of the last renovation. */
   renovationScope: 'partial' | 'full';
-  /** Taxable annual household income (zu versteuerndes Einkommen) (€). */
-  householdIncome: number;
+  /** Taxable annual household income (zu versteuerndes Einkommen) as income range code (Einkommensbereich, F5.4). */
+  incomeRange: string;
   hasChild: boolean;
   /** Annual income tax liability (Einkommensteuerschuld) (€) as cap for § 35c; 0 = unlimited. */
   incomeTax: number;

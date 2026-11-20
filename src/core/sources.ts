@@ -172,7 +172,7 @@ export const DEFAULT_SOURCES: Record<string, DefaultSource> = {
   'building.heatedArea': { kind: 'beispiel', text: `Beispiel für ein Einfamilienhaus. Die beheizte Wohnfläche steht im Kaufvertrag, in der Wohnflächenberechnung oder im Energieausweis. ${own}` },
   'building.renovationYear': { kind: 'beispiel', text: `Standard 0 = keine energetische Sanierung bekannt. ${own}` },
   'building.renovationScope': { kind: 'annahme', text: 'Einzelmaßnahmen (z. B. Fenstertausch, Dachdämmung) senken den Verbrauch typischerweise um 10–25 %, eine umfassende Sanierung der Hülle um 40–60 % – grobe Erfahrungswerte für die Einordnung.' },
-  'building.householdIncome': { kind: 'beispiel', text: 'Beispielwert (ohne Einkommensbonus). Maßgeblich ist der Durchschnitt der zu versteuernden Einkommen des 2. und 3. Jahres vor Antragseingang (Antrag 2026 → 2023 und 2024) aller im Haushalt gemeldeten Eigentümer und deren Partner; Minderjährige zählen nicht. Nachweis nur per Einkommensteuerbescheid. Bitte durch den eigenen Wert ersetzen.' },
+  'building.incomeRange': { kind: 'beispiel', text: 'Beispielbereich (ohne Einkommensbonus). Maßgeblich ist der Durchschnitt der zu versteuernden Einkommen des 2. und 3. Jahres vor Antragseingang (Antrag 2026 → 2023 und 2024) aller im Haushalt gemeldeten Eigentümer und deren Partner; Minderjährige zählen nicht. Nachweis nur per Einkommensteuerbescheid. Bitte den Bereich wählen, der zu Ihrem Durchschnitt passt.' },
   'building.hasChild': { kind: 'beispiel', text: 'Familienzuschlag: Ist mindestens ein Kind unter 18 (bei Antragstellung) mit Hauptwohnsitz in der Wohneinheit gemeldet und besteht für es Kindergeldberechtigung im Haushalt, erhöhen sich die Einkommensgrenzen einmalig um 10.000 € – unabhängig von der Zahl der Kinder. Nachweis per Meldebestätigung.' },
   'building.incomeTax': { kind: 'annahme', text: 'Standard 0 = keine Begrenzung. Liegt die Einkommensteuer unter dem jährlichen Steuerbonus, verfällt der Rest (kein Vor-/Rücktrag).' },
 
@@ -298,7 +298,7 @@ export const OFFICIAL_REFS: Record<string, OfficialRef[]> = {
   'building.ownerOccupied': [m458('S. 5 „Selbstnutzende Eigentümerinnen und Eigentümer“'), rl('8.4.4, 8.4.5'), ESTG('Abs. 1')],
   'building.units': [rl('8.3.1 a'), m458('S. 4 „Wohneinheiten“')],
   'building.constructionYear': [ESTG('Abs. 1'), m458('S. 2 (Bauantrag mind. 5 Jahre zurück)')],
-  'building.householdIncome': [m458('S. 5 „Haushalt“, „Haushaltsjahreseinkommen“'), rl('8.4.5'), m358('S. 2–3 (Einkommensgrenze 358)')],
+  'building.incomeRange': [m458('S. 5 „Haushalt“, „Haushaltsjahreseinkommen“'), rl('8.4.5'), m358('S. 2–3 (Einkommensgrenze 358)')],
   'building.hasChild': [rl('8.4.5'), m458('S. 4 „Einkommensbonus“ (Familienzuschlag), S. 8 „Meldebestätigung“')],
   'building.incomeTax': [ESTG('Abs. 1')],
   'heatPump.investment': [info('4 „Anlagen zur Wärmeerzeugung“'), info('8 „Umfeldmaßnahmen“')],

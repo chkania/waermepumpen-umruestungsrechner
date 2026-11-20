@@ -5,3 +5,4 @@
 - F15.3 Das Handbuch muss jeden Eingabe-Abschnitt, jedes Feld (Beschriftung wie in `fields.ts`), jede Werkzeugleisten-Funktion und jeden Ergebnisbereich nennen – neue Felder/Funktionen erfordern eine Ergänzung (Test schlägt sonst fehl). *(Test: help)*
 
 - F15.4 Links auf eigene Seiten (Hilfe, Impressum, Datenschutz, Lizenzen, Changelog) öffnen im selben Tab – die Eingaben bleiben gespeichert, jede Seite führt zurück zum Rechner. Links auf fremde Seiten (Quellen, GitHub, Messenger) öffnen in einem neuen Tab mit `rel="noopener"`. *(Test: ui)*
+- F15.5 Handbuch zum Haushaltseinkommen: Die Zeile „Zu versteuerndes Haushaltseinkommen“ beschreibt die Auswahl der Einkommensbereiche, die Grenzen einschließlich und die Vereinfachung bei geänderten Expertengrenzen; die Zeile „Kindergeldberechtigtes Kind unter 18“ nennt, dass die Grenzen des Einkommensbonus um 10.000 € steigen (nicht beim KfW-Kredit 358). *(Test: help)*

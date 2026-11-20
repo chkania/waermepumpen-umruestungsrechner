@@ -1,5 +1,6 @@
 import { yearOf } from '../core/dates';
 import { kfwLoanVariant } from '../core/funding';
+import { incomeRangeLabel, incomeRangeValue } from '../core/income-range';
 import { createPriceModel, energySplit } from '../core/prices';
 import { pvSummary } from '../core/pv';
 import { decodeHash, mergeInputs } from '../core/serialize';
@@ -229,7 +230,7 @@ function kfwHtml(inp: Inputs, run: RunResult): string {
   if (k.wsbRate > 0) rows.push(['Wertschöpfungs-Bonus', 'Wärmepumpe mit EU-Ursprung', pct(k.wsbRate)]);
   rows.push(
     ['Klimageschwindigkeitsbonus', k.kgbRate > 0 ? 'Satz im Antragsmonat (sinkt halbjährlich)' : 'entfällt (siehe Hinweise)', pct(k.kgbRate)],
-    ['Einkommensbonus', `zu versteuerndes Haushaltseinkommen ${fmtEur(inp.building.householdIncome)}${inp.building.hasChild ? ', mit Kind' : ''}`, pct(k.incomeRate)],
+    ['Einkommensbonus', `zu versteuerndes Haushaltseinkommen ${incomeRangeLabel(inp.building.incomeRange)}${inp.building.hasChild ? ', mit Kind' : ''}`, pct(k.incomeRate)],
     ['Fördersatz', `${pct(base)} + ${pct(k.kgbRate)} + ${pct(k.incomeRate)} = ${pct(sum)}, höchstens ${pct(k.maxRate)}`, pct(k.ownerUnitRate)],
     ['Höchstbetrag förderfähiger Kosten', units > 1 ? `${units} Wohneinheiten, Staffel im Antragsmonat` : 'erste Wohneinheit, Höchstbetrag im Antragsmonat', fmtEur(k.capTotal)],
     ['Förderfähige Kosten', `min(${fmtEur(run.kfw.invest?.eligible ?? 0)}; ${fmtEur(k.capTotal)})`, fmtEur(k.eligibleCosts)],
@@ -293,7 +294,7 @@ function loansHtml(inp: Inputs, run: RunResult): string {
         <tbody>${rows.join('')}</tbody></table></div>
       ${extras.length ? `<p>Sondertilgungen:</p><ul>${extras.join('')}</ul>` : ''}`;
   });
-  const variant = kfwLoanVariant(inp.building.ownerOccupied, inp.building.units, inp.building.householdIncome, inp.funding);
+  const variant = kfwLoanVariant(inp.building.ownerOccupied, inp.building.units, incomeRangeValue(inp.building.incomeRange), inp.funding);
   const kfwText = inp.financing.useKfwLoan
     ? `deckt zuerst der KfW-Ergänzungskredit ${variant} (höchstens die förderfähigen Kosten) den Bedarf, den Rest ein Bankkredit`
     : 'deckt ein Bankkredit den Bedarf';

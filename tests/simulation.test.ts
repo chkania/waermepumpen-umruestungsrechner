@@ -255,7 +255,7 @@ describe('F6 Finanzierung im Szenario', () => {
   });
 
   it('KfW 359 bei Einkommen > 90.000 €', () => {
-    const r = simulate(fin((i) => (i.building.householdIncome = 100000)), 'kfw');
+    const r = simulate(fin((i) => (i.building.incomeRange = '90001+')), 'kfw');
     expect(r.loans[0].name).toBe('KfW-Kredit 359');
     expect(r.loans[0].rate).toBe(0.033);
   });
