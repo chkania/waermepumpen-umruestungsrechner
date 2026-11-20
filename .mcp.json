@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "wpir-mcp": {
+      "type": "http",
+      "url": "https://wpir-mcp.vercel.app/mcp"
+    }
+  }
+}
